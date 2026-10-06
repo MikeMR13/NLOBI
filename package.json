@@ -1,0 +1,14 @@
+{
+  "name": "nlobi",
+  "version": "0.19.0-beta",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check": "node scripts/validate.mjs",
+    "build": "node scripts/validate.mjs && node scripts/build.mjs",
+    "test": "npm run check"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
