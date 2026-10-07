@@ -231,3 +231,8 @@ if (!app.includes("MAX_ARCHIVE_UNCOMPRESSED")) throw new Error("EPUB QA: falta p
 if (!css.includes(".studioHero{")) throw new Error("Studio QA: falta hero editorial.");
 if (!css.includes(".importImageStrip{")) throw new Error("Studio QA: falta vista previa de ilustraciones importadas.");
 if (!app.includes("parseEpub(file){return parseEpubRich(file)}")) throw new Error("EPUB QA: falta hook de fixture.");
+
+if (!app.includes('id="projectTitle"')) throw new Error("Studio: falta edición del nombre de la obra.");
+if (!app.includes("/rest/v1/rpc/update_translation_project_title")) throw new Error("Studio: renombrado no usa RPC transaccional.");
+if (!app.includes("/rest/v1/rpc/publish_volume_with_sections")) throw new Error("Studio: publicación de volumen no publica capítulos en bloque.");
+if (!app.includes("Publicación en bloque")) throw new Error("Studio: falta explicar publicación automática de capítulos.");
