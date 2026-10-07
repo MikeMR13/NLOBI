@@ -168,6 +168,25 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  await context.close();
 }
 
+
+// Realistic Japanese EPUB fixture: XHTML + SVG xlink image + relative path.
+{
+ const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});await prepare(context);
+ const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+ await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__?.parseEpub);
+ const parsed=await page.evaluate(async b64=>{
+  const bytes=Uint8Array.from(atob(b64),c=>c.charCodeAt(0));
+  const file=new File([bytes],'fixture-jp.epub',{type:'application/epub+zip'});
+  const r=await window.__NLOBI_QA__.parseEpub(file);
+  return {text:r.text,blocks:r.blocks.map(x=>({type:x.type,text:x.text||'',url:x.url||''})),warnings:r.warnings};
+ },'UEsDBBQAAAAIAAy6R11vYassFgAAABQAAAAIAAAAbWltZXR5cGVLLCjIyUxOLMnMz9NPLShN0q7KLAAAUEsDBBQAAAAIAAy6R13wqdALnQAAAOAAAAAWAAAATUVUQS1JTkYvY29udGFpbmVyLnhtbFWOQQ7CIBBF9z0FYWtadEuAJiauNfEESKdKhBkC1OjtRRc17ib5/70/anzGwB6QiyfUfDds+Wg65Qir9Qj5P2KtjEXzJaMkW3yRaCMUWZ2kBDiRWyJgld+aXCW8GTNRnX2AYtaTzUsIfbL1pvnxsD+dxYdo/EBp5izC5G1fXwk0tykF72xtnwiCSyoNc3d7hU2b4sIo8fN3SqzL5g1QSwMEFAAAAAgADLpHXe+uU30nAQAA9wEAABEAAABPRUJQUy9jb250ZW50Lm9wZo2RTU7DMBCF95wi8hY108ACVCWphEQldizaA1j2JBlhO1Y8bcNJ2CB2bBDnqjgGTkr/duxGfu998+N83luTbLAL1LpCZOlUJOhUq8nVhVgtF5N7MS+vci/Vi6zx5LwdnDHrQiEaZj8D2G63KWlfpW1Xw810egetr0QMW2SpJcu9f6bVMeLXnRntWgEatOg4QJZmIMpcqxkTGywX1PO6w+TxefWQ7N4+d+/fP18fORwNORw6DM2kowoDx5IYbUK6EE5uRNJ0WI1l2jdsjUgsapITfvVYCOm9ISU57gajfN0PFt+1HjsmDHsInFNVdoAusWdQTfZ/8gWIbH1EPdl45gBkzDqk3tWXMBpUGJ4HAJztGjy5eImBGTkRO9LiiBDPsxdj4O8by19QSwMEFAAAAAgADLpHXbyEA6ewAAAA2QAAAA8AAABPRUJQUy9uYXYueGh0bWxVj00OgjAQRveeovYAjOjCQEpP4QX4KZYEaAPVwo5IYjyGezmAnqcmXMMW3biZxWS+970h60ykqpcMcVWVlLiJuqqs2whzpWQIoLX29M4TzRH8IAigczeYkkRkPV2ROj4jJk9J6CgRViLFX0Dotn+UIpP5wtluNnsQsrUUYUvLgpIY8YblET6wTkHKfe9XM0/T+znMj7sZBjNezeVlxhuBmBJwMXB5sA7WBBYjAssnH1BLAwQUAAAACAAMukdd4wSmBRMBAACVAQAAFAAAAE9FQlBTL1RleHQvY2gxLnhodG1sdZE7TsQwEIb7nML4AHECVSLHBR3HWIiJLZyHNibOdnlIQIFEAUJCoqCjIFpaENJexuzmGthJQZXGtvR/I883g4/i/EJuCgqYTAXB9gR1KrIygkzKIkRIKeWqEzdfJ8gPggDVloEGpauYYMmloGQcht+vZvx4002j+xvdfev+DqM5xGhGz/N4QxzM/CXcJA6OeUV0+6i7e91+Hl6Hw/Otbt91+6KbDiObOriskuUmjz3PQ4aAMxLWgmdXyzY2haDiVJ3mdQQ94AEf+ND8wtNVQoHisWQR9CFglCdMTs+pKmRrehlB10VnliwRF+K6dIssgciU2x7MVZDx6WffP+h2u98Zp60Rsub/ToWFp+GYEdgt/AFQSwMEFAAAAAgADLpHXX/7nrI/AAAARAAAABYAAABPRUJQUy9JbWFnZXMvaWxsdXMucG5n6wzwc+flkuJiYGDg9fRwCQLSjCDMwQIkt8rwMAEpbk8Xx5CKW8l//sszML1m/NofudQEKMzg6ernss4poQkAUEsBAhQDFAAAAAgADLpHXW9hqywWAAAAFAAAAAgAAAAAAAAAAAAAAIABAAAAAG1pbWV0eXBlUEsBAhQDFAAAAAgADLpHXfCp0AudAAAA4AAAABYAAAAAAAAAAAAAAIABPAAAAE1FVEEtSU5GL2NvbnRhaW5lci54bWxQSwECFAMUAAAACAAMukdd765TfScBAAD3AQAAEQAAAAAAAAAAAAAAgAENAQAAT0VCUFMvY29udGVudC5vcGZQSwECFAMUAAAACAAMukddvIQDp7AAAADZAAAADwAAAAAAAAAAAAAAgAFjAgAAT0VCUFMvbmF2LnhodG1sUEsBAhQDFAAAAAgADLpHXeMEpgUTAQAAlQEAABQAAAAAAAAAAAAAAIABQAMAAE9FQlBTL1RleHQvY2gxLnhodG1sUEsBAhQDFAAAAAgADLpHXX/7nrI/AAAARAAAABYAAAAAAAAAAAAAAIABhQQAAE9FQlBTL0ltYWdlcy9pbGx1cy5wbmdQSwUGAAAAAAYABgB8AQAA+AQAAAAA');
+ const image=parsed.blocks.find(x=>x.type==='image');
+ if(runtime.length||!parsed.text.includes('これは本文です。')||!parsed.text.includes('画像の後の文章です。')||!parsed.blocks.some(x=>x.type==='heading'&&x.text.includes('第一章'))||!image||!/^data:image\/png;base64,/.test(image.url)){
+  failures.push({scenario:'epub-svg-xlink-image',runtime,parsed,error:'epub-rich-import-failed'});
+ }
+ await context.close();
+}
+
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');
