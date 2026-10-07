@@ -73,6 +73,7 @@ async function req(path,opt={}){
 async function jreq(path,opt={}){const r=await req(path,opt);if(!r.ok)throw new Error((await r.text()).slice(0,220)||r.statusText);const tx=await r.text();return tx?JSON.parse(tx):null}
 async function storageUpload(file,path,upsert=true){
  if(!S.token)throw new Error('Debes iniciar sesión para subir archivos.');
+ await ensureFreshSession();
  if(!file||!/^image\/(jpeg|png|webp|gif)$/i.test(file.type||''))throw new Error('Usa una imagen JPG, PNG, WEBP o GIF.');
  if(file.size>8388608)throw new Error('La imagen supera el límite de 8 MB.');
  const clean=path.split('/').map(x=>encodeURIComponent(x)).join('/');
@@ -88,9 +89,10 @@ async function testPngFile(size,name){const canvas=document.createElement('canva
 function storageExt(file){const m={'image/jpeg':'jpg','image/png':'png','image/webp':'webp','image/gif':'gif'};return m[file?.type]||'img'}
 function storageName(prefix,file){return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2,8)}.${storageExt(file)}`}
 
-async function storageListFolder(prefix,offset=0,limit=200){const r=await fetch(`${URL}/storage/v1/object/list/nlobi-media`,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+S.token,'Content-Type':'application/json'},body:JSON.stringify({prefix,limit,offset,sortBy:{column:'updated_at',order:'desc'}})});if(!r.ok)throw new Error((await r.text()).slice(0,250)||'No se pudo listar Storage.');return await r.json()}
+async function storageListFolder(prefix,offset=0,limit=200){await ensureFreshSession();const r=await fetch(`${URL}/storage/v1/object/list/nlobi-media`,{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+S.token,'Content-Type':'application/json'},body:JSON.stringify({prefix,limit,offset,sortBy:{column:'updated_at',order:'desc'}})});if(!r.ok)throw new Error((await r.text()).slice(0,250)||'No se pudo listar Storage.');return await r.json()}
 async function storageWalk(prefix,depth=0){if(depth>8)return[];const out=[],pageSize=200;let offset=0;while(true){const rows=await storageListFolder(prefix,offset,pageSize);for(const x of rows||[]){const path=prefix?`${prefix}/${x.name}`:x.name;const isFolder=!x.id&&(!x.metadata||Object.keys(x.metadata||{}).length===0);if(isFolder)out.push(...await storageWalk(path,depth+1));else if(/\.(jpe?g|png|webp|gif)$/i.test(x.name||''))out.push({name:x.name,path,size:x.metadata?.size||0,mimetype:x.metadata?.mimetype||'',updated_at:x.updated_at||x.created_at||''})}if(!rows||rows.length<pageSize)break;offset+=pageSize}return out}
 async function storageDelete(path){
+ await ensureFreshSession();
  const r=await fetch(`${URL}/storage/v1/object/nlobi-media`,{method:'DELETE',headers:{apikey:KEY,Authorization:'Bearer '+S.token,'Content-Type':'application/json'},body:JSON.stringify({prefixes:[path]})});
  if(!r.ok)throw new Error((await r.text()).slice(0,250)||'No se pudo eliminar el archivo.');
  return true
@@ -504,7 +506,7 @@ function setAuthError(message){
 }
 async function login(){try{setAuthError('');const email=$('#email').value.trim(),password=$('#pass').value;const d=await jreq('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});persistSession(d);await loadUser();go('home',true)}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
 async function signup(){try{setAuthError('');const email=$('#email').value.trim(),password=$('#pass').value,name=$('#name').value.trim(),account_type=document.querySelector('input[name=atype]:checked').value;const d=await jreq('/auth/v1/signup',{method:'POST',body:JSON.stringify({email,password,data:{display_name:name,account_type}})});if(d?.access_token)persistSession(d);toast(d?.access_token?'Cuenta creada y sesión iniciada.':'Cuenta creada. Revisa tu correo si se requiere confirmación.','ok');if(d?.access_token){await loadUser();go('home',true)}else{S.authMode='login';render()}}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
-function logout(){clearSession();S.user=S.profile=null;S.groups=[];S.library=[];S.readingProgress=[];S.readingHistory=[];S.notes=[];S.admin=false;S.view='home';render()}
+function logout(){const token=S.token;if(token)fetch(URL+'/auth/v1/logout',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+token}}).catch(()=>{});clearSession();S.user=S.profile=null;S.groups=[];S.library=[];S.readingProgress=[];S.readingHistory=[];S.notes=[];S.admin=false;S.view='home';render()}
 async function loadCatalog(){S.catalog=await jreq('/rest/v1/translations?select=id,title,status,language_code,popularity_score,updated_at,novels(id,title,synopsis,cover_url,author_name,genres,tags),translator_groups(id,name)&status=in.(active,complete,paused)&order=updated_at.desc')||[]}
 async function loadUser(){if(!S.token)return;try{S.user=await jreq('/auth/v1/user');const uid=S.user.id;const [p,g,l,rp,rh,a,n,np,me]=await Promise.all([
  jreq(`/rest/v1/profiles?id=eq.${uid}&select=id,username,display_name,avatar_url,bio,account_type,public_library,public_activity`),
