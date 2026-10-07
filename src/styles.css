@@ -1,6 +1,6 @@
 :root{
   --bg:#f5f5f3;--panel:#ffffff;--panel2:#f0f0ed;--panel3:#e5e5df;--text:#101010;--muted:#676767;
-  --line:#d9d9d2;--accent:#ffd400;--accent2:#ffb800;--accentSoft:#fff4a8;--danger:#a51f2d;--ok:#237a4b;
+  --line:#d9d9d2;--accent:#ffd400;--accent2:#ffb800;--accentSoft:#fff4a8;--accentText:#6a5600;--danger:#a51f2d;--ok:#237a4b;
   --shadow:0 18px 50px rgba(0,0,0,.08);--shadow2:0 8px 24px rgba(0,0,0,.06);
 }
 *{box-sizing:border-box}
@@ -11,7 +11,7 @@ body{margin:0;background:
   var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
 body.dark{
   --bg:#080808;--panel:#111111;--panel2:#1a1a1a;--panel3:#242424;--text:#f7f7f2;--muted:#a9a9a2;
-  --line:#313131;--accent:#ffd400;--accent2:#ffb800;--accentSoft:#2b2500;--danger:#ff737d;--ok:#67c98d;
+  --line:#3b3b3b;--accent:#ffd400;--accent2:#ffb800;--accentSoft:#2b2500;--accentText:#ffd400;--danger:#ff858e;--ok:#7bd49d;
   --shadow:0 18px 50px rgba(0,0,0,.38);--shadow2:0 8px 24px rgba(0,0,0,.28)
 }
 button,input,textarea,select{font:inherit}
@@ -141,7 +141,7 @@ button:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
 @media(max-width:700px){.projectRow,.sectionRow{grid-template-columns:1fr}.readerPaper{padding:24px}}
 
 
-.followBtn.active{background:var(--accentSoft);color:var(--accent);border-color:var(--accent)}
+.followBtn.active{background:var(--accentSoft);color:var(--accentText);border-color:var(--accent)}
 .readerControls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 .readerControls select,.readerControls input{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text)}
 .readerPaper.reader-sepia{background:#f3e7d2;color:#3a2b20}
@@ -186,7 +186,7 @@ button:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
 .blockEditor{display:grid;gap:12px}
 .blockItem{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px}
 .blockTop{display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px}
-.blockType{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--accent)}
+.blockType{font-size:.78rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--accentText)}
 .blockActions{display:flex;gap:6px;flex-wrap:wrap}
 .blockItem textarea,.blockItem input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text)}
 .blockPalette{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
@@ -249,7 +249,7 @@ button:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
 .filterGrid input,.filterGrid select{padding:12px 13px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text)}
 .chipRow{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
 .chip{border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:999px;padding:7px 11px;cursor:pointer;font-size:.86rem}
-.chip.active{background:var(--accentSoft);border-color:var(--accent);color:var(--accent);font-weight:800}
+.chip.active{background:var(--accentSoft);border-color:var(--accent);color:var(--accentText);font-weight:800}
 .collectionHero{background:linear-gradient(135deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:24px;padding:24px;margin-bottom:18px}
 .collectionRow{margin-top:30px}
 .collectionRow .novelGrid{grid-template-columns:repeat(auto-fill,minmax(170px,1fr))}
@@ -262,7 +262,7 @@ button:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
 .adminGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
 .adminToolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 16px}
 .auditDetails{font-size:.82rem;color:var(--muted);word-break:break-word}
-.adminSectionTitle{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accent);font-weight:900}
+.adminSectionTitle{font-size:.82rem;text-transform:uppercase;letter-spacing:.06em;color:var(--accentText);font-weight:900}
 
 .notificationPrefs{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:16px 0}
 .notificationPref{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px}
@@ -291,14 +291,14 @@ button:disabled{opacity:.55;cursor:not-allowed;transform:none!important}
 
 /* NLOBI YELLOW BLACK THEME */
 .brand{color:var(--text)}
-.nav button.active{background:var(--accentSoft);border-color:color-mix(in srgb,var(--accent) 58%,var(--line));color:#111}
-body.dark .nav button.active{color:var(--accent)}
+.nav button.active,.navLink.active{background:var(--accentSoft);border-color:color-mix(in srgb,var(--accent) 58%,var(--line));color:#151200}
+body.dark .nav button.active,body.dark .navLink.active{color:var(--accent)}
 .badge{background:color-mix(in srgb,var(--accent) 10%,var(--panel2));border-color:color-mix(in srgb,var(--accent) 24%,var(--line))}
 body.dark .badge{color:#d9d9d2}
 .statusPill,.chip.active,.importStep.active{background:var(--accentSoft);color:#5b4a00;border-color:color-mix(in srgb,var(--accent) 46%,var(--line))}
 body.dark .statusPill,body.dark .chip.active,body.dark .importStep.active{color:var(--accent)}
-.link{color:#8a7000}
-body.dark .link{color:var(--accent)}
+.link{color:#6f5900}
+body.dark .link{color:#ffe04d}
 .field input:focus,.field textarea:focus,.field select:focus{border-color:#d6ae00;box-shadow:0 0 0 3px rgba(255,212,0,.2)}
 .novelCard:hover,.panelCard:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
 .top{box-shadow:0 1px 0 rgba(255,212,0,.04)}
@@ -356,4 +356,101 @@ input[type="checkbox"],input[type="radio"]{min-width:20px;min-height:20px}
 @media(max-width:700px){
  .readerControls{grid-template-columns:1fr}
  .readerControls label{margin-top:4px}
+}
+
+
+/* ACCESSIBILITY PASS 3 — contrast, reflow and forced colors */
+html,body{max-width:100%;overflow-x:clip}
+img,svg,video,canvas{max-width:100%}
+pre,code,.importPreview,.mediaPath,.auditDetails{overflow-wrap:anywhere;word-break:break-word}
+.wrap,.bar,.hero,.authShell,.detailHero,.readerShell,.panelGrid,.novelGrid,.libraryList,.studioList,.contentTree,.mediaGrid{min-width:0}
+.row>*{min-width:0}
+input,textarea,select,button{max-width:100%}
+textarea{resize:vertical}
+.eyebrow:not(.hero .eyebrow),.blockType,.adminSectionTitle{color:var(--accentText)!important}
+body.dark .eyebrow{color:#ffe04d!important}
+.statusPill,.chip.active,.importStep.active{color:var(--accentText)}
+body.dark .statusPill,body.dark .chip.active,body.dark .importStep.active{color:#ffe04d}
+.muted{color:#5f5f5f}
+body.dark .muted{color:#b8b8b0}
+.badge{color:#5d5d5d}
+body.dark .badge{color:#d9d9d2}
+.btn:disabled{color:color-mix(in srgb,var(--text) 72%,var(--panel));opacity:.72}
+.readerPaper.reader-sepia .muted{color:#5c4e00}
+.readerPaper.reader-dark .muted{color:#c2c2bb}
+
+@media(max-width:720px){
+ .wrap{padding-inline:16px}
+ .bar{padding-inline:16px;gap:10px}
+ .nav{overflow:visible;flex-wrap:wrap}
+ .navLink,.nav button{flex:0 1 auto}
+ .sectionHead{align-items:flex-start;flex-direction:column}
+ .sectionHead>.row{width:100%}
+ .sectionHead>.row>.btn{flex:1}
+ .hero{padding:28px 20px;border-radius:22px}
+ .hero h1{font-size:clamp(2rem,12vw,3rem)}
+ .detailHero,.profileHero{padding:18px}
+ .libraryCard{grid-template-columns:56px minmax(0,1fr)}
+ .libraryActions{grid-column:1/-1}
+ .mediaToolbar>*{width:100%}
+ .mediaToolbar input{min-width:0}
+ .readerTop{align-items:stretch}
+ .readerTop>.row,.readerTop>.btn{width:100%}
+ .readerTop>.row>.btn{flex:1}
+ .comment.reply{margin-left:14px}
+}
+
+@media(max-width:420px){
+ .wrap{padding:18px 12px 64px}
+ .bar{padding:10px 12px}
+ .brand{width:auto;margin-right:0}
+ .nav{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}
+ .navLink,.nav button{width:100%;justify-content:center;text-align:center}
+ .hero{padding:24px 16px}
+ .hero h1{font-size:2rem;line-height:1.08}
+ .kpis{grid-template-columns:1fr}
+ .novelGrid,.panelGrid,.linkSections,.libraryDashboard,.notificationPrefs,.adminGrid{grid-template-columns:1fr!important}
+ .detailCover{width:min(220px,100%)}
+ .authPanel{padding:22px 16px}
+ .authVisual{padding:24px 18px}
+ .profileHero{grid-template-columns:1fr;text-align:center}
+ .readerPaper{padding:20px 14px;border-radius:16px}
+ .readerPaper h1{font-size:clamp(1.75rem,9vw,2.4rem)}
+ .readerControls{grid-template-columns:1fr}
+ .cardActions,.wizardActions,.mediaActions,.libraryActions{flex-direction:column;align-items:stretch}
+ .cardActions .btn,.wizardActions .btn,.mediaActions .btn,.libraryActions .btn{width:100%}
+ .sectionRow,.projectRow,.libraryCard{grid-template-columns:1fr}
+ .libraryThumb{width:64px}
+ .comment.reply{margin-left:8px}
+}
+
+@media(max-width:320px){
+ .wrap{padding-inline:10px}
+ .nav{grid-template-columns:1fr}
+ .hero{padding-inline:14px}
+ .readerPaper{padding-inline:12px}
+ .btn,.navLink{white-space:normal}
+}
+
+/* Preserve usability when users enlarge text substantially. */
+@media(max-width:60rem){
+ .infoGrid,.filterGrid,.importSummary{grid-template-columns:1fr 1fr}
+}
+@media(max-width:40rem){
+ .infoGrid,.filterGrid,.importSummary{grid-template-columns:1fr}
+ .panelCard[style*="grid-column"]{grid-column:auto!important}
+}
+
+/* Windows High Contrast / forced-colors */
+@media(forced-colors:active){
+ *{box-shadow:none!important;text-shadow:none!important}
+ body,.top,.hero,.authVisual,.readerPaper,.panelCard,.novelCard,.notice,.empty,.detailHero,.profileHero,.mediaCard{background:Canvas!important;color:CanvasText!important}
+ .brandMark,.btn.primary,.heroActions .btn,.demoRibbon{background:Highlight!important;color:HighlightText!important;border-color:Highlight!important}
+ .navLink.active,.nav button.active,.chip.active,.statusPill,.importStep.active{background:Highlight!important;color:HighlightText!important;border-color:Highlight!important}
+ .btn,.navLink,.chip,input,textarea,select,.radio,.spoilerButton{border:1px solid ButtonText!important;color:ButtonText!important;background:ButtonFace!important}
+ a,.link,.externalLink{color:LinkText!important}
+ .muted,.badge{color:CanvasText!important}
+ .novelCard,.panelCard,.notice,.readerPaper,.detailHero,.profileHero{border:1px solid CanvasText!important}
+ .libraryProgress span,.notificationItem.unread,.notice.unread,.translatorNote{forced-color-adjust:none;background:Highlight!important;border-color:Highlight!important}
+ :focus-visible{outline:3px solid Highlight!important;outline-offset:3px!important}
 }
