@@ -332,3 +332,28 @@ body.dark .top{background:rgba(12,12,12,.9)}
  .btn,.navLink,.field input,.field textarea,.field select,.spoilerButton{forced-color-adjust:auto;border:1px solid ButtonText}
  :focus-visible{outline:2px solid Highlight!important}
 }
+
+
+/* ACCESSIBILITY PASS 2 */
+.btn,.navLink,.switch button,.readerControls select,.readerControls input,.readerControls button,.chip{min-height:44px}
+.btn,.navLink,.switch button{min-width:44px}
+input[type="checkbox"],input[type="radio"]{min-width:20px;min-height:20px}
+.readerControls{display:grid;grid-template-columns:auto minmax(110px,1fr);gap:8px 12px;align-items:center}
+.readerControls label{font-weight:700}
+.readerControls button{grid-column:auto}
+.readerPaper.reader-font-serif p,.readerPaper.reader-font-serif blockquote,.readerPaper.reader-font-serif ruby{font-family:Georgia,"Times New Roman",serif}
+.readerPaper.reader-font-sans p,.readerPaper.reader-font-sans blockquote,.readerPaper.reader-font-sans ruby{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.readerPaper.reader-line-compact p,.readerPaper.reader-line-compact blockquote{line-height:1.55}
+.readerPaper.reader-line-comfortable p,.readerPaper.reader-line-comfortable blockquote{line-height:1.8}
+.readerPaper.reader-line-relaxed p,.readerPaper.reader-line-relaxed blockquote{line-height:2}
+.readerPaper.reader-space-compact p{margin-bottom:.65em}
+.readerPaper.reader-space-normal p{margin-bottom:1.1em}
+.readerPaper.reader-space-wide p{margin-bottom:1.6em}
+.readerPaper ruby{ruby-position:over}
+.readerPaper rt{font-size:.58em;line-height:1}
+.readerPaper figure img{max-width:100%;height:auto}
+.readerHeading{scroll-margin-top:96px}
+@media(max-width:700px){
+ .readerControls{grid-template-columns:1fr}
+ .readerControls label{margin-top:4px}
+}
