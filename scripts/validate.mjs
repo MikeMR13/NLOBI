@@ -76,3 +76,17 @@ for (const required of [
 ]) {
   if (!css.includes(required)) throw new Error(`Accessibility pass 3: falta ${required}`);
 }
+
+// Accessibility pass 4 invariants
+const workflow = fs.readFileSync(".github/workflows/ci.yml", "utf8");
+for (const required of [
+  "axe accessibility audit",
+  "@axe-core/cli@4.10.2",
+  "aria-label=\"Mover ",
+  "aria-labelledby=\"blockLabel-",
+  "Texto alternativo",
+  "Vista previa de la ilustración"
+]) {
+  const hay = required.includes("axe") || required.includes("@axe") ? workflow.includes(required) : app.includes(required);
+  if (!hay) throw new Error(`Accessibility pass 4: falta ${required}`);
+}
