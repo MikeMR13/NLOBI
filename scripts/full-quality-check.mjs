@@ -84,7 +84,10 @@ const scenarios=[
  ['admin','admin',authBase],
  ['error-state','home',{catalog:[translation],err:'Error de conexión simulado con un mensaje largo que debe visualizarse correctamente y conservar el botón de reintento.'}],
  ['empty-library','library',{...authBase,library:[],readingProgress:[],readingHistory:[]}],
- ['empty-studio','studio',{...authBase,studioTranslations:[]}]
+ ['empty-studio','studio',{...authBase,studioTranslations:[]}],
+ ['readonly-studio','studio',{...authBase,groups:[{role:'collaborator',translator_groups:{id:'group-1',name:group.name,slug:group.slug}}]}],
+ ['readonly-project','studio:project:project-1',{...authBase,groups:[{role:'proofreader',translator_groups:{id:'group-1',name:group.name,slug:group.slug}}],studioProject:translation,teamMembers}],
+ ['readonly-team','studio:team:group-1',{...authBase,groups:[{role:'collaborator',translator_groups:{id:'group-1',name:group.name,slug:group.slug}}],studioTeam:group,teamMembers}]
 ];
 
 const viewports=[['mobile-320',320,800],['mobile-390',390,844],['tablet-768',768,1024],['desktop-1280',1280,900],['desktop-1600',1600,1000]];
@@ -130,6 +133,9 @@ for(const [vpName,width,height] of viewports){
   if(name==='creator-project'){const edit=page.locator('[data-edit-section="section-1"]');if(await edit.count()){await edit.click();await page.waitForTimeout(15);if(!(await page.locator('#editSectionTitle').count()))failures.push({...row,error:'editor-open-failed'})}}
   if(name==='user-library'){const b=page.locator('[data-library-filter="favorites"]');if(await b.count())await b.click()}
   if(name==='admin')for(const tab of ['applications','users','teams','reports','content','links','beta','audit']){const b=page.locator('[data-admin-tab="'+tab+'"]');if(await b.count())await b.first().click()}
+  if(name==='readonly-studio' && ((await page.locator('[data-v="studio:new"]').count())||(await page.locator('[data-v="studio:import"]').count())))failures.push({...row,error:'readonly-studio-exposes-editor-actions'});
+  if(name==='readonly-project' && ((await page.locator('#createVolume').count())||(await page.locator('#saveDiscoveryMeta').count())||(await page.locator('[data-new-section]').count())))failures.push({...row,error:'readonly-project-exposes-editor-actions'});
+  if(name==='readonly-team' && ((await page.locator('#saveTeamProfile').count())||(await page.locator('#addSupportLink').count())||(await page.locator('[data-media-open]').count())))failures.push({...row,error:'readonly-team-exposes-editor-actions'});
   if((vpName==='mobile-390'||vpName==='desktop-1280')&&['public-home','public-detail','public-reader','user-library','creator-project','creator-team','import-edit','admin'].includes(name))await page.screenshot({path:'quality-results/'+vpName+'-'+name+'.png',fullPage:true});
   await context.close();
  }
