@@ -187,6 +187,34 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  await context.close();
 }
 
+
+// Studio metadata and volume-level publishing must use the transactional RPCs.
+{
+ const calls=[];
+ const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
+ await context.route('**/runtime-config.js',r=>r.fulfill({status:200,contentType:'application/javascript',body:"window.__NLOBI_CONFIG__={supabaseUrl:'"+api+"',supabasePublishableKey:'qa',qaMode:true};"}));
+ await context.route(api+'/**',async r=>{
+  const url=new URL(r.request().url()),path=url.pathname;
+  if(path==='/rest/v1/rpc/update_translation_project_title'){calls.push({kind:'rename',body:r.request().postDataJSON()});return r.fulfill({status:204,body:''})}
+  if(path==='/rest/v1/rpc/publish_volume_with_sections'){calls.push({kind:'publish',body:r.request().postDataJSON()});return r.fulfill({status:200,contentType:'application/json',body:'2'})}
+  return r.fulfill({status:200,contentType:'application/json',body:'[]'});
+ });
+ const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+ await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__);
+ await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:translation,teamMembers});
+ await page.locator('#projectTitle').fill('Nombre actualizado QA');
+ await page.locator('#saveDiscoveryMeta').click();
+ await page.waitForTimeout(60);
+ await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:translation,teamMembers});
+ await page.locator('[data-volume-status="volume-2"][data-status="published"]').click();
+ await page.waitForTimeout(60);
+ const rename=calls.find(x=>x.kind==='rename'),publish=calls.find(x=>x.kind==='publish');
+ if(runtime.length||rename?.body?.p_translation_id!=='project-1'||rename?.body?.p_title!=='Nombre actualizado QA'||publish?.body?.p_volume_id!=='volume-2'){
+  failures.push({scenario:'studio-title-and-volume-publish',runtime,calls,error:'studio-rpc-flow-failed'});
+ }
+ await context.close();
+}
+
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');
