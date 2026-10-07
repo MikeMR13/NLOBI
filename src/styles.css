@@ -305,3 +305,15 @@ body.dark .link{color:var(--accent)}
 body.dark .top{background:rgba(12,12,12,.9)}
 .readerPaper.reader-sepia{background:#fff3b0;color:#211b00}
 .readerPaper.reader-dark{background:#0d0d0d;color:#f5f5ee;border-color:#303030}
+
+
+/* EDITORIAL DIFF */
+.diffList{display:grid;gap:10px}
+.diffList .notice{border-left:4px solid var(--line)}
+.diffList .diff-added{border-left-color:var(--ok);background:color-mix(in srgb,var(--ok) 6%,var(--panel))}
+.diffList .diff-removed{border-left-color:var(--danger);background:color-mix(in srgb,var(--danger) 6%,var(--panel))}
+.diffList .diff-changed{border-left-color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,var(--panel))}
+.diffOld,.diffNew{margin-top:9px;padding:10px 12px;border-radius:10px;background:var(--panel2);white-space:pre-wrap;overflow-wrap:anywhere}
+.diffOld{opacity:.82}
+.mediaStats,.mediaToolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.mediaToolbar input{flex:1;min-width:min(360px,100%);padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--text)}
