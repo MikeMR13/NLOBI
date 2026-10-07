@@ -236,3 +236,9 @@ if (!app.includes('id="projectTitle"')) throw new Error("Studio: falta edición 
 if (!app.includes("/rest/v1/rpc/update_translation_project_title")) throw new Error("Studio: renombrado no usa RPC transaccional.");
 if (!app.includes("/rest/v1/rpc/publish_volume_with_sections")) throw new Error("Studio: publicación de volumen no publica capítulos en bloque.");
 if (!app.includes("Publicación en bloque")) throw new Error("Studio: falta explicar publicación automática de capítulos.");
+
+if (!app.includes('data-delete-volume=')) throw new Error("Studio delete: falta botón de borrar volumen.");
+if (!app.includes('data-delete-section=')) throw new Error("Studio delete: falta botón de borrar capítulo.");
+if (!app.includes('async function deleteStudioVolume')) throw new Error("Studio delete: falta lógica de volumen.");
+if (!app.includes('async function deleteStudioSection')) throw new Error("Studio delete: falta lógica de capítulo.");
+if (!app.includes('cleanupDeletedMedia')) throw new Error("Studio delete: falta limpieza de multimedia.");
