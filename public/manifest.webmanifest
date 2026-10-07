@@ -1,7 +1,7 @@
 {
-  "name": "NLOBI — Biblioteca de novelas ligeras",
-  "short_name": "NLOBI",
-  "description": "NLOBI: build de preproducción con QA, seguridad reforzada y lectura offline.",
+  "name": "El Obi del Lector — Biblioteca de novelas ligeras",
+  "short_name": "El Obi",
+  "description": "El Obi del Lector: biblioteca digital de novelas ligeras con lectura offline, progreso y herramientas para equipos de traducción.",
   "start_url": "/#home",
   "scope": "/",
   "display": "standalone",
