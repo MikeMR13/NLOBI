@@ -119,7 +119,7 @@ function nav(){
  const unread=S.notes.filter(x=>!x.read_at).length;
  const isActive=v=>S.view===v||S.view.startsWith(v+':');
  const link=(v,label)=>`<a class="navLink ${isActive(v)?'active':''}" href="#${v}" data-v="${v}"${isActive(v)?' aria-current="page"':''}>${label}</a>`;
- return `<header class="top"><div class="bar"><a class="brand" href="#home" data-v="home" aria-label="El Obi del Lector, ir al inicio"><span class="brandMark" aria-hidden="true">N</span><span>El Obi del Lector</span></a><nav class="nav" aria-label="Navegación principal">
+ return `<header class="top"><div class="bar"><a class="brand" href="#home" data-v="home" aria-label="El Obi del Lector, ir al inicio"><span class="brandMark" aria-hidden="true">O</span><span>El Obi del Lector</span></a><nav class="nav" aria-label="Navegación principal">
  ${link('home','Inicio')}${link('explore','Explorar')}${link('library','Biblioteca')}
  ${S.user?link('notifications',`Avisos${unread?` · ${unread}`:''}`)+link('beta','Beta'):''}
  ${S.groups.length?link('studio','Studio'):''}${S.admin?link('admin','Admin'):''}
