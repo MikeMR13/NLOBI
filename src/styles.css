@@ -23,9 +23,9 @@ a{color:inherit}
 .brand{display:flex;align-items:center;gap:10px;font-weight:900;letter-spacing:.11em;margin-right:auto}
 .brandMark{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#0b0b0b;display:grid;place-items:center;font-family:Georgia,serif;box-shadow:0 8px 22px rgba(255,212,0,.22)}
 .nav{display:flex;gap:6px;flex-wrap:wrap}
-.nav button,.btn{border:1px solid transparent;border-radius:11px;padding:9px 12px;background:transparent;color:var(--text);transition:.18s ease}
-.nav button:hover,.btn:hover{background:var(--panel2);transform:translateY(-1px)}
-.nav button.active{background:var(--panel2);border-color:var(--line)}
+.nav button,.navLink,.btn{border:1px solid transparent;border-radius:11px;padding:9px 12px;background:transparent;color:var(--text);transition:.18s ease;text-decoration:none}
+.nav button:hover,.navLink:hover,.btn:hover{background:var(--panel2);transform:translateY(-1px)}
+.nav button.active,.navLink.active{background:var(--panel2);border-color:var(--line)}
 .btn{background:var(--panel2);border-color:var(--line)}
 .btn.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));border-color:#e3b800;color:#0b0b0b;font-weight:800;box-shadow:0 8px 20px rgba(255,196,0,.22)}
 .btn.ghost{background:transparent}
@@ -317,3 +317,18 @@ body.dark .top{background:rgba(12,12,12,.9)}
 .diffOld{opacity:.82}
 .mediaStats,.mediaToolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
 .mediaToolbar input{flex:1;min-width:min(360px,100%);padding:11px 12px;border:1px solid var(--line);border-radius:11px;background:var(--panel);color:var(--text)}
+
+
+/* ACCESSIBILITY PASS 1 */
+.srOnly{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+#mainContent:focus{outline:none}
+.formError{margin:10px 0;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--danger) 10%,var(--panel));border:1px solid color-mix(in srgb,var(--danger) 28%,var(--line));color:var(--danger)}
+.formError[hidden]{display:none}
+.spoilerButton{display:block;width:100%;border:1px dashed var(--line);border-radius:10px;padding:10px 12px;background:var(--panel2);color:var(--text);text-align:left;font:inherit}
+.spoilerButton.spoiler{filter:blur(5px)}
+.spoilerButton.spoiler:focus-visible{filter:none}
+.navLink{display:inline-flex;align-items:center}
+@media (forced-colors:active){
+ .btn,.navLink,.field input,.field textarea,.field select,.spoilerButton{forced-color-adjust:auto;border:1px solid ButtonText}
+ :focus-visible{outline:2px solid Highlight!important}
+}
