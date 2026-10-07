@@ -43,3 +43,15 @@ Antes de producción:
 3. verificar `NLOBI_BETA19_ARCHITECTURE`;
 4. probar Auth, Biblioteca, Reader, Studio y Admin;
 5. promover solo el build probado.
+
+## Auditoría de producción
+
+El CI cubre build, accesibilidad, responsive y una matriz funcional de vistas públicas/autenticadas. La base de datos mantiene RLS en las tablas expuestas y las migraciones de endurecimiento se versionan en `supabase/migrations/`.
+
+La configuración runtime acepta tanto los nombres canónicos `NLOBI_SUPABASE_*` como los nombres heredados `NEXT_PUBLIC_SUPABASE_*`.
+
+### Pendientes operativos externos al código
+
+- mantener Vercel enlazado a `MikeMR13/NLOBI` para que `main` despliegue automáticamente;
+- promover a producción únicamente un deployment del commit probado;
+- definir política de respaldo/restauración y retención de logs acorde al entorno de producción.

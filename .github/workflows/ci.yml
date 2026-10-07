@@ -35,7 +35,7 @@ jobs:
       - name: Install accessibility test browser
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
-          npx playwright install --with-deps chromium
+          npx playwright install --with-deps chromium firefox webkit
       - name: axe accessibility audit
         id: axe
         continue-on-error: true
@@ -44,6 +44,8 @@ jobs:
         run: node scripts/layout-check.mjs
       - name: Full platform quality pass
         run: node scripts/full-quality-check.mjs
+      - name: Cross-browser smoke
+        run: node scripts/cross-browser-check.mjs
       - name: Upload full quality report
         if: always()
         continue-on-error: true
