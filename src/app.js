@@ -212,6 +212,34 @@ function adminContent(){return `<div class="sectionHead"><div><h2>Traducciones</
 function adminLinks(){return `<div class="list">${S.adminPurchaseLinks.length?S.adminPurchaseLinks.map(l=>`<div class="adminApp"><div class="row"><span class="badge">${l.is_verified?'Verificado':'Pendiente'}</span><strong>${esc(l.store_name||'Tienda')}</strong></div><div>${esc(l.novels?.title||'Obra')}${l.volume_number?` · Vol. ${esc(l.volume_number)}`:''}</div><div class="muted">${esc(l.translator_groups?.name||'Equipo')}</div><a class="link" href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">${esc(l.url)} ↗</a><div class="row">${l.is_verified?`<button class="btn" data-purchase-verify="${l.id}" data-verified="false">Quitar verificación</button>`:`<button class="btn primary" data-purchase-verify="${l.id}" data-verified="true">Verificar</button>`}<button class="btn danger" data-admin-delete-link="${l.id}">Eliminar</button></div></div>`).join(''):'<div class="empty">No hay enlaces oficiales.</div>'}</div>`}
 function adminAudit(){return `<div class="list">${S.adminAudit.length?S.adminAudit.map(a=>`<div class="notice"><div class="row"><span class="badge">${esc(a.action_type)}</span><strong>${esc(a.target_type)}</strong></div><div class="muted">${esc((a.created_at||'').replace('T',' ').slice(0,19))}</div>${a.details&&Object.keys(a.details).length?`<details><summary>Detalles</summary><div class="auditDetails">${esc(JSON.stringify(a.details))}</div></details>`:''}</div>`).join(''):'<div class="empty">Todavía no hay acciones administrativas.</div>'}</div>`}
 function admin(){if(!S.admin)return `${nav()}<main class="wrap"><div class="empty"><div class="emptyArt">🔒</div><strong>Acceso restringido</strong><div>Esta sección requiere permisos de administración.</div></div></main>`;const body=S.adminTab==='applications'?adminApplications():S.adminTab==='users'?adminUsers():S.adminTab==='teams'?adminTeams():S.adminTab==='reports'?adminReports():S.adminTab==='content'?adminContent():S.adminTab==='links'?adminLinks():S.adminTab==='beta'?adminBeta():S.adminTab==='audit'?adminAudit():adminOverview();return `${nav()}<main class="wrap">${status()}<div class="sectionHead"><div><h2>Administración</h2><p>Moderación, solicitudes, contenido, enlaces oficiales y auditoría.</p></div></div>${adminTabs()}${body}</main>`}
+function render(){
+ const app=document.getElementById('app');
+ if(!app)return;
+ try{
+  let html=home();
+  if(S.view==='explore')html=explore();
+  else if(S.view==='library')html=library();
+  else if(S.view==='auth')html=auth();
+  else if(S.view==='application')html=application();
+  else if(S.view==='studio')html=studio();
+  else if(S.view==='studio:import')html=studioImport();
+  else if(S.view==='studio:new')html=studioNewProject();
+  else if(S.view==='notifications')html=notifications();
+  else if(S.view==='beta')html=betaView();
+  else if(S.view==='admin')html=admin();
+  else if(S.view.startsWith('profile:'))html=publicProfileView();
+  else if(S.view.startsWith('collection:'))html=collectionView();
+  else if(S.view.startsWith('studio:project:'))html=studioProjectView();
+  else if(S.view.startsWith('studio:team:'))html=studioTeamView();
+  else if(S.view.startsWith('studio:media:'))html=studioMediaView();
+  app.innerHTML=html;
+  bind();
+  setNetworkBadge();
+ }catch(e){
+  console.error('[NLOBI render error]',e);
+  app.textContent='NLOBI no pudo mostrar esta vista: '+String(e?.message||e);
+ }
+}
 function bind(){
  $$('[data-v]').forEach(b=>b.onclick=()=>go(b.dataset.v));
  const retry=$('#retryBackend');if(retry)retry.onclick=()=>boot(true);const th=$('#theme');if(th)th.onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('nlobi_dark',document.body.classList.contains('dark')?'1':'0')};const ip=$('#installPwa');if(ip)ip.onclick=installPwa;
