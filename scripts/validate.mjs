@@ -34,7 +34,7 @@ for (const marker of [
 }
 
 const app = fs.readFileSync("src/app.js", "utf8");
-if (!app.includes("function render(){")) throw new Error("Falta el render principal de la SPA.");
+for (const requiredFn of ["function render(){","function detailView(){","function publicGroupView(){","function readerView(){"]) { if (!app.includes(requiredFn)) throw new Error(`Falta vista crítica: ${requiredFn}`); }
 
 if (app.includes("const KEY='") || app.includes("const URL='https://")) {
   throw new Error("La configuración runtime sigue incrustada en app.js.");
