@@ -216,3 +216,7 @@ if (!app.includes("MAX_IMPORT_BYTES=80*1024*1024")) throw new Error("Import secu
 if (!app.includes("MAX_ARCHIVE_UNCOMPRESSED=300*1024*1024")) throw new Error("Import security: falta límite de expansión ZIP.");
 if (!app.includes("const safeCssUrl=")) throw new Error("CSS security: falta normalizador de URL para contexto CSS.");
 if (!app.includes("/rest/v1/rpc/create_translation_project")) throw new Error("Integrity: creación de proyecto no usa RPC atómico.");
+
+if (!app.includes("/auth/v1/signup?redirect_to=")) throw new Error("Auth email: signup no fija redirect_to.");
+if (!app.includes("/auth/v1/resend?redirect_to=")) throw new Error("Auth email: falta reenvío de verificación.");
+if (!app.includes("id=\"resendVerification\"")) throw new Error("Auth email: falta control de reenvío.");
