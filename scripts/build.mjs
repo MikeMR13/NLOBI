@@ -11,7 +11,8 @@ fs.copyFileSync(path.join(root, "src", "index.html"), path.join(dist, "index.htm
 fs.copyFileSync(path.join(root, "src", "styles.css"), path.join(dist, "assets", "styles.css"));
 fs.copyFileSync(path.join(root, "src", "app.js"), path.join(dist, "assets", "app.js"));
 
-for (const file of ["manifest.webmanifest", "sw.js", "icon-192.png", "icon-512.png"]) {
+for (const file of ["manifest.webmanifest", "sw.js", "icon.svg",
+  "icon-192.png", "icon-512.png"]) {
   fs.copyFileSync(path.join(root, "public", file), path.join(dist, file));
 }
 
