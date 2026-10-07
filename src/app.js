@@ -43,6 +43,24 @@ function clearSession(){
  S.token='';S.refreshToken='';S.tokenExpiresAt=0;
  localStorage.removeItem('nlobi_token');localStorage.removeItem('nlobi_refresh_token');localStorage.removeItem('nlobi_token_expires_at')
 }
+function consumeAuthCallback(){
+ const raw=(location.hash||'').slice(1);
+ if(!raw||(!raw.includes('access_token=')&&!raw.includes('error_description=')))return false;
+ const p=new URLSearchParams(raw);
+ const err=p.get('error_description')||p.get('error');
+ if(err){
+  sessionStorage.setItem('nlobi_auth_notice','error:'+err);
+  history.replaceState(null,'',location.pathname+location.search+'#auth');
+  return true
+ }
+ const access_token=p.get('access_token');
+ if(!access_token)return false;
+ persistSession({access_token,refresh_token:p.get('refresh_token')||'',expires_in:Number(p.get('expires_in')||3600)});
+ sessionStorage.setItem('nlobi_auth_notice','ok:'+(p.get('type')==='signup'?'Correo verificado correctamente.':'Sesión confirmada correctamente.'));
+ history.replaceState(null,'',location.pathname+location.search+'#home');
+ return true
+}
+
 async function refreshSession(){
  if(!S.refreshToken)throw new Error('La sesión expiró. Inicia sesión nuevamente.');
  if(refreshPromise)return refreshPromise;
@@ -541,7 +559,7 @@ function setAuthError(message){
  ['email','pass','name'].forEach(id=>{const el=document.getElementById(id);if(el)el.setAttribute('aria-invalid',message?'true':'false')})
 }
 async function login(){try{setAuthError('');const email=$('#email').value.trim(),password=$('#pass').value;const d=await jreq('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});persistSession(d);await loadUser();go('home',true)}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
-function authRedirectUrl(){return location.origin+'/#auth'}
+function authRedirectUrl(){return location.origin+'/'}
 async function signup(){try{setAuthError('');const email=$('#email').value.trim(),password=$('#pass').value,name=$('#name').value.trim(),account_type=document.querySelector('input[name=atype]:checked').value;const d=await jreq('/auth/v1/signup?redirect_to='+encodeURIComponent(authRedirectUrl()),{method:'POST',body:JSON.stringify({email,password,data:{display_name:name,account_type}})});if(d?.access_token)persistSession(d);toast(d?.access_token?'Cuenta creada y sesión iniciada.':'Cuenta creada. Te enviamos un correo de verificación.','ok');if(d?.access_token){await loadUser();go('home',true)}else{S.authMode='login';render()}}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
 async function resendVerification(){try{setAuthError('');const email=$('#email')?.value.trim();if(!email){setAuthError('Escribe tu correo para reenviar la verificación.');return}await jreq('/auth/v1/resend?redirect_to='+encodeURIComponent(authRedirectUrl()),{method:'POST',body:JSON.stringify({type:'signup',email})});toast('Correo de verificación reenviado. Revisa también Spam o Promociones.','ok')}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
 function logout(){const token=S.token;if(token)fetch(URL+'/auth/v1/logout',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+token}}).catch(()=>{});clearSession();S.user=S.profile=null;S.groups=[];S.library=[];S.readingProgress=[];S.readingHistory=[];S.notes=[];S.admin=false;S.view='home';render()}
@@ -675,7 +693,7 @@ function registerPwa(){
 }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;S.pwaInstallReady=true;render()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;S.pwaInstallReady=false;toast('El Obi del Lector quedó instalado.','ok');render()});
-async function boot(isRetry=false){if(localStorage.getItem('nlobi_dark')==='1')document.body.classList.add('dark');S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();try{if(navigator.onLine){await loadCatalog();S.err='';if(S.token){try{await ensureFreshSession();await loadUser();await flushProgressQueue()}catch(e){clearSession();S.user=S.profile=null;console.warn('Sesión no renovable',e)}}await resolveDynamicRoute(S.view);if(isRetry)toast('Conexión restablecida.','ok')}else{await resolveDynamicRoute(S.view);S.err=''}}catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}render()}
+async function boot(isRetry=false){if(localStorage.getItem('nlobi_dark')==='1')document.body.classList.add('dark');S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();try{if(navigator.onLine){await loadCatalog();S.err='';if(S.token){try{await ensureFreshSession();await loadUser();await flushProgressQueue()}catch(e){clearSession();S.user=S.profile=null;console.warn('Sesión no renovable',e)}}await resolveDynamicRoute(S.view);if(isRetry)toast('Conexión restablecida.','ok')}else{await resolveDynamicRoute(S.view);S.err=''}}catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}render();const notice=sessionStorage.getItem('nlobi_auth_notice');if(notice){sessionStorage.removeItem('nlobi_auth_notice');const bad=notice.startsWith('error:'),msg=notice.slice(notice.indexOf(':')+1);toast(bad?'No se pudo confirmar el correo: '+msg:msg,bad?'bad':'ok')}}
 window.addEventListener('hashchange',async()=>{pendingRouteFocus=true;S.view=routeFromHash();render();window.scrollTo({top:0,behavior:'smooth'});try{await resolveDynamicRoute(S.view);S.err=''}catch(e){S.err=friendlyError(e,'No se pudo abrir esta vista.');console.error(e)}render()});
 window.addEventListener('online',async()=>{S.online=true;setNetworkBadge();toast('Conexión restablecida.','ok');await flushProgressQueue();boot(true)});
 window.addEventListener('offline',()=>{S.online=false;setNetworkBadge();render();toast('Sin conexión. Los capítulos guardados siguen disponibles.','bad')});
@@ -688,6 +706,7 @@ if(CONFIG.qaMode===true){
   getState(){return S}
  }
 }
+consumeAuthCallback();
 if(!location.hash)history.replaceState(null,'','#home');
 registerPwa();
 boot();
