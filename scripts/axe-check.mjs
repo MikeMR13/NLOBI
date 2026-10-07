@@ -14,7 +14,8 @@ let failed=false;
 const report=[];
 
 for(const url of urls){
-  const page=await browser.newPage();
+  const context=await browser.newContext();
+  const page=await context.newPage();
   await page.goto(url,{waitUntil:'networkidle'});
   const results=await new AxeBuilder({page}).analyze();
   report.push({url,violations:results.violations});
@@ -24,7 +25,7 @@ for(const url of urls){
     console.log(`- [${v.impact||'unknown'}] ${v.id}: ${v.help}`);
     for(const n of v.nodes.slice(0,10)) console.log(`  ${n.target.join(' ')}`);
   }
-  await page.close();
+  await context.close();
 }
 await browser.close();
 fs.writeFileSync('axe-results/axe-report.json',JSON.stringify(report,null,2));
