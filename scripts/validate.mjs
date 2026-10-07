@@ -71,6 +71,20 @@ for (const required of [
   if (!app.includes(required)) throw new Error("Importer hardening: falta " + required);
 }
 
+
+
+for (const required of [
+  "const translationStatusLabel=",
+  "function libraryButton(",
+  "visibleCatalog().slice(0,8)",
+  "some(sec=>sec.status==='published')",
+  "publicVolumeIds",
+  "✓ En biblioteca"
+]) {
+  if (!app.includes(required)) throw new Error("Novel display QA: falta " + required);
+}
+if (app.includes("x.demo?'Demo':'Publicada'")) throw new Error("Novel display QA: las tarjetas siguen ocultando el estado real.");
+
 console.log("Validation OK");
 if (/(^|[^$])\$\('\[data-[^']+'\)\.forEach/m.test(app)) throw new Error("Selector simple usado con forEach; usa $() para NodeList.");
 
