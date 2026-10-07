@@ -85,9 +85,9 @@ const scenarios=[
  ['error-state','home',{catalog:[translation],err:'Error de conexión simulado con un mensaje largo que debe visualizarse correctamente y conservar el botón de reintento.'}],
  ['empty-library','library',{...authBase,library:[],readingProgress:[],readingHistory:[]}],
  ['empty-studio','studio',{...authBase,studioTranslations:[]}],
- ['readonly-studio','studio',{...authBase,groups:[{role:'collaborator',translator_groups:{id:'group-1',name:group.name,slug:group.slug}}]}],
- ['readonly-project','studio:project:project-1',{...authBase,groups:[{role:'proofreader',translator_groups:{id:'group-1',name:group.name,slug:group.slug}}],studioProject:translation,teamMembers}],
- ['readonly-team','studio:team:group-1',{...authBase,groups:[{role:'collaborator',translator_groups:{id:'group-1',name:group.name,slug:group.slug}}],studioTeam:group,teamMembers}]
+ ['readonly-studio','studio',{...authBase,admin:false,groups:[{role:'collaborator',translator_groups:{id:'group-1',name:group.name,slug:group.slug}}]}],
+ ['readonly-project','studio:project:project-1',{...authBase,admin:false,groups:[{role:'proofreader',translator_groups:{id:'group-1',name:group.name,slug:group.slug}}],studioProject:translation,teamMembers}],
+ ['readonly-team','studio:team:group-1',{...authBase,admin:false,groups:[{role:'collaborator',translator_groups:{id:'group-1',name:group.name,slug:group.slug}}],studioTeam:group,teamMembers}]
 ];
 
 const viewports=[['mobile-320',320,800],['mobile-390',390,844],['tablet-768',768,1024],['desktop-1280',1280,900],['desktop-1600',1600,1000]];
