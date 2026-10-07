@@ -63,3 +63,16 @@ for (const required of [
 ]) {
   if (!app.includes(required)) throw new Error(`Accessibility pass 2: falta ${required}`);
 }
+
+// Accessibility pass 3 invariants
+const css = fs.readFileSync("src/styles.css", "utf8");
+for (const required of [
+  "--accentText:",
+  "/* ACCESSIBILITY PASS 3",
+  "@media(max-width:320px)",
+  "@media(forced-colors:active)",
+  "overflow-x:clip",
+  "grid-template-columns:1fr!important"
+]) {
+  if (!css.includes(required)) throw new Error(`Accessibility pass 3: falta ${required}`);
+}
