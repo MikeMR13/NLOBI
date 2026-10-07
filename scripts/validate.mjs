@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { spawnSync } from "node:child_process";
+import vm from "node:vm";
 
 const mustExist = [
   "src/index.html",
@@ -38,6 +39,36 @@ for (const requiredFn of ["function render(){","function detailView(){","functio
 
 if (app.includes("const KEY='") || app.includes("const URL='https://")) {
   throw new Error("La configuración runtime sigue incrustada en app.js.");
+}
+
+
+
+// Importer heuristics fixtures
+{
+  const start = app.indexOf("function normalizeSectionHeadingText(");
+  const end = app.indexOf("function detectSectionsRich(", start);
+  if (start < 0 || end < 0) throw new Error("Importer QA: no se pudieron aislar las heurísticas.");
+  const sandbox = {};
+  vm.runInNewContext(app.slice(start, end) + ";globalThis.__qa={normalizeSectionHeadingText,detectSectionType,isSectionHeading};", sandbox);
+  const qa = sandbox.__qa;
+  const headings = ["第１章 夏祭り","第一話 はじまり","序章","終章","幕間","閑話","外伝","短編","特別編","書き下ろし","後日談","Capítulo 12","Episode 3"];
+  for (const title of headings) if (!qa.isSectionHeading(title)) throw new Error("Importer QA: no reconoce encabezado " + title);
+  const nonHeadings = ["今日は学校へ行った。","これは普通の本文です。","「第1章って何？」と彼女は聞いた。"];
+  for (const text of nonHeadings) if (qa.isSectionHeading(text)) throw new Error("Importer QA: falso positivo de encabezado " + text);
+  if (qa.normalizeSectionHeadingText("第１章　夏") !== "第1章 夏") throw new Error("Importer QA: NFKC/espacios CJK incorrectos.");
+  if (qa.detectSectionType("閑話") !== "interlude") throw new Error("Importer QA: 閑話 debe ser interlude.");
+  if (qa.detectSectionType("書き下ろし短編") !== "extra") throw new Error("Importer QA: 書き下ろし debe ser extra.");
+}
+
+for (const required of [
+  "function importFingerprint(",
+  "async function rollbackImportedPaths(",
+  "backup_sections",
+  "skipped_duplicates",
+  "function epubUtilityKind(",
+  "function studioSectionStats("
+]) {
+  if (!app.includes(required)) throw new Error("Importer hardening: falta " + required);
 }
 
 console.log("Validation OK");
