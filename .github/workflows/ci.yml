@@ -35,21 +35,23 @@ jobs:
       - name: axe accessibility audit
         id: axe
         continue-on-error: true
+        shell: bash
         run: |
           mkdir -p axe-results
+          set +e
           npx --yes @axe-core/cli@4.10.2 \
             http://127.0.0.1:4173/#home \
             http://127.0.0.1:4173/#explore \
             http://127.0.0.1:4173/#auth \
-            --save axe-results.json \
-            --dir axe-results \
-            --exit
+            --exit 2>&1 | tee axe-results/axe-report.txt
+          status=${PIPESTATUS[0]}
+          exit "$status"
       - name: Upload axe report
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: axe-accessibility-report
-          path: axe-results/
+          path: axe-results/axe-report.txt
           if-no-files-found: error
       - name: Enforce axe result
         if: steps.axe.outcome == 'failure'
