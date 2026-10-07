@@ -380,9 +380,8 @@ async function loadTranslationDetail(id){const rows=await jreq(`/rest/v1/transla
 
 async function uploadPersonalAvatar(e){try{const file=e.target.files?.[0];if(!file||!S.user)return;const url=await storageUpload(file,`users/${S.user.id}/avatar/${mediaStableName('avatar',file)}`,true);const input=$('#profileAvatarUrl');if(input)input.value=url;toast('Avatar subido. Guarda el perfil para aplicarlo.','ok')}catch(err){toast(friendlyError(err),'bad')}}
 async function savePersonalProfile(){try{if(!S.user)return;const oldAvatar=S.profile?.avatar_url||null,username=$('#profileUsername')?.value.trim().replace(/^@/,'')||null;if(username&&(!/^[A-Za-z0-9_.-]{3,40}$/.test(username))){toast('El nombre de usuario debe tener 3-40 caracteres y usar letras, números, punto, guion o guion bajo.','bad');return}const body={display_name:$('#profileDisplayName')?.value.trim()||null,username,avatar_url:$('#profileAvatarUrl')?.value.trim()||null,bio:$('#profileBio')?.value.trim()||null,public_library:!!$('#profilePublicLibrary')?.checked,public_activity:!!$('#profilePublicActivity')?.checked,updated_at:new Date().toISOString()};await jreq(`/rest/v1/profiles?id=eq.${S.user.id}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify(body)});await loadUser();if(oldAvatar&&oldAvatar!==body.avatar_url)await deleteOldMediaIfUnused(oldAvatar);render();toast('Perfil actualizado.','ok')}catch(e){const m=String(e?.message||'');toast(/duplicate|23505/i.test(m)?'Ese nombre de usuario ya está en uso.':friendlyError(e),'bad')}}
-async function openPublicProfile(id){try{const rows=await jreq(`/rest/v1/profiles?id=eq.${id}&select=id,username,display_name,avatar_url,bio,public_library,public_activity&limit=1`);const p=rows?.[0];if(!p)throw new Error('Perfil no encontrado.');let library=[],activity=[];if(p.public_library)library=await jreq(`/rest/v1/library_entries?user_id=eq.${id}&select=translation_id,status,translations(id,title,novels(id,title,cover_url),translator_groups(id,name))&order=updated_at.desc&limit=50`)||[];if(p.public_activity)activity=await jreq(`/rest/v1/reading_progress?user_id=eq.${id}&select=translation_id,progress_percent,updated_at,translations(id,title,novels(id,title))&order=updated_at.desc&limit=20`)||[];S.publicProfile={...p,library,activity};go('profile:'+id)}catch(e){toast(friendlyError(e),'bad')}}
-async function openGroup(id){try{const rows=await jreq(`/rest/v1/translator_groups?id=eq.${id}&select=id,slug,name,description,avatar_url,banner_url,primary_color,secondary_color&limit=1`);const g=rows?.[0];if(!g)throw new Error('Equipo no encontrado.');const [translations,support]=await Promise.all([jreq(`/rest/v1/translations?group_id=eq.${id}&status=in.(active,complete)&select=id,title,status,language_code,novels(id,title,synopsis,cover_url),translator_groups(id,name)&order=updated_at.desc`),jreq(`/rest/v1/support_links?group_id=eq.${id}&select=id,label,url&order=created_at.asc`)]);S.publicGroup={...g,translations:translations||[],support_links:support||[]};go('group:'+id)}catch(e){toast(friendlyError(e),'bad')}}
-
+async function openPublicProfile(id){try{S.publicProfile=await loadPublicProfileData(id);go('profile:'+id)}catch(e){toast(friendlyError(e),'bad')}}
+async function openGroup(id){try{S.publicGroup=await loadPublicGroupData(id);go('group:'+id)}catch(e){toast(friendlyError(e),'bad')}}
 
 function roleLabel(role){return({owner:'Owner',admin:'Admin',translator:'Traductor',editor:'Editor',proofreader:'Corrector',collaborator:'Colaborador'}[role]||role||'Miembro')}
 function myGroupRole(groupId){return S.groups.find(g=>g.translator_groups?.id===groupId)?.role||null}
@@ -454,7 +453,7 @@ function cacheReaderChapter(r){try{localStorage.setItem(chapterCacheKey(r.id),JS
 function readCachedChapter(id){try{return JSON.parse(localStorage.getItem(chapterCacheKey(id))||'null')}catch{return null}}
 function queueProgress(payload){try{const q=JSON.parse(localStorage.getItem('nlobi_progress_queue')||'[]');const filtered=q.filter(x=>!(x.user_id===payload.user_id&&x.translation_id===payload.translation_id));filtered.push(payload);localStorage.setItem('nlobi_progress_queue',JSON.stringify(filtered))}catch(e){console.warn(e)}}
 async function flushProgressQueue(){if(!navigator.onLine||!S.token)return;let q=[];try{q=JSON.parse(localStorage.getItem('nlobi_progress_queue')||'[]')}catch{}if(!q.length)return;const left=[];for(const p of q){try{await jreq('/rest/v1/reading_progress?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(p.progress)});await jreq('/rest/v1/library_entries?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(p.library)})}catch(e){left.push(p)}}localStorage.setItem('nlobi_progress_queue',JSON.stringify(left));if(q.length&&!left.length)toast('Progreso offline sincronizado.','ok')}
-async function openReader(sectionId,translationId){try{if(!navigator.onLine){const cached=readCachedChapter(sectionId);if(!cached)throw new Error('Este capítulo no está disponible sin conexión todavía. Ábrelo una vez con internet para guardarlo.');S.readerSection=cached;S.readerComments=[];if(S.user)await saveReaderProgress(nonRegressingPercent(currentReaderPercent(false)),false);go('reader:'+sectionId);return}const secRows=await jreq(`/rest/v1/sections?id=eq.${sectionId}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`);const sec=secRows?.[0];if(!sec)throw new Error('El capítulo no está disponible.');const volRows=await jreq(`/rest/v1/volumes?id=eq.${sec.volume_id}&select=id,translation_id,volume_number,title&limit=1`);const vol=volRows?.[0];const trId=translationId||vol?.translation_id;const tr=await loadTranslationDetail(trId);const navigation=(tr?.volumes||[]).filter(v=>v.status==='published').sort((a,b)=>Number(a.volume_number)-Number(b.volume_number)).flatMap(v=>(v.sections||[]).filter(x=>x.status==='published').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(x=>({...x,volume_id:v.id,volume_number:v.volume_number})));S.readerSection={...sec,translation_id:trId,volume_number:vol?.volume_number,novel_title:tr?.novels?.title,navigation};cacheReaderChapter(S.readerSection);await loadReaderComments(sectionId);if(S.user){await recordReadingHistory(sectionId,trId);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(false)),false);}go('reader:'+sectionId)}catch(e){const cached=readCachedChapter(sectionId);if(cached){S.readerSection=cached;S.readerComments=[];go('reader:'+sectionId);toast('Mostrando la copia guardada sin conexión.','ok')}else toast(friendlyError(e),'bad')}}
+async function openReader(sectionId,translationId){try{await loadReaderRouteData(sectionId,translationId,{record:true});go('reader:'+sectionId)}catch(e){const cached=readCachedChapter(sectionId);if(cached){S.readerSection=cached;S.readerComments=[];go('reader:'+sectionId);toast('Mostrando la copia guardada sin conexión.','ok')}else toast(friendlyError(e),'bad')}}
 async function saveReaderProgress(percent=100,announce=true){try{if(!S.user||!S.readerSection)return;const R=S.readerSection,progress={user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},currentLib=S.library.find(x=>x.translation_id===R.translation_id),library={user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(currentLib?.status)?currentLib.status:'reading',is_favorite:!!currentLib?.is_favorite};if(!navigator.onLine){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress,library});if(announce)toast('Progreso guardado en este dispositivo. Se sincronizará al volver la conexión.','ok');return}await jreq('/rest/v1/reading_progress?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(progress)});await jreq('/rest/v1/library_entries?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(library)});await loadUser();if(announce)toast(percent>=100?'Lectura marcada como completada.':'Progreso guardado.','ok')}catch(e){const R=S.readerSection;if(S.user&&R){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress:{user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},library:{user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(S.library.find(x=>x.translation_id===R.translation_id)?.status)?S.library.find(x=>x.translation_id===R.translation_id).status:'reading',is_favorite:!!S.library.find(x=>x.translation_id===R.translation_id)?.is_favorite}});if(announce)toast('No se pudo sincronizar; el progreso quedó guardado localmente.','ok')}else if(announce)toast(friendlyError(e),'bad')}}
 function setAuthError(message){
  const box=document.getElementById('authError');if(!box)return;
@@ -521,12 +520,80 @@ async function setAdminSectionStatus(id,status){try{await jreq(`/rest/v1/section
 
 let deferredInstallPrompt=null;
 async function installPwa(){if(!deferredInstallPrompt){toast('La instalación no está disponible todavía en este navegador.','bad');return}deferredInstallPrompt.prompt();try{await deferredInstallPrompt.userChoice}catch{}deferredInstallPrompt=null;S.pwaInstallReady=false;render()}
+async function loadPublicProfileData(id){
+ const rows=await jreq(`/rest/v1/profiles?id=eq.${id}&select=id,username,display_name,avatar_url,bio,public_library,public_activity&limit=1`);
+ const p=rows?.[0];if(!p)throw new Error('Perfil no encontrado.');
+ let library=[],activity=[];
+ if(p.public_library)library=await jreq(`/rest/v1/library_entries?user_id=eq.${id}&select=translation_id,status,translations(id,title,novels(id,title,cover_url),translator_groups(id,name))&order=updated_at.desc&limit=50`)||[];
+ if(p.public_activity)activity=await jreq(`/rest/v1/reading_progress?user_id=eq.${id}&select=translation_id,progress_percent,updated_at,translations(id,title,novels(id,title))&order=updated_at.desc&limit=20`)||[];
+ return {...p,library,activity}
+}
+async function loadPublicGroupData(id){
+ const rows=await jreq(`/rest/v1/translator_groups?id=eq.${id}&select=id,slug,name,description,avatar_url,banner_url,primary_color,secondary_color&limit=1`);
+ const g=rows?.[0];if(!g)throw new Error('Equipo no encontrado.');
+ const [translations,support]=await Promise.all([
+  jreq(`/rest/v1/translations?group_id=eq.${id}&status=in.(active,complete,paused)&select=id,title,status,language_code,novels(id,title,synopsis,cover_url),translator_groups(id,name)&order=updated_at.desc`),
+  jreq(`/rest/v1/support_links?group_id=eq.${id}&select=id,label,url&order=created_at.asc`)
+ ]);
+ return {...g,translations:translations||[],support_links:support||[]}
+}
+async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}){
+ if(!navigator.onLine){
+  const cached=readCachedChapter(sectionId);if(!cached)throw new Error('Este capítulo no está disponible sin conexión todavía.');
+  S.readerSection=cached;S.readerComments=[];return cached
+ }
+ const secRows=await jreq(`/rest/v1/sections?id=eq.${sectionId}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`);
+ const sec=secRows?.[0];if(!sec)throw new Error('El capítulo no está disponible.');
+ const volRows=await jreq(`/rest/v1/volumes?id=eq.${sec.volume_id}&status=eq.published&select=id,translation_id,volume_number,title&limit=1`);
+ const vol=volRows?.[0];if(!vol)throw new Error('El volumen no está disponible.');
+ const trId=translationId||vol.translation_id,tr=await loadTranslationDetail(trId);if(!tr)throw new Error('La obra no está disponible.');
+ const navigation=(tr.volumes||[]).filter(v=>v.status==='published').sort((a,b)=>Number(a.volume_number)-Number(b.volume_number)).flatMap(v=>(v.sections||[]).filter(x=>x.status==='published').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(x=>({...x,volume_id:v.id,volume_number:v.volume_number})));
+ S.readerSection={...sec,translation_id:trId,volume_number:vol.volume_number,novel_title:tr.novels?.title,navigation};
+ cacheReaderChapter(S.readerSection);
+ await loadReaderComments(sectionId);
+ if(record&&S.user){await recordReadingHistory(sectionId,trId);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(false)),false)}
+ return S.readerSection
+}
+async function resolveDynamicRoute(route=S.view){
+ if(!route||!navigator.onLine&& !route.startsWith('reader:'))return;
+ const parts=route.split(':'),kind=parts[0],id=parts.slice(kind==='studio'?2:1).join(':');
+ if(kind==='detail'){
+  if(String(id).startsWith('demo-'))return;
+  if(S.currentDetail?.id!==id)S.currentDetail=await loadTranslationDetail(id);
+  if(!S.currentDetail)throw new Error('Obra no encontrada.');
+ }else if(kind==='group'){
+  if(S.publicGroup?.id!==id)S.publicGroup=await loadPublicGroupData(id);
+ }else if(kind==='profile'){
+  if(S.publicProfile?.id!==id)S.publicProfile=await loadPublicProfileData(id);
+ }else if(kind==='reader'){
+  if(S.readerSection?.id!==id)await loadReaderRouteData(id,null,{record:true});
+ }else if(route.startsWith('studio:project:')){
+  if(!S.user)throw new Error('Inicia sesión para abrir Studio.');
+  if(S.studioProject?.id!==id)S.studioProject=await loadStudioProject(id);
+  if(!S.studioProject)throw new Error('Proyecto no disponible.');
+ }else if(route.startsWith('studio:team:')){
+  if(!S.user)throw new Error('Inicia sesión para abrir Studio.');
+  if(S.studioTeam?.id!==id){S.studioTeam=await loadStudioTeam(id);if(!S.studioTeam)throw new Error('Equipo no disponible.');await loadTeamMembers(id)}
+ }else if(route.startsWith('studio:media:')){
+  if(!S.user)throw new Error('Inicia sesión para abrir Studio.');
+  S.mediaGroupId=id;S.mediaTarget=null;S.mediaQuery='';S.mediaPage=0;S.mediaUsage={};S.mediaLoading=true;render();
+  S.mediaFiles=await storageWalk(`teams/${id}`);await loadMediaUsage(S.mediaFiles.map(x=>x.path));S.mediaLoading=false
+ }
+}
 function restoreReaderRouteFromCache(){if(!S.view.startsWith('reader:')||S.readerSection)return;const id=S.view.split(':')[1],cached=readCachedChapter(id);if(cached){S.readerSection=cached;S.readerComments=[]}}
-function registerPwa(){if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('/sw.js').catch(e=>console.warn('SW',e))}
+function registerPwa(){
+ if(!('serviceWorker'in navigator)||!location.protocol.startsWith('http'))return;
+ let refreshing=false;
+ navigator.serviceWorker.addEventListener('controllerchange',()=>{if(refreshing)return;refreshing=true;location.reload()});
+ navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'}).then(reg=>{
+  reg.update().catch(()=>{});
+  reg.addEventListener('updatefound',()=>{const w=reg.installing;if(!w)return;w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)toast('Nueva versión de NLOBI instalada. Actualizando…','ok')})})
+ }).catch(e=>console.warn('SW',e))
+}
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;S.pwaInstallReady=true;render()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;S.pwaInstallReady=false;toast('NLOBI quedó instalada.','ok');render()});
-async function boot(isRetry=false){if(localStorage.getItem('nlobi_dark')==='1')document.body.classList.add('dark');S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();try{if(navigator.onLine){await loadCatalog();S.err='';if(S.token){await loadUser();await flushProgressQueue()}if(isRetry)toast('Conexión restablecida.','ok')}else{S.err=''}}catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}render()}
-window.addEventListener('hashchange',()=>{pendingRouteFocus=true;S.view=routeFromHash();render();window.scrollTo({top:0,behavior:'smooth'})});
+async function boot(isRetry=false){if(localStorage.getItem('nlobi_dark')==='1')document.body.classList.add('dark');S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();try{if(navigator.onLine){await loadCatalog();S.err='';if(S.token){await loadUser();await flushProgressQueue()}await resolveDynamicRoute(S.view);if(isRetry)toast('Conexión restablecida.','ok')}else{await resolveDynamicRoute(S.view);S.err=''}}catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}render()}
+window.addEventListener('hashchange',async()=>{pendingRouteFocus=true;S.view=routeFromHash();render();window.scrollTo({top:0,behavior:'smooth'});try{await resolveDynamicRoute(S.view);S.err=''}catch(e){S.err=friendlyError(e,'No se pudo abrir esta vista.');console.error(e)}render()});
 window.addEventListener('online',async()=>{S.online=true;setNetworkBadge();toast('Conexión restablecida.','ok');await flushProgressQueue();boot(true)});
 window.addEventListener('offline',()=>{S.online=false;setNetworkBadge();render();toast('Sin conexión. Los capítulos guardados siguen disponibles.','bad')});
 window.addEventListener('error',e=>{console.error('[NLOBI global error]',e.error||e.message,e.filename||'',e.lineno||'',e.colno||'')});
