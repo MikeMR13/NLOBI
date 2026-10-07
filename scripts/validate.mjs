@@ -90,3 +90,27 @@ for (const required of [
   const hay = required.includes("axe") || required.includes("@axe") ? workflow.includes(required) : app.includes(required);
   if (!hay) throw new Error(`Accessibility pass 4: falta ${required}`);
 }
+
+// Deep links and service worker invariants
+const sw = fs.readFileSync("public/sw.js", "utf8");
+for (const required of [
+  "async function resolveDynamicRoute(",
+  "loadPublicGroupData(",
+  "loadPublicProfileData(",
+  "loadReaderRouteData(",
+  "await resolveDynamicRoute(S.view)",
+  "window.addEventListener('hashchange',async()=>"
+]) {
+  if (!app.includes(required)) throw new Error(`Deep links: falta ${required}`);
+}
+for (const required of [
+  "nlobi-shell-v19-4",
+  "'/app.js'",
+  "'/styles.css'",
+  "'/runtime-config.js'",
+  "cache:'no-store'",
+  "self.skipWaiting()",
+  "self.clients.claim()"
+]) {
+  if (!sw.includes(required)) throw new Error(`Service worker: falta ${required}`);
+}
