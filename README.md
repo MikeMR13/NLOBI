@@ -1,6 +1,6 @@
-# NLOBI
+# El Obi del Lector
 
-Biblioteca digital de novelas ligeras para lectores y equipos de traducción.
+Biblioteca digital de novelas ligeras para lectores y equipos de traducción. Marca pública: **El Obi del Lector**.
 
 ## Arquitectura Beta 19
 
@@ -24,14 +24,14 @@ El build no necesita framework ni bundler.
 
 ## Configuración
 
-NLOBI solo utiliza configuración pública de Supabase en el navegador:
+El sitio solo utiliza configuración pública de Supabase en el navegador:
 
 - `NLOBI_SUPABASE_URL`
 - `NLOBI_SUPABASE_PUBLISHABLE_KEY`
 
 Nunca uses `service_role` en frontend o CI del sitio estático.
 
-Si las variables no están presentes, el build de desarrollo utiliza la configuración pública actual de NLOBI.
+Si las variables no están presentes, el build de desarrollo utiliza la configuración pública actual del sitio.
 
 ## Deploy
 
