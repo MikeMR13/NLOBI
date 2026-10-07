@@ -151,6 +151,23 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForTimeout(50);
  if(!(await page.locator('[role="alert"]').count())||!(await page.locator('#retryBackend').count())||runtime.length)failures.push({scenario:'backend-outage',runtime,error:'unsafe-error-state'});await context.close();
 }
+// Supabase implicit-flow confirmation must be consumed before SPA hash routing.
+{
+ const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+ await context.route('**/runtime-config.js',r=>r.fulfill({status:200,contentType:'application/javascript',body:"window.__NLOBI_CONFIG__={supabaseUrl:'"+api+"',supabasePublishableKey:'qa',qaMode:true};"}));
+ await context.route(api+'/**',r=>{
+  const url=new URL(r.request().url());
+  if(url.pathname==='/auth/v1/user')return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(user)});
+  return r.fulfill({status:200,contentType:'application/json',body:'[]'});
+ });
+ const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+ await page.goto(base+'#access_token=qa-confirm-token&refresh_token=qa-confirm-refresh&expires_in=3600&type=signup',{waitUntil:'networkidle'});
+ await page.waitForTimeout(80);
+ const authResult=await page.evaluate(()=>({hash:location.hash,token:localStorage.getItem('nlobi_token'),refresh:localStorage.getItem('nlobi_refresh_token'),text:document.body.innerText}));
+ if(runtime.length||authResult.hash!=='#home'||authResult.token!=='qa-confirm-token'||authResult.refresh!=='qa-confirm-refresh'||!authResult.text.includes('El Obi del Lector'))failures.push({scenario:'email-confirmation-callback',runtime,authResult,error:'auth-callback-not-consumed'});
+ await context.close();
+}
+
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');
