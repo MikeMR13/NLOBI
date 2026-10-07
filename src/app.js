@@ -576,8 +576,9 @@ async function resolveDynamicRoute(route=S.view){
   if(S.studioTeam?.id!==id){S.studioTeam=await loadStudioTeam(id);if(!S.studioTeam)throw new Error('Equipo no disponible.');await loadTeamMembers(id)}
  }else if(route.startsWith('studio:media:')){
   if(!S.user)throw new Error('Inicia sesión para abrir Studio.');
+  if(S.mediaGroupId===id&&S.mediaLoading)return;
   S.mediaGroupId=id;S.mediaTarget=null;S.mediaQuery='';S.mediaPage=0;S.mediaUsage={};S.mediaLoading=true;render();
-  S.mediaFiles=await storageWalk(`teams/${id}`);await loadMediaUsage(S.mediaFiles.map(x=>x.path));S.mediaLoading=false
+  try{S.mediaFiles=await storageWalk(`teams/${id}`);await loadMediaUsage(S.mediaFiles.map(x=>x.path))}finally{S.mediaLoading=false}
  }
 }
 function restoreReaderRouteFromCache(){if(!S.view.startsWith('reader:')||S.readerSection)return;const id=S.view.split(':')[1],cached=readCachedChapter(id);if(cached){S.readerSection=cached;S.readerComments=[]}}
