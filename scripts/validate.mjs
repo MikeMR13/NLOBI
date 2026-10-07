@@ -198,7 +198,14 @@ if (!iconSvg.includes(">オ</text>")) throw new Error("Brand icon: SVG no contie
 // Playwright axe runner invariant
 if (!fs.existsSync("scripts/axe-check.mjs")) throw new Error("Accessibility CI: falta scripts/axe-check.mjs");
 if (!fs.existsSync("scripts/layout-check.mjs")) throw new Error("Visual QA: falta scripts/layout-check.mjs");
+if (!fs.existsSync("scripts/full-quality-check.mjs")) throw new Error("Full QA: falta scripts/full-quality-check.mjs");
 if (!workflow.includes("Visual layout audit")) throw new Error("Visual QA: falta auditoría responsive en CI");
+if (!workflow.includes("Full platform quality pass")) throw new Error("Full QA: falta pase integral en CI");
 if (!workflow.includes("playwright@1.63.0") || !workflow.includes("@axe-core/playwright@4.13.0")) {
   throw new Error("Accessibility CI: versiones Playwright/axe no están fijadas");
 }
+
+if (!app.includes("mediaTargetLabel(t){if(!t)")) throw new Error("Full QA: mediaTargetLabel no tolera destino vacío.");
+if (!app.includes("authShell betaFeedbackShell")) throw new Error("Full QA: feedback Beta conserva layout inline no responsive.");
+if (!app.includes("CONFIG.qaMode===true")) throw new Error("Full QA: falta hook de QA protegido por configuración.");
+if (!css.includes(".betaFeedbackShell{grid-template-columns:.7fr 1.3fr}")) throw new Error("Full QA: falta estilo responsive de feedback Beta.");

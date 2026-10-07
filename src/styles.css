@@ -490,3 +490,8 @@ img{object-position:center}
  *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
  .novelCard:hover,.nav button:hover,.navLink:hover,.btn:hover,.dropZone:hover{transform:none}
 }
+
+
+/* FULL PLATFORM QUALITY PASS */
+.betaFeedbackShell{grid-template-columns:.7fr 1.3fr}
+@media(max-width:720px){.betaFeedbackShell{grid-template-columns:1fr}}
