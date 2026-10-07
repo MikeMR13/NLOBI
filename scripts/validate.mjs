@@ -224,3 +224,10 @@ if (!app.includes("id=\"resendVerification\"")) throw new Error("Auth email: fal
 if (!app.includes("function consumeAuthCallback()")) throw new Error("Auth email: falta consumir callback de confirmación.");
 if (!app.includes("sessionStorage.setItem('nlobi_auth_notice'")) throw new Error("Auth email: falta feedback del callback.");
 if (app.includes("location.origin+'/#auth'")) throw new Error("Auth email: redirect_to no debe usar el hash de rutas.");
+
+if (!app.includes("async function hydrateEpubImages")) throw new Error("EPUB QA: falta hidratación de imágenes SVG/XLink.");
+if (!app.includes("svg image,object[type^=\"image/\"]")) throw new Error("EPUB QA: faltan imágenes SVG/object.");
+if (!app.includes("MAX_ARCHIVE_UNCOMPRESSED")) throw new Error("EPUB QA: falta protección de expansión.");
+if (!css.includes(".studioHero{")) throw new Error("Studio QA: falta hero editorial.");
+if (!css.includes(".importImageStrip{")) throw new Error("Studio QA: falta vista previa de ilustraciones importadas.");
+if (!app.includes("parseEpub(file){return parseEpubRich(file)}")) throw new Error("EPUB QA: falta hook de fixture.");
