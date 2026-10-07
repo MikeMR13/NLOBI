@@ -47,7 +47,7 @@ jobs:
         run: |
           mkdir -p axe-results
           set +e
-          npx --yes @axe-core/cli@4.10.2 \
+          npx --yes @axe-core/cli@4.13.0 \
             http://127.0.0.1:4173/#home \
             http://127.0.0.1:4173/#explore \
             http://127.0.0.1:4173/#auth \
