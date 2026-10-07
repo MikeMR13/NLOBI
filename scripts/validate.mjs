@@ -81,7 +81,7 @@ for (const required of [
 const workflow = fs.readFileSync(".github/workflows/ci.yml", "utf8");
 for (const required of [
   "axe accessibility audit",
-  "@axe-core/cli@4.13.0",
+  "@axe-core/playwright@4.13.0",
   "aria-label=\"Mover ",
   "aria-labelledby=\"blockLabel-",
   "Texto alternativo",
@@ -149,3 +149,9 @@ for (const required of [
 }
 if (!manifest.includes('"src": "/icon.svg"')) throw new Error("Brand icon: manifest no usa /icon.svg");
 if (!iconSvg.includes(">オ</text>")) throw new Error("Brand icon: SVG no contiene オ");
+
+// Playwright axe runner invariant
+if (!fs.existsSync("scripts/axe-check.mjs")) throw new Error("Accessibility CI: falta scripts/axe-check.mjs");
+if (!workflow.includes("playwright@1.63.0") || !workflow.includes("@axe-core/playwright@4.13.0")) {
+  throw new Error("Accessibility CI: versiones Playwright/axe no están fijadas");
+}
