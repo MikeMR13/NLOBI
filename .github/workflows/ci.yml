@@ -33,5 +33,24 @@ jobs:
           cat /tmp/nlobi-serve.log
           exit 1
       - name: axe accessibility audit
+        id: axe
+        continue-on-error: true
         run: |
-          npx --yes @axe-core/cli@4.10.2             http://127.0.0.1:4173/#home             http://127.0.0.1:4173/#explore             http://127.0.0.1:4173/#auth             --exit
+          mkdir -p axe-results
+          npx --yes @axe-core/cli@4.10.2 \
+            http://127.0.0.1:4173/#home \
+            http://127.0.0.1:4173/#explore \
+            http://127.0.0.1:4173/#auth \
+            --save axe-results.json \
+            --dir axe-results \
+            --exit
+      - name: Upload axe report
+        if: always()
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
+        with:
+          name: axe-accessibility-report
+          path: axe-results/
+          if-no-files-found: error
+      - name: Enforce axe result
+        if: steps.axe.outcome == 'failure'
+        run: exit 1
