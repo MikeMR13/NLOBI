@@ -454,3 +454,39 @@ body.dark .badge{color:#d9d9d2}
  .libraryProgress span,.notificationItem.unread,.notice.unread,.translatorNote{forced-color-adjust:none;background:Highlight!important;border-color:Highlight!important}
  :focus-visible{outline:3px solid Highlight!important;outline-offset:3px!important}
 }
+
+
+/* PLATFORM VISUAL AUDIT — responsive/reflow hardening */
+.novelCard{display:flex;flex-direction:column;min-width:0;height:100%}
+.cardBody{display:flex;flex:1;min-width:0;flex-direction:column}
+.cardActions{margin-top:auto;padding-top:13px}
+.detailInfo,.libraryMeta,.panelCard,.notice,.volumeCard,.adminApp,.collectionHero,.authPanel,.importPanel,.sectionDraft,.blockItem,.mediaBody{min-width:0}
+.detailInfo h1,.novelCard h3,.libraryMeta h3,.projectRow h3,.volumeCard strong,.sectionRow span,.notice,.activityItem,.historyRow,.offlineRow,.externalLink{overflow-wrap:anywhere;word-break:normal}
+.libraryThumb{display:grid;place-items:center;flex:none}
+.libraryThumbFallback{font-family:Georgia,"Times New Roman",serif;font-weight:900;font-size:1rem;color:#111;text-transform:uppercase}
+body.dark .libraryThumbFallback{color:#111}
+.externalLink{flex-wrap:wrap}
+.sectionRow>.row,.projectRow>.row,.libraryActions,.notificationActions,.adminToolbar,.wizardActions,.mediaActions{min-width:0}
+.sectionRow>.row>*{max-width:100%}
+img{object-position:center}
+.empty{min-width:0}
+@media(max-width:720px){
+ .readerTop,.readerControls{position:static;top:auto;overflow:visible;backdrop-filter:none}
+ .readerControls{padding:10px 0}
+ .readerControls select,.readerControls input,.readerControls button{width:100%}
+ .importSteps{max-width:100%;scroll-snap-type:x proximity}
+ .importStep{scroll-snap-align:start}
+ .detailInfo h1{font-size:clamp(2rem,9vw,2.6rem)}
+}
+@media(max-width:420px){
+ .empty{padding:26px 16px}
+ .notice,.volumeCard,.adminApp,.panelCard,.collectionHero,.importPanel,.sectionDraft,.blockItem{padding:14px}
+ .sectionHead h2{font-size:1.5rem}
+ .libraryThumb{width:72px}
+ .historyRow>.btn,.offlineRow>.row,.offlineRow>.row>.btn{width:100%}
+ .offlineRow>.row{display:grid}
+}
+@media(prefers-reduced-motion:reduce){
+ *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+ .novelCard:hover,.nav button:hover,.navLink:hover,.btn:hover,.dropZone:hover{transform:none}
+}
