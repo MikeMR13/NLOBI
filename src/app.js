@@ -337,8 +337,15 @@ function enhanceAccessibility(){
  const title=accessibilityViewTitle();
  if(main&&!main.querySelector('h1')){const h=document.createElement('h1');h.className='srOnly';h.textContent=title;main.prepend(h)}
  document.querySelectorAll('.field').forEach((field,i)=>{const label=field.querySelector('label'),control=field.querySelector('input,select,textarea');if(!label||!control)return;if(!control.id)control.id='autoField-'+i;if(!label.htmlFor)label.htmlFor=control.id});
- document.querySelectorAll('select[data-library-status]').forEach(el=>{if(!el.getAttribute('aria-label'))el.setAttribute('aria-label','Estado de lectura')});
- document.querySelectorAll('select[data-member-role]').forEach(el=>{if(!el.getAttribute('aria-label'))el.setAttribute('aria-label','Rol del miembro')});
+ const nameControl=(selector,label)=>document.querySelectorAll(selector).forEach(el=>{if(!el.getAttribute('aria-label')&&!el.getAttribute('aria-labelledby'))el.setAttribute('aria-label',label)});
+ nameControl('select[data-library-status]','Estado de lectura');
+ nameControl('select[data-member-role]','Rol del miembro');
+ nameControl('input[type="file"]','Seleccionar archivo');
+ nameControl('[data-sec-title]','Título de la sección importada');
+ nameControl('[data-sec-type]','Tipo de sección importada');
+ nameControl('[data-sec-body]','Contenido de la sección importada');
+ document.querySelectorAll('[data-import-move]').forEach(el=>el.setAttribute('aria-label',el.dataset.dir==='-1'?'Mover sección hacia arriba':'Mover sección hacia abajo'));
+ document.querySelectorAll('.importSteps,.importPreview').forEach((el,i)=>{if(!el.hasAttribute('tabindex'))el.tabIndex=0;if(!el.getAttribute('aria-label'))el.setAttribute('aria-label',el.classList.contains('importSteps')?'Pasos de importación':'Vista previa importada '+(i+1))});
  document.title=`${title} — El Obi del Lector`;
  const announcer=document.getElementById('routeAnnouncer');
  if(announcer)announcer.textContent=`${title} cargado`;

@@ -508,3 +508,8 @@ select{min-height:44px}
  .panelGrid>.panelCard[style*="grid-column"]{grid-column:1/-1!important}
  .linkPanel{width:100%}
 }
+
+/* FULL QA FIXES 2 — controls and importer keyboard access */
+.nav button{min-width:44px}
+.sectionDraft [data-import-move]{flex:0 0 44px;min-width:44px}
+.mediaPicker input[type="file"]{min-height:44px}
