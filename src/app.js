@@ -297,7 +297,7 @@ function render(){
  }
 }
 function bind(){
- $('[data-v]').forEach(b=>b.onclick=e=>{e.preventDefault();go(b.dataset.v)});
+ $$('[data-v]').forEach(b=>b.onclick=e=>{e.preventDefault();go(b.dataset.v)});
  const retry=$('#retryBackend');if(retry)retry.onclick=()=>boot(true);const th=$('#theme');if(th)th.onclick=()=>{document.body.classList.toggle('dark');const dark=document.body.classList.contains('dark');localStorage.setItem('nlobi_dark',dark?'1':'0');th.setAttribute('aria-pressed',dark?'true':'false');th.setAttribute('aria-label',dark?'Cambiar a tema claro':'Cambiar a tema oscuro')};const ip=$('#installPwa');if(ip)ip.onclick=installPwa;
  const lt=$('#loginTab');if(lt)lt.onclick=()=>{S.authMode='login';render()};const st=$('#signupTab');if(st)st.onclick=()=>{S.authMode='signup';render()};
  const lo=$('#logout');if(lo)lo.onclick=logout;const li=$('#login');if(li)li.onclick=login;const su=$('#signup');if(su)su.onclick=signup;const sa=$('#sendApp');if(sa)sa.onclick=sendApplication;
