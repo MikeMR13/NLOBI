@@ -33,7 +33,13 @@ jobs:
           cat /tmp/nlobi-serve.log
           exit 1
       - name: Sync ChromeDriver
-        run: npx --yes browser-driver-manager@1.0.0 install chrome
+        shell: bash
+        run: |
+          chrome_major="$(google-chrome --version | grep -oE '[0-9]+' | head -1)"
+          npm install --no-save --no-package-lock "chromedriver@${chrome_major}"
+          chromedriver_path="$(node -e "console.log(require('chromedriver').path)")"
+          echo "CHROMEDRIVER_PATH=${chromedriver_path}" >> "$GITHUB_ENV"
+          "$chromedriver_path" --version
       - name: axe accessibility audit
         id: axe
         continue-on-error: true
@@ -45,6 +51,7 @@ jobs:
             http://127.0.0.1:4173/#home \
             http://127.0.0.1:4173/#explore \
             http://127.0.0.1:4173/#auth \
+            --chromedriver-path "$CHROMEDRIVER_PATH" \
             --exit 2>&1 | tee axe-results/axe-report.txt
           status=${PIPESTATUS[0]}
           exit "$status"
