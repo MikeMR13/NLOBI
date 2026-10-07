@@ -22,3 +22,27 @@ const config = spawnSync(process.execPath, [path.join(root, "scripts", "generate
 if (config.status !== 0) process.exit(config.status ?? 1);
 
 console.log(`Built NLOBI into ${dist}`);
+
+/* Build output verification */
+const requiredBuiltFiles = [
+  "index.html",
+  "assets/styles.css",
+  "assets/app.js",
+  "runtime-config.js",
+  "sw.js",
+  "manifest.webmanifest",
+  "icon-192.png",
+  "icon-512.png",
+];
+for (const rel of requiredBuiltFiles) {
+  const full = path.join(dist, rel);
+  if (!fs.existsSync(full)) throw new Error(`Build incompleto: falta dist/${rel}`);
+}
+const builtSw = fs.readFileSync(path.join(dist, "sw.js"), "utf8");
+for (const route of ["/assets/styles.css","/assets/app.js","/runtime-config.js"]) {
+  if (!builtSw.includes(route)) throw new Error(`Service Worker no referencia el asset construido: ${route}`);
+}
+for (const wrong of ["'/styles.css'","'/app.js'"]) {
+  if (builtSw.includes(wrong)) throw new Error(`Service Worker referencia una ruta obsoleta: ${wrong}`);
+}
+console.log("Build output verification OK");
