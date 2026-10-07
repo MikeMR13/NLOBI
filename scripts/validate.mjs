@@ -104,7 +104,7 @@ for (const required of [
   if (!app.includes(required)) throw new Error(`Deep links: falta ${required}`);
 }
 for (const required of [
-  "nlobi-shell-v19-5",
+  "nlobi-shell-v19-6",
   "'/assets/app.js'",
   "'/assets/styles.css'",
   "'/runtime-config.js'",
@@ -135,3 +135,17 @@ for (const required of [
 ]) {
   if (!app.includes(required)) throw new Error(`Auth/Storage refresh: falta ${required}`);
 }
+
+// Japanese logo icon invariants
+const indexHtml = fs.readFileSync("src/index.html","utf8");
+const manifest = fs.readFileSync("public/manifest.webmanifest","utf8");
+const iconSvg = fs.readFileSync("public/icon.svg","utf8");
+for (const required of [
+  'href="/icon.svg"',
+  '<span class="brandMark" aria-hidden="true">オ</span>'
+]) {
+  const source = required.startsWith('href=') ? indexHtml : app;
+  if (!source.includes(required)) throw new Error(`Brand icon: falta ${required}`);
+}
+if (!manifest.includes('"src": "/icon.svg"')) throw new Error("Brand icon: manifest no usa /icon.svg");
+if (!iconSvg.includes(">オ</text>")) throw new Error("Brand icon: SVG no contiene オ");
