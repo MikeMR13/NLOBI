@@ -65,7 +65,7 @@ async function req(path,opt={}){
  };
  if(!path.startsWith('/auth/v1/token'))await ensureFreshSession();
  let r=await doFetch();
- if(r.status===401&&S.refreshToken&&!opt.__retried&&!path.startsWith('/auth/v1/')){
+ if(r.status===401&&S.refreshToken&&!opt.__retried&&!path.startsWith('/auth/v1/token')){
   try{await refreshSession();r=await req(path,{...opt,__retried:true})}catch(e){clearSession();throw e}
  }
  return r
