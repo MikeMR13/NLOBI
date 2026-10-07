@@ -42,3 +42,9 @@ if (app.includes("const KEY='") || app.includes("const URL='https://")) {
 
 console.log("Validation OK");
 if (/(^|[^$])\$\('\[data-[^']+'\)\.forEach/m.test(app)) throw new Error("Selector simple usado con forEach; usa $() para NodeList.");
+
+// Accessibility pass 1 invariants
+if (!app.includes("function enhanceAccessibility(){")) throw new Error("Accessibility pass 1: falta gestión de foco/landmarks.");
+if (!app.includes('aria-current="page"')) throw new Error("Accessibility pass 1: falta aria-current en navegación.");
+if (!app.includes('class="spoiler spoilerButton"')) throw new Error("Accessibility pass 1: spoilers no son operables semánticamente.");
+if (!html.includes('id="routeAnnouncer"')) throw new Error("Accessibility pass 1: falta anunciador de rutas.");
