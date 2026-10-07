@@ -6,7 +6,7 @@ if (!URL || !KEY) {
   document.documentElement.dataset.configError = "1";
   console.error("[NLOBI] Falta configuración pública de Supabase.");
 }
-const S={view:'home',authMode:'login',user:null,token:localStorage.getItem('nlobi_token')||'',profile:null,catalog:[],groups:[],library:[],apps:[],notes:[],admin:false,adminTab:'overview',adminUsers:[],adminTeams:[],adminReports:[],adminContent:[],adminVolumes:[],adminSections:[],adminPurchaseLinks:[],adminAudit:[],adminBetaFeedback:[],betaFeedback:[],betaChecks:[],studioTranslations:[],studioProject:null,studioTeam:null,teamMembers:[],publicProfile:null,currentDetail:null,blockEditor:null,mediaFiles:[],mediaQuery:'',mediaTarget:null,mediaGroupId:null,mediaLoading:false,mediaPage:0,mediaPageSize:40,mediaUsage:{},revisionHistory:[],revisionPreview:null,pwaInstallReady:false,notificationPrefs:{new_publications:true,comment_replies:true,team_updates:true,system_updates:true},readingProgress:[],readingHistory:[],libraryFilter:'all',readerSection:null,readerComments:[],searchQuery:'',searchStatus:'all',searchLanguage:'all',searchGenre:'all',searchTag:'all',searchSort:'updated',publicGroup:null,readerPrefs:{theme:localStorage.getItem('reader_theme')||'light',fontSize:Number(localStorage.getItem('reader_font')||18),width:localStorage.getItem('reader_width')||'normal',lineHeight:localStorage.getItem('reader_line_height')||'comfortable',fontFamily:localStorage.getItem('reader_font_family')||'serif',paragraphSpace:localStorage.getItem('reader_paragraph_space')||'normal'},follows:[],online:navigator.onLine,importState:{step:'file',file:null,type:'',name:'',text:'',parsedBlocks:[],sections:[],warnings:[],translationId:'',volumeNumber:'1',volumeTitle:'',busy:false,message:''},err:''};
+const S={view:'home',authMode:'login',user:null,token:localStorage.getItem('nlobi_token')||'',refreshToken:localStorage.getItem('nlobi_refresh_token')||'',tokenExpiresAt:Number(localStorage.getItem('nlobi_token_expires_at')||0),profile:null,catalog:[],groups:[],library:[],apps:[],notes:[],admin:false,adminTab:'overview',adminUsers:[],adminTeams:[],adminReports:[],adminContent:[],adminVolumes:[],adminSections:[],adminPurchaseLinks:[],adminAudit:[],adminBetaFeedback:[],betaFeedback:[],betaChecks:[],studioTranslations:[],studioProject:null,studioTeam:null,teamMembers:[],publicProfile:null,currentDetail:null,blockEditor:null,mediaFiles:[],mediaQuery:'',mediaTarget:null,mediaGroupId:null,mediaLoading:false,mediaPage:0,mediaPageSize:40,mediaUsage:{},revisionHistory:[],revisionPreview:null,pwaInstallReady:false,notificationPrefs:{new_publications:true,comment_replies:true,team_updates:true,system_updates:true},readingProgress:[],readingHistory:[],libraryFilter:'all',readerSection:null,readerComments:[],searchQuery:'',searchStatus:'all',searchLanguage:'all',searchGenre:'all',searchTag:'all',searchSort:'updated',publicGroup:null,readerPrefs:{theme:localStorage.getItem('reader_theme')||'light',fontSize:Number(localStorage.getItem('reader_font')||18),width:localStorage.getItem('reader_width')||'normal',lineHeight:localStorage.getItem('reader_line_height')||'comfortable',fontFamily:localStorage.getItem('reader_font_family')||'serif',paragraphSpace:localStorage.getItem('reader_paragraph_space')||'normal'},follows:[],online:navigator.onLine,importState:{step:'file',file:null,type:'',name:'',text:'',parsedBlocks:[],sections:[],warnings:[],translationId:'',volumeNumber:'1',volumeTitle:'',busy:false,message:''},err:''};
 const demo=[
 {id:'demo-netoge',language_code:'es',title:'Netoge no Yome',novels:{title:'¿Y pensaste que nunca hay chicas online?',synopsis:'Comedia romántica escolar alrededor de un gremio de jugadores y sus relaciones dentro y fuera del juego.',cover_url:null},translator_groups:{name:'Vista previa NLOBI'},demo:true},
 {id:'demo-silent',language_code:'es',title:'Silent Witch',novels:{title:'Silent Witch',synopsis:'Fantasía académica, magia y secretos en una historia centrada en una prodigio que prefiere pasar desapercibida.',cover_url:null},translator_groups:{name:'Vista previa NLOBI'},demo:true},
@@ -27,7 +27,49 @@ let toastTimer,lastToastMessage='',lastToastAt=0;function toast(message,type='')
 function setNetworkBadge(){const el=$('#netBadge');if(!el)return;S.online=navigator.onLine;el.hidden=S.online;if(!S.online)el.textContent='Sin conexión · algunas funciones no estarán disponibles'}
 function friendlyError(e,fallback='Ocurrió un error inesperado.'){const m=String(e?.message||'');if(e?.name==='AbortError'||/aborted|timeout/i.test(m))return'La conexión tardó demasiado. Intenta nuevamente.';if(/Failed to fetch|NetworkError/i.test(m))return'No se pudo conectar con el servidor.';return m||fallback}
 
-function req(path,opt={}){const c=new AbortController(),t=setTimeout(()=>c.abort(),7000);const h={'apikey':KEY,'Content-Type':'application/json',...(S.token?{'Authorization':'Bearer '+S.token}:{}),...(opt.headers||{})};return fetch(URL+path,{...opt,headers:h,signal:c.signal}).finally(()=>clearTimeout(t))}
+let refreshPromise=null;
+function persistSession(data){
+ S.token=data?.access_token||'';
+ S.refreshToken=data?.refresh_token||S.refreshToken||'';
+ const expiresIn=Number(data?.expires_in||3600);
+ S.tokenExpiresAt=S.token?Date.now()+Math.max(0,expiresIn-60)*1000:0;
+ if(S.token)localStorage.setItem('nlobi_token',S.token);else localStorage.removeItem('nlobi_token');
+ if(S.refreshToken)localStorage.setItem('nlobi_refresh_token',S.refreshToken);else localStorage.removeItem('nlobi_refresh_token');
+ if(S.tokenExpiresAt)localStorage.setItem('nlobi_token_expires_at',String(S.tokenExpiresAt));else localStorage.removeItem('nlobi_token_expires_at')
+}
+function clearSession(){
+ S.token='';S.refreshToken='';S.tokenExpiresAt=0;
+ localStorage.removeItem('nlobi_token');localStorage.removeItem('nlobi_refresh_token');localStorage.removeItem('nlobi_token_expires_at')
+}
+async function refreshSession(){
+ if(!S.refreshToken)throw new Error('La sesión expiró. Inicia sesión nuevamente.');
+ if(refreshPromise)return refreshPromise;
+ refreshPromise=(async()=>{
+  const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),7000);
+  try{
+   const r=await fetch(URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:S.refreshToken}),signal:ctrl.signal});
+   if(!r.ok)throw new Error((await r.text()).slice(0,220)||'No se pudo renovar la sesión.');
+   const data=await r.json();persistSession(data);return data
+  }finally{clearTimeout(timer)}
+ })();
+ try{return await refreshPromise}finally{refreshPromise=null}
+}
+async function ensureFreshSession(){
+ if(S.token&&S.refreshToken&&S.tokenExpiresAt&&Date.now()>=S.tokenExpiresAt)await refreshSession()
+}
+async function req(path,opt={}){
+ const doFetch=async()=>{
+  const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),7000);
+  const h={'apikey':KEY,'Content-Type':'application/json',...(S.token?{'Authorization':'Bearer '+S.token}:{}),...(opt.headers||{})};
+  try{return await fetch(URL+path,{...opt,headers:h,signal:ctrl.signal})}finally{clearTimeout(timer)}
+ };
+ if(!path.startsWith('/auth/v1/token'))await ensureFreshSession();
+ let r=await doFetch();
+ if(r.status===401&&S.refreshToken&&!opt.__retried&&!path.startsWith('/auth/v1/')){
+  try{await refreshSession();r=await req(path,{...opt,__retried:true})}catch(e){clearSession();throw e}
+ }
+ return r
+}
 async function jreq(path,opt={}){const r=await req(path,opt);if(!r.ok)throw new Error((await r.text()).slice(0,220)||r.statusText);const tx=await r.text();return tx?JSON.parse(tx):null}
 async function storageUpload(file,path,upsert=true){
  if(!S.token)throw new Error('Debes iniciar sesión para subir archivos.');
@@ -460,9 +502,9 @@ function setAuthError(message){
  box.hidden=!message;box.textContent=message||'';
  ['email','pass','name'].forEach(id=>{const el=document.getElementById(id);if(el)el.setAttribute('aria-invalid',message?'true':'false')})
 }
-async function login(){try{setAuthError('');const email=$('#email').value.trim(),password=$('#pass').value;const d=await jreq('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});S.token=d.access_token||'';localStorage.setItem('nlobi_token',S.token);await loadUser();go('home',true)}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
-async function signup(){try{setAuthError('');const email=$('#email').value.trim(),password=$('#pass').value,name=$('#name').value.trim(),account_type=document.querySelector('input[name=atype]:checked').value;await jreq('/auth/v1/signup',{method:'POST',body:JSON.stringify({email,password,data:{display_name:name,account_type}})});toast('Cuenta creada. Revisa tu correo si se requiere confirmación.','ok');S.authMode='login';render()}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
-function logout(){S.token='';localStorage.removeItem('nlobi_token');S.user=S.profile=null;S.groups=[];S.library=[];S.readingProgress=[];S.readingHistory=[];S.notes=[];S.admin=false;S.view='home';render()}
+async function login(){try{setAuthError('');const email=$('#email').value.trim(),password=$('#pass').value;const d=await jreq('/auth/v1/token?grant_type=password',{method:'POST',body:JSON.stringify({email,password})});persistSession(d);await loadUser();go('home',true)}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
+async function signup(){try{setAuthError('');const email=$('#email').value.trim(),password=$('#pass').value,name=$('#name').value.trim(),account_type=document.querySelector('input[name=atype]:checked').value;const d=await jreq('/auth/v1/signup',{method:'POST',body:JSON.stringify({email,password,data:{display_name:name,account_type}})});if(d?.access_token)persistSession(d);toast(d?.access_token?'Cuenta creada y sesión iniciada.':'Cuenta creada. Revisa tu correo si se requiere confirmación.','ok');if(d?.access_token){await loadUser();go('home',true)}else{S.authMode='login';render()}}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
+function logout(){clearSession();S.user=S.profile=null;S.groups=[];S.library=[];S.readingProgress=[];S.readingHistory=[];S.notes=[];S.admin=false;S.view='home';render()}
 async function loadCatalog(){S.catalog=await jreq('/rest/v1/translations?select=id,title,status,language_code,popularity_score,updated_at,novels(id,title,synopsis,cover_url,author_name,genres,tags),translator_groups(id,name)&status=in.(active,complete,paused)&order=updated_at.desc')||[]}
 async function loadUser(){if(!S.token)return;try{S.user=await jreq('/auth/v1/user');const uid=S.user.id;const [p,g,l,rp,rh,a,n,np,me]=await Promise.all([
  jreq(`/rest/v1/profiles?id=eq.${uid}&select=id,username,display_name,avatar_url,bio,account_type,public_library,public_activity`),
@@ -593,7 +635,7 @@ function registerPwa(){
 }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;S.pwaInstallReady=true;render()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;S.pwaInstallReady=false;toast('NLOBI quedó instalada.','ok');render()});
-async function boot(isRetry=false){if(localStorage.getItem('nlobi_dark')==='1')document.body.classList.add('dark');S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();try{if(navigator.onLine){await loadCatalog();S.err='';if(S.token){await loadUser();await flushProgressQueue()}await resolveDynamicRoute(S.view);if(isRetry)toast('Conexión restablecida.','ok')}else{await resolveDynamicRoute(S.view);S.err=''}}catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}render()}
+async function boot(isRetry=false){if(localStorage.getItem('nlobi_dark')==='1')document.body.classList.add('dark');S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();try{if(navigator.onLine){await loadCatalog();S.err='';if(S.token){try{await ensureFreshSession();await loadUser();await flushProgressQueue()}catch(e){clearSession();S.user=S.profile=null;console.warn('Sesión no renovable',e)}}await resolveDynamicRoute(S.view);if(isRetry)toast('Conexión restablecida.','ok')}else{await resolveDynamicRoute(S.view);S.err=''}}catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}render()}
 window.addEventListener('hashchange',async()=>{pendingRouteFocus=true;S.view=routeFromHash();render();window.scrollTo({top:0,behavior:'smooth'});try{await resolveDynamicRoute(S.view);S.err=''}catch(e){S.err=friendlyError(e,'No se pudo abrir esta vista.');console.error(e)}render()});
 window.addEventListener('online',async()=>{S.online=true;setNetworkBadge();toast('Conexión restablecida.','ok');await flushProgressQueue();boot(true)});
 window.addEventListener('offline',()=>{S.online=false;setNetworkBadge();render();toast('Sin conexión. Los capítulos guardados siguen disponibles.','bad')});
