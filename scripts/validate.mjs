@@ -211,3 +211,8 @@ if (!app.includes("mediaTargetLabel(t){if(!t)")) throw new Error("Full QA: media
 if (!app.includes("authShell betaFeedbackShell")) throw new Error("Full QA: feedback Beta conserva layout inline no responsive.");
 if (!app.includes("CONFIG.qaMode===true")) throw new Error("Full QA: falta hook de QA protegido por configuración.");
 if (!css.includes(".betaFeedbackShell{grid-template-columns:.7fr 1.3fr}")) throw new Error("Full QA: falta estilo responsive de feedback Beta.");
+
+if (!app.includes("MAX_IMPORT_BYTES=80*1024*1024")) throw new Error("Import security: falta límite global de 80 MB.");
+if (!app.includes("MAX_ARCHIVE_UNCOMPRESSED=300*1024*1024")) throw new Error("Import security: falta límite de expansión ZIP.");
+if (!app.includes("const safeCssUrl=")) throw new Error("CSS security: falta normalizador de URL para contexto CSS.");
+if (!app.includes("/rest/v1/rpc/create_translation_project")) throw new Error("Integrity: creación de proyecto no usa RPC atómico.");
