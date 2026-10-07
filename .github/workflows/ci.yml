@@ -32,35 +32,20 @@ jobs:
           done
           cat /tmp/nlobi-serve.log
           exit 1
-      - name: Sync ChromeDriver
-        shell: bash
+      - name: Install accessibility test browser
         run: |
-          chrome_major="$(google-chrome --version | grep -oE '[0-9]+' | head -1)"
-          npm install --no-save --no-package-lock "chromedriver@${chrome_major}"
-          chromedriver_path="$(node -e "console.log(require('chromedriver').path)")"
-          echo "CHROMEDRIVER_PATH=${chromedriver_path}" >> "$GITHUB_ENV"
-          "$chromedriver_path" --version
+          npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
+          npx playwright install --with-deps chromium
       - name: axe accessibility audit
         id: axe
         continue-on-error: true
-        shell: bash
-        run: |
-          mkdir -p axe-results
-          set +e
-          npx --yes @axe-core/cli@4.13.0 \
-            http://127.0.0.1:4173/#home \
-            http://127.0.0.1:4173/#explore \
-            http://127.0.0.1:4173/#auth \
-            --chromedriver-path "$CHROMEDRIVER_PATH" \
-            --exit 2>&1 | tee axe-results/axe-report.txt
-          status=${PIPESTATUS[0]}
-          exit "$status"
+        run: node scripts/axe-check.mjs
       - name: Upload axe report
         if: always()
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: axe-accessibility-report
-          path: axe-results/axe-report.txt
+          path: axe-results/axe-report.json
           if-no-files-found: error
       - name: Enforce axe result
         if: steps.axe.outcome == 'failure'
