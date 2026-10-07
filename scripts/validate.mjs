@@ -48,3 +48,18 @@ if (!app.includes("function enhanceAccessibility(){")) throw new Error("Accessib
 if (!app.includes('aria-current="page"')) throw new Error("Accessibility pass 1: falta aria-current en navegación.");
 if (!app.includes('class="spoiler spoilerButton"')) throw new Error("Accessibility pass 1: spoilers no son operables semánticamente.");
 if (!html.includes('id="routeAnnouncer"')) throw new Error("Accessibility pass 1: falta anunciador de rutas.");
+
+// Accessibility pass 2 invariants
+for (const required of [
+  'aria-labelledby="chapterTitle"',
+  'aria-label="Navegación entre capítulos"',
+  'id="readerLineHeight"',
+  'id="readerFontFamily"',
+  'id="readerParagraphSpace"',
+  'function resetReaderPrefs(){',
+  '<ruby>',
+  '<rp>(',
+  'Ilustración del capítulo'
+]) {
+  if (!app.includes(required)) throw new Error(`Accessibility pass 2: falta ${required}`);
+}
