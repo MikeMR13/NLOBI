@@ -19,9 +19,10 @@ const safeUrl=u=>{if(!u)return'#';try{const v=/^https?:\/\//i.test(String(u))?St
 const titleOf=x=>x?.novels?.title||x?.title||'Novela';
 const coverOf=x=>x?.novels?.cover_url||null;
 const statusLabel=s=>({reading:'Leyendo',plan_to_read:'Por leer',completed:'Terminada',paused:'Pausada',dropped:'Abandonada'}[s]||s||'En biblioteca');
+let pendingRouteFocus=false;
 const validRoute=v=>['home','explore','library','auth','application','studio','studio:import','studio:new','notifications','beta','admin'].includes(v)||/^detail:[A-Za-z0-9_-]+$/.test(v)||/^group:[A-Za-z0-9_-]+$/.test(v)||/^profile:[A-Za-z0-9_-]+$/.test(v)||/^collection:[A-Za-z0-9_-]+$/.test(v)||/^studio:project:[A-Za-z0-9_-]+$/.test(v)||/^studio:team:[A-Za-z0-9_-]+$/.test(v)||/^studio:media:[A-Za-z0-9_-]+$/.test(v)||/^reader:[A-Za-z0-9_-]+$/.test(v);
 function routeFromHash(){let raw='home';try{raw=decodeURIComponent((location.hash||'#home').slice(1))}catch{history.replaceState(null,'','#home');return'home'}return validRoute(raw)?raw:'home'}
-function go(view,replace=false){if(!validRoute(view))view='home';const next='#'+encodeURIComponent(view).replace(/%3A/g,':');if(location.hash===next){S.view=view;render();window.scrollTo({top:0,behavior:'smooth'});return}if(replace)history.replaceState(null,'',next);else location.hash=next}
+function go(view,replace=false){if(!validRoute(view))view='home';pendingRouteFocus=true;const next='#'+encodeURIComponent(view).replace(/%3A/g,':');if(location.hash===next){S.view=view;render();window.scrollTo({top:0,behavior:'smooth'});return}if(replace){history.replaceState(null,'',next);S.view=view;render()}else location.hash=next}
 let toastTimer,lastToastMessage='',lastToastAt=0;function toast(message,type=''){const host=$('#toastHost');if(!host)return;const msg=String(message||''),now=Date.now();if(msg===lastToastMessage&&now-lastToastAt<5000)return;lastToastMessage=msg;lastToastAt=now;host.replaceChildren();const el=document.createElement('div');el.className='toast '+type;el.textContent=msg;host.appendChild(el);clearTimeout(toastTimer);toastTimer=setTimeout(()=>{host.replaceChildren();if(lastToastMessage===msg)lastToastMessage=''},4200)}
 function setNetworkBadge(){const el=$('#netBadge');if(!el)return;S.online=navigator.onLine;el.hidden=S.online;if(!S.online)el.textContent='Sin conexión · algunas funciones no estarán disponibles'}
 function friendlyError(e,fallback='Ocurrió un error inesperado.'){const m=String(e?.message||'');if(e?.name==='AbortError'||/aborted|timeout/i.test(m))return'La conexión tardó demasiado. Intenta nuevamente.';if(/Failed to fetch|NetworkError/i.test(m))return'No se pudo conectar con el servidor.';return m||fallback}
@@ -72,12 +73,13 @@ async function materializeImportedImages(blocks,groupId,sectionKey){
 
 function nav(){
  const unread=S.notes.filter(x=>!x.read_at).length;
- const active=v=>S.view===v||S.view.startsWith(v+':')?'active':'';
- return `<header class="top"><div class="bar"><div class="brand"><span class="brandMark">N</span>NLOBI</div><nav class="nav">
- <button class="${active('home')}" data-v="home">Inicio</button><button class="${active('explore')}" data-v="explore">Explorar</button><button class="${active('library')}" data-v="library">Biblioteca</button>
- ${S.user?`<button class="${active('notifications')}" data-v="notifications">Avisos${unread?` · ${unread}`:''}</button><button class="${active('beta')}" data-v="beta">Beta</button>`:''}
- ${S.groups.length?`<button class="${active('studio')}" data-v="studio">Studio</button>`:''}${S.admin?`<button class="${active('admin')}" data-v="admin">Admin</button>`:''}
- <button class="${active('auth')}" data-v="auth">${S.user?'Perfil':'Entrar'}</button>${S.pwaInstallReady?'<button id="installPwa" class="installHint" title="Instalar NLOBI">＋ Instalar</button>':''}<button id="theme" aria-label="Cambiar tema" title="Cambiar tema">◐</button></nav></div></header>${!S.online?'<div class="offlinePill">Sin conexión · modo lectura offline</div>':''}` }
+ const isActive=v=>S.view===v||S.view.startsWith(v+':');
+ const link=(v,label)=>`<a class="navLink ${isActive(v)?'active':''}" href="#${v}" data-v="${v}"${isActive(v)?' aria-current="page"':''}>${label}</a>`;
+ return `<header class="top"><div class="bar"><a class="brand" href="#home" data-v="home" aria-label="NLOBI, ir al inicio"><span class="brandMark" aria-hidden="true">N</span><span>NLOBI</span></a><nav class="nav" aria-label="Navegación principal">
+ ${link('home','Inicio')}${link('explore','Explorar')}${link('library','Biblioteca')}
+ ${S.user?link('notifications',`Avisos${unread?` · ${unread}`:''}`)+link('beta','Beta'):''}
+ ${S.groups.length?link('studio','Studio'):''}${S.admin?link('admin','Admin'):''}
+ ${link('auth',S.user?'Perfil':'Entrar')}${S.pwaInstallReady?'<button id="installPwa" class="installHint" type="button">＋ Instalar</button>':''}<button id="theme" type="button" aria-label="${document.body.classList.contains('dark')?'Cambiar a tema claro':'Cambiar a tema oscuro'}" aria-pressed="${document.body.classList.contains('dark')?'true':'false'}" title="Cambiar tema">◐</button></nav></div></header>${!S.online?'<div class="offlinePill" role="status">Sin conexión · modo lectura offline</div>':''}` }
 function status(){return S.err?`<div class="status bad" role="alert"><strong>Hay un problema de conexión.</strong><div>${esc(S.err)}</div><div style="margin-top:8px"><button class="btn" id="retryBackend">Reintentar</button></div></div>`:''}
 function coverMarkup(x,detail=false){
  const img=coverOf(x), t=esc(titleOf(x));
@@ -232,6 +234,36 @@ function readerView(){
  const comment=c=>`<div class="comment ${c.parent_id?'reply':''}"><div class="row"><strong>${esc(c.profiles?.display_name||c.profiles?.username||'Usuario')}</strong><span class="muted">${esc((c.created_at||'').replace('T',' ').slice(0,16))}</span></div><div class="${c.is_spoiler?'spoiler':''}" ${c.is_spoiler?'data-reveal-spoiler=""':''}>${esc(c.body||'')}</div><div class="row"><button class="btn" data-like-comment="${c.id}">${c.liked_by_me?'♥':'♡'} ${c.like_count||0}</button>${S.user?`<button class="btn" data-reply-comment="${c.id}">Responder</button><button class="btn danger" data-report-comment="${c.id}">Reportar</button>`:''}</div></div>`;
  return `${nav()}<main class="wrap"><div class="readerShell"><div class="readerTop"><button class="btn" data-back-detail="${R.translation_id}">← Obra</button><div class="row">${prev?`<button class="btn" data-read-section="${prev.id}" data-translation="${R.translation_id}">← Anterior</button>`:''}${next?`<button class="btn primary" data-read-section="${next.id}" data-translation="${R.translation_id}">Siguiente →</button>`:''}</div></div><div class="readerControls"><label>Tema <select id="readerTheme"><option value="light" ${theme==='light'?'selected':''}>Claro</option><option value="sepia" ${theme==='sepia'?'selected':''}>Sepia</option><option value="dark" ${theme==='dark'?'selected':''}>Oscuro</option></select></label><label>Tamaño <input id="readerFont" type="range" min="14" max="30" value="${Number(S.readerPrefs.fontSize||18)}"></label><label>Ancho <select id="readerWidth"><option value="narrow" ${width==='narrow'?'selected':''}>Estrecho</option><option value="normal" ${width==='normal'?'selected':''}>Normal</option><option value="wide" ${width==='wide'?'selected':''}>Ancho</option></select></label><button class="btn" id="markReaderDone">Marcar capítulo leído</button></div><article class="readerPaper reader-${esc(theme)} reader-${esc(width)}" style="font-size:${Number(S.readerPrefs.fontSize||18)}px"><div class="readerMeta">${esc(R.novel_title||'NLOBI')}${R.volume_number!=null?` · Vol. ${esc(R.volume_number)}`:''}</div><h1>${esc(R.title||'Capítulo')}</h1>${(R.content||[]).map(renderReaderBlock).join('')}</article><section class="commentBox"><h2>Comentarios</h2>${S.user?`<div class="field"><label>Escribe un comentario</label><textarea id="newCommentBody" rows="4"></textarea></div><label class="radio"><input type="checkbox" id="newCommentSpoiler"><span>Contiene spoiler</span></label><button class="btn primary" id="postComment">Publicar comentario</button>`:'<p class="muted">Inicia sesión para comentar.</p>'}<div style="margin-top:18px">${roots.length?roots.map(c=>comment(c)+S.readerComments.filter(r=>r.parent_id===c.id).map(comment).join('')).join(''):'<div class="muted">Todavía no hay comentarios.</div>'}</div></section></div></main>`;
 }
+function accessibilityViewTitle(){
+ if(S.view==='home')return'Inicio';
+ if(S.view==='explore')return'Explorar';
+ if(S.view==='library')return'Biblioteca';
+ if(S.view==='auth')return S.user?'Perfil':'Acceso';
+ if(S.view==='application')return'Solicitud de equipo';
+ if(S.view==='studio')return'Studio';
+ if(S.view==='studio:import')return'Importar';
+ if(S.view==='studio:new')return'Nuevo proyecto';
+ if(S.view==='notifications')return'Avisos';
+ if(S.view==='beta')return'Beta';
+ if(S.view==='admin')return'Administración';
+ if(S.view.startsWith('reader:'))return S.readerSection?.title||'Lector';
+ if(S.view.startsWith('detail:'))return titleOf(S.currentDetail)||'Detalle de obra';
+ if(S.view.startsWith('group:'))return S.publicGroup?.name||'Equipo';
+ if(S.view.startsWith('profile:'))return S.publicProfile?.display_name||S.publicProfile?.username||'Perfil público';
+ if(S.view.startsWith('studio:project:'))return S.studioProject?.novels?.title||S.studioProject?.title||'Proyecto';
+ if(S.view.startsWith('studio:team:'))return S.studioTeam?.name||'Equipo';
+ if(S.view.startsWith('studio:media:'))return'Biblioteca multimedia';
+ return'NLOBI'
+}
+function enhanceAccessibility(){
+ const main=document.querySelector('#app main');
+ if(main){main.id='mainContent';main.tabIndex=-1}
+ const title=accessibilityViewTitle();
+ document.title=`${title} — NLOBI`;
+ const announcer=document.getElementById('routeAnnouncer');
+ if(announcer)announcer.textContent=`${title} cargado`;
+ if(pendingRouteFocus&&main){pendingRouteFocus=false;requestAnimationFrame(()=>main.focus({preventScroll:true}))}
+}
 function render(){
  const app=document.getElementById('app');
  if(!app)return;
@@ -256,6 +288,7 @@ function render(){
   else if(S.view.startsWith('studio:team:'))html=studioTeamView();
   else if(S.view.startsWith('studio:media:'))html=studioMediaView();
   app.innerHTML=html;
+  enhanceAccessibility();
   bind();
   setNetworkBadge();
  }catch(e){
@@ -264,8 +297,8 @@ function render(){
  }
 }
 function bind(){
- $$('[data-v]').forEach(b=>b.onclick=()=>go(b.dataset.v));
- const retry=$('#retryBackend');if(retry)retry.onclick=()=>boot(true);const th=$('#theme');if(th)th.onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('nlobi_dark',document.body.classList.contains('dark')?'1':'0')};const ip=$('#installPwa');if(ip)ip.onclick=installPwa;
+ $('[data-v]').forEach(b=>b.onclick=e=>{e.preventDefault();go(b.dataset.v)});
+ const retry=$('#retryBackend');if(retry)retry.onclick=()=>boot(true);const th=$('#theme');if(th)th.onclick=()=>{document.body.classList.toggle('dark');const dark=document.body.classList.contains('dark');localStorage.setItem('nlobi_dark',dark?'1':'0');th.setAttribute('aria-pressed',dark?'true':'false');th.setAttribute('aria-label',dark?'Cambiar a tema claro':'Cambiar a tema oscuro')};const ip=$('#installPwa');if(ip)ip.onclick=installPwa;
  const lt=$('#loginTab');if(lt)lt.onclick=()=>{S.authMode='login';render()};const st=$('#signupTab');if(st)st.onclick=()=>{S.authMode='signup';render()};
  const lo=$('#logout');if(lo)lo.onclick=logout;const li=$('#login');if(li)li.onclick=login;const su=$('#signup');if(su)su.onclick=signup;const sa=$('#sendApp');if(sa)sa.onclick=sendApplication;
  $$('[data-open]').forEach(b=>b.onclick=()=>openDetail(b.dataset.open));const cs=$('#catalogSearch');if(cs)cs.oninput=e=>{S.searchQuery=e.target.value;render()};const cg=$('#catalogGenre');if(cg)cg.onchange=e=>{S.searchGenre=e.target.value;render()};const cso=$('#catalogSort');if(cso)cso.onchange=e=>{S.searchSort=e.target.value;render()};$$('[data-tag-filter]').forEach(b=>b.onclick=()=>{S.searchTag=b.dataset.tagFilter;render()});const cf=$('#clearCatalogFilters');if(cf)cf.onclick=()=>{S.searchQuery='';S.searchStatus='all';S.searchLanguage='all';S.searchGenre='all';S.searchTag='all';S.searchSort='updated';render()};$$('[data-collection]').forEach(b=>b.onclick=()=>go('collection:'+b.dataset.collection));const cst=$('#catalogStatus');if(cst)cst.onchange=e=>{S.searchStatus=e.target.value;render()};const cl=$('#catalogLanguage');if(cl)cl.onchange=e=>{S.searchLanguage=e.target.value;render()};$$('[data-group]').forEach(b=>b.onclick=()=>openGroup(b.dataset.group));$$('[data-profile]').forEach(b=>b.onclick=()=>openPublicProfile(b.dataset.profile));const spp=$('#savePersonalProfile');if(spp)spp.onclick=savePersonalProfile;const paf=$('#profileAvatarFile');if(paf)paf.onchange=uploadPersonalAvatar;$$('[data-admin-tab]').forEach(b=>b.onclick=()=>{S.adminTab=b.dataset.adminTab;render()});$$('[data-report-review]').forEach(b=>b.onclick=()=>reviewReport(b.dataset.reportReview,'reviewed'));$$('[data-report-dismiss]').forEach(b=>b.onclick=()=>reviewReport(b.dataset.reportDismiss,'dismissed'));$$('[data-comment-delete]').forEach(b=>b.onclick=()=>deleteReportedComment(b.dataset.commentDelete,b.dataset.reportId));$$('[data-translation-status]').forEach(b=>b.onclick=()=>setTranslationStatus(b.dataset.translationStatus,b.dataset.status));$$('[data-purchase-verify]').forEach(b=>b.onclick=()=>reviewPurchaseLink(b.dataset.purchaseVerify,b.dataset.verified==='true'));$$('[data-admin-delete-link]').forEach(b=>b.onclick=()=>deleteAdminPurchaseLink(b.dataset.adminDeleteLink));$$('[data-admin-volume]').forEach(b=>b.onclick=()=>setAdminVolumeStatus(b.dataset.adminVolume,b.dataset.status));$$('[data-admin-section]').forEach(b=>b.onclick=()=>setAdminSectionStatus(b.dataset.adminSection,b.dataset.status));$$('[data-import-back]').forEach(b=>b.onclick=()=>{syncImportFields();S.importState.step=b.dataset.importBack;render()});const fi=$('#importFile');if(fi)fi.onchange=e=>selectImportFile(e.target.files?.[0]);const ai=$('#analyzeImport');if(ai)ai.onclick=analyzeImportFile;const ds=$('#detectStructure');if(ds)ds.onclick=()=>{S.importState.sections=detectSectionsRich(S.importState.parsedBlocks,S.importState.text);S.importState.step='structure';render()};const rs=$('#reviewStructure');if(rs)rs.onclick=()=>{syncStructureFields();S.importState.step='review';render()};const ge=$('#goEditImport');if(ge)ge.onclick=()=>{syncImportTarget();if(!S.importState.translationId){toast('Selecciona una traducción/proyecto.','bad');return}S.importState.step='edit';render()};const gp=$('#goPublishImport');if(gp)gp.onclick=()=>{syncEditedBodies();S.importState.step='publish';render()};const sd=$('#saveImportDrafts');if(sd)sd.onclick=saveImportDrafts;const bc=$('#runBetaChecks');if(bc)bc.onclick=runBetaChecks;const bf=$('#submitBetaFeedback');if(bf)bf.onclick=submitBetaFeedback;$$('[data-beta-status]').forEach(b=>b.onclick=()=>updateBetaFeedbackStatus(b.dataset.betaStatus,b.dataset.status));
@@ -458,7 +491,7 @@ function registerPwa(){if('serviceWorker'in navigator&&location.protocol.startsW
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;S.pwaInstallReady=true;render()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;S.pwaInstallReady=false;toast('NLOBI quedó instalada.','ok');render()});
 async function boot(isRetry=false){if(localStorage.getItem('nlobi_dark')==='1')document.body.classList.add('dark');S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();try{if(navigator.onLine){await loadCatalog();S.err='';if(S.token){await loadUser();await flushProgressQueue()}if(isRetry)toast('Conexión restablecida.','ok')}else{S.err=''}}catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}render()}
-window.addEventListener('hashchange',()=>{S.view=routeFromHash();render();window.scrollTo({top:0,behavior:'smooth'})});
+window.addEventListener('hashchange',()=>{pendingRouteFocus=true;S.view=routeFromHash();render();window.scrollTo({top:0,behavior:'smooth'})});
 window.addEventListener('online',async()=>{S.online=true;setNetworkBadge();toast('Conexión restablecida.','ok');await flushProgressQueue();boot(true)});
 window.addEventListener('offline',()=>{S.online=false;setNetworkBadge();render();toast('Sin conexión. Los capítulos guardados siguen disponibles.','bad')});
 window.addEventListener('error',e=>{console.error('[NLOBI global error]',e.error||e.message,e.filename||'',e.lineno||'',e.colno||'')});
