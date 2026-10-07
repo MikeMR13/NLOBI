@@ -104,9 +104,9 @@ for (const required of [
   if (!app.includes(required)) throw new Error(`Deep links: falta ${required}`);
 }
 for (const required of [
-  "nlobi-shell-v19-4",
-  "'/app.js'",
-  "'/styles.css'",
+  "nlobi-shell-v19-5",
+  "'/assets/app.js'",
+  "'/assets/styles.css'",
   "'/runtime-config.js'",
   "cache:'no-store'",
   "self.skipWaiting()",
@@ -114,3 +114,16 @@ for (const required of [
 ]) {
   if (!sw.includes(required)) throw new Error(`Service worker: falta ${required}`);
 }
+
+// Session refresh invariants
+for (const required of [
+  "function persistSession(",
+  "async function refreshSession(){",
+  "async function ensureFreshSession(){",
+  "nlobi_refresh_token",
+  "grant_type=refresh_token"
+]) {
+  if (!app.includes(required)) throw new Error(`Auth refresh: falta ${required}`);
+}
+const pkg = JSON.parse(fs.readFileSync("package.json","utf8"));
+if (pkg.engines?.node !== "22.x") throw new Error("Node debe quedar fijado en 22.x");
