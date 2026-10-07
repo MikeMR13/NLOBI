@@ -81,7 +81,7 @@ for (const required of [
 const workflow = fs.readFileSync(".github/workflows/ci.yml", "utf8");
 for (const required of [
   "axe accessibility audit",
-  "@axe-core/cli@4.10.2",
+  "@axe-core/cli@4.13.0",
   "aria-label=\"Mover ",
   "aria-labelledby=\"blockLabel-",
   "Texto alternativo",
@@ -127,3 +127,11 @@ for (const required of [
 }
 const pkg = JSON.parse(fs.readFileSync("package.json","utf8"));
 if (pkg.engines?.node !== "22.x") throw new Error("Node debe quedar fijado en 22.x");
+
+// Storage refresh invariants
+for (const required of [
+  "await ensureFreshSession();",
+  "/auth/v1/logout"
+]) {
+  if (!app.includes(required)) throw new Error(`Auth/Storage refresh: falta ${required}`);
+}
