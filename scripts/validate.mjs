@@ -220,3 +220,7 @@ if (!app.includes("/rest/v1/rpc/create_translation_project")) throw new Error("I
 if (!app.includes("/auth/v1/signup?redirect_to=")) throw new Error("Auth email: signup no fija redirect_to.");
 if (!app.includes("/auth/v1/resend?redirect_to=")) throw new Error("Auth email: falta reenvío de verificación.");
 if (!app.includes("id=\"resendVerification\"")) throw new Error("Auth email: falta control de reenvío.");
+
+if (!app.includes("function consumeAuthCallback()")) throw new Error("Auth email: falta consumir callback de confirmación.");
+if (!app.includes("sessionStorage.setItem('nlobi_auth_notice'")) throw new Error("Auth email: falta feedback del callback.");
+if (app.includes("location.origin+'/#auth'")) throw new Error("Auth email: redirect_to no debe usar el hash de rutas.");
