@@ -42,10 +42,11 @@ jobs:
         run: node scripts/axe-check.mjs
       - name: Upload axe report
         if: always()
+        continue-on-error: true
         uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
         with:
           name: axe-accessibility-report
-          path: axe-results/axe-report.json
+          path: axe-results/
           if-no-files-found: error
       - name: Enforce axe result
         if: steps.axe.outcome == 'failure'
