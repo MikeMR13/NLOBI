@@ -1,8 +1,8 @@
-# NLOBI Beta 19 — Arquitectura y producción
+# NLOBI Beta 19 — Arquitectura y estado de producción
 
-## Resultado
+## Estado actual
 
-Beta 18 fue migrada desde un HTML monolítico a un proyecto estático con build reproducible.
+El proyecto vive en `MikeMR13/NLOBI` y GitHub Actions valida cada pull request y cada push a `main`.
 
 ## Estructura
 
@@ -10,66 +10,45 @@ Beta 18 fue migrada desde un HTML monolítico a un proyecto estático con build 
 - `src/styles.css` — estilos globales.
 - `src/app.js` — aplicación cliente.
 - `public/` — PWA: manifest, Service Worker e iconos.
-- `scripts/generate-config.mjs` — genera configuración pública runtime.
-- `scripts/validate.mjs` — validación de JS, JSON y estructura.
-- `scripts/build.mjs` — genera `dist/`.
-- `.github/workflows/ci.yml` — CI preparado para GitHub.
-- `vercel.json` — build, output y headers de seguridad.
+- `scripts/` — build y suites de QA.
+- `supabase/migrations/` — cambios de esquema/RLS aplicados durante el endurecimiento.
+- `.github/workflows/ci.yml` — validación automática.
+- `vercel.json` — build, salida y headers de seguridad.
 
-## Configuración
+## Seguridad y QA
 
-Variables soportadas:
+- RLS activo en tablas públicas expuestas.
+- Storage limitado a imágenes de hasta 8 MB y escrituras por propietario/equipo editorial.
+- Creación de proyecto novela+traducción transaccional mediante RPC.
+- Roles de consulta separados de roles editoriales en Studio.
+- CI con validación, build, Axe, auditoría responsive, matriz funcional y smoke cross-browser.
+- Headers CSP, nosniff, referrer policy, permissions policy, COOP, frame-ancestors y object-src.
+
+## Configuración pública
+
+Se aceptan:
 
 - `NLOBI_SUPABASE_URL`
 - `NLOBI_SUPABASE_PUBLISHABLE_KEY`
 
-Nunca debe usarse `service_role` en el frontend.
+Por compatibilidad también se aceptan:
 
-## Seguridad HTTP preparada
+- `NEXT_PUBLIC_SUPABASE_URL`
+- `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 
-- Content-Security-Policy
-- X-Content-Type-Options
-- Referrer-Policy
-- Permissions-Policy
-- Cross-Origin-Opener-Policy
-- frame-ancestors none
-- object-src none
+Nunca debe utilizarse `service_role` en el navegador.
 
-La CSP permite únicamente los CDN que utiliza el importador DOCX/EPUB/PDF.
+## Estado Vercel detectado en la auditoría
 
-## CI
+Existe el proyecto Vercel `nlobi`, pero la integración consultada no lo reportó como proyecto Git enlazado a `MikeMR13/NLOBI`. El deployment más reciente observado durante la auditoría apuntaba a un commit anterior a `main`.
 
-En cada pull request y push a `main`:
+Por tanto, el repositorio/CI está sano, pero la promoción a producción debe considerarse pendiente hasta reconectar la integración Git o desplegar explícitamente el commit probado y verificarlo.
 
-1. `npm ci`
-2. `npm run check`
-3. `npm run build`
+## Cierre de producción
 
-Las GitHub Actions están fijadas a commits concretos.
-
-## Verificación local
-
-- `npm run check`: OK
-- `npm run build`: OK
-- `/`: 200 + marcador `NLOBI_BETA19_ARCHITECTURE`
-- `/assets/app.js`: 200
-- `/assets/styles.css`: 200
-- `/manifest.webmanifest`: 200
-- `/sw.js`: 200
-
-## Estado Git/Vercel
-
-El GitHub conectado actualmente no contiene un repositorio NLOBI, y la integración disponible no permite crear uno desde este flujo. Por tanto, CI está preparada pero todavía no activada en GitHub.
-
-El proyecto Vercel existente es `nlobi`, pero los alias de producción siguen apuntando al deployment anterior. Beta 19 no se declara desplegada ni promovida.
-
-## Para cerrar producción
-
-1. Crear un repositorio vacío `NLOBI` en el GitHub conectado.
-2. Subir este proyecto.
-3. Vincular el repositorio al proyecto Vercel `nlobi`.
-4. Configurar las dos variables públicas de Supabase en Vercel.
-5. Ejecutar CI.
-6. Crear preview.
-7. Verificar el marcador Beta 19 y flujos críticos.
-8. Promover el build probado a producción.
+1. CI de `main` en verde.
+2. Vercel enlazado al repositorio correcto o deployment explícito del SHA probado.
+3. Smoke test contra el deployment real.
+4. Verificación de Auth, Biblioteca, Reader, Studio, Importador y Admin con datos reales.
+5. Estrategia de backup/restauración documentada.
+6. Retención/observabilidad suficiente para incidentes de producción.

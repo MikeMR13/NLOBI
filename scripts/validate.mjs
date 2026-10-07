@@ -199,8 +199,10 @@ if (!iconSvg.includes(">オ</text>")) throw new Error("Brand icon: SVG no contie
 if (!fs.existsSync("scripts/axe-check.mjs")) throw new Error("Accessibility CI: falta scripts/axe-check.mjs");
 if (!fs.existsSync("scripts/layout-check.mjs")) throw new Error("Visual QA: falta scripts/layout-check.mjs");
 if (!fs.existsSync("scripts/full-quality-check.mjs")) throw new Error("Full QA: falta scripts/full-quality-check.mjs");
+if (!fs.existsSync("scripts/cross-browser-check.mjs")) throw new Error("Cross-browser QA: falta scripts/cross-browser-check.mjs");
 if (!workflow.includes("Visual layout audit")) throw new Error("Visual QA: falta auditoría responsive en CI");
 if (!workflow.includes("Full platform quality pass")) throw new Error("Full QA: falta pase integral en CI");
+if (!workflow.includes("Cross-browser smoke")) throw new Error("Cross-browser QA: falta smoke Firefox/WebKit en CI");
 if (!workflow.includes("playwright@1.63.0") || !workflow.includes("@axe-core/playwright@4.13.0")) {
   throw new Error("Accessibility CI: versiones Playwright/axe no están fijadas");
 }
@@ -209,3 +211,8 @@ if (!app.includes("mediaTargetLabel(t){if(!t)")) throw new Error("Full QA: media
 if (!app.includes("authShell betaFeedbackShell")) throw new Error("Full QA: feedback Beta conserva layout inline no responsive.");
 if (!app.includes("CONFIG.qaMode===true")) throw new Error("Full QA: falta hook de QA protegido por configuración.");
 if (!css.includes(".betaFeedbackShell{grid-template-columns:.7fr 1.3fr}")) throw new Error("Full QA: falta estilo responsive de feedback Beta.");
+
+if (!app.includes("MAX_IMPORT_BYTES=80*1024*1024")) throw new Error("Import security: falta límite global de 80 MB.");
+if (!app.includes("MAX_ARCHIVE_UNCOMPRESSED=300*1024*1024")) throw new Error("Import security: falta límite de expansión ZIP.");
+if (!app.includes("const safeCssUrl=")) throw new Error("CSS security: falta normalizador de URL para contexto CSS.");
+if (!app.includes("/rest/v1/rpc/create_translation_project")) throw new Error("Integrity: creación de proyecto no usa RPC atómico.");
