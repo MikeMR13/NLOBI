@@ -41,3 +41,4 @@ if (app.includes("const KEY='") || app.includes("const URL='https://")) {
 }
 
 console.log("Validation OK");
+if (/\$\('\[data-[^']+'\)\.forEach/.test(app)) throw new Error("Selector simple usado con forEach; usa $$() para NodeList.");
