@@ -22,3 +22,16 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run build
+      - name: Start preview server
+        run: |
+          npx --yes serve@14.2.4 dist -l 4173 > /tmp/nlobi-serve.log 2>&1 &
+          echo $! > /tmp/nlobi-serve.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          cat /tmp/nlobi-serve.log
+          exit 1
+      - name: axe accessibility audit
+        run: |
+          npx --yes @axe-core/cli@4.10.2             http://127.0.0.1:4173/#home             http://127.0.0.1:4173/#explore             http://127.0.0.1:4173/#auth             --exit
