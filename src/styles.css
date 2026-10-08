@@ -1207,3 +1207,33 @@ body.dark .mobileNav #themeMobile{color:#ffd400}
 .exploreActiveChip span{font-size:1.25em;font-weight:700}
 @media(max-width:650px){.exploreFiltersToggle{padding:13px 15px}.exploreFiltersMeta{font-size:0}.exploreFiltersMeta span{font-size:1.3rem}.exploreFiltersBody{padding:13px}.exploreFiltersBody .filterGrid{grid-template-columns:1fr}.exploreActiveFilters{gap:7px}}
 @media(prefers-reduced-motion:reduce){.exploreFiltersMeta span{transition:none}}
+
+
+/* Explorar · tercera pasada: tarjetas de biblioteca editorial */
+.exploreEditorial .exploreNovelGrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(13px,2.1vw,25px);align-items:stretch}
+.exploreNovelGrid>.catalogEditorialCard{display:flex;flex-direction:column;min-width:0;overflow:hidden;border-radius:16px;background:var(--panel);border:1px solid var(--line);transition:transform .2s ease,border-color .2s ease,box-shadow .2s ease}
+.exploreNovelGrid>.catalogEditorialCard:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 12px 30px #00000013}
+.exploreNovelGrid .catalogCoverButton{display:block;position:relative;width:100%;aspect-ratio:2/3;border-radius:0;overflow:hidden;padding:0;min-height:0;background:var(--panel2)}
+.exploreNovelGrid .catalogBookArt{display:block;width:100%;height:100%;aspect-ratio:2/3}
+.exploreNovelGrid .catalogBookArt img{display:block;width:100%;height:100%;object-fit:cover;object-position:center}
+.exploreNovelGrid .catalogCoverOverlay{position:absolute;bottom:0;left:0;right:0;display:flex;justify-content:center;align-items:center;min-height:46px;background:#111d;color:#fff;opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s}
+.exploreNovelGrid .catalogCoverButton:hover .catalogCoverOverlay,.exploreNovelGrid .catalogCoverButton:focus-visible .catalogCoverOverlay{opacity:1;transform:none}
+.exploreNovelGrid .catalogCardContent{display:flex;flex-direction:column;flex:1;min-width:0;padding:14px;gap:7px}
+.exploreNovelGrid .catalogStatusRow{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:0}
+.exploreNovelGrid .catalogStatusTag{font-size:.71rem;font-weight:750;line-height:1.25}
+.exploreNovelGrid .catalogLanguage{font-size:.7rem;font-weight:750;letter-spacing:.07em}
+.exploreNovelGrid h3{font-size:clamp(.92rem,1.2vw,1.08rem);line-height:1.4;letter-spacing:-.015em;margin:0;overflow-wrap:anywhere}
+.exploreNovelGrid .catalogTitleLink{display:-webkit-box;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;min-height:0!important;padding:2px 0!important}
+.exploreNovelGrid .catalogTranslator{color:var(--muted);font-size:.8rem;line-height:1.4;margin:0;overflow-wrap:anywhere}
+.exploreNovelGrid .catalogTranslator span{color:var(--accentText)}
+.exploreNovelGrid .catalogGenres{display:flex;flex-wrap:wrap;gap:5px;margin-top:3px}
+.exploreNovelGrid .catalogGenres span{font-size:.69rem;padding:4px 7px;border-radius:6px;background:var(--panel2);color:var(--muted)}
+.exploreNovelGrid .catalogCardSynopsis{display:-webkit-box;-webkit-line-clamp:2;line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:var(--muted);font-size:.77rem;line-height:1.5;margin:0}
+.exploreNovelGrid .catalogCardActions{display:flex;align-items:stretch;flex-wrap:wrap;gap:7px;margin-top:auto;padding-top:10px}
+.exploreNovelGrid .catalogCardActions>.btn{min-height:44px;padding:9px 12px}
+.exploreNovelGrid .catalogCardActions>.btn.primary{flex:1}
+.exploreNovelGrid .catalogCardActions button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media(max-width:1080px){.exploreEditorial .exploreNovelGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:730px){.exploreEditorial .exploreNovelGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:12px}.exploreNovelGrid .catalogCardContent{padding:11px;gap:6px}.exploreNovelGrid .catalogCardSynopsis{display:none}.exploreNovelGrid .catalogCardActions>.btn{font-size:.76rem;padding:8px}.exploreNovelGrid .catalogCoverOverlay{display:none}}
+@media(max-width:350px){.exploreEditorial .exploreNovelGrid{gap:9px}.exploreNovelGrid .catalogCardContent{padding:9px}.exploreNovelGrid .catalogGenres{display:none}.exploreNovelGrid .catalogCardActions{gap:5px}}
+@media(prefers-reduced-motion:reduce){.exploreNovelGrid>.catalogEditorialCard,.exploreNovelGrid .catalogCoverOverlay{transition:none}.exploreNovelGrid>.catalogEditorialCard:hover{transform:none}}
