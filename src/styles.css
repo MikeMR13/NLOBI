@@ -1560,3 +1560,23 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .betaLoadError{margin:14px 0;padding:14px 17px;border:1px solid #c77454;border-radius:12px;background:var(--panel2);color:var(--text);line-height:1.55;overflow-wrap:anywhere}
 .betaReportsSection>.sectionHead{gap:12px;flex-wrap:wrap}
 @media(max-width:600px){.betaReportsSection>.sectionHead>.btn{width:100%;justify-content:center;min-height:44px}}
+
+
+/* Centro Beta · fase 6: gestión administrativa */
+.betaAdminCenter{min-width:0}.betaAdminFilters{display:grid;grid-template-columns:minmax(220px,2fr) repeat(2,minmax(145px,1fr));gap:12px;margin:18px 0}
+.betaAdminFilters label,.betaAdminIssueControls label,.betaAdminNoteLabel{display:flex;flex-direction:column;gap:6px;font-size:.84rem;font-weight:700}
+.betaAdminFilters input,.betaAdminFilters select,.betaAdminIssueControls select,.betaAdminNoteLabel textarea{width:100%;min-width:0;min-height:44px;border-radius:9px}
+.betaAdminList{display:grid;gap:15px}.betaAdminIssue{display:grid;gap:15px;border:1px solid var(--line);background:var(--panel);border-radius:15px;padding:clamp(15px,2.7vw,24px);min-width:0}
+.betaAdminIssue[hidden],.betaAdminNoMatches[hidden]{display:none!important}
+.betaAdminIssueHead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.betaAdminIssueHead h3{overflow-wrap:anywhere;margin:5px 0}.betaAdminIssueHead p{margin:3px 0 0}
+.betaAdminIssueDescription{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;margin:0}
+.betaAdminIssueControls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.betaAdminNoteLabel textarea{resize:vertical;min-height:95px;font-weight:400}
+.betaAdminIssueActions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.betaAdminIssueActions .btn{min-height:44px}
+.betaAdminHistory{border-top:1px solid var(--line);padding-top:12px}.betaAdminHistory summary{cursor:pointer;font-weight:700;padding:6px 0}
+.betaAdminHistory ol{padding-left:23px;display:grid;gap:10px;font-size:.84rem;color:var(--muted);overflow-wrap:anywhere}
+.betaAdminNoMatches{padding:24px;border:1px dashed var(--line);border-radius:12px;text-align:center;color:var(--muted)}
+.betaAdminCenter :is(input,select,textarea,button,summary):focus-visible{outline:3px solid var(--accent,#e5bd26);outline-offset:2px}
+@media(max-width:750px){.betaAdminFilters{grid-template-columns:1fr 1fr}.betaAdminFilters label:first-child{grid-column:1/-1}}
+@media(max-width:480px){.betaAdminFilters,.betaAdminIssueControls{grid-template-columns:1fr}.betaAdminFilters label:first-child{grid-column:auto}.betaAdminIssueHead{flex-direction:column}.betaAdminIssueActions .btn{width:100%}}
