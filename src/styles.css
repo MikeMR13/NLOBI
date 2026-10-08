@@ -1499,3 +1499,24 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .betaDiagnosticEmpty{padding:21px;text-align:center;background:var(--panel2);border-radius:11px;color:var(--muted)}
 .betaDiagnosticDisclaimer{font-size:.77rem;color:var(--muted);line-height:1.5;margin:8px 0 0}
 @media(max-width:520px){.betaDiagnosticResult{grid-template-columns:36px minmax(0,1fr);gap:9px;padding:10px}.betaDiagnosticState{grid-column:2;white-space:normal}.betaDiagnosticCount{font-size:1rem}.betaDiagnosticSummary{align-items:flex-start}}
+
+
+/* Centro Beta · fase 3: formulario guiado */
+.betaEditorial .betaFeedbackShell{max-width:none;grid-template-columns:minmax(250px,.8fr) minmax(0,1.2fr);margin:16px 0 30px;align-items:stretch}
+.betaFormEyebrow{display:block;color:#ffd400;font-size:.74rem;letter-spacing:.12em;font-weight:800;margin-bottom:12px}
+.betaFeedbackShell .authVisual{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.betaFeedbackShell .authVisual h2{line-height:1.23;margin:0}
+.betaFeedbackShell .authVisual>p{line-height:1.6;margin:0}
+.betaFormTip{margin-top:auto;padding:15px;border:1px solid #ffffff38;border-radius:12px;background:#ffffff12}
+.betaFormTip strong{display:block;margin-bottom:6px}.betaFormTip p{font-size:.86rem;line-height:1.6;margin:0}
+.betaReportForm{display:flex;flex-direction:column;gap:16px}
+.betaReportForm .field{display:flex;flex-direction:column;gap:7px}
+.betaReportForm label{font-weight:750}
+.betaReportForm input,.betaReportForm select,.betaReportForm textarea{width:100%;min-height:44px}
+.betaReportForm textarea{min-height:155px;resize:vertical}
+.betaReportForm small{font-size:.77rem;line-height:1.4}
+.betaFieldRequired{color:var(--accentText)}
+.betaReportPrivacy{font-size:.78rem;line-height:1.6;color:var(--muted);margin:0}
+.betaSubmitButton{align-self:flex-start;min-height:46px;font-weight:800}
+.betaSubmitButton:disabled{opacity:.65;cursor:wait}
+@media(max-width:760px){.betaEditorial .betaFeedbackShell{grid-template-columns:1fr}.betaFeedbackShell .authVisual{min-height:auto}.betaSubmitButton{align-self:stretch}}
