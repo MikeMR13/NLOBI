@@ -1129,3 +1129,22 @@ body.dark .mobileNav #themeMobile{color:#ffd400}
 .homeFeaturedCoverLink{display:block;cursor:pointer}
 .homeBookCoverLink{display:block;cursor:pointer;color:inherit;text-decoration:none}
 .homeBookCoverLink .cover,.homeBookCoverLink .coverBox,.homeBookCoverLink .cardCover{height:100%}
+
+
+/* Mobile QA: WCAG-friendly targets without changing the black/yellow identity */
+@media (max-width: 900px){
+ .catalogTitleLink,.homeFeaturedTitleLink,.homeBookTitleLink{display:flex;align-items:center;min-height:44px;padding-block:8px;box-sizing:border-box}
+ .catalogEditorialCard .catalogCardActions .btn{min-height:44px;padding:10px 12px}
+ .homeEditorial .homeFeaturedLink,.homeEditorial .homeBookOpen{display:inline-flex;align-items:center;min-height:44px;padding:10px 0}
+ .homeEditorial .homeFeaturedTitleLink,.homeEditorial .homeBookTitleLink{min-height:44px}
+ .catalogCoverButton,.homeBookCoverLink{touch-action:manipulation}
+}
+@media (min-width:901px){
+ .catalogTitleLink,.homeFeaturedTitleLink,.homeBookTitleLink{display:inline-flex;align-items:center;min-height:44px;padding-block:8px}
+ .catalogEditorialCard .catalogCardActions .btn{min-height:44px}
+ .homeEditorial .homeFeaturedLink,.homeEditorial .homeBookOpen{display:inline-flex;align-items:center;min-height:44px}
+}
+@media(max-width:430px){
+ .catalogEditorialCard .catalogCardActions .btn{min-height:44px;font-size:.76rem}
+ .homeEditorial .homeFeaturedLink,.homeEditorial .homeBookOpen{min-height:44px}
+}
