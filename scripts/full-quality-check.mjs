@@ -203,6 +203,8 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__);
  await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:translation,teamMembers});
  await page.locator('#projectTitle').fill('Nombre actualizado QA');
+ await page.locator('input[name="projectGenres-choice"][value="Romance"]').check();
+ await page.locator('#projectDemography').selectOption('General');
  await page.locator('#saveDiscoveryMeta').click();
  await page.waitForTimeout(60);
  await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:translation,teamMembers});
@@ -269,6 +271,22 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  await context.close();
 }
 
+// Reader must expose valid illustrations from the rich-block model.
+{
+ const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});await prepare(context);
+ const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+ await page.goto(base+'#home',{waitUntil:'networkidle'});
+ const result=await page.evaluate(async()=>{
+  const url='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aGKsAAAAASUVORK5CYII=';
+  window.__NLOBI_QA__.setState({view:'reader:test-image',readerSection:{id:'test-image',title:'Ilustración de prueba',novel_title:'QA',volume_number:1,content:[{type:'paragraph',text:'Antes de la ilustración'},{type:'image',url,alt:'Ilustración de prueba'},{type:'paragraph',text:'Después de la ilustración'}],navigation:[]}});
+  const img=document.querySelector('.readerPaper figure img');
+  if(!img)return {imageFound:false};
+  try{await img.decode()}catch{}
+  return {imageFound:true,naturalWidth:img.naturalWidth,visible:getComputedStyle(img).display!=='none',src:img.getAttribute('src')?.startsWith('data:image/png')};
+ });
+ if(runtime.length||!result.imageFound||!result.naturalWidth||!result.visible||!result.src)failures.push({scenario:'reader-rich-block-image-visible',runtime,result,error:'reader-image-not-rendered'});
+ await context.close();
+}
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');
