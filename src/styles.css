@@ -613,3 +613,6 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 .volumeCommentActions{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
 .volumeCommentActions+.commentBox{margin:16px 0 6px}
 @media(max-width:600px){.readerBottom .btn{width:100%}.readerSettings .readerControls{grid-template-columns:1fr 1fr}}
+
+/* Closed settings must be removed from the visual and keyboard layout at all zoom levels. */
+.readerSettings:not([open])>.readerControls{display:none!important}
