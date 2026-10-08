@@ -1662,3 +1662,6 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .adminModerationEmpty{border:1px dashed var(--line);border-radius:12px;padding:20px;text-align:center;color:var(--muted)}.adminModerationEmpty[hidden]{display:none!important}
 .adminModeration :is(input,select,button,summary):focus-visible{outline:3px solid var(--accent,#e0b600);outline-offset:2px}
 @media(max-width:560px){.adminModerationFilters{grid-template-columns:1fr}.adminModerationIntro{padding:15px}.adminModerationItem{padding:13px}.adminModerationItem .btn{flex:1}}
+
+/* Admin QA phase 6: filter controls and mobile safety */
+.adminFilterMeta{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.adminFilterMeta p{margin:0}.adminFilterMeta .btn{min-height:42px}.adminWorkspaceMain{overflow-wrap:anywhere}.adminWorkspaceContent :is(button,input,select,textarea,summary):focus-visible{outline:3px solid var(--accent,#ffd400);outline-offset:2px}.adminWorkspaceContent :is(.adminEditorialEntries,.adminModerationEntries,.adminDirectoryTableWrap){min-width:0}.adminWorkspaceContent .adminDashboardKpi{word-break:normal;overflow-wrap:anywhere}@media(max-width:570px){.adminFilterMeta{align-items:stretch;flex-direction:column}.adminFilterMeta .btn{width:100%}}
