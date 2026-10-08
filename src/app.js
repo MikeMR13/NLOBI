@@ -218,22 +218,33 @@ function studio(){
 
 function mediaFolderOf(file){const path=file.path,matches=(S.mediaFolderIndex||[]).filter(x=>x.paths.has(path)),match=matches.find(x=>x.volumeId)||matches[0];return match?{novel:match.novel,volume:match.volume}: {novel:'other',volume:'other'}}
 async function loadMediaFolders(groupId){
+ const files=S.mediaFiles||[],index=[],scope='teams/'+groupId+'/';
  try{
-  const trs=await jreq('/rest/v1/translations?group_id=eq.'+groupId+'&select=id,novels(id,title,cover_url),volumes(id,volume_number,title,cover_url,sections(content))')||[];
-  S.mediaFolderIndex=trs.map(t=>{
-   const novel=t.novels?.title||'Obra sin título',paths=new Set();
-   if(t.novels?.cover_url)paths.add(storagePathFromUrl(t.novels.cover_url));
-   return {novel,novelId:t.novels?.id,volume:'general',paths:new Set([...paths,...(S.mediaFiles||[]).filter(f=>f.path.startsWith('teams/'+groupId+'/library/novel-'+t.novels?.id+'/')).map(f=>f.path)].filter(Boolean))}
-  });
-  for(const t of trs)for(const v of t.volumes||[]){
-   const paths=new Set([storagePathFromUrl(v.cover_url)]);
-   for(const sec of v.sections||[])for(const block of (Array.isArray(sec.content)?sec.content:[]))if(block?.type==='image')paths.add(storagePathFromUrl(block.url));
-   const prefix='teams/'+groupId+'/imports/volume-'+v.id+'/';
-   const volumePrefix='teams/'+groupId+'/volumes/'+v.id+'/';
-   for(const f of S.mediaFiles||[])if(f.path.startsWith(prefix)||f.path.startsWith(volumePrefix)||f.path.startsWith('teams/'+groupId+'/imports/volume-'+v.id+'-section-'))paths.add(f.path);
-   for(const f of S.mediaFiles||[])if(f.path.startsWith('teams/'+groupId+'/library/volume-'+v.id+'/'))paths.add(f.path);S.mediaFolderIndex.push({novel:t.novels?.title||'Obra sin título',novelId:t.novels?.id,volumeId:v.id,volume:'Vol. '+v.volume_number+(v.title?' · '+v.title:''),paths:new Set([...paths].filter(Boolean))});
+  const translations=await jreq('/rest/v1/translations?group_id=eq.'+groupId+'&select=id,novel_id,novels(id,title,cover_url)')||[];
+  const ids=translations.map(t=>t.id).filter(Boolean);
+  let volumes=[];
+  for(let k=0;k<ids.length;k+=30){
+   const slice=ids.slice(k,k+30);
+   volumes.push(...(await jreq('/rest/v1/volumes?translation_id=in.('+slice.join(',')+')&select=id,translation_id,volume_number,title,cover_url')||[]));
   }
- }catch(e){S.mediaFolderIndex=[];console.warn('No se pudo construir el árbol de imágenes',e)}
+  for(const t of translations){
+   const novel=t.novels?.title||'Obra sin título',novelId=t.novel_id||t.novels?.id;
+   const shared=new Set(files.filter(f=>f.path.startsWith(scope+'library/novel-'+novelId+'/')).map(f=>f.path));
+   const cover=storagePathFromUrl(t.novels?.cover_url);if(cover)shared.add(cover);
+   index.push({novel,novelId,volume:'general',paths:shared});
+   for(const v of volumes.filter(x=>x.translation_id===t.id)){
+    const paths=new Set(),prefixes=[scope+'imports/volume-'+v.id+'/',scope+'imports/volume-'+v.id+'-section-',scope+'volumes/'+v.id+'/',scope+'library/volume-'+v.id+'/'];
+    for(const f of files)if(prefixes.some(prefix=>f.path.startsWith(prefix)))paths.add(f.path);
+    const coverPath=storagePathFromUrl(v.cover_url);if(coverPath)paths.add(coverPath);
+    index.push({novel,novelId,volumeId:v.id,volume:'Vol. '+v.volume_number+(v.title?' · '+v.title:''),paths});
+   }
+  }
+  S.mediaFolderIndex=index;
+ }catch(e){
+  S.mediaFolderIndex=index;
+  console.warn('No se pudieron cargar las obras y volúmenes de la biblioteca',e);
+  toast('No se pudo completar la clasificación por obra y volumen: '+friendlyError(e),'bad');
+ }
 }
 function storagePathFromUrl(url){if(!url)return'';try{const u=new URL(url,location.origin),marker='/storage/v1/object/public/nlobi-media/';const i=u.pathname.indexOf(marker);return i>=0?decodeURIComponent(u.pathname.slice(i+marker.length)):''}catch{return''}}
 function mediaFiltered(){const q=S.mediaQuery.trim().toLowerCase();return (S.mediaFiles||[]).filter(x=>{const folder=mediaFolderOf(x);return(S.mediaFolderNovel==='all'||folder.novel===S.mediaFolderNovel)&&(S.mediaFolderVolume==='all'||folder.volume===S.mediaFolderVolume)&&(!q||x.name.toLowerCase().includes(q)||x.path.toLowerCase().includes(q)||folder.novel.toLowerCase().includes(q))})}
