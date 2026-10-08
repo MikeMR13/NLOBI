@@ -1119,3 +1119,13 @@ body.dark .homeEditorial .homeProgressOverline,body.dark .homeEditorial .homeRec
  .mobileNav #themeMobile{background:var(--accentSoft);color:var(--accentText);border:1px solid var(--accent);border-radius:10px;font-weight:800}
 }
 body.dark .mobileNav #themeMobile{color:#ffd400}
+
+
+/* Portadas y títulos navegables: enlaces reales con foco accesible */
+.catalogTitleLink,.homeFeaturedTitleLink,.homeBookTitleLink{color:inherit;text-decoration:none}
+.catalogTitleLink:hover,.homeFeaturedTitleLink:hover,.homeBookTitleLink:hover{text-decoration:underline;text-decoration-color:var(--accent);text-underline-offset:3px}
+.catalogTitleLink:focus-visible,.homeFeaturedTitleLink:focus-visible,.homeBookTitleLink:focus-visible,.homeBookCoverLink:focus-visible,.homeFeaturedCoverLink:focus-visible{outline:3px solid var(--accent);outline-offset:3px;border-radius:5px}
+.catalogCoverButton{color:inherit;text-decoration:none}
+.homeFeaturedCoverLink{display:block;cursor:pointer}
+.homeBookCoverLink{display:block;cursor:pointer;color:inherit;text-decoration:none}
+.homeBookCoverLink .cover,.homeBookCoverLink .coverBox,.homeBookCoverLink .cardCover{height:100%}
