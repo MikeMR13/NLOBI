@@ -317,6 +317,7 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   await page.locator('#markReaderDone').click();
   const read=await page.evaluate(()=>JSON.parse(localStorage.getItem('nlobi_read_sections_guest')||'[]').includes('section-1'));
   await page.evaluate(state=>window.__NLOBI_QA__.setState(state),{user:null,view:'detail:project-1',currentDetail:translation});
+  await page.locator('[data-open-volume="volume-1"]').click();
   const after=await page.evaluate(()=>({badge:document.body.textContent.includes('✓ Leído'),volumeComments:!!document.querySelector('[data-volume-comments]')}));
   if(runtime.length||!before.collapsed||before.commentInReader||!before.finish||!before.indent||!read||!after.badge||!after.volumeComments)
    failures.push({scenario:'reader-collapsible-settings-chapter-read-and-volume-comments',runtime,before,read,after});
