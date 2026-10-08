@@ -1354,3 +1354,14 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 @media(max-width:1050px){.libraryShelf:not(.libraryShelfList){grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:700px){.libraryShelf:not(.libraryShelfList){grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.libraryShelfInfo{padding:10px;gap:5px}.libraryShelfInfo h3{font-size:.9rem}.libraryShelfSwitch button{padding:7px 10px}.libraryShelfList .libraryShelfCard{grid-template-columns:105px minmax(0,1fr)}.libraryShelfList .libraryShelfInfo{padding:10px}}
 @media(max-width:380px){.libraryShelfBottom>.btn{font-size:.74rem;padding:7px}.libraryShelfInfo{padding:8px}.libraryShelfList .libraryShelfCard{grid-template-columns:90px minmax(0,1fr)}}
+
+
+/* Biblioteca: fourth-pass navigation and organization */
+.libraryTabs{display:flex;gap:8px;align-items:center;overflow-x:auto;border-bottom:1px solid var(--line);padding:5px 0 12px;margin:24px 0;scrollbar-width:thin}
+.libraryTabs button{flex:0 0 auto;cursor:pointer;min-height:44px;padding:10px 17px;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);font-weight:750}
+.libraryTabs button.active{background:var(--accent);color:#111;border-color:var(--accent)}
+.libraryTabs button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.libraryShelfTools{display:grid;grid-template-columns:minmax(0,1fr) minmax(170px,260px);gap:12px;margin:13px 0 18px}
+.libraryShelfTools input,.libraryShelfTools select{width:100%;min-height:46px;border:1px solid var(--line);border-radius:11px;padding:10px 14px;background:var(--panel);color:var(--text)}
+.libraryShelfTools input:focus-visible,.libraryShelfTools select:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+@media(max-width:600px){.libraryTabs{gap:6px;margin:16px 0}.libraryTabs button{padding:9px 14px}.libraryShelfTools{grid-template-columns:1fr;gap:9px}}
