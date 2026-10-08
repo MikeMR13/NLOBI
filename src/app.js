@@ -595,8 +595,16 @@ function detailView(){
 function publicGroupView(){
  const G=S.publicGroup;
  if(!G)return `${nav()}<main class="wrap">${status()}<div class="empty"><div class="emptyArt">👥</div><strong>Equipo no cargado</strong><div style="margin-top:12px"><button class="btn" data-v="explore">← Explorar</button></div></div></main>`;
- return `${nav()}<main class="wrap">${status()}${teamIdentityHero(G)}<div class="sectionHead"><div><h2>Traducciones</h2><p>Proyectos públicos del equipo.</p></div></div>${G.translations?.length?`<div class="novelGrid">${G.translations.map(card).join('')}</div>`:'<div class="empty">Este equipo todavía no tiene traducciones públicas.</div>'}${G.support_links?.length?`<div class="sectionHead"><div><h2>☕ Apoya al traductor</h2></div></div><div class="list">${G.support_links.map(l=>`<div class="notice"><a class="link" href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">${esc(l.label||'Apoyar')} ↗</a></div>`).join('')}</div>`:''}</main>`;
+ const works=Array.isArray(G.translations)?G.translations:[],links=Array.isArray(G.support_links)?G.support_links.filter(l=>safeUrl(l.url)!=='#'):[];
+ const worksLabel=works.length===1?'obra publicada':'obras publicadas';
+ return `${nav()}<main class="wrap teamPublicPage">${status()}${teamIdentityHero(G)}
+ <div class="teamPublicOverview" aria-label="Resumen del equipo"><div class="teamPublicStat"><strong>${works.length}</strong><span>${worksLabel}</span></div><div class="teamPublicStat"><strong>${links.length}</strong><span>${links.length===1?'enlace de apoyo':'enlaces de apoyo'}</span></div><div class="teamPublicIntro"><span class="eyebrow">COMUNIDAD DE TRADUCCIÓN</span><p>Explora las novelas que comparte este equipo en El Obi del Lector.</p></div></div>
+ <nav class="teamPublicNav" aria-label="Secciones del perfil del equipo"><a href="#teamPublicWorks">Traducciones <span>${works.length}</span></a>${links.length?'<a href="#teamPublicSupport">Apoyar al equipo ↗</a>':''}</nav>
+ <section id="teamPublicWorks" class="teamPublicSection" aria-labelledby="teamPublicWorksTitle"><div class="sectionHead"><div><span class="eyebrow">CATÁLOGO DEL EQUIPO</span><h2 id="teamPublicWorksTitle">Traducciones</h2><p>${works.length?'Obras disponibles para descubrir y leer.':'Aún no hay publicaciones de este equipo.'}</p></div></div>${works.length?`<div class="novelGrid">${works.map(card).join('')}</div>`:'<div class="empty">Este equipo todavía no tiene traducciones públicas.</div>'}</section>
+ ${links.length?`<section id="teamPublicSupport" class="teamPublicSection teamPublicSupport" aria-labelledby="teamPublicSupportTitle"><div class="sectionHead"><div><span class="eyebrow">ENLACES EXTERNOS</span><h2 id="teamPublicSupportTitle">Apoya al traductor</h2><p>Visita los canales oficiales compartidos por el equipo.</p></div></div><div class="teamPublicLinks">${links.map(l=>`<a class="teamPublicLink" href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener noreferrer"><span>${esc(l.label||'Apoyar al equipo')}</span><span aria-hidden="true">↗</span></a>`).join('')}</div></section>`:''}
+ </main>`;
 }
+
 function readerView(){
  const R=S.readerSection;
  if(!R)return `${nav()}<main class="wrap"><div class="empty"><div class="emptyArt" aria-hidden="true">📖</div><strong>Capítulo no disponible</strong><div style="margin-top:12px"><button class="btn" data-v="library">← Biblioteca</button></div></div></main>`;
