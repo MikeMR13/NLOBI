@@ -50,5 +50,11 @@
         }
       ]
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/media/:path*",
+      "destination": "https://hfbpsizgwzvvznrktiuq.supabase.co/storage/v1/object/public/nlobi-media/:path*"
+    }
   ]
 }
