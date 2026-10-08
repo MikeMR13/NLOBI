@@ -616,3 +616,15 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 
 /* Closed settings must be removed from the visual and keyboard layout at all zoom levels. */
 .readerSettings:not([open])>.readerControls{display:none!important}
+
+/* Reader typography choices: system-font fallbacks avoid blocking chapter rendering. */
+.readerPaper.reader-font-literata p,.readerPaper.reader-font-literata blockquote,.readerPaper.reader-font-literata ruby{font-family:"Literata",Georgia,serif}
+.readerPaper.reader-font-merriweather p,.readerPaper.reader-font-merriweather blockquote,.readerPaper.reader-font-merriweather ruby{font-family:"Merriweather",Georgia,serif}
+.readerPaper.reader-font-lora p,.readerPaper.reader-font-lora blockquote,.readerPaper.reader-font-lora ruby{font-family:"Lora",Georgia,serif}
+.readerPaper.reader-font-garamond p,.readerPaper.reader-font-garamond blockquote,.readerPaper.reader-font-garamond ruby{font-family:Garamond,"EB Garamond","Times New Roman",serif}
+.readerPaper.reader-font-baskerville p,.readerPaper.reader-font-baskerville blockquote,.readerPaper.reader-font-baskerville ruby{font-family:Baskerville,"Libre Baskerville",Georgia,serif}
+.readerPaper.reader-font-palatino p,.readerPaper.reader-font-palatino blockquote,.readerPaper.reader-font-palatino ruby{font-family:"Palatino Linotype",Palatino,"Book Antiqua",serif}
+.readerPaper.reader-font-verdana p,.readerPaper.reader-font-verdana blockquote,.readerPaper.reader-font-verdana ruby{font-family:Verdana,Geneva,sans-serif}
+.readerPaper.reader-font-trebuchet p,.readerPaper.reader-font-trebuchet blockquote,.readerPaper.reader-font-trebuchet ruby{font-family:"Trebuchet MS",Arial,sans-serif}
+.readerPaper.reader-font-arial p,.readerPaper.reader-font-arial blockquote,.readerPaper.reader-font-arial ruby{font-family:Arial,Helvetica,sans-serif}
+.readerPaper.reader-font-mono p,.readerPaper.reader-font-mono blockquote,.readerPaper.reader-font-mono ruby{font-family:Consolas,"Liberation Mono",monospace}
