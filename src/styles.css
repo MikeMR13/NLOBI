@@ -596,3 +596,20 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 .genreDropdownOptions label{display:flex;align-items:center;gap:8px;padding:8px;border-radius:8px;cursor:pointer}
 .genreDropdownOptions label:hover{background:var(--panel2)}
 .genreDropdownOptions input{accent-color:var(--accent);flex-shrink:0}
+
+/* Focused light-novel reader */
+.readerSettings{margin:14px 0 22px;border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:0 15px}
+.readerSettings>summary{cursor:pointer;padding:15px 0;font-weight:750;list-style-position:inside}
+.readerSettings[open]>summary{border-bottom:1px solid var(--line)}
+.readerSettings .readerControls{padding:16px 0;display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px 12px;align-items:center}
+.readerSettings .readerControls label{font-size:.88rem;color:var(--muted)}
+.readerSettings .readerControls select,.readerSettings .readerControls input{min-width:0;width:100%}
+.readerBottom{display:flex;justify-content:flex-end;gap:12px;flex-wrap:wrap;padding:20px 0 30px}
+.readerPaper.reader-indent-first p:not(.readerMeta){text-indent:1.6em}
+.readerPaper.reader-align-justify p{text-align:justify;text-justify:inter-word}
+.readerPaper.reader-contrast-high{color:#111;background:#fff;border-color:#777}
+.readerPaper.reader-dark.reader-contrast-high{color:#fff;background:#090909;border-color:#aaa}
+.readerPaper.reader-images-hide figure.readerIllustration{display:none}
+.volumeCommentActions{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.volumeCommentActions+.commentBox{margin:16px 0 6px}
+@media(max-width:600px){.readerBottom .btn{width:100%}.readerSettings .readerControls{grid-template-columns:1fr 1fr}}
