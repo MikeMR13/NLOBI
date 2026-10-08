@@ -259,3 +259,19 @@ if (!app.includes("posfacio.*|historia\\s+especial")) throw new Error("EPUB Cali
 if (!app.includes("Se omitió material preliminar anterior a la primera sección narrativa")) throw new Error("EPUB Calibre: falta recorte de front matter.");
 if (!app.includes("importCanonicalText(docTitle)!==importCanonicalText(bookTitle)")) throw new Error("EPUB Calibre: no se evita el <title> repetido.");
 if (!app.includes("detectImportSections(blocks,text='')")) throw new Error("EPUB Calibre: falta hook QA de secciones.");
+
+// QA de regresión para perfiles públicos y gestión de equipos.
+for (const marker of [
+ 'function publicGroupView(){',
+ 'id="teamPublicWorks"',
+ 'teamPublicEmpty',
+ 'id="teamPanel-identity"',
+ 'id="teamPanel-members"',
+ 'id="teamPanel-permissions"',
+ 'id="teamPanel-links"',
+ 'aria-controls="teamPanel-${key}"',
+ 'No puedes modificar tu propio rol desde esta sesión.',
+ 'No puedes retirarte a ti mismo desde esta sección.',
+ 'Introduce un enlace HTTPS válido.',
+ 'Introduce colores válidos en formato #RRGGBB.',
+]) if (!app.includes(marker)) throw new Error(`Regresión de perfiles de equipo: ${marker}`);
