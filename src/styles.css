@@ -1653,3 +1653,12 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .adminEditorialEmpty{border:1px dashed var(--line);border-radius:12px;text-align:center;padding:22px;color:var(--muted)}.adminEditorialEmpty[hidden]{display:none!important}
 .adminEditorial :is(input,select,button):focus-visible{outline:3px solid var(--accent,#e0b600);outline-offset:2px}
 @media(max-width:570px){.adminEditorialTools{grid-template-columns:1fr}.adminEditorialIntro{padding:15px}.adminEditorialCard{padding:14px}.adminEditorialCard .row>.btn{flex:1}}
+
+
+/* Administración global · fase 5: moderación y auditoría */
+.adminModeration{display:grid;gap:17px;min-width:0}.adminModerationIntro{padding:18px 20px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}.adminModerationIntro h3{font-size:1.18rem;margin:7px 0}.adminModerationIntro p{color:var(--muted);margin:0;line-height:1.55}
+.adminModerationFilters{display:grid;grid-template-columns:minmax(200px,2fr) minmax(140px,1fr);gap:13px}.adminModerationFilters label{display:grid;gap:7px;font-size:.82rem;font-weight:700}.adminModerationFilters input,.adminModerationFilters select{width:100%;min-width:0;min-height:44px;border-radius:10px}
+.adminModerationEntries{display:grid;gap:13px}.adminModerationEntries>.list{display:grid;gap:13px}.adminModerationItem{border:1px solid var(--line);border-radius:13px;padding:17px;overflow-wrap:anywhere;min-width:0}.adminModerationItem[hidden]{display:none!important}.adminModerationItem .row{flex-wrap:wrap;gap:9px}.adminModerationItem .btn{min-height:42px}.adminModerationItem details{margin-top:10px}
+.adminModerationEmpty{border:1px dashed var(--line);border-radius:12px;padding:20px;text-align:center;color:var(--muted)}.adminModerationEmpty[hidden]{display:none!important}
+.adminModeration :is(input,select,button,summary):focus-visible{outline:3px solid var(--accent,#e0b600);outline-offset:2px}
+@media(max-width:560px){.adminModerationFilters{grid-template-columns:1fr}.adminModerationIntro{padding:15px}.adminModerationItem{padding:13px}.adminModerationItem .btn{flex:1}}
