@@ -1365,3 +1365,11 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .libraryShelfTools input,.libraryShelfTools select{width:100%;min-height:46px;border:1px solid var(--line);border-radius:11px;padding:10px 14px;background:var(--panel);color:var(--text)}
 .libraryShelfTools input:focus-visible,.libraryShelfTools select:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
 @media(max-width:600px){.libraryTabs{gap:6px;margin:16px 0}.libraryTabs button{padding:9px 14px}.libraryShelfTools{grid-template-columns:1fr;gap:9px}}
+
+/* Library QA refinements */
+.libraryResultCount{font-size:.85rem;color:var(--muted);margin:8px 0 12px}
+.libraryShelfCard:focus-within{border-color:var(--accent)}
+.libraryShelfMenuPanel{max-height:min(70vh,440px);overflow-y:auto}
+.libraryTabs{scroll-padding-inline:12px}
+.libraryShelfMenuPanel .btn:focus-visible,.libraryTabs button:focus-visible,.libraryShelfTools :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media(prefers-reduced-motion:reduce){.libraryShelfCard,.libraryTabs button{transition:none}}
