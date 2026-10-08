@@ -1706,3 +1706,23 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .readerEditLayout :is(input,textarea,button):focus-visible{outline:3px solid var(--accent,#ffd400);outline-offset:2px}
 @media(max-width:760px){.readerEditMain{grid-template-columns:minmax(0,1fr)}.readerEditAside{grid-column:1;grid-row:auto}.readerEditPrivacy,.readerEditActions{grid-column:1}.readerEditCard{padding:17px}}
 @media(max-width:440px){.readerEditActions{flex-direction:column;align-items:stretch}.readerEditActions .btn{width:100%}}
+
+
+/* Perfil público del lector · fase 3 */
+.publicReaderProfile{max-width:1200px}.publicReaderHero{background:#252525;color:#fff;border:1px solid #454545;border-radius:20px;overflow:hidden;margin-bottom:30px}
+.publicReaderKicker{font-size:.7rem;font-weight:800;letter-spacing:.13em;color:#ffd400;border-bottom:1px solid #444;padding:18px 24px}
+.publicReaderIdentity{display:flex;align-items:center;gap:23px;padding:28px}
+.publicReaderAvatar{width:112px;height:112px;flex:none;border-radius:50%;background:#443b2a;color:#ffd400;font-size:2.7rem;font-weight:800;display:grid;place-items:center;overflow:hidden;border:3px solid #bda34e}
+.publicReaderAvatar img{width:100%;height:100%;object-fit:cover}.publicReaderIdentity h1{font-family:Georgia,serif;font-size:clamp(1.5rem,3vw,2.15rem);line-height:1.2;color:#fff;margin:0 0 6px;overflow-wrap:anywhere}
+.publicReaderHandle{color:#bdbdbd;margin:0 0 10px}.publicReaderBio{white-space:pre-line;color:#eee;line-height:1.55;overflow-wrap:anywhere;margin:0 0 12px}
+.publicReaderTags{display:flex;flex-wrap:wrap;gap:8px}.publicReaderTags span{padding:5px 10px;border-radius:20px;background:#3a352c;border:1px solid #6a5d40;color:#f6dda0;font-size:.73rem;font-weight:650}
+.publicReaderSection{margin:26px 0 40px}.publicReaderSectionHeader{display:flex;align-items:end;justify-content:space-between;gap:12px;margin-bottom:20px;border-bottom:1px solid var(--line);padding-bottom:15px}.publicReaderSectionHeader h2{font-size:1.45rem;margin:6px 0}.publicReaderSectionHeader p{color:var(--muted);margin:0;line-height:1.5}
+.publicReaderCount{white-space:nowrap;color:var(--muted);font-size:.8rem;font-weight:750}
+.publicReaderBooks{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:18px}.publicReaderBook{min-width:0}.publicReaderBookButton{display:block;width:100%;height:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:14px;overflow:hidden;text-align:left;padding:0 0 13px;font:inherit;cursor:pointer}.publicReaderBookButton:hover{border-color:var(--accent,#e4b900);transform:translateY(-2px)}
+.publicReaderBookCover{aspect-ratio:2/3;background:var(--panel2);display:grid;place-items:center;overflow:hidden;font-size:2rem;font-weight:800}.publicReaderBookCover img{width:100%;height:100%;object-fit:cover}.publicReaderBookState{display:inline-block;margin:12px 11px 7px;font-size:.7rem;color:var(--muted);font-weight:800}.publicReaderBook h3{font-size:.86rem;line-height:1.4;overflow-wrap:anywhere;margin:0 11px 5px}.publicReaderBook p{color:var(--muted);font-size:.74rem;margin:0 11px;overflow-wrap:anywhere}
+.publicReaderEmpty{display:grid;justify-items:center;gap:8px;text-align:center;padding:35px 20px;border:1px dashed var(--line);border-radius:14px;color:var(--muted)}.publicReaderEmpty strong{color:var(--text)}.publicReaderEmpty p{margin:0}
+.publicReaderActivity{display:grid;gap:10px}.publicReaderActivityItem{display:flex;align-items:center;gap:15px;padding:17px;border:1px solid var(--line);border-radius:13px;background:var(--panel)}.publicReaderProgress{flex:none;padding:9px 12px;background:var(--panel2);border-radius:9px;font-weight:800;font-variant-numeric:tabular-nums}.publicReaderActivityItem strong{overflow-wrap:anywhere}.publicReaderActivityItem p{font-size:.76rem;color:var(--muted);margin:4px 0 0}
+.publicReaderBookButton:focus-visible{outline:3px solid var(--accent,#ffd400);outline-offset:3px}
+@media(max-width:620px){.publicReaderIdentity{padding:20px;gap:15px;align-items:flex-start}.publicReaderAvatar{width:78px;height:78px;font-size:1.8rem}.publicReaderKicker{padding:15px 20px}.publicReaderBooks{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.publicReaderSectionHeader{align-items:flex-start;flex-direction:column}}
+@media(max-width:360px){.publicReaderIdentity{flex-direction:column}.publicReaderBooks{gap:8px}}
+@media(prefers-reduced-motion:reduce){.publicReaderBookButton:hover{transform:none}}
