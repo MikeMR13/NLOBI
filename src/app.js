@@ -647,7 +647,7 @@ function render(){
  const app=document.getElementById('app');
  if(!app)return;
  try{
-  let html=home();
+  let html=S.view==='home'?home():'';
   if(S.view==='explore')html=explore();
   else if(S.view==='library')html=library();
   else if(S.view==='auth')html=auth();
