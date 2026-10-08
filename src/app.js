@@ -862,7 +862,34 @@ async function loadNovelDeletionSnapshot(novelId){
  const sectionIds=rows.flatMap(t=>(t.volumes||[]).flatMap(v=>(v.sections||[]).map(sec=>sec.id)));
  const currentCover=S.studioProject?.novels?.cover_url||null;
  const media=[currentCover,...rows.flatMap(t=>(t.volumes||[]).flatMap(v=>[v.cover_url,...(v.sections||[]).flatMap(sectionMediaUrls)])),...await revisionMediaUrls(sectionIds)].filter(Boolean);
- return {translations:rows,sectionIds,media,volumes:rows.reduce((n,t)=>n+(t.volumes||[]).length,0),sections:sectionIds.length}
+ return {novelId,translations:rows,sectionIds,media,volumes:rows.reduce((n,t)=>n+(t.volumes||[]).length,0),sections:sectionIds.length}
+}
+async function cleanupDeletedNovelStorage(snap){
+ const mediaPaths=new Set((snap.media||[]).map(storagePathFromPublicUrl).filter(Boolean));
+ const ownGroupIds=new Set((S.groups||[]).map(g=>g.translator_groups?.id).filter(Boolean));
+ const groupIds=[...new Set((snap.translations||[]).map(t=>t.group_id).filter(x=>ownGroupIds.has(x)))];
+ const volumeIds=new Set((snap.translations||[]).flatMap(t=>(t.volumes||[]).map(v=>v.id)));
+ const novelId=snap.novelId;
+ let scanned=0,removed=0,retained=0,failed=0;
+ for(const groupId of groupIds){
+  const files=await storageWalk('teams/'+groupId);
+  for(const f of files){
+   const path=f.path,ownsVolume=[...volumeIds].some(id=>path.includes('/imports/volume-'+id+'-section-')||path.includes('/imports/volume-'+id+'/')||path.includes('/volumes/'+id+'/')||path.includes('/library/volume-'+id+'/'));
+   if(ownsVolume||path.includes('/library/novel-'+novelId+'/'))mediaPaths.add(path);
+  }
+ }
+ const paths=[...mediaPaths];
+ for(let i=0;i<paths.length;i+=100){
+  const batch=paths.slice(i,i+100);
+  const rows=await jreq('/rest/v1/rpc/media_usage_for_paths',{method:'POST',body:JSON.stringify({p_paths:batch})})||[];
+  const counts=new Map(rows.map(x=>[x.path,Number(x.reference_count||0)]));
+  for(const path of batch){
+   scanned++;
+   if(!counts.has(path)||counts.get(path)>0){retained++;continue}
+   try{await storageDelete(path);removed++}catch(e){failed++;console.warn('No se pudo borrar archivo de obra eliminada',path,e)}
+  }
+ }
+ return {scanned,removed,retained,failed};
 }
 async function deleteStudioProject(){
  try{
@@ -872,9 +899,10 @@ async function deleteStudioProject(){
   if(typed!=='ELIMINAR'){if(typed!==null)toast('Eliminación cancelada: escribe ELIMINAR exactamente.','bad');return}
   const deleted=await jreq(`/rest/v1/novels?id=eq.${P.novels.id}&select=id`,{method:'DELETE',headers:{Prefer:'return=representation'}});
   if(!deleted?.length)throw new Error('No tienes permiso para eliminar toda la obra o la obra ya no existe.');
-  await cleanupDeletedMedia(snap.media);
+  let cleanup;
+  try{cleanup=await cleanupDeletedNovelStorage(snap)}catch(e){console.warn('Limpieza multimedia parcial',e);cleanup={removed:0,failed:1,retained:0}}
   S.studioProject=null;S.currentDetail=null;S.blockEditor=null;S.revisionHistory=[];S.revisionPreview=null;
-  await loadStudioData();await loadCatalog();go('studio');toast('Obra y todo su contenido eliminados definitivamente.','ok')
+  await loadStudioData();await loadCatalog();go('studio');toast('Obra eliminada. Multimedia: '+cleanup.removed+' archivos borrados, '+cleanup.retained+' conservados por seguridad'+(cleanup.failed?', '+cleanup.failed+' pendientes de limpieza.':'.'),cleanup.failed?'bad':'ok')
  }catch(e){toast(friendlyError(e),'bad')}
 }
 async function deleteStudioSection(id){try{const P=S.studioProject,sec=P?.volumes?.flatMap(v=>v.sections||[]).find(x=>x.id===id);if(!P||!sec)return;const label=sec.title||('Capítulo '+(sec.section_number||''));if(!confirm(`¿Eliminar "${label}" definitivamente? Se borrarán el capítulo, sus revisiones, comentarios y archivos multimedia que ya no estén en uso.`))return;const media=[...sectionMediaUrls(sec),...await revisionMediaUrls([id])];await jreq(`/rest/v1/sections?id=eq.${id}`,{method:'DELETE',headers:{Prefer:'return=minimal'}});if(S.studioProject?.editingSection?.id===id){S.studioProject.editingSection=null;S.blockEditor=null;S.revisionHistory=[];S.revisionPreview=null}await cleanupDeletedMedia(media);await refreshStudioProject();await loadCatalog();toast('Capítulo eliminado definitivamente.','ok')}catch(e){toast(friendlyError(e),'bad')}}
