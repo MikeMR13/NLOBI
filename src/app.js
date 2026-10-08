@@ -216,7 +216,7 @@ function studio(){
  <div class="studioList">${projects.length?projects.map(t=>`<article class="projectRow"><div class="projectIdentity"><div class="projectMark" aria-hidden="true">${esc((t.novels?.title||t.title||'P').trim().slice(0,1).toUpperCase())}</div><div><div class="row"><span class="badge">${esc(translationStatusLabel(t.status))}</span><span class="badge">${esc((t.language_code||'es').toUpperCase())}</span></div><h3>${esc(t.novels?.title||t.title||'Proyecto')}</h3><div class="muted">${esc(t.translator_groups?.name||'Equipo')}</div></div></div><div class="projectActions"><button class="btn ${isCurrentGroupEditor(t.group_id)?'primary':''}" data-studio-project="${t.id}">${isCurrentGroupEditor(t.group_id)?'Abrir editor':'Ver proyecto'} →</button></div></article>`).join(''):`<div class="empty"><div class="emptyArt">✎</div><strong>Aún no tienes proyectos</strong><div>${canEdit?'Crea la primera obra de tu equipo o importa un archivo.':'Todavía no hay proyectos disponibles para tu equipo.'}</div>${canEdit?'<div style="margin-top:12px"><button class="btn primary" data-v="studio:new">Crear proyecto</button></div>':''}</div>`}</div></main>`
 }
 
-function mediaFolderOf(file){const path=file.path,match=(S.mediaFolderIndex||[]).find(x=>x.paths.has(path));return match?{novel:match.novel,volume:match.volume}: {novel:'other',volume:'other'}}
+function mediaFolderOf(file){const path=file.path,matches=(S.mediaFolderIndex||[]).filter(x=>x.paths.has(path)),match=matches.find(x=>x.volumeId)||matches[0];return match?{novel:match.novel,volume:match.volume}: {novel:'other',volume:'other'}}
 async function loadMediaFolders(groupId){
  try{
   const trs=await jreq('/rest/v1/translations?group_id=eq.'+groupId+'&select=id,novels(id,title,cover_url),volumes(id,volume_number,title,cover_url,sections(content))')||[];
@@ -230,14 +230,14 @@ async function loadMediaFolders(groupId){
    for(const sec of v.sections||[])for(const block of (Array.isArray(sec.content)?sec.content:[]))if(block?.type==='image')paths.add(storagePathFromUrl(block.url));
    const prefix='teams/'+groupId+'/imports/volume-'+v.id+'/';
    const volumePrefix='teams/'+groupId+'/volumes/'+v.id+'/';
-   for(const f of S.mediaFiles||[])if(f.path.startsWith(prefix)||f.path.startsWith(volumePrefix))paths.add(f.path);
+   for(const f of S.mediaFiles||[])if(f.path.startsWith(prefix)||f.path.startsWith(volumePrefix)||f.path.startsWith('teams/'+groupId+'/imports/volume-'+v.id+'-section-'))paths.add(f.path);
    for(const f of S.mediaFiles||[])if(f.path.startsWith('teams/'+groupId+'/library/volume-'+v.id+'/'))paths.add(f.path);S.mediaFolderIndex.push({novel:t.novels?.title||'Obra sin título',novelId:t.novels?.id,volumeId:v.id,volume:'Vol. '+v.volume_number+(v.title?' · '+v.title:''),paths:new Set([...paths].filter(Boolean))});
   }
  }catch(e){S.mediaFolderIndex=[];console.warn('No se pudo construir el árbol de imágenes',e)}
 }
 function storagePathFromUrl(url){if(!url)return'';try{const u=new URL(url,location.origin),marker='/storage/v1/object/public/nlobi-media/';const i=u.pathname.indexOf(marker);return i>=0?decodeURIComponent(u.pathname.slice(i+marker.length)):''}catch{return''}}
 function mediaFiltered(){const q=S.mediaQuery.trim().toLowerCase();return (S.mediaFiles||[]).filter(x=>{const folder=mediaFolderOf(x);return(S.mediaFolderNovel==='all'||folder.novel===S.mediaFolderNovel)&&(S.mediaFolderVolume==='all'||folder.volume===S.mediaFolderVolume)&&(!q||x.name.toLowerCase().includes(q)||x.path.toLowerCase().includes(q)||folder.novel.toLowerCase().includes(q))})}
-function mediaFolderOptions(){const all=(S.mediaFiles||[]).map(mediaFolderOf),novels=[...new Set(all.map(x=>x.novel))].sort(),volumes=[...new Set(all.filter(x=>S.mediaFolderNovel==='all'||x.novel===S.mediaFolderNovel).map(x=>x.volume))].sort();return{novels,volumes}}
+function mediaFolderOptions(){const all=(S.mediaFiles||[]).map(mediaFolderOf),known=S.mediaFolderIndex||[],novels=[...new Set([...all.map(x=>x.novel),...known.map(x=>x.novel)])].sort(),volumes=[...new Set([...all.filter(x=>S.mediaFolderNovel==='all'||x.novel===S.mediaFolderNovel).map(x=>x.volume),...known.filter(x=>S.mediaFolderNovel==='all'||x.novel===S.mediaFolderNovel).map(x=>x.volume)])].sort();return{novels,volumes}}
 
 function mediaPageData(){const all=mediaFiltered(),size=Math.max(12,Number(S.mediaPageSize||40)),pages=Math.max(1,Math.ceil(all.length/size));S.mediaPage=Math.max(0,Math.min(Number(S.mediaPage||0),pages-1));const start=S.mediaPage*size;return{all,items:all.slice(start,start+size),pages,page:S.mediaPage}}
 async function loadMediaUsage(paths){const list=[...new Set((paths||[]).filter(Boolean))];if(!list.length){S.mediaUsage={};return}const rows=await jreq('/rest/v1/rpc/media_usage_for_paths',{method:'POST',body:JSON.stringify({p_paths:list})})||[];S.mediaUsage=Object.fromEntries(rows.map(x=>[x.path,Number(x.reference_count||0)]))}
