@@ -1272,3 +1272,25 @@ body.dark .mobileNav #themeMobile{color:#ffd400}
 .homeEditorial .homeFeaturedLabel,.homeEditorial .homeFeaturedLink,.homeEditorial .homeBookOpen{color:#685400}
 body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeaturedLabel,body.dark .homeEditorial .homeFeaturedLink,body.dark .homeEditorial .homeBookOpen{color:#ffe14a}
 @media(max-width:730px){.exploreNovelGrid .catalogTitleLink{min-height:44px!important}}
+
+
+/* Biblioteca personal: primera pasada editorial */
+.libraryEditorial .libraryShowcase{position:relative;isolation:isolate;overflow:hidden;margin:22px 0 30px;padding:clamp(24px,5vw,48px);border:1px solid #333;border-radius:23px;background:#151515;color:#fff}
+.libraryShowcase:before{content:"";position:absolute;z-index:-1;right:-95px;bottom:-170px;width:390px;height:390px;border:1px solid #ffd40035;border-radius:50%;box-shadow:0 0 0 48px #ffd40009,0 0 0 98px #ffd40007;pointer-events:none}
+.libraryShowcaseTop{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.libraryEyebrow{color:#ffd400;font-size:.73rem;font-weight:800;letter-spacing:.15em}
+.libraryEyebrow span{color:#aaa;padding-inline:5px}
+.libraryMark{color:#ffd400;font-size:2rem;font-weight:800}
+.libraryShowcase h1{font-family:Literata,Georgia,serif;color:#fff;letter-spacing:-.045em;line-height:1.1;font-size:clamp(2.3rem,5vw,4.25rem);margin:14px 0}
+.libraryTitleAccent{color:#ffd400}
+.libraryShowcase>p{color:#d5d5d5;line-height:1.65;max-width:680px;margin:0 0 24px}
+.libraryHeroStats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));max-width:710px;gap:12px}
+.libraryHeroStat{display:flex;flex-direction:column;gap:5px;background:#242424;border:1px solid #383838;border-radius:13px;padding:16px 19px}
+.libraryHeroStat strong{font-size:clamp(1.5rem,2.5vw,2.15rem);line-height:1.15;color:#ffd400;font-weight:800;font-variant-numeric:tabular-nums}
+.libraryHeroStat span{color:#dedede;font-size:.82rem}
+.libraryHeroActions{display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:22px}
+.libraryDiscoverButton{display:inline-flex;align-items:center;justify-content:center;gap:12px;min-height:44px;background:#ffd400!important;color:#111!important;border-color:#ffd400!important;font-weight:800!important}
+.libraryDiscoverButton:hover{background:#ffe34c!important;border-color:#ffe34c!important}
+.libraryHeroHint{color:#c7c7c7;font-size:.84rem}
+@media(max-width:600px){.libraryEditorial .libraryShowcase{margin:12px 0 24px;padding:23px 18px;border-radius:18px}.libraryMark{font-size:1.6rem}.libraryShowcase>p{font-size:.92rem}.libraryHeroStats{gap:8px}.libraryHeroStat{padding:12px 9px;border-radius:10px}.libraryHeroStat span{font-size:.73rem}.libraryHeroActions{align-items:stretch;flex-direction:column;gap:11px}.libraryHeroHint{text-align:center}}
+@media(max-width:350px){.libraryHeroStat{padding:11px 7px}.libraryHeroStat span{font-size:.68rem}}
