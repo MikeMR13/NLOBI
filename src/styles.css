@@ -795,3 +795,27 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 .studioQualityDetails .qualityIssue{color:#c0392b;font-weight:700}
 .studioQualityDetails .qualityWarning{color:var(--text)}
 @media(max-width:620px){.studioQualityPanel summary small{width:100%;margin-left:0}}
+
+
+/* Roles granulares y revisiones editoriales */
+.studioTeamAccess{margin:0 0 22px;border:1px solid var(--line);border-radius:16px;background:var(--panel);padding:15px 18px}
+.studioTeamAccess h2{font-size:1rem;margin:0 0 10px}.studioTeamAccess .row{gap:9px;flex-wrap:wrap}
+.teamPermissionsPanel{margin:26px 0 20px}
+.teamPermissionsGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:14px;align-items:start}
+.teamPermissionCard{padding:18px;border:1px solid var(--line);border-radius:16px;background:var(--panel);box-shadow:var(--shadow2);min-width:0}
+.teamPermissionCard header{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.teamPermissionControls{display:grid;gap:11px;margin-bottom:15px}
+.teamPermissionControls label{display:flex;align-items:center;justify-content:space-between;gap:14px;font-size:.87rem;line-height:1.45}
+.teamPermissionControls label select{width:min(100%,164px);min-width:145px;padding:8px;font-size:.82rem}
+.teamReviewSettings{margin:18px 0 24px;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel2)}
+.teamReviewSettings h3{margin:0 0 13px}.teamReviewSettings label{align-items:flex-start;gap:10px}.teamReviewSettings input[type=checkbox]{margin-top:4px;accent-color:var(--accent)}
+.studioReviewPanel{width:100%;flex:1 1 100%;margin:9px 0 3px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);min-width:0}
+.studioReviewPanel summary{cursor:pointer;padding:10px 12px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.studioReviewPanel summary strong{font-size:.85rem}.studioReviewBody{border-top:1px solid var(--line);padding:13px}
+.studioReviewBody .row{flex-wrap:wrap;gap:8px}.studioReviewBody select{flex:1 1 170px;max-width:100%;min-width:0}
+.studioReviewBody .field textarea{width:100%}.studioVolumeCard .sectionRow{flex-wrap:wrap}
+.studioScheduleBox{border:1px solid var(--line);border-radius:12px;background:var(--panel2);padding:12px 14px;margin:12px 0}
+.studioScheduleBox>strong{font-size:.9rem}.studioScheduleBox .row{flex-wrap:wrap;gap:9px;margin-top:8px}
+.studioScheduleBox input[type=datetime-local]{display:block;width:100%;max-width:260px;margin-top:6px}
+.studioScheduleBox .muted{font-size:.82rem}
+@media(max-width:620px){.teamPermissionControls label{flex-direction:column;align-items:stretch;gap:5px}.teamPermissionControls label select{width:100%;max-width:none}.teamPermissionCard{padding:14px}.teamReviewSettings{padding:15px}}
