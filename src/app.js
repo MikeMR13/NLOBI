@@ -783,7 +783,8 @@ if(CONFIG.qaMode===true){
   setState(patch={}){Object.assign(S,patch);render()},
   setView(view){S.view=validRoute(view)?view:'home';history.replaceState(null,'','#'+S.view);render()},
   getState(){return S},
-  parseEpub(file){return parseEpubRich(file)}
+  parseEpub(file){return parseEpubRich(file)},
+  detectImportSections(blocks,text=''){return detectSectionsRich(blocks,text)}
  }
 }
 consumeAuthCallback();
