@@ -1584,3 +1584,26 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 /* Beta quick navigation: button reset and stable anchor targets */
 .betaEditorial .betaQuickLink{font:inherit;font-weight:750;cursor:pointer;justify-content:center;text-align:left;appearance:none}
 .betaEditorial #beta-diagnostic,.betaEditorial #beta-feedback,.betaEditorial #beta-reports{scroll-margin-top:110px}
+
+
+/* Administración global — fase 1 */
+.adminWorkspace{max-width:1480px}.adminWorkspaceHeader{display:flex;justify-content:space-between;align-items:center;gap:16px;padding:25px 0 22px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.adminWorkspaceEyebrow{font-size:.72rem;letter-spacing:.12em;font-weight:800;color:var(--muted)}
+.adminWorkspaceHeader h1{font-size:clamp(1.65rem,3vw,2.4rem);line-height:1.2;margin:7px 0}.adminWorkspaceHeader p{color:var(--muted);margin:0}
+.adminAccessMark{padding:8px 12px;border:1px solid var(--line);border-radius:99px;background:var(--panel);font-size:.8rem;font-weight:750;white-space:nowrap}
+.adminWorkspaceLayout{display:grid;grid-template-columns:242px minmax(0,1fr);gap:24px;align-items:start}
+.adminWorkspaceSidebar{position:sticky;top:84px;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:15px;max-height:calc(100vh - 105px);overflow:auto}
+.adminSidebarTitle{display:flex;align-items:center;gap:11px;padding:9px 7px 17px;border-bottom:1px solid var(--line);margin-bottom:13px}
+.adminSidebarLogo{display:grid;place-items:center;width:41px;height:41px;background:#1a1a1a;color:#ffd400;font-size:1.5rem;font-weight:800;border-radius:11px}
+.adminSidebarTitle strong{display:block;font-size:.92rem}.adminSidebarTitle small{display:block;color:var(--muted);margin-top:3px;font-size:.75rem}
+.adminNavGroup+.adminNavGroup{margin-top:15px}.adminNavGroupTitle{padding:8px 11px;color:var(--muted);font-size:.69rem;letter-spacing:.1em;font-weight:800;text-transform:uppercase}
+.adminSideLink{width:100%;display:flex;align-items:center;gap:11px;text-align:left;padding:11px 12px;min-height:43px;border:1px solid transparent;border-radius:10px;background:transparent;color:var(--text);font:inherit;font-size:.88rem;font-weight:650;cursor:pointer}
+.adminSideLink:hover{background:var(--panel2)}.adminSideLink.isActive{background:#252525;color:#ffe16a;border-color:#48412b}
+.adminSideIcon{width:21px;text-align:center;font-size:1.1rem}.adminSideLink:focus-visible{outline:3px solid var(--accent,#ffd400);outline-offset:2px}
+.adminWorkspaceMain{min-width:0;padding-bottom:45px}.adminCurrentHead{display:flex;align-items:end;justify-content:space-between;border-bottom:1px solid var(--line);margin-bottom:22px;padding:6px 0 15px}
+.adminCurrentHead h2{margin:7px 0 0;font-size:clamp(1.35rem,2vw,1.85rem)}.adminWorkspaceContent{min-width:0}.adminWorkspaceContent .adminGrid{min-width:0}
+.adminMobileNav{display:none}.adminWorkspaceContent .adminApp{overflow-wrap:anywhere}
+@media(max-width:940px){.adminWorkspaceLayout{grid-template-columns:205px minmax(0,1fr);gap:15px}.adminWorkspaceSidebar{padding:10px}.adminSideLink{padding:10px 8px}}
+@media(max-width:740px){.adminWorkspaceHeader{align-items:flex-start;padding-top:15px}.adminAccessMark{display:none}.adminWorkspaceLayout{display:block}.adminWorkspaceSidebar{display:none}.adminMobileNav{display:grid;gap:7px;margin:0 0 16px}.adminMobileNav label{font-weight:750;font-size:.83rem}.adminMobileNav select{width:100%;min-height:48px;border-radius:11px}.adminCurrentHead{margin-bottom:16px}.adminWorkspaceContent .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:440px){.adminWorkspaceContent .kpis{grid-template-columns:1fr}.adminWorkspaceHeader h1{font-size:1.5rem}}
+@media(prefers-reduced-motion:reduce){.adminSideLink{transition:none}}
