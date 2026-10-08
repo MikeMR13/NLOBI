@@ -143,6 +143,13 @@ async function materializeImportedImages(blocks,groupId,sectionKey,uploadedPaths
  return out
 }
 
+function accountDropdown(mobile=false){
+ if(!S.user)return '<a class="navLink" href="#auth" data-v="auth">Entrar</a>';
+ const avatar=S.profile?.avatar_url?'<img src="'+esc(safeUrl(S.profile.avatar_url))+'" alt="">':'<span aria-hidden="true">'+esc((S.profile?.display_name||S.profile?.username||'U').charAt(0).toUpperCase())+'</span>';
+ const label=esc(S.profile?.display_name||S.profile?.username||'Mi cuenta');
+ const teams=S.groups.map(g=>({id:g.translator_groups?.id,name:g.translator_groups?.name})).filter(g=>g.id);
+ return `<details class="accountDropdown ${mobile?'accountMobile':''}"><summary aria-label="Abrir menú de usuario" aria-haspopup="true"><span class="accountAvatar">${avatar}</span><span class="accountName">${label}</span><span aria-hidden="true">▾</span></summary><div class="accountDropdownPanel" aria-label="Opciones de la cuenta"><button type="button" data-account-action="profile">Perfil</button><button type="button" data-account-action="edit">Editar perfil</button>${teams.length?'<div class="accountMenuLabel">Gestión del equipo</div>'+teams.map(g=>`<button type="button" data-account-team="${esc(g.id)}">${esc(g.name||'Equipo traductor')}</button>`).join(''):'<button type="button" data-account-action="teams">Gestión del equipo</button>'}<button type="button" data-account-action="studio">Studio</button><div class="accountMenuDivider"></div><button type="button" class="accountSignOut" data-account-action="logout">Cerrar sesión</button></div></details>`
+}
 function nav(){
  const unread=S.notes.filter(x=>!x.read_at).length;
  const isActive=v=>S.view===v||S.view.startsWith(v+':');
@@ -150,12 +157,12 @@ function nav(){
  return `<header class="top"><div class="bar"><a class="brand" href="#home" data-v="home" aria-label="El Obi del Lector, ir al inicio"><span class="brandMark" aria-hidden="true">オ</span><span>El Obi del Lector</span></a><nav class="nav" aria-label="Navegación principal">
  ${link('home','Inicio')}${link('explore','Explorar')}${link('library','Biblioteca')}
  ${S.user?link('notifications',`Avisos${unread?` · ${unread}`:''}`)+link('beta','Beta'):''}
- ${S.groups.length?link('studio','Studio'):''}${S.admin?link('admin','Admin'):''}
- ${link('auth',S.user?'Perfil':'Entrar')}${S.pwaInstallReady?'<button id="installPwa" class="installHint" type="button">＋ Instalar</button>':''}<button id="theme" type="button" aria-label="${document.body.classList.contains('dark')?'Cambiar a tema claro':'Cambiar a tema oscuro'}" aria-pressed="${document.body.classList.contains('dark')?'true':'false'}" title="Cambiar tema">◐</button></nav><details class="mobileNav"><summary aria-label="Abrir menú de navegación">☰ Menú</summary><nav aria-label="Navegación móvil">
+ ${S.admin?link('admin','Admin'):''}
+ ${accountDropdown()}${S.pwaInstallReady?'<button id="installPwa" class="installHint" type="button">＋ Instalar</button>':''}<button id="theme" type="button" aria-label="${document.body.classList.contains('dark')?'Cambiar a tema claro':'Cambiar a tema oscuro'}" aria-pressed="${document.body.classList.contains('dark')?'true':'false'}" title="Cambiar tema">◐</button></nav><details class="mobileNav"><summary aria-label="Abrir menú de navegación">☰ Menú</summary><nav aria-label="Navegación móvil">
  ${link('home','Inicio')}${link('explore','Explorar')}${link('library','Biblioteca')}
  ${S.user?link('notifications',`Avisos${unread?` · ${unread}`:''}`)+link('beta','Beta'):''}
- ${S.groups.length?link('studio','Studio'):''}${S.admin?link('admin','Admin'):''}
- ${link('auth',S.user?'Perfil':'Entrar')}${S.pwaInstallReady?'<button id="installPwaMobile" class="installHint" type="button">＋ Instalar</button>':''}<button id="themeMobile" type="button" aria-label="Cambiar tema" title="Cambiar tema">◐ Tema</button>
+ ${S.admin?link('admin','Admin'):''}
+ ${accountDropdown(true)}${S.pwaInstallReady?'<button id="installPwaMobile" class="installHint" type="button">＋ Instalar</button>':''}<button id="themeMobile" type="button" aria-label="Cambiar tema" title="Cambiar tema">◐ Tema</button>
  </nav></details></div></header>${!S.online?'<div class="offlinePill" role="status">Sin conexión · modo lectura offline</div>':''}` }
 function status(){return S.err?`<div class="status bad" role="alert"><strong>Hay un problema de conexión.</strong><div>${esc(S.err)}</div><div style="margin-top:8px"><button class="btn" id="retryBackend">Reintentar</button></div></div>`:''}
 function coverMarkup(x,detail=false){
@@ -637,6 +644,15 @@ function render(){
 function bind(){
  $$('[data-original-src]').forEach(img=>{const showFailure=()=>{const note=img.closest('figure')?.querySelector('.readerImageFallback');if(note)note.hidden=false;img.hidden=true};img.addEventListener('error',()=>{if(!img.dataset.retried&&img.dataset.originalSrc&&!img.dataset.originalSrc.startsWith('data:')&&img.src!==img.dataset.originalSrc){img.dataset.retried='1';img.src=img.dataset.originalSrc;return}showFailure()});if(img.complete&&!img.naturalWidth)showFailure()});
  $$('[data-v]').forEach(b=>b.onclick=e=>{e.preventDefault();go(b.dataset.v)});
+ $('[data-account-action]').forEach(b=>b.onclick=()=>{
+ const a=b.dataset.accountAction;
+ if(a==='logout'){logout();go('home');return}
+ if(a==='profile'){go('auth');return}
+ if(a==='edit'){go('auth');setTimeout(()=>{const el=$('#profileDisplayName');el?.scrollIntoView({behavior:'smooth',block:'center'});el?.focus()},120);return}
+ if(a==='studio'){go('studio');return}
+ if(a==='teams'){go('studio');toast('Para gestionar el equipo, primero debes pertenecer a uno.','');return}
+ });
+ $('[data-account-team]').forEach(b=>b.onclick=()=>openStudioTeam(b.dataset.accountTeam));
  const retry=$('#retryBackend');if(retry)retry.onclick=()=>boot(true);const th=$('#theme');if(th)th.onclick=()=>{document.body.classList.toggle('dark');const dark=document.body.classList.contains('dark');localStorage.setItem('nlobi_dark',dark?'1':'0');th.setAttribute('aria-pressed',dark?'true':'false');th.setAttribute('aria-label',dark?'Cambiar a tema claro':'Cambiar a tema oscuro')};const thMobile=$('#themeMobile');if(thMobile)thMobile.onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('nlobi_dark',document.body.classList.contains('dark')?'1':'0');render()};const ip=$('#installPwa');if(ip)ip.onclick=installPwa;const ipMobile=$('#installPwaMobile');if(ipMobile)ipMobile.onclick=installPwa;
  const lt=$('#loginTab');if(lt)lt.onclick=()=>{S.authMode='login';render()};const st=$('#signupTab');if(st)st.onclick=()=>{S.authMode='signup';render()};
  const lo=$('#logout');if(lo)lo.onclick=logout;const li=$('#login');if(li)li.onclick=login;const su=$('#signup');if(su)su.onclick=signup;const rv=$('#resendVerification');if(rv)rv.onclick=resendVerification;const sa=$('#sendApp');if(sa)sa.onclick=sendApplication;
