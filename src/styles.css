@@ -1102,3 +1102,20 @@ body.dark .homeEditorial .homeProgressOverline,body.dark .homeEditorial .homeRec
 @keyframes obiSkeleton{to{background-position-x:-200%}}
 @media(max-width:700px){.homeLoadingHero{grid-template-columns:1fr;min-height:0;padding:25px}.homeLoadingCover{height:180px;width:120px}.homeLoadingBooks{grid-template-columns:repeat(2,minmax(0,1fr))}.homeLoadingLine.headline{height:35px}}
 @media(prefers-reduced-motion:reduce){.homeLoadingLine,.homeLoadingCover,.homeLoadingBooks span{animation:none}}
+
+
+/* Mobile navigation repair: prevent the dropdown from being clipped by details. */
+.themeMobileQuick{display:none}
+@media(max-width:720px){
+ .top{overflow:visible}
+ .top .bar{overflow:visible}
+ .mobileNav{position:static;overflow:visible;max-height:none}
+ .mobileNav[open]{overflow:visible;max-height:none}
+ .mobileNav>summary{display:flex;align-items:center;min-height:44px;white-space:nowrap}
+ .mobileNav nav{position:absolute;left:auto;right:max(12px,env(safe-area-inset-right));top:calc(100% + 3px);width:min(340px,calc(100vw - 24px));max-height:calc(100dvh - 78px);overflow-y:auto;overscroll-behavior:contain;z-index:100;padding:12px;box-shadow:0 18px 38px rgba(0,0,0,.22)}
+ .mobileNav:not([open]) nav{display:none}
+ .themeMobileQuick{appearance:none;display:grid;place-items:center;flex:none;width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--panel2);color:var(--text);font-size:1.45rem;cursor:pointer}
+ .themeMobileQuick:hover,.themeMobileQuick:focus-visible{border-color:var(--accent);background:var(--accentSoft);outline-offset:2px}
+ .mobileNav #themeMobile{background:var(--accentSoft);color:var(--accentText);border:1px solid var(--accent);border-radius:10px;font-weight:800}
+}
+body.dark .mobileNav #themeMobile{color:#ffd400}
