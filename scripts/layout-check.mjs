@@ -5,7 +5,9 @@ const base='http://127.0.0.1:4173/';
 const routes=['#home','#explore','#library','#auth','#detail:demo-netoge','#collection:popular'];
 const viewports=[
   {name:'mobile-320',width:320,height:900},
+  {name:'mobile-375',width:375,height:812},
   {name:'mobile-390',width:390,height:900},
+  {name:'mobile-430',width:430,height:932},
   {name:'tablet-768',width:768,height:1024},
   {name:'desktop-1280',width:1280,height:900}
 ];
