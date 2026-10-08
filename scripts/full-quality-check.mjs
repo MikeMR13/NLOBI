@@ -341,6 +341,34 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   await context.close();
  }
 
+
+ // A valid EPUB stylesheet with an embedded font must retain font metadata.
+ {
+  const context=await browser.newContext({viewport:{width:375,height:812},serviceWorkers:'block'});await prepare(context);
+  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__?.parseEpub);
+  await page.addScriptTag({url:'https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js'});
+  const result=await page.evaluate(async()=>{
+   const zip=new JSZip();
+   zip.file('mimetype','application/epub+zip');
+   zip.file('META-INF/container.xml','<container xmlns="urn:oasis:names:tc:opendocument:xmlns:container" version="1.0"><rootfiles><rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/></rootfiles></container>');
+   zip.file('OEBPS/content.opf','<package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>Novela de prueba</dc:title></metadata><manifest><item id="css" href="styles/book.css" media-type="text/css"/><item id="font" href="fonts/story.woff2" media-type="font/woff2"/><item id="c1" href="chapter.xhtml" media-type="application/xhtml+xml"/></manifest><spine><itemref idref="c1"/></spine></package>');
+   zip.file('OEBPS/styles/book.css','@font-face { font-family: "Fuente de novela"; src: url("../fonts/story.woff2") format("woff2"); } body {font-family: "Fuente de novela";}');
+   zip.file('OEBPS/fonts/story.woff2',new Uint8Array([119,79,70,50,0,0,0,0]));
+   zip.file('OEBPS/chapter.xhtml','<html xmlns="http://www.w3.org/1999/xhtml"><head><title>Capítulo 1</title></head><body><h1>Capítulo 1</h1><p>Texto de prueba con fuente original.</p></body></html>');
+   const blob=await zip.generateAsync({type:'blob'});
+   const parsed=await window.__NLOBI_QA__.parseEpub(new File([blob],'fuente.epub',{type:'application/epub+zip'}));
+   return {font:parsed.epubFont,warning:parsed.warnings?.some(x=>x.includes('Fuente incrustada'))};
+  });
+  const mobile=await page.evaluate(()=>({horizontalOverflow:document.documentElement.scrollWidth>innerWidth,visibleMenu:getComputedStyle(document.querySelector('.mobileNav')).display!=='none',desktopHidden:getComputedStyle(document.querySelector('.bar>.nav')).display==='none'}));
+  await page.locator('.mobileNav summary').click();
+  const links=await page.locator('.mobileNav[open] nav a.navLink').count();
+  if(errors.length||result.font?.family!=='Fuente de novela'||result.font?.path!=='OEBPS/fonts/story.woff2'||!result.warning||mobile.horizontalOverflow||!mobile.visibleMenu||!mobile.desktopHidden||links<3){
+   failures.push({scenario:'epub-embedded-font-and-mobile-header',errors,result,mobile,links});
+  }
+  await context.close();
+ }
+
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');
