@@ -216,7 +216,19 @@ function studio(){
  <div class="studioList">${projects.length?projects.map(t=>`<article class="projectRow"><div class="projectIdentity"><div class="projectMark" aria-hidden="true">${esc((t.novels?.title||t.title||'P').trim().slice(0,1).toUpperCase())}</div><div><div class="row"><span class="badge">${esc(translationStatusLabel(t.status))}</span><span class="badge">${esc((t.language_code||'es').toUpperCase())}</span></div><h3>${esc(t.novels?.title||t.title||'Proyecto')}</h3><div class="muted">${esc(t.translator_groups?.name||'Equipo')}</div></div></div><div class="projectActions"><button class="btn ${isCurrentGroupEditor(t.group_id)?'primary':''}" data-studio-project="${t.id}">${isCurrentGroupEditor(t.group_id)?'Abrir editor':'Ver proyecto'} →</button></div></article>`).join(''):`<div class="empty"><div class="emptyArt">✎</div><strong>Aún no tienes proyectos</strong><div>${canEdit?'Crea la primera obra de tu equipo o importa un archivo.':'Todavía no hay proyectos disponibles para tu equipo.'}</div>${canEdit?'<div style="margin-top:12px"><button class="btn primary" data-v="studio:new">Crear proyecto</button></div>':''}</div>`}</div></main>`
 }
 
-function mediaFolderOf(file){const path=file.path,matches=(S.mediaFolderIndex||[]).filter(x=>x.paths.has(path)),match=matches.find(x=>x.volumeId)||matches[0];return match?{novel:match.novel,volume:match.volume}: {novel:'other',volume:'other'}}
+function mediaFolderOf(file){
+ const path=file.path,index=S.mediaFolderIndex||[],matches=index.filter(x=>x.paths.has(path));
+ let match=matches.find(x=>x.volumeId)||matches[0];
+ if(!match){
+  const m=path.match(/\/(?:imports\/volume-|volumes\/|library\/volume-)([0-9a-f]{8}-[0-9a-f-]{27,})/i);
+  if(m)match=index.find(x=>x.volumeId===m[1]);
+ }
+ if(!match){
+  const m=path.match(/\/library\/novel-([0-9a-f]{8}-[0-9a-f-]{27,})/i);
+  if(m)match=index.find(x=>x.novelId===m[1]);
+ }
+ return match?{novel:match.novel,volume:match.volume}:{novel:'other',volume:'other'};
+}
 async function loadMediaFolders(groupId){
  const files=S.mediaFiles||[],index=[],scope='teams/'+groupId+'/';
  try{
