@@ -444,7 +444,7 @@ function epubTitleMap(zip,opf,base,manifest){
  const navItem=[...opf.querySelectorAll('manifest item')].find(n=>(n.getAttribute('properties')||'').split(/\s+/).includes('nav'));
  if(navItem?.getAttribute('href')){
   const p=epubHrefKey(base,navItem.getAttribute('href')),f=zip.file(p);
-  if(f)map._navPromise=f.async('text').then(raw=>{const doc=new DOMParser().parseFromString(raw,'text/html'),navBase=p.includes('/')?p.slice(0,p.lastIndexOf('/')+1):'';doc.querySelectorAll('nav a[href]').forEach(a=>add(navBase,a.getAttribute('href'),a.textContent||'','nav'))})
+  if(f)map._navPromise=f.async('text').then(raw=>{const doc=new DOMParser().parseFromString(raw,'text/html'),navBase=p.includes('/')?p.slice(0,p.lastIndexOf('/')+1):'';doc.querySelectorAll('nav[epub\\:type="toc"] a[href],nav#toc a[href],nav[role="doc-toc"] a[href]').forEach(a=>add(navBase,a.getAttribute('href'),a.textContent||'','nav'))})
  }
  const spine=opf.querySelector('spine'),tocId=spine?.getAttribute('toc'),ncx=tocId?manifest[tocId]:null;
  if(ncx?.href){
