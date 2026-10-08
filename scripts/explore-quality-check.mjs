@@ -11,11 +11,14 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    await page.goto('http://127.0.0.1:4173/#explore',{waitUntil:'networkidle'});
    await page.waitForSelector('#exploreTitle');
    await page.locator('[data-explore-view="list"]').click();
-   if(!await page.locator('.exploreNovelGrid.exploreListView').count())throw Error('Vista lista ausente');
+   if(await page.locator('[data-explore-view="list"]').getAttribute('aria-pressed')!=='true')throw Error('No se activa vista lista');
+   if(await page.locator('.exploreNovelGrid').count()&&!await page.locator('.exploreNovelGrid.exploreListView').count())throw Error('Vista lista ausente');
    await page.reload({waitUntil:'networkidle'});
-   if(!await page.locator('.exploreNovelGrid.exploreListView').count())throw Error('Preferencia de vista no persistente');
+   if(await page.locator('[data-explore-view="list"]').getAttribute('aria-pressed')!=='true')throw Error('Preferencia de vista no persistente');
+   if(await page.locator('.exploreNovelGrid').count()&&!await page.locator('.exploreNovelGrid.exploreListView').count())throw Error('Vista lista no persistente');
    await page.locator('[data-explore-view="grid"]').click();
-   if(await page.locator('.exploreNovelGrid.exploreListView').count())throw Error('No vuelve a portadas');
+   if(await page.locator('[data-explore-view="grid"]').getAttribute('aria-pressed')!=='true')throw Error('No vuelve a portadas');
+   if(await page.locator('.exploreNovelGrid.exploreListView').count())throw Error('Clase lista activa en portadas');
    const filters=page.locator('#exploreFilters');
    await filters.locator(':scope > summary').click();
    if(!await filters.evaluate(e=>e.open))throw Error('Filtros no abren');
