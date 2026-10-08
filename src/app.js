@@ -504,6 +504,14 @@ async function parseEpubRich(file){
   if(sections.length)warnings.push('Estructura EPUB detectada desde el índice: '+sections.length+' secciones; los XHTML intermedios se agruparon con la entrada anterior del TOC.');
  }
 
+ // A partial or generic NCX is not authoritative when explicit chapter headings reveal more sections.
+ if(sections.length){
+  const explicit=pages.flatMap(page=>page.utility==='skip'?[]:page.blocks.filter(b=>b.type==='heading'&&isSectionHeading(b.text)));
+  if(explicit.length>sections.length){
+   warnings.push('El índice EPUB está incompleto frente a los encabezados narrativos; se usará la detección editorial alternativa.');
+   sections.length=0;
+  }
+ }
  if(!sections.length){
   const all=[];
   for(const page of pages){
