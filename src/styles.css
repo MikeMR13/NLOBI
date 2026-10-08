@@ -950,3 +950,35 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 .homeProgressDetails .btn{min-height:38px;font-size:.8rem}
 @media(max-width:900px){.homeProgressGrid{grid-template-columns:1fr}}
 @media(max-width:450px){.homeProgressCard{grid-template-columns:96px minmax(0,1fr);padding:10px;gap:11px}.homeProgressDetails h3{font-size:1rem}.homeProgressDetails .btn{font-size:.72rem;padding:7px 9px}}
+
+
+/* Fase visual cuatro: búsqueda rápida, navegación móvil y accesibilidad */
+.quickSearchMenu{position:relative;align-self:center}
+.quickSearchMenu>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:7px;padding:9px 12px;min-height:42px;border:1px solid var(--line);border-radius:11px;font-weight:650}
+.quickSearchMenu>summary::-webkit-details-marker{display:none}
+.quickSearchMenu>summary>span:first-child{font-size:1.25rem;line-height:1}
+.quickSearchMenu[open]>summary,.quickSearchMenu>summary:hover{background:var(--panel2)}
+.quickSearchForm{position:absolute;right:0;top:calc(100% + 10px);width:min(360px,calc(100vw - 28px));z-index:40;padding:16px;border:1px solid var(--line);border-radius:15px;background:var(--panel);box-shadow:var(--shadow)}
+.quickSearchForm label{display:block;font-weight:800;font-size:.84rem;margin-bottom:9px}
+.quickSearchFields{display:flex;gap:8px}
+.quickSearchFields input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:11px;color:var(--text)}
+.quickSearchFields button{border:0;border-radius:9px;background:var(--accent);color:#111;font-weight:800;padding:8px 11px;white-space:nowrap}
+.quickSearchForm p{font-size:.76rem;color:var(--muted);margin:10px 0 0}
+.quickSearchMenu>summary:focus-visible,.quickSearchFields input:focus-visible,.quickSearchFields button:focus-visible,.shelfArrow:focus-visible,.catalogCoverButton:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.mobileNav .quickSearchMenu{display:block;width:100%;margin:7px 0}
+.mobileNav .quickSearchMenu>summary{width:100%}
+.mobileNav .quickSearchForm{position:static;box-shadow:none;width:100%;margin-top:7px}
+.homeEditorial :is(button,a):focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.homeEditorial .homeQuickLinks button{min-height:48px}
+.discoverShelfTrack{scroll-padding-inline:8px}
+@media(max-width:700px){
+ .bar{gap:10px;padding:10px 13px}
+ .brand{font-size:.84rem;letter-spacing:.03em;min-width:0}
+ .brandMark{flex-shrink:0}
+ .mobileNav>summary{min-height:44px;display:flex;align-items:center}
+ .mobileNav[open]{max-height:calc(100dvh - 65px);overflow-y:auto;overscroll-behavior:contain}
+ .mobileNav nav{padding-bottom:13px}
+ .quickSearchFields input{font-size:16px}
+ .discoverShelfTrack{scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
+}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.homeEditorial *,.quickSearchMenu *{animation-duration:.01ms!important;transition-duration:.01ms!important}}
