@@ -575,3 +575,8 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
  .importImageStrip{grid-template-columns:repeat(2,minmax(0,1fr))}
  .importImageStrip img{height:130px}
 }
+
+.detailBackBar{display:flex;align-items:center;margin:14px 0 16px}
+.dangerZone{display:flex;gap:18px;align-items:center;justify-content:space-between;border-color:color-mix(in srgb,#c0392b 50%,var(--line));background:color-mix(in srgb,#c0392b 6%,var(--panel))}
+.dangerZone>div{min-width:0}
+@media(max-width:620px){.dangerZone{align-items:stretch;flex-direction:column}.dangerZone .btn{width:100%}}

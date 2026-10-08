@@ -215,6 +215,40 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  await context.close();
 }
 
+
+// Detail view must return to the originating selection view.
+{
+ const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});await prepare(context);
+ const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+ await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__);
+ await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('detail:project-1')},{...authBase,currentDetail:translation,detailBackRoute:'library'});
+ await page.locator('[data-detail-back]').click();await page.waitForTimeout(30);
+ if(runtime.length||!page.url().endsWith('#library'))failures.push({scenario:'detail-context-back',runtime,url:page.url(),error:'detail-back-route-failed'});
+ await context.close();
+}
+
+// Deleting an entire Studio project must require confirmation and DELETE the novel root.
+{
+ const calls=[];
+ const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
+ await context.route('**/runtime-config.js',r=>r.fulfill({status:200,contentType:'application/javascript',body:"window.__NLOBI_CONFIG__={supabaseUrl:'"+api+"',supabasePublishableKey:'qa',qaMode:true};"}));
+ await context.route(api+'/**',async r=>{
+  const u=new URL(r.request().url()),p=u.pathname;
+  if(p==='/rest/v1/translations'&&u.searchParams.has('novel_id'))return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{id:'project-1',group_id:'group-1',volumes:translation.volumes||[]}])});
+  if(p==='/rest/v1/section_revisions')return r.fulfill({status:200,contentType:'application/json',body:'[]'});
+  if(p==='/rest/v1/novels'&&r.request().method()==='DELETE'){calls.push({kind:'delete-novel',url:r.request().url()});return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{id:'novel-1'}])})}
+  return r.fulfill({status:200,contentType:'application/json',body:'[]'});
+ });
+ const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+ page.on('dialog',async d=>{if(d.type()==='prompt')await d.accept('ELIMINAR');else await d.accept()});
+ await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__);
+ const project={...translation,novels:{...translation.novels,id:'novel-1'}};
+ await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:project,teamMembers});
+ await page.locator('#deleteStudioProject').click();await page.waitForTimeout(80);
+ if(runtime.length||!calls.some(x=>x.kind==='delete-novel'))failures.push({scenario:'studio-delete-project',runtime,calls,error:'project-delete-not-issued'});
+ await context.close();
+}
+
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');

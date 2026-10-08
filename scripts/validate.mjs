@@ -242,3 +242,12 @@ if (!app.includes('data-delete-section=')) throw new Error("Studio delete: falta
 if (!app.includes('async function deleteStudioVolume')) throw new Error("Studio delete: falta lógica de volumen.");
 if (!app.includes('async function deleteStudioSection')) throw new Error("Studio delete: falta lógica de capítulo.");
 if (!app.includes('cleanupDeletedMedia')) throw new Error("Studio delete: falta limpieza de multimedia.");
+
+if (!app.includes('id="deleteStudioProject"')) throw new Error("Studio project delete: falta acción de eliminación completa.");
+if (!app.includes("async function deleteStudioProject")) throw new Error("Studio project delete: falta lógica de eliminación.");
+if (!app.includes("loadNovelDeletionSnapshot")) throw new Error("Studio project delete: falta inventario de contenido/multimedia.");
+if (!app.includes("Escribe ELIMINAR")) throw new Error("Studio project delete: falta confirmación fuerte.");
+if (!app.includes("data-detail-back")) throw new Error("Detail navigation: falta botón Volver.");
+if (!app.includes("detailBackRoute")) throw new Error("Detail navigation: falta ruta de regreso contextual.");
+if (!css.includes(".dangerZone{")) throw new Error("Studio project delete: falta zona peligrosa visual.");
+if (!css.includes(".detailBackBar{")) throw new Error("Detail navigation: falta estilo de regreso.");
