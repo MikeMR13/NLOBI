@@ -1819,3 +1819,11 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 @media(max-width:520px){.teamPublicEmpty{align-items:flex-start;flex-direction:column;gap:15px}.teamPublicEmptyIcon{width:60px;height:60px;font-size:1.65rem}.teamPublicEmpty .btn{width:100%;justify-content:center}.teamPublicOverview{gap:9px}.teamPublicStat strong{font-size:1.45rem}.teamPublicIntro p{font-size:.85rem}}
 @media(prefers-reduced-motion:reduce){.teamPublicPage .teamPublicLink{transition:none}.teamPublicPage *{scroll-behavior:auto!important}}
 @media(forced-colors:active){.teamPublicNav a:focus-visible,.teamPublicLink:focus-visible{outline:2px solid Highlight}.teamPublicEmpty{border-style:solid}}
+
+/* Auditoría fase 5: campos y pestañas de gestión de equipo */
+.teamSettingsTab[aria-current="page"]{font-weight:800}
+.teamSettingsNav{min-width:0}
+.teamSettingsNav>*{min-width:0;overflow-wrap:anywhere}
+[data-team-settings-panel]:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+#teamColorHint{font-size:.8rem;line-height:1.5;margin:0 0 14px}
+@media(max-width:400px){.teamSettingsNav{grid-template-columns:1fr 1fr}.teamSettingsTab{font-size:.76rem;line-height:1.35;overflow-wrap:anywhere}}
