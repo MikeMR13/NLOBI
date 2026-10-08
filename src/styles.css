@@ -1434,3 +1434,19 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .notificationMorePanel{position:absolute;right:0;bottom:calc(100% + 7px);z-index:10;display:flex;flex-direction:column;gap:8px;min-width:185px;max-width:min(260px,80vw);padding:11px;border:1px solid var(--line);border-radius:12px;background:var(--panel);box-shadow:0 10px 30px #0004}
 .notificationMorePanel .btn{min-height:44px}
 @media(max-width:550px){.notificationsEditorial .notificationFeedCard{padding:13px;grid-template-columns:40px minmax(0,1fr);gap:10px}.notificationFeedIcon{width:40px;height:40px;font-size:1.12rem}.notificationFeedFooter{align-items:flex-start;flex-direction:column}.notificationFeedControls{width:100%;justify-content:flex-end}.notificationFeedControls>.btn{flex:1}}
+
+
+/* Avisos — fase 4: preferencias compactas y agrupacion por fecha */
+.notificationsEditorial .notificationSettings{border:1px solid var(--line);background:var(--panel);border-radius:14px;margin:14px 0 20px}
+.notificationSettings>summary{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;cursor:pointer;min-height:56px;padding:15px 18px;list-style:none}
+.notificationSettings>summary::-webkit-details-marker{display:none}
+.notificationSettings>summary:after{content:"⌄";font-size:1.3rem;color:var(--muted)}
+.notificationSettings[open]>summary:after{content:"⌃"}
+.notificationSettingsHeading{font-weight:800;color:var(--text)}
+.notificationSettingsHint{font-size:.82rem;color:var(--muted);margin-left:auto}
+.notificationSettings>summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.notificationSettings .notificationPrefs{margin:0;padding:0 16px 17px}
+.notificationDateGroup{grid-column:1/-1;display:flex;align-items:center;gap:12px;font-size:.86rem;font-weight:800;color:var(--text);margin:11px 0 2px}
+.notificationDateGroup:after{content:"";height:1px;background:var(--line);flex:1}
+.notificationsEditorial .notificationFeed>.empty{grid-column:1/-1;padding:34px 18px}
+@media(max-width:620px){.notificationSettings>summary{padding:13px}.notificationSettingsHint{width:100%;margin-left:0}.notificationSettings .notificationPrefs{padding:0 11px 12px}}
