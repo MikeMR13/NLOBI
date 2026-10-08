@@ -440,7 +440,7 @@ async function epubDataUrl(zip,path,warnings,label){const zf=zip.file(path);if(!
 async function hydrateEpubImages(doc,zip,base,warnings){const nodes=[...doc.querySelectorAll('img,svg image,object[type^="image/"]')],seen=new Set();for(const node of nodes){if(seen.has(node))continue;seen.add(node);const tag=node.tagName.toLowerCase();let src=tag==='img'?(node.getAttribute('src')||''):(tag==='object'?(node.getAttribute('data')||''):(node.getAttribute('href')||node.getAttribute('xlink:href')||node.getAttributeNS?.('http://www.w3.org/1999/xlink','href')||''));if(!src&&tag==='img'){const srcset=node.getAttribute('srcset')||'';src=srcset.split(',')[0]?.trim().split(/\s+/)[0]||''}if(!src||/^(?:https?:|data:)/i.test(src))continue;const zp=epubHrefKey(base,src),dataUrl=await epubDataUrl(zip,zp,warnings,src);if(!dataUrl){(node.closest?.('svg')||node).remove();continue}if(tag==='img'){node.setAttribute('src',dataUrl);node.removeAttribute('srcset');continue}const img=doc.createElement('img'),container=node.closest?.('svg')||node;img.setAttribute('src',dataUrl);img.setAttribute('alt',node.getAttribute('alt')||container.getAttribute?.('aria-label')||'');const title=node.getAttribute('title')||container.querySelector?.('title')?.textContent||'';if(title)img.setAttribute('title',title);container.replaceWith(img)}}
 function epubTitleMap(zip,opf,base,manifest){
  const map=new Map();map._entries=[];
- const add=(rawBase,src,title,source)=>{const cleanTitle=normalizeImportedText(title||'');if(!src||!cleanTitle)return;const key=epubHrefKey(rawBase,src);if(!key)return;if(!map.has(key))map.set(key,cleanTitle);map._entries.push({path:key,title:cleanTitle,source})};
+ const add=(rawBase,src,title,source)=>{const cleanTitle=normalizeImportedText(title||'');if(!src||!cleanTitle)return;const key=epubHrefKey(rawBase,src);if(!key)return;if(!map.has(key))map.set(key,cleanTitle);map._entries.push({path:key,title:cleanTitle,source,fragment:String(src).split('#')[1]||''})};
  const navItem=[...opf.querySelectorAll('manifest item')].find(n=>(n.getAttribute('properties')||'').split(/\s+/).includes('nav'));
  if(navItem?.getAttribute('href')){
   const p=epubHrefKey(base,navItem.getAttribute('href')),f=zip.file(p);
@@ -499,7 +499,18 @@ async function parseEpubRich(file){
    const title=normalizeSectionHeadingText(cur.title||kept[0].usefulTitle||('Sección '+(sections.length+1)));
    const blocks=[];for(const page of kept)blocks.push(...page.blocks);
    if(!blocks.length)continue;
-   sections.push({title,section_type:detectSectionType(title),blocks,body:blocksToPlainText(blocks)});
+   sections.push({title,section_type:detectSectionType(title),sourcePath:cur.path,blocks,body:blocksToPlainText(blocks)});
+  }
+  // Some books place two editorial sections in a single XHTML and link to a fragment.
+  for(const entry of titles._entries||[]){
+   if(!entry.fragment||!isSectionHeading(entry.title))continue;
+   const idx=sections.findIndex(sec=>sec.sourcePath===entry.path);
+   if(idx<0)continue;
+   const sec=sections[idx],cut=sec.blocks.findIndex((block,pos)=>pos>0&&(block.type==='heading'||block.type==='paragraph')&&importCanonicalText(block.text)===importCanonicalText(entry.title));
+   if(cut<1)continue;
+   const trailing=sec.blocks.splice(cut);
+   sec.body=blocksToPlainText(sec.blocks);
+   sections.splice(idx+1,0,{title:normalizeSectionHeadingText(entry.title),section_type:detectSectionType(entry.title),sourcePath:entry.path,blocks:trailing,body:blocksToPlainText(trailing)});
   }
   if(sections.length)warnings.push('Estructura EPUB detectada desde el índice: '+sections.length+' secciones; los XHTML intermedios se agruparon con la entrada anterior del TOC.');
  }
