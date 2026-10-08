@@ -1263,3 +1263,12 @@ body.dark .mobileNav #themeMobile{color:#ffd400}
 .exploreEmpty .btn{min-height:44px}
 @media(max-width:600px){.exploreResultsBar{align-items:flex-start}.exploreResultsActions{width:100%;justify-content:space-between}.exploreViewSwitch button{padding:8px 10px}.exploreListView>.catalogEditorialCard{grid-template-columns:100px minmax(0,1fr);min-height:155px}.exploreListView .catalogCoverButton{min-height:155px}.exploreListView .catalogCardContent{padding:10px;gap:5px}.exploreListView .catalogCardSynopsis,.exploreListView .catalogGenres{display:none}.exploreListView .catalogCardActions{flex-wrap:wrap}.exploreListView .catalogCardActions>.btn{min-height:44px}}
 @media(max-width:360px){.exploreViewSwitch button span{display:none}.exploreViewSwitch button{min-width:44px}.exploreListView>.catalogEditorialCard{grid-template-columns:86px minmax(0,1fr)}}
+
+
+/* Explore quality pass · readable controls, proper touch sizes and contrast */
+.exploreNovelGrid .catalogTitleLink{display:flex!important;align-items:center;min-height:44px!important;padding:9px 0!important;line-height:1.4;overflow-wrap:anywhere}
+.exploreNovelGrid h3{overflow:visible;display:block;-webkit-line-clamp:unset;line-clamp:unset}
+.exploreNovelGrid .catalogStatusTag{color:#544400}
+.homeEditorial .homeFeaturedLabel,.homeEditorial .homeFeaturedLink,.homeEditorial .homeBookOpen{color:#685400}
+body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeaturedLabel,body.dark .homeEditorial .homeFeaturedLink,body.dark .homeEditorial .homeBookOpen{color:#ffe14a}
+@media(max-width:730px){.exploreNovelGrid .catalogTitleLink{min-height:44px!important}}
