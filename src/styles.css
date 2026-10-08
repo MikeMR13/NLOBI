@@ -767,3 +767,19 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 .pagedItemActions .btn{font-size:.73rem;padding:5px 9px}
 .pagedItem:focus-within .pagedItemActions,.pagedItem:hover .pagedItemActions{opacity:1}
 @media(max-width:620px){.pagedAddTools{position:static}.pagedItemActions{flex-wrap:wrap;opacity:1}}
+
+
+/* Paginado WYSIWYG: documento de texto continuo */
+.pagedFormatBar{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin:0 0 10px;padding:10px;border-radius:12px;background:var(--panel2);border:1px solid var(--line)}
+.pagedFormatBar .btn{min-width:39px}
+.pagedContinuousEditor{min-height:460px;outline:none;font:1rem/1.9 "Literata",Georgia,serif;white-space:normal;overflow-wrap:anywhere;caret-color:var(--accent);cursor:text}
+.pagedContinuousEditor:focus-visible{outline:2px solid var(--accent);outline-offset:12px;border-radius:2px}
+.pagedContinuousEditor>p,.pagedContinuousEditor>div:not(.pagedDocumentWidget){margin:0 0 1.05em;min-height:1.7em}
+.pagedContinuousEditor>h2{font-size:1.25rem;line-height:1.5;margin:1.2em 0 .7em}
+.pagedContinuousEditor>blockquote{padding:4px 0 4px 18px;border-left:3px solid var(--accent);margin:1em 0}
+.pagedContinuousEditor>aside{background:var(--panel2);padding:12px 16px;border-radius:10px;margin:16px 0}
+.pagedContinuousEditor .pagedDocumentWidget{margin:16px 0;cursor:default;border:1px dashed var(--line);border-radius:11px;padding:10px;background:var(--panel2)}
+.pagedDocumentWidget .editorBlock{margin:0;max-width:100%}
+.pagedDocumentWidget .mediaPreview{max-width:100%;max-height:330px;object-fit:contain}
+.pagedDocumentWidget input,.pagedDocumentWidget textarea{font-family:inherit}
+@media(max-width:620px){.pagedContinuousEditor{min-height:340px}.pagedFormatBar .btn{flex:1 1 auto}}
