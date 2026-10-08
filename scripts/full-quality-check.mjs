@@ -287,6 +287,25 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  if(runtime.length||!result.imageFound||!result.naturalWidth||!result.visible||!result.src)failures.push({scenario:'reader-rich-block-image-visible',runtime,result,error:'reader-image-not-rendered'});
  await context.close();
 }
+
+ // EPUB3 navigation takes priority over the NCX fallback; title pages are not chapters.
+ {
+  const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});await prepare(context);
+  const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+  await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__?.parseEpub);
+  const result=await page.evaluate(async raw=>{
+   const bytes=Uint8Array.from(atob(raw),x=>x.charCodeAt(0));
+   const parsed=await window.__NLOBI_QA__.parseEpub(new File([bytes],'Libro de prueba.epub',{type:'application/epub+zip'}));
+   const origin=window.__NLOBI_CONFIG__.supabaseUrl;
+   const url=origin+'/storage/v1/object/public/nlobi-media/teams/123/imports/example.jpg';
+   return {titles:parsed.sections?.map(x=>x.title),text:parsed.text,media:window.__NLOBI_QA__.mediaUrl(url)};
+  },'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');
+  if(runtime.length||JSON.stringify(result.titles)!==JSON.stringify(['Prólogo','Capítulo 1'])||result.text.includes('Créditos editoriales')||result.media!=='/media/teams/123/imports/example.jpg'){
+   failures.push({scenario:'epub-title-chapter-and-reader-media-path',runtime,result,error:'epub-title-or-media-regression'});
+  }
+  await context.close();
+ }
+
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');

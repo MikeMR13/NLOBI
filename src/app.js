@@ -15,7 +15,7 @@ const demo=[
 ];
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const safeUrl=u=>{if(!u)return'#';try{const v=/^https?:\/\//i.test(String(u))?String(u):'https://'+String(u);const x=new URL(v);return ['http:','https:'].includes(x.protocol)?x.href:'#'}catch{return'#'}};const safeMediaUrl=u=>/^data:image\/(png|jpeg|jpg|gif|webp);base64,/i.test(String(u||''))?String(u):safeUrl(u);const safeCssUrl=u=>safeUrl(u).replace(/[\\'"()]/g,c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0').toUpperCase());
+const safeUrl=u=>{if(!u)return'#';try{const v=/^https?:\/\//i.test(String(u))?String(u):'https://'+String(u);const x=new globalThis.URL(v);return ['http:','https:'].includes(x.protocol)?x.href:'#'}catch{return'#'}};const safeMediaUrl=u=>{const raw=String(u||'');if(/^data:image\/(png|jpeg|jpg|gif|webp);base64,/i.test(raw))return raw;const url=safeUrl(raw);try{const parsed=new globalThis.URL(url),origin=new globalThis.URL(URL),prefix='/storage/v1/object/public/nlobi-media/';if(parsed.origin===origin.origin&&parsed.pathname.startsWith(prefix))return '/media/'+parsed.pathname.slice(prefix.length)+parsed.search} catch{}return url};const safeCssUrl=u=>safeUrl(u).replace(/[\\'"()]/g,c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0').toUpperCase());
 const titleOf=x=>x?.novels?.title||x?.title||'Novela';
 const coverOf=x=>x?.novels?.cover_url||null;
 const statusLabel=s=>({reading:'Leyendo',plan_to_read:'Por leer',completed:'Completada',paused:'Pausada',dropped:'Abandonada'}[s]||s||'En biblioteca');
@@ -264,7 +264,7 @@ function addEditorBlock(type){if(!S.blockEditor)return;const map={paragraph:{typ
 function moveEditorBlock(i,dir){if(!S.blockEditor)return;const j=i+dir;if(j<0||j>=S.blockEditor.blocks.length)return;[S.blockEditor.blocks[i],S.blockEditor.blocks[j]]=[S.blockEditor.blocks[j],S.blockEditor.blocks[i]];render()}
 function deleteEditorBlock(i){if(!S.blockEditor)return;S.blockEditor.blocks.splice(i,1);render()}
 function syncEditorInputs(){if(!S.blockEditor)return;S.blockEditor.blocks.forEach((b,i)=>{if(['paragraph','heading','quote','translator_note'].includes(b.type)){const el=document.querySelector(`[data-block-text="${i}"]`);if(el)b.text=el.value}else if(b.type==='image'){const u=document.querySelector(`[data-block-url="${i}"]`),a=document.querySelector(`[data-block-alt="${i}"]`),c=document.querySelector(`[data-block-caption="${i}"]`);if(u)b.url=u.value;if(a)b.alt=a.value;if(c)b.caption=c.value}else if(b.type==='ruby'){const ba=document.querySelector(`[data-block-base="${i}"]`),r=document.querySelector(`[data-block-reading="${i}"]`);if(ba)b.base=ba.value;if(r)b.reading=r.value}})}
-function renderReaderBlock(b){b=normalizeBlock(b);if(b.type==='heading')return `<h2 class="readerHeading">${esc(b.text||'')}</h2>`;if(b.type==='quote')return `<blockquote>${esc(b.text||'')}</blockquote>`;if(b.type==='separator')return '<hr aria-hidden="true">';if(b.type==='translator_note')return `<aside class="translatorNote" aria-label="Nota del traductor"><strong>Nota del traductor</strong><div>${esc(b.text||'')}</div></aside>`;if(b.type==='ruby')return `<p><ruby>${esc(b.base||'')}<rp>(</rp><rt>${esc(b.reading||'')}</rt><rp>)</rp></ruby></p>`;if(b.type==='image'&&b.url){const alt=String(b.alt??'').trim();return `<figure><img src="${esc(safeMediaUrl(b.url))}" alt="${esc(alt||'Ilustración del capítulo')}" loading="eager" decoding="async">${b.caption?`<figcaption>${esc(b.caption)}</figcaption>`:''}</figure>`}return `<p>${esc(b.text||'')}</p>`}
+function renderReaderBlock(b){b=normalizeBlock(b);if(b.type==='heading')return `<h2 class="readerHeading">${esc(b.text||'')}</h2>`;if(b.type==='quote')return `<blockquote>${esc(b.text||'')}</blockquote>`;if(b.type==='separator')return '<hr aria-hidden="true">';if(b.type==='translator_note')return `<aside class="translatorNote" aria-label="Nota del traductor"><strong>Nota del traductor</strong><div>${esc(b.text||'')}</div></aside>`;if(b.type==='ruby')return `<p><ruby>${esc(b.base||'')}<rp>(</rp><rt>${esc(b.reading||'')}</rt><rp>)</rp></ruby></p>`;if(b.type==='image'&&b.url){const alt=String(b.alt??'').trim();return `<figure class="readerIllustration"><img src="${esc(safeMediaUrl(b.url))}" data-original-src="${esc(safeUrl(b.url))}" alt="${esc(alt||'Ilustración del capítulo')}" loading="eager" decoding="async">${b.caption?`<figcaption>${esc(b.caption)}</figcaption>`:''}<figcaption class="readerImageFallback" hidden>Esta ilustración no se pudo cargar. <a href="${esc(safeUrl(b.url))}" target="_blank" rel="noopener noreferrer">Abrir imagen original</a></figcaption></figure>`}return `<p>${esc(b.text||'')}</p>`}
 function importSteps(){const order=[['file','Archivo'],['analysis','Análisis'],['structure','Estructura'],['review','Revisión'],['edit','Edición'],['publish','Guardar']],current=order.findIndex(([k])=>k===S.importState.step);return `<aside class="importSteps" aria-label="Progreso de importación">${order.map(([k,label],i)=>`<div class="importStep ${i===current?'active':i<current?'done':''}"${i===current?' aria-current="step"':''}><span class="stepDot" aria-hidden="true">${i<current?'✓':i+1}</span><span>${label}</span></div>`).join('')}</aside>`}
 function studioImport(){if(!editorialGroups().length)return `${nav()}<main class="wrap"><div class="empty"><div class="emptyArt">🔒</div><strong>No tienes permisos para importar</strong><div>La importación requiere rol Owner, Admin, Traductor o Editor.</div><div style="margin-top:12px"><button class="btn" data-v="studio">← Studio</button></div></div></main>`;return `${nav()}<main class="wrap">${status()}<div class="sectionHead"><div><span class="eyebrow" style="color:var(--accent)">Studio · Importador</span><h2>Importar volumen o capítulo</h2><p>Archivo → Análisis → Estructura → Revisión → Edición → Guardar o publicar</p></div><button class="btn" data-v="studio">← Studio</button></div><div class="importShell">${importSteps()}<section class="importPanel">${importStepView()}</section></div></main>`}
 function importBlockStats(blocks){const c={paragraph:0,heading:0,quote:0,image:0,separator:0,translator_note:0,ruby:0};(blocks||[]).forEach(b=>{if(c[b.type]!==undefined)c[b.type]++});return c}
@@ -412,6 +412,7 @@ function render(){
  }
 }
 function bind(){
+ $$('[data-original-src]').forEach(img=>{const showFailure=()=>{const note=img.closest('figure')?.querySelector('.readerImageFallback');if(note)note.hidden=false;img.hidden=true};img.addEventListener('error',()=>{if(!img.dataset.retried&&img.dataset.originalSrc&&!img.dataset.originalSrc.startsWith('data:')&&img.src!==img.dataset.originalSrc){img.dataset.retried='1';img.src=img.dataset.originalSrc;return}showFailure()});if(img.complete&&!img.naturalWidth)showFailure()});
  $$('[data-v]').forEach(b=>b.onclick=e=>{e.preventDefault();go(b.dataset.v)});
  const retry=$('#retryBackend');if(retry)retry.onclick=()=>boot(true);const th=$('#theme');if(th)th.onclick=()=>{document.body.classList.toggle('dark');const dark=document.body.classList.contains('dark');localStorage.setItem('nlobi_dark',dark?'1':'0');th.setAttribute('aria-pressed',dark?'true':'false');th.setAttribute('aria-label',dark?'Cambiar a tema claro':'Cambiar a tema oscuro')};const ip=$('#installPwa');if(ip)ip.onclick=installPwa;
  const lt=$('#loginTab');if(lt)lt.onclick=()=>{S.authMode='login';render()};const st=$('#signupTab');if(st)st.onclick=()=>{S.authMode='signup';render()};
@@ -454,6 +455,7 @@ function epubTitleMap(zip,opf,base,manifest){
  }
  return map
 }
+function isEpubBookTitleSection(title,bookTitle,fileName=''){const clean=v=>importCanonicalText(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\u3040-\u30ff\u4e00-\u9fff]+/gi,'');const t=clean(title),book=clean(bookTitle),name=clean(fileName);return Boolean(t&&((book&&t===book)||(name&&t===name)))}
 function epubUtilityKind(path,title,blocks){const t=normalizeSectionHeadingText(title||''),p=String(path||'').toLowerCase(),chars=blocksToPlainText(blocks||[]).replace(/\[Ilustración(?::[^\]]+)?\]/g,'').trim().length,images=(blocks||[]).filter(b=>b.type==='image').length;if((/(?:^|\/)(?:nav|toc|contents?)(?:\.|\/|$)/i.test(p)||/^(?:目次|table of contents|contents|índice)$/i.test(t))&&chars<1200)return'skip';if((/(?:^|\/)(?:cover|titlepage)(?:\.|\/|$)/i.test(p)||/^(?:表紙|cover|portada)$/i.test(t))&&chars<300&&images<=2)return'skip';if(/(?:口絵|挿絵|illustrations?|ilustraciones?|gallery)/i.test(t)||/(?:^|\/)(?:illustrations?|gallery)(?:\.|\/|$)/i.test(p))return'illustrations';return'content'}
 async function parseEpubRich(file){
  const zip=await inspectZipSafety(file),warnings=[];let paths=[],titles=new Map(),manifest={},bookTitle='';
@@ -484,7 +486,8 @@ async function parseEpubRich(file){
  }
 
  const pathIndex=new Map(pages.map((x,i)=>[x.path,i])),seen=new Set();
- const tocBoundaries=(titles._entries||[])
+ const preferredToc=(titles._entries||[]).filter(x=>x.source==='nav');
+ const tocBoundaries=(preferredToc.length>=2?preferredToc:titles._entries||[])
   .map((x,order)=>({...x,index:pathIndex.get(x.path),order}))
   .filter(x=>Number.isInteger(x.index)&&!seen.has(x.path)&&(seen.add(x.path),true))
   .sort((a,b)=>a.index-b.index||a.order-b.order);
@@ -498,6 +501,7 @@ async function parseEpubRich(file){
    const kept=group.filter(x=>x.utility!=='skip'&&x.blocks.length);
    if(!kept.length)continue;
    const title=normalizeSectionHeadingText(cur.title||kept[0].usefulTitle||('Sección '+(sections.length+1)));
+   if(isEpubBookTitleSection(title,bookTitle,file.name.replace(/\.epub$/i,'').split(' - ')[0]))continue;
    const blocks=[];for(const page of kept)blocks.push(...page.blocks);
    if(!blocks.length)continue;
    sections.push({title,section_type:detectSectionType(title),sourcePath:cur.path,blocks,body:blocksToPlainText(blocks)});
@@ -559,7 +563,7 @@ function normalizeImportedText(t){return String(t||'').replace(/\r\n?/g,'\n').re
 function normalizeSectionHeadingText(v){return String(v||'').normalize('NFKC').replace(/[\u00a0\u3000]+/g,' ').replace(/\s+/g,' ').trim()}
 function detectSectionType(t){t=normalizeSectionHeadingText(t).toLowerCase();if(/pr[oó]logo|prologue|プロローグ|序章|序幕/.test(t))return'prologue';if(/ep[ií]logo|epilogue|エピローグ|終章|終幕/.test(t))return'epilogue';if(/interludio|interlude|幕間|間章|閑話/.test(t))return'interlude';if(/afterword|あとがき|後書き|posfacio|nota del autor/.test(t))return'afterword';if(/extra|bonus|特典|番外|外伝|短編|特別編|書き下ろし|後日談|口絵|挿絵|illustrations?|ilustraciones?|gallery/.test(t))return'extra';return'chapter'}
 function isSectionHeading(text){const t=normalizeSectionHeadingText(text);if(!t||t.length>220)return false;return /^(?:(?:cap[ií]tulo|chapter|episode|episodio|scene|act)\s*(?:[0-9]+|[ivxlcdm]+)\b.*|第?\s*(?:[0-9]+|[一二三四五六七八九十百千万〇零]+)\s*(?:章|話|節|部|巻|幕|編).*|(?:一|二|三|四|五|六|七|八|九|十|百)+\s*(?:章|話).*|序章.*|序幕.*|終章.*|終幕.*|前章.*|後章.*|pr[oó]logo.*|prologue.*|プロローグ.*|ep[ií]logo.*|epilogue.*|エピローグ.*|interludio.*|interlude.*|幕間.*|間章.*|閑話.*|afterword.*|posfacio.*|historia\s+especial(?:\s+ss)?\b.*|special\s+story.*|ss\s*[-:：].*|あとがき.*|後書き.*|extra.*|bonus.*|番外.*|外伝.*|短編.*|特別編.*|書き下ろし.*|後日談.*|口絵.*|挿絵.*|illustrations?.*|ilustraciones?.*|gallery.*)$/i.test(t)}
-function detectSectionsRich(blocks,text){const source=(blocks||[]).length?blocks:textBlocks(text),out=[];let title='Capítulo 1',buf=[];const push=()=>{const clean=buf.filter(Boolean);if(clean.length)out.push({title,section_type:detectSectionType(title),blocks:clean,body:blocksToPlainText(clean)})};for(const raw of source){const b=normalizeImportBlock(raw),candidate=(b.type==='heading'||b.type==='paragraph')&&isSectionHeading(b.text);if(candidate){push();title=normalizeSectionHeadingText(b.text);buf=[]}else buf.push(b)}push();if(!out.length&&source.length)out.push({title:'Capítulo 1',section_type:'chapter',blocks:source.map(normalizeImportBlock),body:blocksToPlainText(source)});return out.map((x,i)=>({...x,section_number:i+1}))}
+function detectSectionsRich(blocks,text){const source=(blocks||[]).length?blocks:textBlocks(text),out=[];let title='Capítulo 1',buf=[];let begun=false,openingImages=[];const push=()=>{const clean=buf.filter(Boolean);if(clean.length)out.push({title,section_type:detectSectionType(title),blocks:clean,body:blocksToPlainText(clean)})};for(const raw of source){const b=normalizeImportBlock(raw),candidate=(b.type==='heading'||b.type==='paragraph')&&isSectionHeading(b.text);if(candidate){if(begun)push();begun=true;title=normalizeSectionHeadingText(b.text);buf=[]}else if(begun)buf.push(b);else if(b.type==='image')openingImages.push(b)}push();if(openingImages.length&&out.length){out[0].blocks.unshift(...openingImages);out[0].body=blocksToPlainText(out[0].blocks)}if(!out.length&&source.length&&!begun)out.push({title:'Capítulo 1',section_type:'chapter',blocks:source.map(normalizeImportBlock),body:blocksToPlainText(source)});return out.map((x,i)=>({...x,section_number:i+1}))}
 function renumberImportSections(){S.importState.sections=(S.importState.sections||[]).map((x,i)=>({...x,section_number:i+1}))}
 function importMoveSection(i,dir){syncStructureFields();const a=S.importState.sections,j=i+dir;if(j<0||j>=a.length)return;[a[i],a[j]]=[a[j],a[i]];renumberImportSections();render()}
 function importDeleteSection(i){syncStructureFields();S.importState.sections.splice(i,1);renumberImportSections();render()}
@@ -859,6 +863,7 @@ if(CONFIG.qaMode===true){
   setView(view){S.view=validRoute(view)?view:'home';history.replaceState(null,'','#'+S.view);render()},
   getState(){return S},
   parseEpub(file){return parseEpubRich(file)},
+  mediaUrl(url){return safeMediaUrl(url)},
   detectImportSections(blocks,text=''){return detectSectionsRich(blocks,text)}
  }
 }
