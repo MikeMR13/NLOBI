@@ -150,6 +150,9 @@ function accountDropdown(mobile=false){
  const teams=S.groups.map(g=>({id:g.translator_groups?.id,name:g.translator_groups?.name})).filter(g=>g.id);
  return `<details class="accountDropdown ${mobile?'accountMobile':''}"><summary aria-label="Abrir menú de usuario" aria-haspopup="true"><span class="accountAvatar">${avatar}</span><span class="accountName">${label}</span><span aria-hidden="true">▾</span></summary><div class="accountDropdownPanel" aria-label="Opciones de la cuenta"><button type="button" data-account-action="profile">Perfil</button><button type="button" data-account-action="edit">Editar perfil</button><button type="button" data-account-action="teams">Gestión del equipo</button><button type="button" data-account-action="studio">Studio</button><div class="accountMenuDivider"></div><button type="button" class="accountSignOut" data-account-action="logout">Cerrar sesión</button></div></details>`
 }
+function quickSearchMenu(mobile=false){
+ return `<details class="quickSearchMenu ${mobile?'quickSearchMobile':''}"><summary aria-label="Abrir búsqueda rápida" title="Buscar novelas"><span aria-hidden="true">⌕</span><span class="quickSearchText">Buscar</span></summary><form class="quickSearchForm" data-quick-search><label for="quickSearch${mobile?'Mobile':'Desktop'}">Buscar una novela</label><div class="quickSearchFields"><input id="quickSearch${mobile?'Mobile':'Desktop'}" name="q" type="search" autocomplete="off" placeholder="Título, autor, género…" value="${esc(S.searchQuery||'')}" maxlength="120"><button type="submit">Buscar →</button></div><p>Busca por título, autor, género o equipo traductor.</p></form></details>`
+}
 function nav(){
  const unread=S.notes.filter(x=>!x.read_at).length;
  const isActive=v=>S.view===v||S.view.startsWith(v+':');
@@ -158,11 +161,11 @@ function nav(){
  ${link('home','Inicio')}${link('explore','Explorar')}${link('library','Biblioteca')}
  ${S.user?link('notifications',`Avisos${unread?` · ${unread}`:''}`)+link('beta','Beta'):''}
  ${S.admin?link('admin','Admin'):''}
- ${accountDropdown()}${S.pwaInstallReady?'<button id="installPwa" class="installHint" type="button">＋ Instalar</button>':''}<button id="theme" type="button" aria-label="${document.body.classList.contains('dark')?'Cambiar a tema claro':'Cambiar a tema oscuro'}" aria-pressed="${document.body.classList.contains('dark')?'true':'false'}" title="Cambiar tema">◐</button></nav><details class="mobileNav"><summary aria-label="Abrir menú de navegación">☰ Menú</summary><nav aria-label="Navegación móvil">
+ ${quickSearchMenu()}${accountDropdown()}${S.pwaInstallReady?'<button id="installPwa" class="installHint" type="button">＋ Instalar</button>':''}<button id="theme" type="button" aria-label="${document.body.classList.contains('dark')?'Cambiar a tema claro':'Cambiar a tema oscuro'}" aria-pressed="${document.body.classList.contains('dark')?'true':'false'}" title="Cambiar tema">◐</button></nav><details class="mobileNav"><summary aria-label="Abrir menú de navegación">☰ Menú</summary><nav aria-label="Navegación móvil">
  ${link('home','Inicio')}${link('explore','Explorar')}${link('library','Biblioteca')}
  ${S.user?link('notifications',`Avisos${unread?` · ${unread}`:''}`)+link('beta','Beta'):''}
  ${S.admin?link('admin','Admin'):''}
- ${accountDropdown(true)}${S.pwaInstallReady?'<button id="installPwaMobile" class="installHint" type="button">＋ Instalar</button>':''}<button id="themeMobile" type="button" aria-label="Cambiar tema" title="Cambiar tema">◐ Tema</button>
+ ${quickSearchMenu(true)}${accountDropdown(true)}${S.pwaInstallReady?'<button id="installPwaMobile" class="installHint" type="button">＋ Instalar</button>':''}<button id="themeMobile" type="button" aria-label="Cambiar tema" title="Cambiar tema">◐ Tema</button>
  </nav></details></div></header>${!S.online?'<div class="offlinePill" role="status">Sin conexión · modo lectura offline</div>':''}` }
 function status(){return S.err?`<div class="status bad" role="alert"><strong>Hay un problema de conexión.</strong><div>${esc(S.err)}</div><div style="margin-top:8px"><button class="btn" id="retryBackend">Reintentar</button></div></div>`:''}
 function coverMarkup(x,detail=false){
@@ -675,7 +678,9 @@ function render(){
 }
 function bind(){
  $$('[data-original-src]').forEach(img=>{const showFailure=()=>{const note=img.closest('figure')?.querySelector('.readerImageFallback');if(note)note.hidden=false;img.hidden=true};img.addEventListener('error',()=>{if(!img.dataset.retried&&img.dataset.originalSrc&&!img.dataset.originalSrc.startsWith('data:')&&img.src!==img.dataset.originalSrc){img.dataset.retried='1';img.src=img.dataset.originalSrc;return}showFailure()});if(img.complete&&!img.naturalWidth)showFailure()});
- $$('[data-v]').forEach(b=>b.onclick=e=>{e.preventDefault();go(b.dataset.v)});
+ $('[data-v]').forEach(b=>b.onclick=e=>{e.preventDefault();go(b.dataset.v)});
+ $('[data-quick-search]').forEach(form=>form.onsubmit=e=>{e.preventDefault();S.searchQuery=(new FormData(form).get('q')||'').toString().trim().slice(0,120);S.searchStatus='all';S.searchLanguage='all';S.searchGenre='all';S.searchTag='all';go('explore');});
+
  $$('[data-account-action]').forEach(b=>b.onclick=()=>{
  const a=b.dataset.accountAction;
  if(a==='logout'){logout();go('home');return}
