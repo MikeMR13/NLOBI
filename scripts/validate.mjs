@@ -149,7 +149,7 @@ for (const required of [
   if (!app.includes(required)) throw new Error(`Deep links: falta ${required}`);
 }
 for (const required of [
-  "nlobi-shell-v19-6",
+  "nlobi-shell-v19-7",
   "'/assets/app.js'",
   "'/assets/styles.css'",
   "'/runtime-config.js'",
