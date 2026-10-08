@@ -1450,3 +1450,13 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .notificationDateGroup:after{content:"";height:1px;background:var(--line);flex:1}
 .notificationsEditorial .notificationFeed>.empty{grid-column:1/-1;padding:34px 18px}
 @media(max-width:620px){.notificationSettings>summary{padding:13px}.notificationSettingsHint{width:100%;margin-left:0}.notificationSettings .notificationPrefs{padding:0 11px 12px}}
+
+/* Avisos · QA visual/accesibilidad */
+.notificationsEditorial .notificationFeedCard:focus-within{border-color:var(--accent)}
+.notificationsEditorial .notificationMorePanel{max-height:min(65vh,350px);overflow-y:auto}
+.notificationsEditorial .notificationMorePanel .btn{white-space:normal}
+.notificationsEditorial .notificationFeedCard .notificationKind{overflow-wrap:anywhere}
+.notificationsEditorial .notificationFeedControls{min-width:0;flex-wrap:wrap}
+.notificationFilterRow{scroll-padding-inline:12px}
+@media(prefers-reduced-motion:reduce){.notificationsEditorial .notificationFeedCard,.notificationFilterChip,.notificationMore summary{transition:none!important}}
+@media(max-width:380px){.notificationsEditorial .notificationFeedCard{grid-template-columns:1fr}.notificationFeedIcon{width:40px;height:40px}.notificationMorePanel{max-width:calc(100vw - 54px)}}
