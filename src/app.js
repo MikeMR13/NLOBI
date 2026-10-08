@@ -115,6 +115,14 @@ async function storageDelete(path){
  await ensureFreshSession();
  const r=await fetch(`${URL}/storage/v1/object/nlobi-media`,{method:'DELETE',headers:{apikey:KEY,Authorization:'Bearer '+S.token,'Content-Type':'application/json'},body:JSON.stringify({prefixes:[path]})});
  if(!r.ok)throw new Error((await r.text()).slice(0,250)||'No se pudo eliminar el archivo.');
+ const result=await r.json().catch(()=>null);
+ const deleted=Array.isArray(result)?result:Array.isArray(result?.data)?result.data:null;
+ if(deleted&&!deleted.some(item=>typeof item==='string'?item===path:item?.name===path||item?.path===path)){
+  throw new Error('Supabase no eliminó el archivo. Puede estar protegido por permisos o por una referencia activa.');
+ }
+ const folder=path.slice(0,path.lastIndexOf('/')),filename=path.slice(path.lastIndexOf('/')+1);
+ const remaining=await storageListFolder(folder,0,200);
+ if(remaining.some(x=>x.name===filename))throw new Error('El archivo sigue en Storage. Revisa permisos y referencias antes de volver a intentar.');
  return true
 }
 function dataUrlToBlob(dataUrl){
@@ -783,12 +791,12 @@ async function mediaBulkDelete(paths,label){
  try{
   await loadMediaUsage(S.mediaFiles.map(x=>x.path));
   const safe=list.filter(path=>Number(S.mediaUsage?.[path]||0)===0),blocked=list.length-safe.length;
-  let removed=0,failed=0;
-  for(const path of safe){try{await storageDelete(path);removed++}catch{failed++}}
+  let removed=0,failed=0,firstError='';
+  for(const path of safe){try{await storageDelete(path);removed++}catch(e){failed++;if(!firstError)firstError=friendlyError(e,'No se pudo eliminar')}}
   S.mediaFiles=await storageWalk('teams/'+S.mediaGroupId);
   await Promise.all([loadMediaUsage(S.mediaFiles.map(x=>x.path)),loadMediaFolders(S.mediaGroupId)]);
   S.mediaSelected=[];S.mediaPage=0;render();
-  toast(removed+' eliminadas; '+blocked+' protegidas por uso; '+failed+' errores.',failed?'bad':'ok')
+  toast(removed+' eliminadas; '+blocked+' protegidas por uso; '+failed+' errores.'+(firstError?' '+firstError:''),failed||(!removed&&blocked)?'bad':'ok')
  }catch(e){toast(friendlyError(e),'bad')}
 }
 async function deleteMediaAsset(path){try{if(!path)return;if(S.mediaUsage?.[path]===undefined)await loadMediaUsage([path]);if(Number(S.mediaUsage?.[path]||0)>0){toast('No puedes eliminar esta imagen porque todavía está siendo usada.','bad');return}if(!confirm('¿Eliminar definitivamente esta imagen?'))return;await loadMediaUsage([path]);if(Number(S.mediaUsage?.[path]||0)>0){toast('Esta imagen sigue en uso.','bad');return}await storageDelete(path);S.mediaSelected=(S.mediaSelected||[]).filter(x=>x!==path);S.mediaFiles=S.mediaFiles.filter(x=>x.path!==path);delete S.mediaUsage[path];render();toast('Archivo eliminado de Storage.','ok')}catch(e){toast(friendlyError(e),'bad')}}
