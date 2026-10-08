@@ -323,6 +323,23 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   await context.close();
  }
 
+
+ // The work page shows volume covers first, then chapters after selecting a volume.
+ {
+  const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});await prepare(context);
+  const page=await context.newPage(),errors=[];page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(base+'#home',{waitUntil:'networkidle'});
+  await page.evaluate(state=>window.__NLOBI_QA__.setState(state),{user:null,view:'detail:project-1',currentDetail:translation,detailVolumeId:null,detailVolumeTranslationId:'project-1'});
+  const gallery=await page.evaluate(()=>({covers:document.querySelectorAll('[data-open-volume]').length,chapters:document.querySelectorAll('.volumeChapterList .sectionRow').length}));
+  await page.locator('[data-open-volume="volume-1"]').click();
+  const opened=await page.evaluate(()=>({chapters:document.querySelectorAll('.volumeChapterList .sectionRow').length,comments:document.querySelectorAll('[data-volume-comments]').length,title:document.querySelector('.volumeOpenedHero h2')?.textContent}));
+  await page.locator('[data-volume-gallery]').click();
+  const back=await page.locator('[data-open-volume]').count();
+  if(errors.length||gallery.covers!==1||gallery.chapters!==0||opened.chapters!==2||opened.comments!==1||!opened.title||back!==1)
+   failures.push({scenario:'volume-cover-gallery-chapter-navigation',errors,gallery,opened,back});
+  await context.close();
+ }
+
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');
