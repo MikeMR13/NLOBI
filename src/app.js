@@ -349,7 +349,7 @@ function readerView(){
   <label for="readerImages">Ilustraciones</label><select id="readerImages"><option value="show" ${(S.readerPrefs.images||"show")==="show"?"selected":""}>Mostrar</option><option value="hide" ${S.readerPrefs.images==="hide"?"selected":""}>Ocultar</option></select>
  </section></details>
  ${fontFamily==='original'&&R.epub_font_family?`<p class="muted readerFontNotice">Tipografía original: ${esc(R.epub_font_family)}</p>`:''}
- <article class="readerPaper reader-${esc(theme)} reader-${esc(width)} reader-line-${esc(lineHeight)} reader-font-${esc(fontFamily)} reader-space-${esc(paragraphSpace)} reader-indent-${esc(S.readerPrefs.indent||"none")} reader-align-${esc(S.readerPrefs.align||"left")} reader-contrast-${esc(S.readerPrefs.contrast||"standard")} reader-images-${esc(S.readerPrefs.images||"show")}" style="font-size:${Number(S.readerPrefs.fontSize||18)}px" aria-labelledby="chapterTitle"><div class="readerMeta">${esc(R.novel_title||'El Obi del Lector')}${R.volume_number!=null?` · Vol. ${esc(R.volume_number)}`:''}</div><h1 id="chapterTitle">${esc(R.title||'Capítulo')}</h1>${(R.content||[]).map(renderReaderBlock).join('')}</article>
+ <article class="readerPaper reader-${esc(theme)} reader-${esc(width)} reader-line-${esc(lineHeight)} reader-font-${esc(fontFamily==='original'&&S.epubFontLoaded!==R.epub_font_url?'serif':fontFamily)} reader-space-${esc(paragraphSpace)} reader-indent-${esc(S.readerPrefs.indent||"none")} reader-align-${esc(S.readerPrefs.align||"left")} reader-contrast-${esc(S.readerPrefs.contrast||"standard")} reader-images-${esc(S.readerPrefs.images||"show")}" style="font-size:${Number(S.readerPrefs.fontSize||18)}px" aria-labelledby="chapterTitle"><div class="readerMeta">${esc(R.novel_title||'El Obi del Lector')}${R.volume_number!=null?` · Vol. ${esc(R.volume_number)}`:''}</div><h1 id="chapterTitle">${esc(R.title||'Capítulo')}</h1>${(R.content||[]).map(renderReaderBlock).join('')}</article>
  <nav class="readerBottom" aria-label="Continuar lectura"><button class="btn" id="markReaderDone" type="button">✓ Marcar como leído</button>${next?`<button class="btn primary" id="finishAndNext" data-next-section="${next.id}" data-translation="${R.translation_id}">Finalizar y leer siguiente →</button>`:`<button class="btn primary" id="finishAndReturn" data-translation="${R.translation_id}">✓ Finalizar capítulo y volver a la obra</button>`}</nav>
  </div></main>`;
 }
@@ -518,8 +518,8 @@ async function activateEpubFont(url){
  if(S.epubFontLoaded===clean||S.epubFontLoading===clean)return;
  S.epubFontLoading=clean;
  try{
-  const font=new FontFace('NLOBI-EPUB-Original','url("'+clean.replace(/["\\]/g,'')+'")');
-  await font.load();document.fonts.add(font);S.epubFontLoaded=clean;
+  const font=new FontFace('NLOBI-EPUB-Original','url("'+safeMediaUrl(clean).replace(/["\\]/g,'')+'")');
+  await font.load();if(S.epubFontFace)document.fonts.delete(S.epubFontFace);document.fonts.add(font);S.epubFontFace=font;S.epubFontLoaded=clean;
   if(S.readerPrefs.fontFamily==='original')render();
  }catch(e){console.warn('Fuente EPUB no disponible; se usa la tipografía de reserva.',e)}
  finally{S.epubFontLoading=null}
