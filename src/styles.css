@@ -1088,3 +1088,17 @@ body.dark .homeEditorial .homeProgressOverline,body.dark .homeEditorial .homeRec
  .homeEditorial .homeProgressBar{border-color:var(--text)}
  .homeEditorial .homeSectionKicker{font-weight:900}
 }
+
+
+/* Quinta fase · cierre: carga estable del inicio */
+.homeLoading{display:grid;gap:20px;margin:10px 0 32px}
+.homeLoadingHero{min-height:350px;display:grid;grid-template-columns:1.1fr .65fr;align-items:center;gap:clamp(22px,5vw,70px);padding:clamp(22px,5vw,55px);border:1px solid var(--line);border-radius:23px;background:var(--panel)}
+.homeLoadingHero>div:first-child{display:grid;gap:17px}
+.homeLoadingLine,.homeLoadingCover,.homeLoadingBooks span{display:block;border-radius:9px;background:linear-gradient(95deg,var(--panel2) 20%,color-mix(in srgb,var(--accent) 15%,var(--panel2)) 45%,var(--panel2) 70%);background-size:200% 100%;animation:obiSkeleton 1.8s ease-in-out infinite}
+.homeLoadingLine{height:18px;width:92%}.homeLoadingLine.short{width:36%;height:12px}.homeLoadingLine.headline{width:77%;height:44px}.homeLoadingLine.medium{width:61%}
+.homeLoadingCover{height:265px;width:min(200px,100%);margin-inline:auto;border-radius:12px}
+.homeLoadingLabel{color:var(--muted);font-size:.9rem;font-weight:700}
+.homeLoadingBooks{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.homeLoadingBooks span{aspect-ratio:2/3}
+@keyframes obiSkeleton{to{background-position-x:-200%}}
+@media(max-width:700px){.homeLoadingHero{grid-template-columns:1fr;min-height:0;padding:25px}.homeLoadingCover{height:180px;width:120px}.homeLoadingBooks{grid-template-columns:repeat(2,minmax(0,1fr))}.homeLoadingLine.headline{height:35px}}
+@media(prefers-reduced-motion:reduce){.homeLoadingLine,.homeLoadingCover,.homeLoadingBooks span{animation:none}}
