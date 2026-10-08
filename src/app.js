@@ -501,7 +501,7 @@ async function parseEpubRich(file){
    const kept=group.filter(x=>x.utility!=='skip'&&x.blocks.length);
    if(!kept.length)continue;
    const title=normalizeSectionHeadingText(cur.title||kept[0].usefulTitle||('Sección '+(sections.length+1)));
-   if(isEpubBookTitleSection(title,bookTitle,cur.path.split('/').pop().replace(/\\.[^.]+$/,'')))continue;
+   if(isEpubBookTitleSection(title,bookTitle,file.name.replace(/\.epub$/i,'').split(' - ')[0]))continue;
    const blocks=[];for(const page of kept)blocks.push(...page.blocks);
    if(!blocks.length)continue;
    sections.push({title,section_type:detectSectionType(title),sourcePath:cur.path,blocks,body:blocksToPlainText(blocks)});
@@ -863,6 +863,7 @@ if(CONFIG.qaMode===true){
   setView(view){S.view=validRoute(view)?view:'home';history.replaceState(null,'','#'+S.view);render()},
   getState(){return S},
   parseEpub(file){return parseEpubRich(file)},
+  mediaUrl(url){return safeMediaUrl(url)},
   detectImportSections(blocks,text=''){return detectSectionsRich(blocks,text)}
  }
 }
