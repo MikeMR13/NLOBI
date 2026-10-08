@@ -1520,3 +1520,38 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .betaSubmitButton{align-self:flex-start;min-height:46px;font-weight:800}
 .betaSubmitButton:disabled{opacity:.65;cursor:wait}
 @media(max-width:760px){.betaEditorial .betaFeedbackShell{grid-template-columns:1fr}.betaFeedbackShell .authVisual{min-height:auto}.betaSubmitButton{align-self:stretch}}
+
+
+/* Centro Beta · fase 4: seguimiento de reportes */
+.betaReportsSection{margin:26px 0 48px;scroll-margin-top:96px}
+.betaReportsTotal{font-size:.75em;color:var(--muted);font-weight:600}
+.betaReportsSummary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0 24px}
+.betaReportMetric{padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:14px;display:flex;flex-direction:column;gap:4px}
+.betaReportMetric strong{font-size:1.55rem;font-variant-numeric:tabular-nums}
+.betaReportMetric span{font-size:.82rem;color:var(--muted)}
+.betaReportsGroups{display:grid;gap:12px}
+.betaReportsGroup{border:1px solid var(--line);background:var(--panel);border-radius:15px;overflow:hidden}
+.betaReportsGroup>summary{display:flex;align-items:center;gap:12px;padding:17px 20px;cursor:pointer;font-weight:800;list-style:none}
+.betaReportsGroup>summary::-webkit-details-marker{display:none}
+.betaReportsGroup>summary:before{content:"";width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s}
+.betaReportsGroup[open]>summary:before{transform:rotate(45deg)}
+.betaReportGroupCount{margin-left:auto;border-radius:99px;background:var(--panel2);padding:3px 10px;font-size:.81rem}
+.betaReportsGroupBody{border-top:1px solid var(--line);padding:4px 20px 20px;display:grid;gap:12px}
+.betaGroupHelp{color:var(--muted);font-size:.85rem;margin:12px 0 2px}
+.betaGroupEmpty{padding:16px;background:var(--panel2);border-radius:10px;color:var(--muted);margin:0}
+.betaReportCard{border:1px solid var(--line);border-radius:12px;padding:16px;background:var(--panel2);min-width:0}
+.betaReportCardHead{display:flex;justify-content:space-between;align-items:start;gap:12px}
+.betaReportCardHead h3{font-size:1rem;margin:5px 0 0;overflow-wrap:anywhere}
+.betaReportCardHead time{font-size:.8rem;color:var(--muted);white-space:nowrap}
+.betaReportType{font-size:.73rem;color:var(--muted);font-weight:750}
+.betaReportDetails{margin-top:12px}
+.betaReportDetails>summary{cursor:pointer;font-weight:700;font-size:.85rem;min-height:28px}
+.betaReportDescription{white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.6;margin-top:12px}
+.betaAdminReply{border-left:3px solid var(--accent,#e5bd26);padding:10px 14px;margin-top:14px;background:var(--panel)}
+.betaAdminReply p{white-space:pre-wrap;overflow-wrap:anywhere;margin:6px 0 0}
+.betaReportsEmpty{padding:28px;border:1px dashed var(--line);border-radius:15px;background:var(--panel);text-align:center}
+.betaReportsEmpty strong{display:block;font-size:1.1rem}.betaReportsEmpty p{color:var(--muted);line-height:1.55}
+.betaReportsEmpty .btn{display:inline-flex;margin-top:8px}
+.betaReportsGroup summary:focus-visible,.betaReportDetails summary:focus-visible{outline:3px solid var(--accent,#e5bd26);outline-offset:-3px}
+@media(max-width:680px){.betaReportsSummary{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.betaReportMetric{padding:13px}.betaReportsGroup>summary{padding:14px}.betaReportsGroupBody{padding:3px 12px 14px}.betaReportCard{padding:13px}.betaReportCardHead{flex-direction:column;gap:5px}}
+@media(prefers-reduced-motion:reduce){.betaReportsGroup>summary:before{transition:none}}
