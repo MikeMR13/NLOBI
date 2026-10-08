@@ -44,6 +44,8 @@ jobs:
         run: node scripts/layout-check.mjs
       - name: Mobile interaction audit (Chromium + WebKit)
         run: node scripts/mobile-interactions-check.mjs
+      - name: Explore visual and interaction audit
+        run: node scripts/explore-quality-check.mjs
       - name: Full platform quality pass
         run: node scripts/full-quality-check.mjs
       - name: Cross-browser smoke
