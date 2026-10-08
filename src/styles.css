@@ -1749,3 +1749,6 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 #teamProfileSettings .authPanel .field{margin-bottom:16px}
 @media(max-width:620px){.teamIdentityBanner{min-height:125px;padding:17px}.teamIdentityMain{padding:0 17px 19px;align-items:flex-start;gap:13px}.teamIdentityAvatar{height:78px;width:78px;border-width:4px;font-size:1.7rem}.teamIdentityCopy{padding-top:44px}.teamIdentityCopy h1{font-size:1.4rem}}
 @media(max-width:380px){.teamIdentityMain{flex-direction:column;gap:6px}.teamIdentityCopy{padding-top:0}}
+
+/* Preferencias: seguridad de la cuenta */
+.readerPasswordCard{grid-column:1/-1}.readerPasswordCard form{display:grid;gap:12px;max-width:520px}.readerPasswordCard .field{margin:0}.readerPasswordCard input[type=password],.readerPasswordCard input[type=text]{width:100%}.readerPasswordReveal{display:flex;gap:10px;align-items:center;font-size:.88rem;cursor:pointer}.readerPasswordReveal input{width:18px;height:18px;accent-color:var(--accent,#b79518)}.readerPasswordCard [type=submit]{justify-self:start;min-height:44px}.readerPasswordCard #readerPasswordMessage{margin:0;font-size:.86rem;line-height:1.5}@media(max-width:520px){.readerPasswordCard [type=submit]{width:100%}}
