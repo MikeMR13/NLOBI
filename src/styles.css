@@ -1409,3 +1409,28 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .notificationFilterChip.active .notificationFilterCount{background:#111;color:#ffd400}
 .notificationFilterResult{font-size:.84rem;color:var(--muted);margin:0 0 15px}
 @media(max-width:620px){.notificationFilterRow{margin-right:-12px;padding-right:12px;gap:7px}.notificationFilterChip{padding:9px 13px}}
+
+
+/* Avisos · fase 3: tarjetas de actividad */
+.notificationsEditorial .notificationFeed{display:grid;gap:12px}
+.notificationsEditorial .notificationFeedCard{display:grid;grid-template-columns:48px minmax(0,1fr);gap:15px;align-items:start;overflow:visible;padding:19px;border:1px solid var(--line);border-radius:15px;background:var(--panel)}
+.notificationsEditorial .notificationFeedCard.unread{border-left:4px solid var(--accent);background:var(--panel)}
+.notificationFeedIcon{display:grid;place-items:center;width:46px;height:46px;border-radius:12px;background:var(--panel2);font-size:1.4rem}
+.notificationFeedCard.unread .notificationFeedIcon{background:#ffdf50;color:#151515}
+.notificationFeedContent{min-width:0;display:flex;flex-direction:column;gap:9px}
+.notificationFeedTop{display:flex;align-items:center;justify-content:space-between;gap:9px}
+.notificationKind{font-size:.73rem;font-weight:800;color:var(--accentText);letter-spacing:.04em}
+.notificationUnreadDot{display:inline-block;width:9px;height:9px;flex:0 0 9px;border-radius:50%;background:var(--accent)}
+.notificationFeedContent h3{font-size:1.04rem;line-height:1.4;margin:0;overflow-wrap:anywhere}
+.notificationFeedBody{margin:0;color:var(--muted);font-size:.9rem;line-height:1.6;overflow-wrap:anywhere}
+.notificationFeedFooter{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-top:3px}
+.notificationFeedDate{color:var(--muted);font-size:.77rem}
+.notificationFeedControls{display:flex;align-items:center;gap:8px}
+.notificationFeedControls>.btn{min-height:44px}
+.notificationMore{position:relative}
+.notificationMore summary{list-style:none;display:grid;place-items:center;cursor:pointer;width:44px;height:44px;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);font-size:1.5rem}
+.notificationMore summary::-webkit-details-marker{display:none}
+.notificationMore summary:focus-visible,.notificationMorePanel .btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.notificationMorePanel{position:absolute;right:0;bottom:calc(100% + 7px);z-index:10;display:flex;flex-direction:column;gap:8px;min-width:185px;max-width:min(260px,80vw);padding:11px;border:1px solid var(--line);border-radius:12px;background:var(--panel);box-shadow:0 10px 30px #0004}
+.notificationMorePanel .btn{min-height:44px}
+@media(max-width:550px){.notificationsEditorial .notificationFeedCard{padding:13px;grid-template-columns:40px minmax(0,1fr);gap:10px}.notificationFeedIcon{width:40px;height:40px;font-size:1.12rem}.notificationFeedFooter{align-items:flex-start;flex-direction:column}.notificationFeedControls{width:100%;justify-content:flex-end}.notificationFeedControls>.btn{flex:1}}
