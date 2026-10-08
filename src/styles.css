@@ -1482,3 +1482,20 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .betaEditorial #beta-diagnostic,.betaEditorial #beta-feedback,.betaEditorial #beta-reports{scroll-margin-top:96px}
 @media(max-width:620px){.betaEditorial .betaShowcase{margin:12px 0 22px;padding:23px 18px;border-radius:18px}.betaKanji{font-size:1.6rem}.betaQuickLinks{display:grid;grid-template-columns:1fr}.betaQuickLink{justify-content:flex-start}}
 @media(prefers-reduced-motion:reduce){.betaQuickLink{transition:none}}
+
+
+/* Centro Beta · fase 2: diagnóstico verificable */
+.betaDiagnosticPanel{border:1px solid var(--line);background:var(--panel);border-radius:17px;padding:clamp(16px,3vw,25px);margin:15px 0 28px}
+.betaDiagnosticSummary{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.betaDiagnosticSummary h3{margin:4px 0 7px;font-size:clamp(1.2rem,2.2vw,1.5rem)}
+.betaDiagnosticSummary p{margin:0;color:var(--muted);line-height:1.55;font-size:.89rem}
+.betaDiagnosticCount{white-space:nowrap;font-weight:800;color:var(--accentText);font-variant-numeric:tabular-nums;font-size:1.4rem}
+.betaDiagnosticResults{display:grid;gap:9px;margin:20px 0 14px}
+.betaDiagnosticResult{display:grid;grid-template-columns:39px minmax(0,1fr) auto;align-items:center;gap:12px;background:var(--panel2);border:1px solid var(--line);padding:13px;border-radius:12px}
+.betaDiagnosticIcon{display:grid;place-items:center;width:37px;height:37px;border-radius:10px;font-weight:850;background:var(--panel);color:var(--text)}
+.betaDiagnosticIcon.passed{color:#146b39;background:#daf4e4}.betaDiagnosticIcon.failed{color:#903b16;background:#ffeadf}.betaDiagnosticIcon.pending{color:var(--text)}
+.betaDiagnosticResult strong{display:block;overflow-wrap:anywhere}.betaDiagnosticResult p{margin:4px 0 0;font-size:.82rem;color:var(--muted);line-height:1.5;overflow-wrap:anywhere}
+.betaDiagnosticState{font-size:.78rem;color:var(--muted);white-space:nowrap;font-weight:750}
+.betaDiagnosticEmpty{padding:21px;text-align:center;background:var(--panel2);border-radius:11px;color:var(--muted)}
+.betaDiagnosticDisclaimer{font-size:.77rem;color:var(--muted);line-height:1.5;margin:8px 0 0}
+@media(max-width:520px){.betaDiagnosticResult{grid-template-columns:36px minmax(0,1fr);gap:9px;padding:10px}.betaDiagnosticState{grid-column:2;white-space:normal}.betaDiagnosticCount{font-size:1rem}.betaDiagnosticSummary{align-items:flex-start}}
