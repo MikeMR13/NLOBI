@@ -16,10 +16,10 @@ for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
    await page.waitForFunction(()=>window.__NLOBI_QA__&&document.querySelector('.mobileNav'));
    await page.evaluate(n=>window.__NLOBI_QA__.setState({catalog:[n],catalogLoaded:true,catalogLoading:false}),novel);
    const menu=page.locator('.mobileNav');
-   await menu.locator('summary').click();
+   await menu.locator(':scope > summary').click();
    if(!await menu.evaluate(el=>el.open))throw Error('Menú no abre');
    if(!await page.locator('#nlobiMobileMenu a[data-v="explore"]').isVisible())throw Error('Enlaces del menú invisibles');
-   await menu.locator('summary').click();
+   await menu.locator(':scope > summary').click();
    if(await menu.evaluate(el=>el.open))throw Error('Menú no cierra');
    const initial=await page.locator('body').evaluate(el=>el.classList.contains('dark'));
    await page.locator('#themeMobileQuick').click();
