@@ -1780,3 +1780,26 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .teamSettingsTab:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 [data-team-settings-panel][hidden]{display:none!important}
 @media(max-width:620px){.teamSettingsNav{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.teamSettingsTab{min-height:44px;font-size:.79rem;padding:9px 5px}}
+
+/* Fase 3: perfil público de equipos traductores */
+.teamPublicPage{padding-bottom:60px}
+.teamPublicOverview{display:grid;grid-template-columns:minmax(120px,160px) minmax(120px,160px) minmax(0,1fr);gap:12px;margin:22px 0 14px}
+.teamPublicStat,.teamPublicIntro{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:17px 19px}
+.teamPublicStat{display:flex;flex-direction:column;justify-content:center;gap:3px}
+.teamPublicStat strong{font-size:clamp(1.5rem,2.5vw,2rem);line-height:1.2;font-variant-numeric:tabular-nums}
+.teamPublicStat span{color:var(--muted);font-size:.82rem}
+.teamPublicIntro{display:flex;flex-direction:column;justify-content:center}
+.teamPublicIntro p{margin:6px 0 0;color:var(--muted);font-size:.89rem}
+.teamPublicNav{display:flex;flex-wrap:wrap;gap:9px;border-bottom:1px solid var(--line);padding:10px 0 17px;margin-bottom:27px}
+.teamPublicNav a{display:inline-flex;align-items:center;gap:9px;text-decoration:none;color:var(--text);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:11px 17px;font-size:.88rem;font-weight:700;min-height:44px}
+.teamPublicNav a:hover{border-color:var(--accent);background:var(--panel2)}
+.teamPublicNav a:focus-visible,.teamPublicLink:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.teamPublicNav a span{background:var(--panel2);border-radius:99px;padding:2px 7px;font-size:.74rem;font-variant-numeric:tabular-nums}
+.teamPublicSection{scroll-margin-top:95px;margin:0 0 38px}
+.teamPublicSupport{padding-top:4px}
+.teamPublicLinks{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:12px}
+.teamPublicLink{display:flex;justify-content:space-between;gap:12px;align-items:center;min-height:60px;padding:15px 19px;background:var(--panel);border:1px solid var(--line);border-radius:13px;text-decoration:none;color:var(--text);font-weight:700;overflow-wrap:anywhere}
+.teamPublicLink:hover{border-color:var(--accent);box-shadow:var(--shadow2)}
+.teamPublicLink span:last-child{flex:none;color:var(--muted)}
+@media(max-width:700px){.teamPublicOverview{grid-template-columns:repeat(2,minmax(0,1fr))}.teamPublicIntro{grid-column:1/-1}.teamPublicStat,.teamPublicIntro{padding:14px}.teamPublicNav a{flex:1;justify-content:center}.teamPublicSection{scroll-margin-top:78px}}
+@media(max-width:390px){.teamPublicNav{flex-direction:column}.teamPublicNav a{width:100%}}
