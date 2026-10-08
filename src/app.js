@@ -165,7 +165,7 @@ function nav(){
  ${link('home','Inicio')}${link('explore','Explorar')}${link('library','Biblioteca')}
  ${S.user?link('notifications',`Avisos${unread?` · ${unread}`:''}`)+link('beta','Beta'):''}
  ${S.admin?link('admin','Admin'):''}
- ${quickSearchMenu(true)}${accountDropdown(true)}${S.pwaInstallReady?'<button id="installPwaMobile" class="installHint" type="button">＋ Instalar</button>':''}<button id="themeMobile" type="button" aria-label="Cambiar tema">${document.body.classList.contains('dark')?'☀ Activar modo claro':'☾ Activar modo oscuro'}</button>
+ ${quickSearchMenu(true)}${accountDropdown(true)}${!window.matchMedia('(display-mode: standalone)').matches&&!navigator.standalone?'<button id="installPwaMobile" class="installHint" type="button">＋ Instalar aplicación</button>':''}<button id="themeMobile" type="button" aria-label="Cambiar tema">${document.body.classList.contains('dark')?'☀ Activar modo claro':'☾ Activar modo oscuro'}</button>
  </nav></details></div></header>${!S.online?'<div class="offlinePill" role="status">Sin conexión · modo lectura offline</div>':''}` }
 function status(){return S.err?`<div class="status bad" role="alert"><strong>Hay un problema de conexión.</strong><div>${esc(S.err)}</div><div style="margin-top:8px"><button class="btn" id="retryBackend">Reintentar</button></div></div>`:''}
 function coverMarkup(x,detail=false){
@@ -1286,7 +1286,24 @@ async function setAdminVolumeStatus(id,status){try{await jreq(`/rest/v1/volumes?
 async function setAdminSectionStatus(id,status){try{await jreq(`/rest/v1/sections?id=eq.${id}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({status,updated_at:new Date().toISOString()})});await audit(status==='hidden'?'section_hidden':'section_restored','section',id,{status});await loadAdminData();render();toast('Sección actualizada.','ok')}catch(e){toast(friendlyError(e),'bad')}}
 
 let deferredInstallPrompt=null;
-async function installPwa(){if(!deferredInstallPrompt){toast('La instalación no está disponible todavía en este navegador.','bad');return}deferredInstallPrompt.prompt();try{await deferredInstallPrompt.userChoice}catch{}deferredInstallPrompt=null;S.pwaInstallReady=false;render()}
+async function installPwa(){
+ if(deferredInstallPrompt){
+  const prompt=deferredInstallPrompt;deferredInstallPrompt=null;
+  await prompt.prompt();
+  try{await prompt.userChoice}catch{}
+  S.pwaInstallReady=false;render();return;
+ }
+ if(window.matchMedia('(display-mode: standalone)').matches||navigator.standalone){toast('El Obi del Lector ya está abierto como aplicación.','ok');return}
+ const ios=/iPad|iPhone|iPod/.test(navigator.userAgent)||navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1;
+ const message=ios?'En Safari: toca Compartir (cuadrado con flecha hacia arriba), elige «Añadir a pantalla de inicio» y confirma «Añadir». Si no aparece, busca la opción en el menú de acciones de Compartir.':'En tu navegador, abre el menú (⋮ o equivalente), elige «Instalar aplicación» o «Añadir a pantalla de inicio» y confirma. Si el navegador no ofrece esa opción, abre NLOBI desde Chrome o Safari.';
+ const dialog=document.createElement('dialog');dialog.className='installHelpDialog';
+ dialog.innerHTML='<div class="installHelpHead"><strong>Instalar El Obi del Lector</strong><button type="button" aria-label="Cerrar instrucciones">✕</button></div><p></p><button class="btn primary" type="button">Entendido</button>';
+ dialog.querySelector('p').textContent=message;
+ dialog.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>dialog.close()));
+ dialog.addEventListener('close',()=>dialog.remove(),{once:true});
+ document.body.appendChild(dialog);dialog.showModal();
+}
+
 async function loadPublicProfileData(id){
  const rows=await jreq(`/rest/v1/profiles?id=eq.${id}&select=id,username,display_name,avatar_url,bio,public_library,public_activity&limit=1`);
  const p=rows?.[0];if(!p)throw new Error('Perfil no encontrado.');
