@@ -361,7 +361,7 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
    return {fonts:parsed.epubFonts,warning:parsed.warnings?.some(x=>x.includes('Se detectaron'))};
   });
   const mobile=await page.evaluate(()=>({horizontalOverflow:document.documentElement.scrollWidth>innerWidth,visibleMenu:getComputedStyle(document.querySelector('.mobileNav')).display!=='none',desktopHidden:getComputedStyle(document.querySelector('.bar>.nav')).display==='none'}));
-  await page.locator('.mobileNav summary').click();
+  await page.locator('.mobileNav > summary').click();
   const links=await page.locator('.mobileNav[open] nav a.navLink').count();
   if(errors.length||result.fonts?.length!==3||result.fonts?.[0]?.family!=='Fuente de novela'||result.fonts?.[0]?.path!=='OEBPS/fonts/story.woff2'||result.fonts?.[1]?.weight!=='700'||result.fonts?.[2]?.family!=='Fuente adicional'||result.fonts?.[2]?.style!=='italic'||!result.warning||mobile.horizontalOverflow||!mobile.visibleMenu||!mobile.desktopHidden||links<3){
    failures.push({scenario:'epub-embedded-font-and-mobile-header',errors,result,mobile,links});
