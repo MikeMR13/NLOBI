@@ -1316,3 +1316,41 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 @media(max-width:950px){.libraryContinueGrid{grid-template-columns:1fr}.libraryContinueCard{grid-template-columns:145px minmax(0,1fr);min-height:220px}}
 @media(max-width:470px){.libraryContinueGrid{gap:12px}.libraryContinueCard{grid-template-columns:minmax(105px,37%) minmax(0,1fr);min-height:207px}.libraryContinueInfo{padding:13px;gap:6px}.libraryContinueEyebrow{font-size:.62rem}.libraryContinueInfo h3{font-size:.96rem}.libraryContinueChapter{font-size:.76rem}.libraryContinueProgressLabel{font-size:.69rem}.libraryContinueButton{font-size:.8rem;padding:9px 8px}}
 @media(max-width:350px){.libraryContinueCard{grid-template-columns:100px minmax(0,1fr)}.libraryContinueInfo{padding:10px}}
+
+
+/* Biblioteca · tercera pasada: estantería personal */
+.libraryShelfSection{margin:28px 0 34px}.libraryShelfSection .sectionHead{align-items:center}
+.libraryShelfSwitch{display:flex;gap:3px;border:1px solid var(--line);background:var(--panel2);border-radius:12px;padding:4px}
+.libraryShelfSwitch button{min-height:44px;border:0;background:transparent;color:var(--text);font-weight:750;padding:8px 12px;border-radius:8px;cursor:pointer}
+.libraryShelfSwitch button.active{background:var(--accent);color:#111}
+.libraryShelfSwitch button:focus-visible,.libraryShelfCover:focus-visible,.libraryShelfTitle:focus-visible,.libraryShelfMenu summary:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.libraryShelf{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:17px;overflow:visible}
+.libraryShelfCard{position:relative;display:flex;flex-direction:column;min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:15px;overflow:visible}
+.libraryShelfCover{display:block;aspect-ratio:2/3;border:0;padding:0;background:var(--panel2);cursor:pointer;border-radius:14px 14px 0 0;overflow:hidden}
+.libraryShelfCover img{display:block;width:100%;height:100%;object-fit:cover}
+.libraryShelfFallback{display:grid;place-items:center;width:100%;height:100%;font:700 3rem Georgia,serif;color:var(--accentText)}
+.libraryShelfInfo{display:flex;flex:1;flex-direction:column;gap:8px;min-width:0;padding:14px}
+.libraryShelfBadges{display:flex;justify-content:space-between;align-items:center;gap:6px;min-height:27px}
+.libraryShelfFavorite{font-size:1.1rem;color:var(--accentText)}
+.libraryShelfInfo h3{font:700 1rem/1.38 Georgia,serif;margin:0;overflow-wrap:anywhere}
+.libraryShelfTitle{display:block;text-align:left;cursor:pointer;background:transparent;border:0;color:var(--text);padding:8px 0;min-height:44px;width:100%;font:inherit}
+.libraryShelfTeam,.libraryShelfProgress{font-size:.78rem;color:var(--muted);line-height:1.4;margin:0;overflow-wrap:anywhere}
+.libraryShelfInfo .libraryProgress{height:7px;margin-top:5px}
+.libraryShelfBottom{display:flex;gap:8px;align-items:center;margin-top:auto;padding-top:8px;position:relative}
+.libraryShelfBottom>.btn{flex:1;min-height:44px}
+.libraryShelfMenu{position:relative}
+.libraryShelfMenu summary{list-style:none;display:grid;place-items:center;cursor:pointer;border:1px solid var(--line);background:var(--panel2);border-radius:10px;color:var(--text);min-width:44px;min-height:44px;font-size:1.5rem}
+.libraryShelfMenu summary::-webkit-details-marker{display:none}
+.libraryShelfMenuPanel{position:absolute;z-index:30;right:0;bottom:calc(100% + 6px);display:flex;flex-direction:column;gap:9px;width:min(270px,80vw);background:var(--panel);border:1px solid var(--line);padding:13px;border-radius:12px;box-shadow:0 12px 35px #0004}
+.libraryShelfMenuPanel label{display:flex;flex-direction:column;gap:6px;font-size:.82rem;color:var(--muted)}
+.libraryShelfMenuPanel select{width:100%;min-height:44px}
+.libraryShelfMenuPanel .btn{min-height:44px;width:100%}
+.libraryShelf.libraryShelfList{grid-template-columns:1fr}
+.libraryShelfList .libraryShelfCard{display:grid;grid-template-columns:115px minmax(0,1fr);min-height:175px}
+.libraryShelfList .libraryShelfCover{height:100%;aspect-ratio:auto;border-radius:14px 0 0 14px}
+.libraryShelfList .libraryShelfInfo{padding:12px 18px}
+.libraryShelfList .libraryShelfBottom{justify-content:flex-start}
+.libraryShelfList .libraryShelfBottom>.btn{flex:0 1 180px}
+@media(max-width:1050px){.libraryShelf:not(.libraryShelfList){grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.libraryShelf:not(.libraryShelfList){grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.libraryShelfInfo{padding:10px;gap:5px}.libraryShelfInfo h3{font-size:.9rem}.libraryShelfSwitch button{padding:7px 10px}.libraryShelfList .libraryShelfCard{grid-template-columns:105px minmax(0,1fr)}.libraryShelfList .libraryShelfInfo{padding:10px}}
+@media(max-width:380px){.libraryShelfBottom>.btn{font-size:.74rem;padding:7px}.libraryShelfInfo{padding:8px}.libraryShelfList .libraryShelfCard{grid-template-columns:90px minmax(0,1fr)}}
