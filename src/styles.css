@@ -1022,3 +1022,25 @@ body.dark .homeEditorial .homeBookOpen{color:#ffd400}
  .homeEditorial .catalogUpdated{font-size:.67rem}
 }
 @media(prefers-reduced-motion:reduce){.homeEditorial .catalogEditorialCard,.homeEditorial .shelfArrow{transition:none}.homeEditorial .catalogEditorialCard:hover,.homeEditorial .catalogEditorialCard:focus-within,.homeEditorial .shelfArrow:hover{transform:none}}
+
+
+/* Quinta fase · tercera pasada: inicio personalizado negro/amarillo */
+.homeEditorial .homePersonalSection{margin:30px 0 42px}
+.homeEditorial .homePersonalSection>.discoverShelfHead{border-bottom:2px solid color-mix(in srgb,var(--accent) 43%,var(--line));padding-bottom:14px}
+.homeEditorial .homePersonalHint{margin:7px 0 0;font-size:.86rem;color:var(--muted)}
+.homeEditorial .homeProgressGrid{gap:17px}
+.homeEditorial .homeProgressCard{border-radius:17px;border:1px solid var(--line);padding:15px;box-shadow:0 7px 25px rgba(0,0,0,.055);transition:box-shadow .2s,border-color .2s}
+.homeEditorial .homeProgressCard:hover{border-color:color-mix(in srgb,var(--accent) 62%,var(--line));box-shadow:0 12px 29px rgba(0,0,0,.1)}
+.homeEditorial .homeProgressCover{border-radius:10px;background:linear-gradient(145deg,#111 20%,#333 60%,#ffd400 150%);color:#ffd400}
+.homeEditorial .homeProgressOverline{color:var(--accentText);font-size:.68rem}
+.homeEditorial .homeProgressDetails h3{margin:8px 0 7px;font-size:1.12rem}
+.homeEditorial .homeProgressDetails p{display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.homeEditorial .homeProgressBar{height:9px;background:var(--panel2);border-radius:99px}
+.homeEditorial .homeProgressBar>span{background:linear-gradient(90deg,#e5bc00,#ffd400)}
+.homeEditorial .homeProgressDetails .btn.primary{background:var(--accent);border-color:#dfb800;color:#111;box-shadow:none;font-weight:800}
+.homeEditorial .homeProgressDetails .btn.primary:hover{filter:brightness(.97)}
+.homeEditorial .homeRecommendationIntro{display:flex;align-items:center;gap:9px;border-left:3px solid var(--accent);background:var(--panel2);padding:11px 15px;margin:34px 0 -22px;font-size:.84rem;color:var(--muted);border-radius:0 10px 10px 0}
+.homeEditorial .homeRecommendationIntro>span:first-child{color:var(--accentText);font-size:1.1rem}
+body.dark .homeEditorial .homeProgressOverline,body.dark .homeEditorial .homeRecommendationIntro>span:first-child{color:#ffd400}
+@media(max-width:600px){.homeEditorial .homeProgressCard{padding:11px;gap:12px}.homeEditorial .homePersonalSection{margin:24px 0 35px}.homeEditorial .homeRecommendationIntro{margin:26px 0 -12px}.homeEditorial .homeProgressDetails .btn.primary{min-height:40px}}
+@media(prefers-reduced-motion:reduce){.homeEditorial .homeProgressCard{transition:none}}
