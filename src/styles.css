@@ -718,3 +718,18 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 .blockEditor textarea[data-block-text]{font-family:"Literata","Georgia",serif;font-size:1rem;line-height:1.85;min-height:115px;resize:vertical}
 .blockEditor textarea[data-block-text]:focus{outline:2px solid var(--accent);outline-offset:2px}
 @media(max-width:620px){.editorProToolbar{align-items:stretch;flex-direction:column}.editorProToolbar .row{display:flex;flex-wrap:wrap}.editorProToolbar .btn{flex:1 1 130px}}
+
+
+/* Editor Studio — manuscrito y vista del lector en vivo */
+.studioEditorWorkspace{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr);gap:18px;align-items:start;margin-top:16px}
+.studioEditorWriting,.studioEditorLivePreview{min-width:0}
+.studioEditorPaneTitle{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin:0 0 12px;padding:0 2px}
+.studioEditorPaneTitle strong{font-size:1rem}.studioEditorPaneTitle span{font-size:.78rem;color:var(--muted)}
+.studioEditorWriting .blockPalette{display:flex;flex-wrap:wrap;gap:6px}
+.studioEditorLivePreview{position:sticky;top:78px}
+.studioEditorPreviewPaper{background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:clamp(16px,2vw,28px);max-height:70vh;overflow:auto;font:1rem/1.85 "Literata","Georgia",serif;overflow-wrap:anywhere;box-shadow:var(--shadow2)}
+.studioEditorPreviewPaper h2{font-size:1.45rem;line-height:1.4;margin:0 0 20px}
+.studioEditorPreviewPaper p{margin:0 0 1.15em;white-space:pre-wrap}
+.studioEditorPreviewPaper .readerIllustration img{max-width:100%;height:auto}
+.studioEditorPreviewPaper blockquote{border-left:3px solid var(--accent);padding-left:14px;margin:16px 0}
+@media(max-width:920px){.studioEditorWorkspace{grid-template-columns:1fr}.studioEditorLivePreview{position:static}.studioEditorPreviewPaper{max-height:440px}}
