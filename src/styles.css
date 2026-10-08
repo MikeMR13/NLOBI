@@ -982,3 +982,43 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
  .discoverShelfTrack{scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch}
 }
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto!important}.homeEditorial *,.quickSearchMenu *{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+
+/* Quinta fase · segunda pasada: estanterías y novedades, identidad amarillo/negro */
+.homeEditorial .discoverShelf{position:relative;margin-block:38px 50px}
+.homeEditorial .discoverShelfHead{padding-bottom:13px;border-bottom:2px solid color-mix(in srgb,var(--accent) 40%,var(--line))}
+.homeEditorial .discoverShelfHead h2{font-weight:700;letter-spacing:-.025em}
+.homeEditorial .discoverShelfActions .btn{font-size:.85rem;font-weight:750}
+.homeEditorial .shelfArrow{width:42px;height:42px;border-radius:12px;transition:background .18s ease,border-color .18s ease,transform .18s ease}
+.homeEditorial .shelfArrow:hover{background:var(--accent);color:#101010;border-color:var(--accent);transform:translateY(-2px)}
+.homeEditorial .discoverShelfTrack{grid-auto-columns:clamp(175px,19vw,225px);gap:17px;padding:9px 4px 24px;scroll-padding-inline:5px}
+.homeEditorial .catalogEditorialCard{border:1px solid var(--line);border-radius:15px;box-shadow:0 5px 20px rgba(0,0,0,.055);transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.homeEditorial .catalogEditorialCard:hover,.homeEditorial .catalogEditorialCard:focus-within{border-color:color-mix(in srgb,var(--accent) 73%,var(--line));box-shadow:0 13px 30px rgba(0,0,0,.12);transform:translateY(-4px)}
+.homeEditorial .catalogCoverButton{background:linear-gradient(145deg,#141414,#ffd400)}
+.homeEditorial .catalogCoverFallback{background:linear-gradient(155deg,#111 10%,#333 55%,#ffd400 150%);color:#fff}
+.homeEditorial .catalogCoverFallback>span{color:var(--accent)}
+.homeEditorial .catalogCoverOverlay{background:linear-gradient(transparent,rgba(0,0,0,.88));color:#fff}
+.homeEditorial .catalogCardContent{padding:14px 13px 15px}
+.homeEditorial .catalogStatusTag{color:var(--accentText);background:var(--accentSoft);border-radius:6px;padding:4px 7px}
+.homeEditorial .catalogEditorialCard h3{font-size:1.01rem;line-height:1.43;min-height:2.8em;margin:12px 0 7px}
+.homeEditorial .catalogTranslator{line-height:1.5}
+.homeEditorial .catalogUpdated{display:inline-flex;align-items:center;gap:5px;align-self:flex-start;margin:-2px 0 10px;font-size:.7rem;font-weight:750;color:var(--muted)}
+.homeEditorial .catalogCardActions .btn.primary{background:var(--accent);color:#111;border-color:#e0b900;box-shadow:none}
+.homeEditorial .catalogGenres span{background:var(--panel2);color:var(--text)}
+.homeEditorial .homeBookCard{border-color:var(--line);box-shadow:0 4px 17px rgba(0,0,0,.04)}
+.homeEditorial .homeBookCard:hover{border-color:var(--accent);box-shadow:0 13px 30px rgba(0,0,0,.1)}
+.homeEditorial .homeBookOpen{color:var(--accentText);font-weight:800}
+body.dark .homeEditorial .catalogStatusTag{color:#ffd400}
+body.dark .homeEditorial .catalogUpdated{color:#c4c4bc}
+body.dark .homeEditorial .homeBookOpen{color:#ffd400}
+@media(max-width:640px){
+ .homeEditorial .discoverShelf{margin-block:29px 39px}
+ .homeEditorial .discoverShelfHead{align-items:flex-start}
+ .homeEditorial .discoverShelfActions .btn{padding:8px}
+ .homeEditorial .shelfArrow{height:40px;width:40px}
+ .homeEditorial .discoverShelfTrack{grid-auto-columns:minmax(160px,58vw);gap:12px;padding-bottom:18px}
+ .homeEditorial .catalogCardContent{padding:11px}
+ .homeEditorial .catalogEditorialCard h3{font-size:.93rem}
+ .homeEditorial .catalogUpdated{font-size:.67rem}
+}
+@media(prefers-reduced-motion:reduce){.homeEditorial .catalogEditorialCard,.homeEditorial .shelfArrow{transition:none}.homeEditorial .catalogEditorialCard:hover,.homeEditorial .catalogEditorialCard:focus-within,.homeEditorial .shelfArrow:hover{transform:none}}
