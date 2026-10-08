@@ -455,7 +455,7 @@ function epubTitleMap(zip,opf,base,manifest){
  }
  return map
 }
-function isEpubBookTitleSection(title,bookTitle,fileName=''){const t=importCanonicalText(title).replace(/[^\\p{L}\\p{N}]+/gu,'');const book=importCanonicalText(bookTitle).replace(/[^\\p{L}\\p{N}]+/gu,'');const name=importCanonicalText(fileName).replace(/[^\\p{L}\\p{N}]+/gu,'');return Boolean(t&&((book&&t===book)||(name&&t===name)||/^netgame\\d{1,3}$/i.test(t)))}
+function isEpubBookTitleSection(title,bookTitle,fileName=''){const clean=v=>importCanonicalText(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\u3040-\u30ff\u4e00-\u9fff]+/gi,'');const t=clean(title),book=clean(bookTitle),name=clean(fileName);return Boolean(t&&((book&&t===book)||(name&&t===name)))}
 function epubUtilityKind(path,title,blocks){const t=normalizeSectionHeadingText(title||''),p=String(path||'').toLowerCase(),chars=blocksToPlainText(blocks||[]).replace(/\[Ilustración(?::[^\]]+)?\]/g,'').trim().length,images=(blocks||[]).filter(b=>b.type==='image').length;if((/(?:^|\/)(?:nav|toc|contents?)(?:\.|\/|$)/i.test(p)||/^(?:目次|table of contents|contents|índice)$/i.test(t))&&chars<1200)return'skip';if((/(?:^|\/)(?:cover|titlepage)(?:\.|\/|$)/i.test(p)||/^(?:表紙|cover|portada)$/i.test(t))&&chars<300&&images<=2)return'skip';if(/(?:口絵|挿絵|illustrations?|ilustraciones?|gallery)/i.test(t)||/(?:^|\/)(?:illustrations?|gallery)(?:\.|\/|$)/i.test(p))return'illustrations';return'content'}
 async function parseEpubRich(file){
  const zip=await inspectZipSafety(file),warnings=[];let paths=[],titles=new Map(),manifest={},bookTitle='';
