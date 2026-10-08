@@ -1044,3 +1044,47 @@ body.dark .homeEditorial .homeBookOpen{color:#ffd400}
 body.dark .homeEditorial .homeProgressOverline,body.dark .homeEditorial .homeRecommendationIntro>span:first-child{color:#ffd400}
 @media(max-width:600px){.homeEditorial .homeProgressCard{padding:11px;gap:12px}.homeEditorial .homePersonalSection{margin:24px 0 35px}.homeEditorial .homeRecommendationIntro{margin:26px 0 -12px}.homeEditorial .homeProgressDetails .btn.primary{min-height:40px}}
 @media(prefers-reduced-motion:reduce){.homeEditorial .homeProgressCard{transition:none}}
+
+
+/* Quinta fase · cuarta pasada: acabado responsive, accesibilidad y movimiento controlado */
+.homeEditorial{overflow-wrap:break-word}
+.homeEditorial .homeShowcase,.homeEditorial .homeFeatured,.homeEditorial .homeProgressCard,.homeEditorial .catalogEditorialCard{min-width:0}
+.homeEditorial :is(.homeFeaturedInfo h2,.homeProgressDetails h3,.catalogEditorialCard h3,.homeBookDetails h3){overflow-wrap:anywhere}
+.homeEditorial :is(.discoverShelfTrack,.homeGenreLinks){overscroll-behavior-inline:contain}
+.homeEditorial :is(.shelfArrow,.homeQuickLinks button,.homeGenreLinks button,.homeBookOpen,.homeFeaturedLink){touch-action:manipulation}
+.homeEditorial :is(.shelfArrow,.homeGenreLinks button,.homeBookOpen,.homeFeaturedLink,.catalogCoverButton,.homeProgressDetails .btn):focus-visible{outline:3px solid var(--accent);outline-offset:3px;scroll-margin:90px}
+.homeEditorial .discoverShelfTrack:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:8px}
+.homeEditorial .homeProgressBar>span{transition:width .3s ease}
+.homeEditorial .catalogEditorialCard,.homeEditorial .homeBookCard,.homeEditorial .homeProgressCard{will-change:auto}
+@media(hover:none){
+ .homeEditorial .catalogCoverOverlay{opacity:1}
+ .homeEditorial :is(.catalogEditorialCard,.homeBookCard,.homeProgressCard):hover{transform:none}
+}
+@media(max-width:760px){
+ .homeEditorial .discoverShelfActions{flex-wrap:wrap;justify-content:flex-end}
+ .homeEditorial .discoverShelfHead>div:first-child{min-width:0;flex:1 1 175px}
+ .homeEditorial .homeShowcaseCopy>p{font-size:1rem}
+ .homeEditorial .homeQuickLinks button{min-height:48px}
+ .homeEditorial .homeBookDetails h3{min-height:2.6em}
+}
+@media(max-width:430px){
+ .homeEditorial .discoverShelfHead{gap:10px}
+ .homeEditorial .discoverShelfActions .btn{flex-basis:100%;text-align:right}
+ .homeEditorial .shelfArrow{width:44px;height:44px}
+ .homeEditorial .homeShowcaseActions{gap:8px}
+ .homeEditorial .homeShowcaseActions .btn{min-height:44px}
+ .homeEditorial .homeProgressGrid{gap:12px}
+ .homeEditorial .homeProgressCover{align-self:start}
+ .homeEditorial .homeProgressDetails .btn{width:100%}
+ .homeEditorial .homeBookGrid{gap:10px}
+}
+@media(prefers-reduced-motion:reduce){
+ .homeEditorial .homeProgressBar>span{transition:none!important}
+ .homeEditorial :is(.catalogEditorialCard,.homeBookCard,.homeProgressCard,.shelfArrow,.catalogBookArt>img){animation:none!important;transition:none!important}
+ .homeEditorial :is(.catalogEditorialCard,.homeBookCard,.homeProgressCard,.shelfArrow):hover{transform:none!important}
+}
+@media(prefers-contrast:more){
+ .homeEditorial :is(.catalogEditorialCard,.homeBookCard,.homeProgressCard,.homeQuickLinks button){border-width:2px}
+ .homeEditorial .homeProgressBar{border-color:var(--text)}
+ .homeEditorial .homeSectionKicker{font-weight:900}
+}
