@@ -48,6 +48,21 @@ jobs:
         run: node scripts/full-quality-check.mjs
       - name: Cross-browser smoke
         run: node scripts/cross-browser-check.mjs
+      - name: Mobile Lighthouse performance report
+        id: lighthouse
+        continue-on-error: true
+        run: |
+          mkdir -p performance-results
+          npx --yes lighthouse@12 http://127.0.0.1:4173/#home --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --form-factor=mobile --screenEmulation.mobile=true --throttling-method=simulate --only-categories=performance,accessibility --output=json --output-path=performance-results/mobile-home.json --quiet
+          node -e "const r=require('./performance-results/mobile-home.json');const a=r.audits;const m={performance:Math.round(100*r.categories.performance.score),accessibility:Math.round(100*r.categories.accessibility.score),LCP:a['largest-contentful-paint']?.numericValue,CLS:a['cumulative-layout-shift']?.numericValue,TBT:a['total-blocking-time']?.numericValue};console.log('Lighthouse mobile:',JSON.stringify(m));require('node:fs').writeFileSync('performance-results/summary.json',JSON.stringify(m,null,2))"
+      - name: Upload performance report
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
+        with:
+          name: lighthouse-mobile-report
+          path: performance-results/
+          if-no-files-found: warn
       - name: Upload full quality report
         if: always()
         continue-on-error: true
