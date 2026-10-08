@@ -1644,3 +1644,12 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .adminDirectory :is(input,select,button,summary):focus-visible{outline:3px solid var(--accent,#e3ba27);outline-offset:2px}
 @media(max-width:800px){.adminDirectoryToolbar{grid-template-columns:repeat(2,minmax(0,1fr))}.adminDirectoryToolbar label:first-child{grid-column:1/-1}}
 @media(max-width:520px){.adminDirectoryToolbar{grid-template-columns:1fr}.adminDirectoryToolbar label:first-child{grid-column:auto}.adminDirectoryTable thead{display:none}.adminDirectoryTable,.adminDirectoryTable tbody,.adminDirectoryTable tr,.adminDirectoryTable td{display:block}.adminDirectoryTable tr{padding:10px 0;border-bottom:1px solid var(--line)}.adminDirectoryTable td{border:0;padding:6px 13px}.adminDirectoryTable tr[hidden]{display:none}.adminDirectoryPager .btn{min-height:44px}}
+
+
+/* Administración global — fase 4: supervisión editorial */
+.adminEditorial{display:grid;gap:17px;min-width:0}.adminEditorialIntro{border:1px solid var(--line);background:var(--panel);padding:19px;border-radius:14px}.adminEditorialIntro h3{margin:6px 0;font-size:1.2rem}.adminEditorialIntro p{margin:0;color:var(--muted);line-height:1.5}
+.adminEditorialTools{display:grid;grid-template-columns:minmax(220px,2fr) minmax(155px,1fr);gap:13px}.adminEditorialTools label{display:grid;gap:7px;font-size:.82rem;font-weight:700}.adminEditorialTools input,.adminEditorialTools select{width:100%;min-width:0;min-height:45px;border-radius:10px}.adminEditorialEntries{min-width:0;display:grid;gap:16px}.adminEditorialEntries>.list{display:grid;gap:12px}
+.adminEditorialCard{border:1px solid var(--line);border-radius:13px;padding:17px;overflow-wrap:anywhere;min-width:0}.adminEditorialCard[hidden]{display:none!important}.adminEditorialCard .row{flex-wrap:wrap}.adminEditorialCard .btn{min-height:42px}.adminEditorialCard .link{overflow-wrap:anywhere}
+.adminEditorialEmpty{border:1px dashed var(--line);border-radius:12px;text-align:center;padding:22px;color:var(--muted)}.adminEditorialEmpty[hidden]{display:none!important}
+.adminEditorial :is(input,select,button):focus-visible{outline:3px solid var(--accent,#e0b600);outline-offset:2px}
+@media(max-width:570px){.adminEditorialTools{grid-template-columns:1fr}.adminEditorialIntro{padding:15px}.adminEditorialCard{padding:14px}.adminEditorialCard .row>.btn{flex:1}}
