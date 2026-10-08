@@ -709,3 +709,12 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 .importDropBenefits{font-size:.83rem;line-height:1.7;color:var(--muted);max-width:400px}
 .importSmartDrop strong{font-size:1.1rem;max-width:340px}
 @media(max-width:620px){.importSmartDrop{min-height:180px;padding:22px 12px}.importDropBenefits{font-size:.76rem}}
+
+
+/* Studio editor profesional */
+.editorProToolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--panel2);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:12px 0}
+.editorProToolbar #editorDraftStatus{font-size:.82rem;color:var(--muted);line-height:1.5}
+.editorProToolbar .row{gap:8px}
+.blockEditor textarea[data-block-text]{font-family:"Literata","Georgia",serif;font-size:1rem;line-height:1.85;min-height:115px;resize:vertical}
+.blockEditor textarea[data-block-text]:focus{outline:2px solid var(--accent);outline-offset:2px}
+@media(max-width:620px){.editorProToolbar{align-items:stretch;flex-direction:column}.editorProToolbar .row{display:flex;flex-wrap:wrap}.editorProToolbar .btn{flex:1 1 130px}}
