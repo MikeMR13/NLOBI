@@ -1148,3 +1148,14 @@ body.dark .mobileNav #themeMobile{color:#ffd400}
  .catalogEditorialCard .catalogCardActions .btn{min-height:44px;font-size:.76rem}
  .homeEditorial .homeFeaturedLink,.homeEditorial .homeBookOpen{min-height:44px}
 }
+
+
+/* PWA: mobile installation guidance */
+.installHelpDialog{width:min(92vw,440px);max-width:440px;border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--text);padding:22px;box-shadow:0 20px 75px #0006}
+.installHelpDialog::backdrop{background:rgba(0,0,0,.66)}
+.installHelpDialog .installHelpHead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.installHelpDialog .installHelpHead strong{font-size:1.18rem}
+.installHelpDialog .installHelpHead button{background:var(--panel2);color:var(--text);border:1px solid var(--line);border-radius:9px;width:44px;height:44px;cursor:pointer}
+.installHelpDialog p{line-height:1.65;margin:18px 0}
+.installHelpDialog>.btn{min-height:44px;width:100%}
+.mobileNav #installPwaMobile{min-height:46px;background:var(--accent);color:#111;border-radius:10px;font-weight:800}
