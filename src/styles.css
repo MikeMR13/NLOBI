@@ -1580,3 +1580,7 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .betaAdminCenter :is(input,select,textarea,button,summary):focus-visible{outline:3px solid var(--accent,#e5bd26);outline-offset:2px}
 @media(max-width:750px){.betaAdminFilters{grid-template-columns:1fr 1fr}.betaAdminFilters label:first-child{grid-column:1/-1}}
 @media(max-width:480px){.betaAdminFilters,.betaAdminIssueControls{grid-template-columns:1fr}.betaAdminFilters label:first-child{grid-column:auto}.betaAdminIssueHead{flex-direction:column}.betaAdminIssueActions .btn{width:100%}}
+
+/* Beta quick navigation: button reset and stable anchor targets */
+.betaEditorial .betaQuickLink{font:inherit;font-weight:750;cursor:pointer;justify-content:center;text-align:left;appearance:none}
+.betaEditorial #beta-diagnostic,.betaEditorial #beta-feedback,.betaEditorial #beta-reports{scroll-margin-top:110px}
