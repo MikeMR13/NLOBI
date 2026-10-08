@@ -506,8 +506,8 @@ async function parseEpubRich(file){
 
  // A partial or generic NCX is not authoritative when explicit chapter headings reveal more sections.
  if(sections.length){
-  const explicit=pages.flatMap(page=>page.utility==='skip'?[]:page.blocks.filter(b=>b.type==='heading'&&isSectionHeading(b.text)));
-  if(explicit.length>sections.length){
+  const inferred=detectSectionsRich(pages.filter(page=>page.utility!=='skip').flatMap(page=>page.blocks),'');
+  if(inferred.length>sections.length){
    warnings.push('El índice EPUB está incompleto frente a los encabezados narrativos; se usará la detección editorial alternativa.');
    sections.length=0;
   }
