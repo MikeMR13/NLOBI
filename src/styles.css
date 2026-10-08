@@ -667,3 +667,6 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
  .mobileNav nav{position:absolute;z-index:50;top:calc(100% + 10px);right:0;width:min(85vw,300px);max-height:min(75vh,560px);overflow-y:auto;display:grid;gap:4px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:var(--shadow);text-align:left}
  .mobileNav nav .navLink,.mobileNav nav button{display:block;text-align:left;width:100%;font-size:.96rem;min-height:42px;padding:10px 12px;white-space:normal}
 }
+
+/* All embedded EPUB font families are selected through a safe CSS variable. */
+.readerPaper.reader-font-original p,.readerPaper.reader-font-original blockquote,.readerPaper.reader-font-original ruby{font-family:var(--epub-reader-font,Georgia,serif)}
