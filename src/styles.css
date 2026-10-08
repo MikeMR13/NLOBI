@@ -841,3 +841,6 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 .mobileNav .accountDropdown>summary{width:100%;justify-content:flex-start}
 .mobileNav .accountDropdownPanel{position:static;z-index:auto;width:100%;box-shadow:none;margin-top:5px}
 @media(max-width:1070px){.nav .accountName{max-width:86px}}
+
+/* Hub de gestión de equipos */
+.teamManageGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,310px),1fr));gap:16px;margin:20px 0}.teamManageCard{display:flex;flex-direction:column;gap:10px;align-items:flex-start}.teamManageCard h3{margin:0}.teamManageCard p{margin:0}.teamManageCard .btn{margin-top:auto}
