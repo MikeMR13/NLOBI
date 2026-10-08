@@ -648,3 +648,22 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 .volumeChapterList{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0 16px}
 @media(max-width:580px){.volumeGallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.volumeOpenedHero{grid-template-columns:100px 1fr;gap:12px;padding:12px}.volumeOpenedHero .btn{white-space:normal}.volumeOpenedHero h2{font-size:1.1rem}}
 @media(prefers-reduced-motion:reduce){.volumeGalleryCard{transition:none}.volumeGalleryCard:hover{transform:none}}
+
+/* EPUB original typography, loaded only from approved media storage */
+.readerPaper.reader-font-original p,.readerPaper.reader-font-original blockquote,.readerPaper.reader-font-original ruby{font-family:"NLOBI-EPUB-Original",Georgia,"Times New Roman",serif}
+.readerFontNotice{font-size:.82rem;margin:0 0 12px}
+/* Compact mobile navigation: no horizontal spill or overflowing header links. */
+.mobileNav{display:none}
+@media(max-width:720px){
+ .top .bar{display:flex;flex-wrap:nowrap;align-items:center;gap:10px;padding:10px 14px;min-width:0}
+ .top .brand{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 auto;font-size:.86rem;letter-spacing:.025em;margin-right:0}
+ .top .brand>span:last-child{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .top .brandMark{flex-shrink:0;width:34px;height:34px}
+ .top .bar>.nav{display:none}
+ .mobileNav{display:block;flex:0 0 auto;position:relative}
+ .mobileNav>summary{list-style:none;cursor:pointer;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);font-weight:750;min-height:42px}
+ .mobileNav>summary::-webkit-details-marker{display:none}
+ .mobileNav[open]>summary{background:var(--accentSoft);border-color:var(--accent)}
+ .mobileNav nav{position:absolute;z-index:50;top:calc(100% + 10px);right:0;width:min(85vw,300px);max-height:min(75vh,560px);overflow-y:auto;display:grid;gap:4px;padding:10px;border:1px solid var(--line);border-radius:14px;background:var(--panel);box-shadow:var(--shadow);text-align:left}
+ .mobileNav nav .navLink,.mobileNav nav button{display:block;text-align:left;width:100%;font-size:.96rem;min-height:42px;padding:10px 12px;white-space:normal}
+}
