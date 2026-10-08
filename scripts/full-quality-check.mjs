@@ -306,6 +306,23 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   await context.close();
  }
 
+
+ // Reader settings remain collapsed; comments belong to volume and completed chapters show in the work view.
+ {
+  const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});await prepare(context);
+  const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+  await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__);
+  await page.evaluate(state=>window.__NLOBI_QA__.setState(state),{user:null,readerSection:{...section1,translation_id:'project-1',novel_title:'Obra QA',volume_number:1,navigation:[section1,section2]},view:'reader:section-1'});
+  const before=await page.evaluate(()=>({collapsed:!document.querySelector('#readerSettings')?.open,commentInReader:!!document.querySelector('.commentBox'),finish:!!document.querySelector('#finishAndNext'),indent:!!document.querySelector('#readerIndent')}));
+  await page.locator('#markReaderDone').click();
+  const read=await page.evaluate(()=>JSON.parse(localStorage.getItem('nlobi_read_sections_guest')||'[]').includes('section-1'));
+  await page.evaluate(state=>window.__NLOBI_QA__.setState(state),{user:null,view:'detail:project-1',currentDetail:translation});
+  const after=await page.evaluate(()=>({badge:document.body.textContent.includes('✓ Leído'),volumeComments:!!document.querySelector('[data-volume-comments]')}));
+  if(runtime.length||!before.collapsed||before.commentInReader||!before.finish||!before.indent||!read||!after.badge||!after.volumeComments)
+   failures.push({scenario:'reader-collapsible-settings-chapter-read-and-volume-comments',runtime,before,read,after});
+  await context.close();
+ }
+
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');
