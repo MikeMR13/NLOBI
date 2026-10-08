@@ -203,6 +203,8 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__);
  await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:translation,teamMembers});
  await page.locator('#projectTitle').fill('Nombre actualizado QA');
+ await page.locator('input[name="projectGenres-choice"][value="Romance"]').check();
+ await page.locator('#projectDemography').selectOption('General');
  await page.locator('#saveDiscoveryMeta').click();
  await page.waitForTimeout(60);
  await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:translation,teamMembers});
