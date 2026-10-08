@@ -76,7 +76,10 @@ for (const required of [
 for (const required of [
   "const translationStatusLabel=",
   "function libraryButton(",
-  "visibleCatalog().slice(0,8)",
+  "function home(){",
+  "const real=S.catalog.length,items=visibleCatalog()",
+  "class=\"homeShowcase\"",
+  "class=\"homeBookGrid\"",
   "some(sec=>sec.status==='published')",
   "publicVolumeIds",
   "✓ En biblioteca"
