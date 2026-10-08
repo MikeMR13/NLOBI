@@ -898,3 +898,37 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 @media(max-width:970px){.homeShowcase{grid-template-columns:1fr;padding:35px}.homeFeatured{display:grid;grid-template-columns:40% 60%;align-items:center}.homeFeaturedVisual{min-height:245px}.homeBookGrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
 @media(max-width:640px){.homeShowcase{padding:26px 20px;border-radius:19px;margin-top:10px;gap:20px}.homeShowcase:before{inset:8px}.homeShowcaseCopy h1{font-size:clamp(2.3rem,10vw,3.35rem)}.homeFeatured{display:block}.homeFeaturedVisual{min-height:210px}.homeFeaturedBook{width:135px}.homeQuickLinks{grid-template-columns:1fr;gap:8px;margin-bottom:25px}.homeQuickLinks button{padding:13px}.homeBookGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.homeBookDetails{padding:10px}.homeBookDetails h3{font-size:.88rem}.homeSectionHead{gap:9px}.homeClosing{display:block;padding:22px}.homeClosing .btn{margin-top:15px}}
 @media(prefers-reduced-motion:reduce){.homeBookCard,.homeQuickLinks button{transition:none}.homeBookCard:hover,.homeQuickLinks button:hover{transform:none}}
+
+
+/* Segunda pasada visual: tarjetas y estanterías */
+.catalogEditorialCard{display:flex;flex-direction:column;min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:16px;background:var(--panel);transition:transform .2s ease,box-shadow .2s ease}
+.catalogEditorialCard:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(0,0,0,.11)}
+.catalogCoverButton{appearance:none;position:relative;display:block;width:100%;aspect-ratio:2/3;padding:0;margin:0;border:0;background:var(--panel2);cursor:pointer;overflow:hidden}
+.catalogBookArt,.catalogBookArt>img{display:block;width:100%;height:100%}
+.catalogBookArt>img{object-fit:cover;transition:transform .3s}
+.catalogCoverButton:hover .catalogBookArt img{transform:scale(1.045)}
+.catalogCoverFallback{width:100%;height:100%;background:linear-gradient(145deg,#5f4638,#a47a5b);color:white;display:flex;flex-direction:column;justify-content:space-between;padding:20px}
+.catalogCoverFallback>span{font-size:1.8rem}.catalogCoverFallback strong{font:1.2rem/1.45 Georgia,serif;text-align:left;overflow-wrap:anywhere}
+.catalogCoverOverlay{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(23,18,13,.85));color:white;padding:37px 10px 12px;text-align:center;font-size:.82rem;font-weight:750;opacity:0;transition:opacity .2s}
+.catalogCoverButton:hover .catalogCoverOverlay,.catalogCoverButton:focus-visible .catalogCoverOverlay{opacity:1}
+.catalogCardContent{padding:14px;display:flex;flex:1;flex-direction:column;min-width:0}
+.catalogStatusRow{display:flex;align-items:center;justify-content:space-between;gap:7px}
+.catalogStatusTag{font-size:.69rem;color:var(--accent);font-weight:750}
+.catalogLanguage{font-size:.67rem;font-weight:700;color:var(--muted)}
+.catalogEditorialCard h3{margin:11px 0 5px;font:1.02rem/1.4 Georgia,serif;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.catalogTranslator{font-size:.78rem;color:var(--muted);margin:0 0 9px}
+.catalogGenres{display:flex;flex-wrap:wrap;gap:5px;margin:1px 0 10px}.catalogGenres span{font-size:.68rem;background:var(--panel2);border:1px solid var(--line);border-radius:20px;padding:3px 7px}
+.catalogCardSynopsis{font-size:.78rem;line-height:1.5;color:var(--muted);margin:0 0 12px;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden}
+.catalogCardActions{display:flex;gap:6px;align-items:center;flex-wrap:wrap;margin-top:auto}
+.catalogCardActions .btn{font-size:.77rem;min-height:34px;padding:7px 9px}
+.discoverShelf{margin:42px 0}
+.discoverShelfHead{display:flex;justify-content:space-between;align-items:end;flex-wrap:wrap;gap:12px;margin-bottom:18px}
+.discoverShelfHead h2{font:clamp(1.55rem,2.8vw,2.2rem)/1.25 Georgia,serif;margin:7px 0 0}
+.discoverShelfActions{display:flex;align-items:center;gap:5px}
+.shelfArrow{appearance:none;display:grid;place-items:center;border:1px solid var(--line);background:var(--panel);color:var(--text);border-radius:50%;width:35px;height:35px;cursor:pointer}
+.shelfArrow:hover{border-color:var(--accent);color:var(--accent)}
+.discoverShelfTrack{display:grid;grid-auto-flow:column;grid-auto-columns:clamp(160px,20vw,220px);gap:14px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x proximity;padding:4px 3px 17px;scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.discoverShelfTrack>.catalogEditorialCard{scroll-snap-align:start}
+.novelGrid>.catalogEditorialCard{height:100%}
+@media(max-width:640px){.discoverShelf{margin:28px 0}.discoverShelfTrack{grid-auto-columns:minmax(155px,56vw);gap:11px}.discoverShelfHead h2{font-size:1.55rem}.catalogCardContent{padding:10px}.catalogEditorialCard h3{font-size:.9rem}.catalogCardSynopsis{display:none}.catalogCardActions .btn{font-size:.72rem;padding:6px 8px}.catalogCoverOverlay{opacity:1;background:linear-gradient(transparent,rgba(23,18,13,.65))}}
+@media(prefers-reduced-motion:reduce){.catalogEditorialCard,.catalogBookArt>img,.catalogCoverOverlay{transition:none}.catalogEditorialCard:hover{transform:none}}
