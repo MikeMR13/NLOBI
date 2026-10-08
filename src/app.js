@@ -659,7 +659,7 @@ function bind(){
  if(a==='studio'){go('studio');return}
  if(a==='teams'){go('studio:teams');return}
  });
- $('[data-account-team]').forEach(b=>b.onclick=()=>openStudioTeam(b.dataset.accountTeam));
+ $$('[data-account-team]').forEach(b=>b.onclick=()=>openStudioTeam(b.dataset.accountTeam));
  const retry=$('#retryBackend');if(retry)retry.onclick=()=>boot(true);const th=$('#theme');if(th)th.onclick=()=>{document.body.classList.toggle('dark');const dark=document.body.classList.contains('dark');localStorage.setItem('nlobi_dark',dark?'1':'0');th.setAttribute('aria-pressed',dark?'true':'false');th.setAttribute('aria-label',dark?'Cambiar a tema claro':'Cambiar a tema oscuro')};const thMobile=$('#themeMobile');if(thMobile)thMobile.onclick=()=>{document.body.classList.toggle('dark');localStorage.setItem('nlobi_dark',document.body.classList.contains('dark')?'1':'0');render()};const ip=$('#installPwa');if(ip)ip.onclick=installPwa;const ipMobile=$('#installPwaMobile');if(ipMobile)ipMobile.onclick=installPwa;
  const lt=$('#loginTab');if(lt)lt.onclick=()=>{S.authMode='login';render()};const st=$('#signupTab');if(st)st.onclick=()=>{S.authMode='signup';render()};
  const lo=$('#logout');if(lo)lo.onclick=logout;const li=$('#login');if(li)li.onclick=login;const su=$('#signup');if(su)su.onclick=signup;const rv=$('#resendVerification');if(rv)rv.onclick=resendVerification;const sa=$('#sendApp');if(sa)sa.onclick=sendApplication;
