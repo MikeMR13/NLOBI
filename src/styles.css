@@ -628,3 +628,23 @@ body.dark .projectMark{background:linear-gradient(145deg,#0c0c0c,#202020)}
 .readerPaper.reader-font-trebuchet p,.readerPaper.reader-font-trebuchet blockquote,.readerPaper.reader-font-trebuchet ruby{font-family:"Trebuchet MS",Arial,sans-serif}
 .readerPaper.reader-font-arial p,.readerPaper.reader-font-arial blockquote,.readerPaper.reader-font-arial ruby{font-family:Arial,Helvetica,sans-serif}
 .readerPaper.reader-font-mono p,.readerPaper.reader-font-mono blockquote,.readerPaper.reader-font-mono ruby{font-family:Consolas,"Liberation Mono",monospace}
+
+/* Book-like volume gallery */
+.volumeGallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(165px,1fr));gap:20px;margin:18px 0 34px}
+.volumeGalleryCard{appearance:none;display:flex;flex-direction:column;text-align:left;padding:0;border:1px solid var(--line);border-radius:14px;background:var(--panel);color:var(--text);overflow:hidden;min-width:0;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease}
+.volumeGalleryCard:hover{transform:translateY(-4px);box-shadow:var(--shadow2);border-color:var(--accent)}
+.volumeGalleryCard:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.volumeGalleryArtwork{display:grid;place-items:center;width:100%;aspect-ratio:2/3;overflow:hidden;background:linear-gradient(145deg,var(--panel3),var(--panel2))}
+.volumeGalleryArtwork img,.volumeOpenedCover img{width:100%;height:100%;object-fit:cover;display:block}
+.volumeCoverPlaceholder{display:grid;place-items:center;width:100%;height:100%;font-size:3rem;background:linear-gradient(145deg,var(--panel3),var(--panel2))}
+.volumeGalleryInfo{display:flex;flex-direction:column;gap:6px;padding:12px;width:100%;min-width:0}
+.volumeGalleryInfo strong{font-size:.95rem}
+.volumeGalleryName{font-size:.88rem;line-height:1.4;overflow-wrap:anywhere}
+.volumeGalleryCount{font-size:.76rem;color:var(--muted);margin-top:3px}
+.volumeOpened{margin:18px 0 32px}
+.volumeOpenedHero{display:grid;grid-template-columns:minmax(110px,185px) 1fr;gap:24px;align-items:center;margin:18px 0 28px;padding:20px;background:var(--panel);border:1px solid var(--line);border-radius:18px}
+.volumeOpenedHero h2{margin:10px 0}
+.volumeOpenedCover{aspect-ratio:2/3;overflow:hidden;border-radius:10px;background:var(--panel2);box-shadow:var(--shadow2)}
+.volumeChapterList{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:0 16px}
+@media(max-width:580px){.volumeGallery{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.volumeOpenedHero{grid-template-columns:100px 1fr;gap:12px;padding:12px}.volumeOpenedHero .btn{white-space:normal}.volumeOpenedHero h2{font-size:1.1rem}}
+@media(prefers-reduced-motion:reduce){.volumeGalleryCard{transition:none}.volumeGalleryCard:hover{transform:none}}
