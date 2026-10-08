@@ -1555,3 +1555,8 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .betaReportsGroup summary:focus-visible,.betaReportDetails summary:focus-visible{outline:3px solid var(--accent,#e5bd26);outline-offset:-3px}
 @media(max-width:680px){.betaReportsSummary{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.betaReportMetric{padding:13px}.betaReportsGroup>summary{padding:14px}.betaReportsGroupBody{padding:3px 12px 14px}.betaReportCard{padding:13px}.betaReportCardHead{flex-direction:column;gap:5px}}
 @media(prefers-reduced-motion:reduce){.betaReportsGroup>summary:before{transition:none}}
+
+/* Centro Beta fase 5: errores recuperables y accion de actualización */
+.betaLoadError{margin:14px 0;padding:14px 17px;border:1px solid #c77454;border-radius:12px;background:var(--panel2);color:var(--text);line-height:1.55;overflow-wrap:anywhere}
+.betaReportsSection>.sectionHead{gap:12px;flex-wrap:wrap}
+@media(max-width:600px){.betaReportsSection>.sectionHead>.btn{width:100%;justify-content:center;min-height:44px}}
