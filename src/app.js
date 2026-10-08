@@ -423,7 +423,7 @@ function insertPagedBlock(type){
  serializePagedChapter();
  const block=type==='image'?{type,url:'',alt:'',caption:''}:type==='ruby'?{type,base:'',reading:''}:type==='separator'?{type}:{type,text:''};
  S.blockEditor.blocks.splice(Math.max(0,position),0,block);
- backupEditorialDraft();render();
+ render();backupEditorialDraft();
  const node=$('#studioPagedEditable')?.children[Math.max(0,position)];if(node){node.scrollIntoView({block:'nearest'});if(node.matches('p,h2,blockquote,aside')){const range=document.createRange();range.selectNodeContents(node);range.collapse(false);const sel=document.getSelection();sel.removeAllRanges();sel.addRange(range);node.focus()}}
 }
 function pagedFormat(action){
