@@ -251,3 +251,8 @@ if (!app.includes("data-detail-back")) throw new Error("Detail navigation: falta
 if (!app.includes("detailBackRoute")) throw new Error("Detail navigation: falta ruta de regreso contextual.");
 if (!css.includes(".dangerZone{")) throw new Error("Studio project delete: falta zona peligrosa visual.");
 if (!css.includes(".detailBackBar{")) throw new Error("Detail navigation: falta estilo de regreso.");
+
+if (!app.includes("posfacio.*|historia\\s+especial")) throw new Error("EPUB Calibre: faltan títulos especiales.");
+if (!app.includes("Se omitió material preliminar anterior a la primera sección narrativa")) throw new Error("EPUB Calibre: falta recorte de front matter.");
+if (!app.includes("importCanonicalText(docTitle)!==importCanonicalText(bookTitle)")) throw new Error("EPUB Calibre: no se evita el <title> repetido.");
+if (!app.includes("detectImportSections(blocks,text='')")) throw new Error("EPUB Calibre: falta hook QA de secciones.");
