@@ -678,8 +678,8 @@ function render(){
 }
 function bind(){
  $$('[data-original-src]').forEach(img=>{const showFailure=()=>{const note=img.closest('figure')?.querySelector('.readerImageFallback');if(note)note.hidden=false;img.hidden=true};img.addEventListener('error',()=>{if(!img.dataset.retried&&img.dataset.originalSrc&&!img.dataset.originalSrc.startsWith('data:')&&img.src!==img.dataset.originalSrc){img.dataset.retried='1';img.src=img.dataset.originalSrc;return}showFailure()});if(img.complete&&!img.naturalWidth)showFailure()});
- $('[data-v]').forEach(b=>b.onclick=e=>{e.preventDefault();go(b.dataset.v)});
- $('[data-quick-search]').forEach(form=>form.onsubmit=e=>{e.preventDefault();S.searchQuery=(new FormData(form).get('q')||'').toString().trim().slice(0,120);S.searchStatus='all';S.searchLanguage='all';S.searchGenre='all';S.searchTag='all';go('explore');});
+ $$('[data-v]').forEach(b=>b.onclick=e=>{e.preventDefault();go(b.dataset.v)});
+ $$('[data-quick-search]').forEach(form=>form.onsubmit=e=>{e.preventDefault();S.searchQuery=(new FormData(form).get('q')||'').toString().trim().slice(0,120);S.searchStatus='all';S.searchLanguage='all';S.searchGenre='all';S.searchTag='all';go('explore');});
 
  $$('[data-account-action]').forEach(b=>b.onclick=()=>{
  const a=b.dataset.accountAction;
