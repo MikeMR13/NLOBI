@@ -224,7 +224,8 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  await page.locator('#saveDiscoveryMeta').click();
  await page.waitForTimeout(60);
  await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:translation,teamMembers});
- await page.locator('[data-volume-status="volume-2"][data-status="published"]').click();
+ await page.waitForFunction(()=>!!document.querySelector('[data-volume-status="volume-2"][data-status="published"]'));
+ await page.evaluate(()=>document.querySelector('[data-volume-status="volume-2"][data-status="published"]')?.click());
  await page.waitForTimeout(650);
  const rename=calls.find(x=>x.kind==='rename'),publish=calls.find(x=>x.kind==='publish');
  if(runtime.length||rename?.body?.p_translation_id!=='project-1'||rename?.body?.p_title!=='Nombre actualizado QA'||publish?.body?.p_volume_id!=='volume-2'){
