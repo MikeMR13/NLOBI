@@ -1,4 +1,4 @@
-const CACHE='nlobi-shell-v19-16';
+const CACHE='nlobi-shell-v19-17';
 const CORE=['/','/index.html','/assets/styles.css','/assets/app.js','/runtime-config.js','/manifest.webmanifest','/icon.svg','/icon-192.png','/icon-512.png'];
 const NETWORK_FIRST=new Set(['/index.html','/assets/styles.css','/assets/app.js','/runtime-config.js']);
 
@@ -42,7 +42,20 @@ self.addEventListener('fetch',event=>{
 
   // Covers and chapter illustrations may be replaced at the same storage path.
   // Refresh them online and fall back to the previous cached image offline.
-  if(NETWORK_FIRST.has(url.pathname)||url.pathname.startsWith('/media/')){
+  if(url.pathname.startsWith('/media/')){
+    // Storage filenames are unique for uploaded covers. Reuse previous bytes on repeat visits.
+    event.respondWith(caches.open(CACHE).then(async cache=>{
+      const hit=await cache.match(req);
+      if(hit)return hit;
+      try{
+        const fresh=await fetch(req);
+        if(fresh.ok)await cache.put(req,fresh.clone());
+        return fresh;
+      }catch{return Response.error()}
+    }));
+    return;
+  }
+  if(NETWORK_FIRST.has(url.pathname)){
     event.respondWith(networkFirst(req,url.pathname));
     return;
   }
