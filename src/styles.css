@@ -1989,3 +1989,34 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .teamPublicRecentItem p{margin:5px 0 0;font-size:.84rem;color:var(--muted)}
 .teamPublicRecentItem .btn{flex:none;min-height:44px}
 @media(max-width:620px){.teamPublicFollow{justify-content:stretch}.teamPublicFollow .btn{width:100%}.teamPublicControls{align-items:stretch;flex-direction:column}.teamPublicControls input,.teamPublicControls select{flex:none;width:100%}.teamPublicRecentItem{align-items:stretch;flex-direction:column}.teamPublicRecentItem .btn{width:100%}.teamPublicOverview{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+
+/* Reader reviews on novel detail */
+.translationReviews{margin-top:42px;padding-top:8px;border-top:1px solid var(--line)}
+.reviewEditor,.reviewSignin{margin:18px 0 24px;padding:20px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}
+.reviewEditor h3{margin:0 0 6px}
+.reviewEditor>label:not(.reviewSpoilerCheck){display:block;font-weight:700;margin:14px 0 8px}
+.reviewEditor textarea{width:100%;min-height:132px;resize:vertical}
+.reviewSpoilerCheck{display:flex;align-items:center;gap:9px;margin:12px 0 16px}
+.readerReviewList{display:grid;gap:14px}
+.readerReview{padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:var(--shadow-sm)}
+.reviewAuthor{display:flex;align-items:center;gap:11px;margin-bottom:12px}
+.reviewAuthor>div{display:flex;flex-direction:column;gap:2px}
+.reviewAuthor>div>span{font-size:.84rem;color:var(--muted)}
+.reviewAvatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;overflow:hidden;background:var(--soft);font-weight:800}
+.reviewAvatar img{width:100%;height:100%;object-fit:cover}
+.reviewText{margin:0 0 12px;line-height:1.68;overflow-wrap:anywhere}
+.reviewSpoiler{width:100%;margin:0 0 12px;padding:15px;text-align:left;border:1px dashed var(--line);border-radius:14px;background:var(--soft);color:inherit;cursor:pointer}
+.reviewSpoiler>strong,.reviewSpoiler>span:not(.reviewSpoilerText){display:block}
+.reviewSpoiler>span:not(.reviewSpoilerText){margin-top:4px;color:var(--muted);font-size:.9rem}
+.reviewSpoilerText{display:none;margin-top:12px;line-height:1.68}
+.reviewSpoiler.revealed .reviewSpoilerText{display:block}
+.reviewSignin{display:flex;align-items:center;justify-content:space-between;gap:14px}
+.reviewSignin p{margin:0}
+@media (max-width:700px){
+ .translationReviews{margin-top:30px}
+ .reviewEditor,.reviewSignin,.readerReview{padding:15px;border-radius:15px}
+ .reviewSignin{align-items:flex-start;flex-direction:column}
+ .reviewEditor .row{align-items:stretch;flex-direction:column}
+ .reviewEditor .row .btn{width:100%}
+}
