@@ -1973,3 +1973,19 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 @media(min-width:721px){.exploreEditorial .exploreFilterGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}}
 @media(max-width:720px){.exploreEditorial .exploreFilterGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
 @media(max-width:480px){.exploreEditorial .exploreFilterGrid{grid-template-columns:1fr}}
+
+/* Perfiles públicos de equipos: seguimiento, actividad y filtro de obras */
+.teamPublicFollow{display:flex;justify-content:flex-end;gap:10px;margin:16px 0 4px}
+.teamPublicFollow .btn{min-height:44px}
+.teamPublicControls{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:0 0 18px}
+.teamPublicControls input,.teamPublicControls select{min-height:44px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;background:var(--panel);color:var(--text)}
+.teamPublicControls input{flex:1 1 260px;min-width:0}
+.teamPublicControls select{flex:0 1 205px;min-width:0}
+.teamPublicControls>span{font-size:.8rem;color:var(--muted)}
+.teamPublicControls :is(input,select):focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.teamPublicRecentList{display:grid;gap:10px}
+.teamPublicRecentItem{display:flex;align-items:center;justify-content:space-between;gap:14px;min-width:0;padding:15px 18px;background:var(--panel);border:1px solid var(--line);border-radius:13px}
+.teamPublicRecentItem>div{min-width:0;overflow-wrap:anywhere}
+.teamPublicRecentItem p{margin:5px 0 0;font-size:.84rem;color:var(--muted)}
+.teamPublicRecentItem .btn{flex:none;min-height:44px}
+@media(max-width:620px){.teamPublicFollow{justify-content:stretch}.teamPublicFollow .btn{width:100%}.teamPublicControls{align-items:stretch;flex-direction:column}.teamPublicControls input,.teamPublicControls select{flex:none;width:100%}.teamPublicRecentItem{align-items:stretch;flex-direction:column}.teamPublicRecentItem .btn{width:100%}.teamPublicOverview{grid-template-columns:repeat(2,minmax(0,1fr))}}
