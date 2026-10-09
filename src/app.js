@@ -1614,18 +1614,18 @@ async function saveImportDrafts(publishAfter=false){const I=S.importState;if(I.b
 
 
 function setReaderPref(k,v){
- const open=!!document.getElementById('readerSettings')?.open,advanced=!!document.getElementById('readerAdvanced')?.open,y=window.scrollY,anchor=readerFlow.beforeRender();
+ const open=!!document.getElementById('readerSettings')?.open,floating=document.getElementById('readerSettings')?.dataset.floatingOpen==='true',advanced=!!document.getElementById('readerAdvanced')?.open,y=window.scrollY,anchor=readerFlow.beforeRender();
  if(k==='fontSize')v=Math.max(14,Math.min(30,Math.round(Number(v)||18)));
  S.readerPrefs[k]=v;
  const keys={fontSize:'reader_font',theme:'reader_theme',width:'reader_width',lineHeight:'reader_line_height',fontFamily:'reader_font_family',paragraphSpace:'reader_paragraph_space',flow:'reader_flow'};
  localStorage.setItem(keys[k]||('reader_'+k),String(v));
  render();
- const settings=document.getElementById('readerSettings');if(settings)settings.open=open;
+ const settings=document.getElementById('readerSettings');if(settings){settings.open=open;settings.dataset.floatingOpen=floating?'true':'false'}
  const detail=document.getElementById('readerAdvanced');if(detail)detail.open=advanced;
  if(anchor)requestAnimationFrame(()=>readerFlow.restore(anchor));else window.scrollTo({top:y,behavior:'instant'});
  requestAnimationFrame(updateReaderProgress);
 }
-function resetReaderPrefs(){const y=window.scrollY,anchor=readerFlow.beforeRender(),flow=S.readerPrefs.flow;S.readerPrefs={theme:'light',fontSize:18,width:'normal',lineHeight:'comfortable',fontFamily:'original',paragraphSpace:'normal',indent:'none',align:'left',contrast:'standard',images:'show',flow};['reader_theme','reader_font','reader_width','reader_line_height','reader_font_family','reader_paragraph_space','reader_indent','reader_align','reader_contrast','reader_images'].forEach(k=>localStorage.removeItem(k));render();const panel=document.getElementById('readerSettings');if(panel)panel.open=true;const advanced=document.getElementById('readerAdvanced');if(advanced)advanced.open=true;if(anchor)requestAnimationFrame(()=>readerFlow.restore(anchor));else window.scrollTo({top:y,behavior:'instant'});toast('Preferencias de lectura restablecidas.','ok')}
+function resetReaderPrefs(){const floating=document.getElementById('readerSettings')?.dataset.floatingOpen==='true',y=window.scrollY,anchor=readerFlow.beforeRender(),flow=S.readerPrefs.flow;S.readerPrefs={theme:'light',fontSize:18,width:'normal',lineHeight:'comfortable',fontFamily:'original',paragraphSpace:'normal',indent:'none',align:'left',contrast:'standard',images:'show',flow};['reader_theme','reader_font','reader_width','reader_line_height','reader_font_family','reader_paragraph_space','reader_indent','reader_align','reader_contrast','reader_images'].forEach(k=>localStorage.removeItem(k));render();const panel=document.getElementById('readerSettings');if(panel){panel.open=true;panel.dataset.floatingOpen=floating?'true':'false'}const advanced=document.getElementById('readerAdvanced');if(advanced)advanced.open=true;if(anchor)requestAnimationFrame(()=>readerFlow.restore(anchor));else window.scrollTo({top:y,behavior:'instant'});toast('Preferencias de lectura restablecidas.','ok')}
 function isFollowing(type,id){return (S.follows||[]).some(f=>f.target_type===type&&f.target_id===id)}
 function followNovelButton(id){if(!id||!S.user)return '';const following=isFollowing('translation',id);return `<button type="button" class="btn followNovelButton ${following?'following':''}" data-follow-type="translation" data-follow-id="${esc(id)}" aria-pressed="${following?'true':'false'}">${following?'✓ Siguiendo · Avisos activados':'＋ Seguir novela'}</button>`}
 function unreadNovelUpdates(id){return (S.notes||[]).filter(n=>n.notification_type==='new_publication'&&n.translation_id===id&&!n.read_at).length}
