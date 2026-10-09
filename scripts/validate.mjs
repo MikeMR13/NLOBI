@@ -452,6 +452,8 @@ for (const marker of [
  if(app.slice(begin,end).includes('data-reader-quick="flow"'))throw new Error('Selector de lectura: no debe mostrarse dentro del lector');
  const volume=app.slice(app.indexOf('function detailView(){'),app.indexOf('function publicGroupView(){'));
  if(!volume.includes("readerModeOptions('volume')")||volume.indexOf("readerModeOptions('volume')")>volume.indexOf('class="volumeChapterList"'))throw new Error('Selector de lectura: debe aparecer antes del índice de capítulos');
+ if(!volume.includes('class="volumeChapterList">${chapters.map'))throw new Error('Selector de lectura: lista de capítulos con HTML inválido');
+ if(volume.indexOf('class="volumeReadingModeAction"')<volume.indexOf("readerModeOptions('volume')"))throw new Error('Selector de lectura: botón Continuar debe estar después de escoger modo');
  for(const key of ['.volumeReadingMode','.readingModeOptions','.readingModeOption:focus-visible','@media(max-width:650px)'])if(!css.includes(key))throw new Error('Selector de lectura CSS: falta '+key);
  // Confirm legacy site-appearance preferences still parse and preserve the reader mode.
  const appearanceSource=app.slice(app.indexOf('function readSiteAppearance(){'),app.indexOf('let siteAppearance='));
