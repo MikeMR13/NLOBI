@@ -1,6 +1,6 @@
 // NLOBI reader phase 8 — private per-user bookmarks, highlights and notes.
 // Text anchors reference content block indices + plain-text offsets (never alter published blocks).
-export function createReaderAnnotations({state,request,escape,flow,openChapter,renderApp,notify,cancelAutoResume=()=>{}}){
+export function createReaderAnnotations({state,request,requestAll,escape,flow,openChapter,renderApp,notify,cancelAutoResume=()=>{}}){
  const S=()=>state();
  let entries=[],owner=null,loading=null,root=null,streamObserver=null,controller=null,chosen=null,editing=null,libraryFilter='all',pendingJump=null,lastViewed=null;
  const table='/rest/v1/reader_annotations';
@@ -24,7 +24,8 @@ export function createReaderAnnotations({state,request,escape,flow,openChapter,r
   if(loading)return loading;
   loading=(async()=>{
    try{
-    const rows=await request(table+'?user_id=eq.'+encodeURIComponent(uid)+'&select=id,user_id,translation_id,section_id,kind,anchor_mode,start_block,start_offset,end_block,end_offset,excerpt,note,color,created_at,updated_at,sections(title),translations(title,novels(title))&order=created_at.desc&limit=1000');
+    const query=table+'?user_id=eq.'+encodeURIComponent(uid)+'&select=id,user_id,translation_id,section_id,kind,anchor_mode,start_block,start_offset,end_block,end_offset,excerpt,note,color,created_at,updated_at,sections(title),translations(title,novels(title))&order=created_at.desc';
+    const rows=await requestAll(query,{},300,40);
     if(owner===uid&&S().user?.id===uid)entries=Array.isArray(rows)?rows:[];
    }catch(err){console.warn('[NLOBI] Anotaciones pendientes de cargar',err);if(owner===uid)notify('No fue posible cargar tus anotaciones.','bad')}
    finally{loading=null}
