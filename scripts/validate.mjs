@@ -120,6 +120,18 @@ for (const required of [
 for (const required of [".collectionColorSwatches{",".collectionColorSwatch{",".collectionCustomColor{",".collectionPreviewAutoCover{"]) {
   if (!collectionCss.includes(required)) throw new Error("Library collections phase 2 CSS: falta " + required);
 }
+for (const required of [
+  'class="collectionCoverGallery"',
+  'data-collection-cover=',
+  'id="collectionCover"',
+  'class="collectionCoverChoice',
+  'collectionCoverAutomatic'
+]) {
+  if (!app.includes(required)) throw new Error("Library collections phase 3: falta " + required);
+}
+for (const required of [".collectionCoverGallery{",".collectionCoverChoice{",".collectionCoverChoiceArt{",".collectionCoverAutomatic{"]) {
+  if (!collectionCss.includes(required)) throw new Error("Library collections phase 3 CSS: falta " + required);
+}
 
 console.log("Validation OK");
 if (/(^|[^$])\$\('\[data-[^']+'\)\.forEach/m.test(app)) throw new Error("Selector simple usado con forEach; usa $() para NodeList.");
