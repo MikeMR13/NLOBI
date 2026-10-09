@@ -1,4 +1,4 @@
-const CACHE='nlobi-shell-v20-continuous';
+const CACHE='nlobi-shell-v20-19';
 const CORE=['/','/index.html','/assets/styles.css','/assets/app.js','/assets/reader-flow.js','/runtime-config.js','/manifest.webmanifest','/icon.svg','/icon-192.png','/icon-512.png'];
 const NETWORK_FIRST=new Set(['/index.html','/assets/styles.css','/assets/app.js','/assets/reader-flow.js','/runtime-config.js']);
 
