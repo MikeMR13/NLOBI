@@ -2034,3 +2034,5 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .reviewActions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
 .reviewActions>span{color:var(--muted);font-size:.86rem;margin-right:auto}
 @media(max-width:620px){.reviewRatingSummary{grid-template-columns:1fr}.reviewActions .btn{flex:1}.reviewSortRow{justify-content:space-between}}
+
+.reviewAuthorLink{border:0;background:transparent;color:inherit;padding:0;text-align:left;font:inherit;font-weight:700;cursor:pointer}.reviewAuthorLink:hover{text-decoration:underline}.reviewAuthorLink:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:3px}
