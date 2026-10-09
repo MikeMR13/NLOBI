@@ -14,6 +14,14 @@ for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
   try{
    await page.goto(base+'#home',{waitUntil:'networkidle'});
    await page.waitForFunction(()=>window.__NLOBI_QA__&&document.querySelector('.mobileNav'));
+   // The first-paint hero heading must retain DOM identity as the catalog finishes loading.
+   await page.evaluate(n=>{
+    const qa=window.__NLOBI_QA__;
+    qa.setState({catalog:[n],catalogLoaded:false,catalogLoading:true});
+    const firstHeading=document.querySelector('.homeShowcaseCopy h1');
+    qa.setState({catalog:[n],catalogLoaded:true,catalogLoading:false});
+    if(!firstHeading||document.querySelector('.homeShowcaseCopy h1')!==firstHeading)throw Error('LCP: título reemplazado durante la carga');
+   },novel);
    await page.evaluate(n=>window.__NLOBI_QA__.setState({catalog:[n],catalogLoaded:true,catalogLoading:false}),novel);
    const menu=page.locator('.mobileNav');
    await menu.locator(':scope > summary').click();
