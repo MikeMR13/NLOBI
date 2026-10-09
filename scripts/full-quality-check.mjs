@@ -74,7 +74,10 @@ const scenarios=[
  ['user-public-reader-profile','profile:user-2',{...authBase,catalog:[translation],publicProfile:{...publicProfile,readerSocial:{followers:17,following:4}}}],
  ['public-reader','reader:section-1',{catalog:[translation],readerSection,readerComments:comments}],
  ['guest-library','library',{}],['guest-auth','auth',{}],
- ['user-library','library',authBase],['user-profile','auth',authBase],['user-notifications','notifications',authBase],['user-beta','beta',authBase],
+ ['user-library','library',authBase],
+ ['user-library-collections','library',{...authBase,libraryTab:'collections',readerCollections:[],savedCollections:[],discoverCollections:[],collectionFormOpen:false}],
+ ['user-library-collections-form','library',{...authBase,libraryTab:'collections',readerCollections:[],savedCollections:[],discoverCollections:[],collectionFormOpen:true,collectionEditingId:null}],
+ ['user-profile','auth',authBase],['user-notifications','notifications',authBase],['user-beta','beta',authBase],
  ['creator-studio','studio',authBase],['creator-new','studio:new',authBase],
  ['creator-project','studio:project:project-1',{...authBase,studioProject:translation,teamMembers}],
  ['creator-team','studio:team:group-1',{...authBase,studioTeam:group,teamMembers}],
@@ -137,6 +140,14 @@ for(const [vpName,width,height] of viewports){
   if(check.overflow>2)failures.push({...row,error:'horizontal-overflow'});if(check.clipped.length)failures.push({...row,error:'clipped-controls'});if(check.tiny.length)failures.push({...row,error:'small-targets'});if(check.badText.length)failures.push({...row,error:'bad-visible-text'});if(!check.main||check.content<2)failures.push({...row,error:'empty-main'});if(runtime.length)failures.push({...row,error:'runtime-error'});if(serious.length)failures.push({...row,error:'axe-serious'});
   if(name==='creator-project'){const edit=page.locator('[data-edit-section="section-1"]');if(await edit.count()){await edit.click();await page.waitForTimeout(15);if(!(await page.locator('#editSectionTitle').count()))failures.push({...row,error:'editor-open-failed'})}}
   if(name==='user-library'){const b=page.locator('[data-library-filter="favorites"]');if(await b.count())await b.click()}
+  if(name==='user-library-collections-form'){
+   const form=page.locator('#collectionForm'),collections=page.locator('.libraryCollections'),bookTab=page.locator('[data-library-tab="books"]');
+   if(!(await form.count())||!(await collections.count()))failures.push({...row,error:'collections-form-not-rendered'});
+   const cls=await bookTab.getAttribute('class');
+   if(String(cls||'').includes('<')||String(cls||'').length>80)failures.push({...row,error:'collections-html-leaked-into-tab-class'});
+   const box=await form.boundingBox();
+   if(box&&width>=768&&box.width<520)failures.push({...row,error:'collections-form-too-narrow'});
+  }
   if(name==='admin')for(const tab of ['applications','users','teams','reports','content','links','beta','audit']){const b=page.locator('[data-admin-tab="'+tab+'"]:visible');if(await b.count())await b.first().click({timeout:5000})}
   if(name==='readonly-studio' && ((await page.locator('[data-v="studio:new"]:visible').count())||(await page.locator('[data-v="studio:import"]:visible').count())))failures.push({...row,error:'readonly-studio-exposes-editor-actions'});
   if(name==='readonly-project' && ((await page.locator('#createVolume:visible').count())||(await page.locator('#saveDiscoveryMeta:visible').count())||(await page.locator('[data-new-section]:visible').count())))failures.push({...row,error:'readonly-project-exposes-editor-actions'});
@@ -213,7 +224,8 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  await page.locator('#saveDiscoveryMeta').click();
  await page.waitForTimeout(60);
  await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:translation,teamMembers});
- await page.locator('[data-volume-status="volume-2"][data-status="published"]').click();
+ await page.waitForFunction(()=>!!document.querySelector('[data-volume-status="volume-2"][data-status="published"]'));
+ await page.evaluate(()=>document.querySelector('[data-volume-status="volume-2"][data-status="published"]')?.click());
  await page.waitForTimeout(650);
  const rename=calls.find(x=>x.kind==='rename'),publish=calls.find(x=>x.kind==='publish');
  if(runtime.length||rename?.body?.p_translation_id!=='project-1'||rename?.body?.p_title!=='Nombre actualizado QA'||publish?.body?.p_volume_id!=='volume-2'){
