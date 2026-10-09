@@ -12,7 +12,7 @@ const S={view:'home',authMode:'login',user:null,token:localStorage.getItem('nlob
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const readerFlow=createReaderFlow({state:()=>S,renderBlock:renderReaderBlock,escapeText:esc,request:jreq,readCache:readCachedChapter,writeCache:cacheReaderChapter,queueProgress,markRead:recordSectionCompleted,readIds:readSectionIds});
-const readerEnhancements=createReaderEnhancements({flow:readerFlow,state:()=>S,readPosition:readReaderPosition,openChapter:id=>openReader(id,readerFlow.active()?.translation_id),savePosition:()=>readerFlow.save(true).then(()=>toast('Punto de lectura guardado.','ok')),openSettings:()=>{const settings=document.getElementById('readerSettings');if(settings){settings.open=true;settings.querySelector('summary')?.focus()}},seekTo:readerGoToPercent});
+const readerEnhancements=createReaderEnhancements({flow:readerFlow,state:()=>S,readPosition:readReaderPosition,openChapter:id=>openReader(id,readerFlow.active()?.translation_id),savePosition:()=>readerFlow.save(true).then(()=>toast('Punto de lectura guardado.','ok')),openSettings:()=>{const settings=document.getElementById('readerSettings');if(settings){settings.open=!settings.open;settings.dataset.floatingOpen=settings.open?'true':'false';if(settings.open)settings.querySelector('.readerSettingsClose')?.focus({preventScroll:true})}},seekTo:readerGoToPercent});
 const safeUrl=u=>{if(!u)return'#';try{const v=/^https?:\/\//i.test(String(u))?String(u):'https://'+String(u);const x=new globalThis.URL(v);return ['http:','https:'].includes(x.protocol)?x.href:'#'}catch{return'#'}};const safeMediaUrl=u=>{const raw=String(u||'');if(/^data:image\/(png|jpeg|jpg|gif|webp);base64,/i.test(raw))return raw;const url=safeUrl(raw);try{const parsed=new globalThis.URL(url),origin=new globalThis.URL(URL),prefix='/storage/v1/object/public/nlobi-media/';if(parsed.origin===origin.origin&&parsed.pathname.startsWith(prefix))return '/media/'+parsed.pathname.slice(prefix.length)+parsed.search} catch{}return url};const safeCssUrl=u=>safeUrl(u).replace(/[\\'"()]/g,c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0').toUpperCase());
 const titleOf=x=>x?.novels?.title||x?.title||'Novela';
 const coverOf=x=>x?.novels?.cover_url||null;
@@ -1289,7 +1289,7 @@ function observeShelves(){
 function render(){
  const app=document.getElementById('app');
  if(!app)return;
- const readerRestore=S.view.startsWith('reader:')&&readerFlow.paper(readerFlow.active()?.id)?readerFlow.beforeRender():null;
+ if(S.view.startsWith('reader:')&&readerFlow.paper(readerFlow.active()?.id))readerFlow.beforeRender();
  try{
   let html=S.view==='home'?home():'';
   if(S.view==='explore')html=explore();
@@ -1320,7 +1320,6 @@ function render(){
   app.innerHTML=html;
   enhanceAccessibility();
   bind();
-  if(readerRestore)readerEnhancements.restoreStable(readerRestore);
   applyStudioActionAccess();
   setNetworkBadge();
  }catch(e){
