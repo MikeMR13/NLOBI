@@ -2672,3 +2672,18 @@ body:has(.readerExperience.readerFocused) .top{display:none!important}
  .readerLightboxBottom{padding:7px 11px;min-height:49px}
 }
 @media(prefers-reduced-motion:reduce){.readerFloatDock{transition:none}}
+
+/* Keep the existing preferences panel accessible from the floating dock,
+   without moving the document scroll position or duplicating settings. */
+.readerExperience .readerSettings[data-floating-open="true"] .readerSettingsPanel{
+ position:fixed;top:auto;left:auto;
+ right:max(12px,calc((100vw - 980px)/2));
+ bottom:calc(90px + env(safe-area-inset-bottom));
+ max-height:min(68dvh,700px);z-index:115
+}
+@media(max-width:690px){
+ .readerExperience .readerSettings[data-floating-open="true"] .readerSettingsPanel{
+  right:9px;left:9px;width:auto;max-width:none;
+  bottom:calc(115px + env(safe-area-inset-bottom));max-height:calc(100dvh - 145px)
+ }
+}
