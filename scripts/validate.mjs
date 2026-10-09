@@ -512,3 +512,10 @@ for (const marker of [
  for(const marker of ['assets/reader-enhancements.js','reader-enhancements.js'])if(!build.includes(marker))throw new Error('Fase 7 build: falta '+marker);
  if(!sw.includes('/assets/reader-enhancements.js'))throw new Error('Fase 7 PWA: módulo ausente de caché');
 }
+
+
+// Lightweight runtime checks for the phase 7 dock and resume guard.
+{
+ const t=spawnSync(process.execPath,['scripts/reader-phase7-check.mjs'],{stdio:'inherit'});
+ if(t.status!==0)throw new Error('Fase 7: fallaron regresiones de la barra flotante y reanudación');
+}
