@@ -362,13 +362,28 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__);
   await page.evaluate(state=>window.__NLOBI_QA__.setState(state),{user:null,readerSection:{...section1,translation_id:'project-1',novel_title:'Obra QA',volume_number:1,navigation:[section1,section2]},view:'reader:section-1'});
   const before=await page.evaluate(()=>({collapsed:!document.querySelector('#readerSettings')?.open,commentInReader:!!document.querySelector('.commentBox'),finish:!!document.querySelector('#finishAndNext'),indent:!!document.querySelector('#readerIndent')}));
+  await page.locator('#readerSettings>summary').click();
+  await page.locator('[data-reader-quick="theme"][data-reader-value="dark"]').click();
+  await page.locator('[data-reader-quick="fontSize"][data-reader-value="21"]').click();
+  const readerQuick=await page.evaluate(()=>({
+   popup:!!document.querySelector('#readerSettings')?.open,
+   dark:!!document.querySelector('.readerExperience.readerSurface-dark'),
+   textSize:document.querySelector('.readerExperience .readerPaper')?.style.fontSize,
+   chapterHeading:!!document.querySelector('#chapterTitle'),
+   progressTrack:!!document.querySelector('#readerProgressFill'),
+   advancedSource:!!document.querySelector('#readerFontFamily option[value="original"]'),
+   imageControl:!!document.querySelector('#readerImages')
+  }));
+  await page.locator('#closeReaderSettings').click();
+  await page.locator('#readerBookmark').click();
+  const readerBookmark=await page.evaluate(()=>!!localStorage.getItem('nlobi_reader_position_section-1'));
   await page.locator('#markReaderDone').click();
   const read=await page.evaluate(()=>JSON.parse(localStorage.getItem('nlobi_read_sections_guest')||'[]').includes('section-1'));
   await page.evaluate(state=>window.__NLOBI_QA__.setState(state),{user:null,view:'detail:project-1',currentDetail:translation});
   await page.locator('[data-open-volume="volume-1"]').click();
   const after=await page.evaluate(()=>({badge:document.body.textContent.includes('✓ Leído'),volumeComments:!!document.querySelector('[data-volume-comments]')}));
-  if(runtime.length||!before.collapsed||before.commentInReader||!before.finish||!before.indent||!read||!after.badge||!after.volumeComments)
-   failures.push({scenario:'reader-collapsible-settings-chapter-read-and-volume-comments',runtime,before,read,after});
+  if(runtime.length||!readerQuick.popup||!readerQuick.dark||readerQuick.textSize!=='21px'||!readerQuick.chapterHeading||!readerQuick.progressTrack||!readerQuick.advancedSource||!readerQuick.imageControl||!readerBookmark||!before.collapsed||before.commentInReader||!before.finish||!before.indent||!read||!after.badge||!after.volumeComments)
+   failures.push({scenario:'reader-quick-settings-progress-and-chapter-completion',runtime,before,readerQuick,readerBookmark,read,after});
   await context.close();
  }
 
