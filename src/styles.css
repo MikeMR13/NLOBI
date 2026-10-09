@@ -2056,3 +2056,14 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .novelCollectionPicker .row{flex-wrap:wrap}
 .novelCollectionPicker select{flex:1;min-width:170px}
 @media(max-width:540px){.collectionCard{padding:15px}.libraryCollections .sectionHead{align-items:flex-start;gap:12px;flex-wrap:wrap}}
+
+.collectionForm,.collectionAddTool{margin:18px 0;padding:20px;border:1px solid var(--line);border-radius:16px;background:var(--panel);display:grid;gap:12px}
+.collectionForm label,.collectionAddTool label{font-weight:650}
+.collectionForm input:not([type=checkbox]),.collectionForm textarea,.collectionAddTool input{width:100%;min-width:0}
+.collectionDetail{margin-top:18px}
+.collectionDetail>.sectionHead{margin-top:18px}
+.collectionSearchResults{display:grid;gap:6px;max-height:260px;overflow-y:auto}
+.collectionSearchResults>.btn{text-align:left;white-space:normal}
+.collectionEntryList>div{flex-wrap:wrap}
+.collectionEntryList>div>button:first-child{flex:1;min-width:130px}
+@media(max-width:550px){.collectionForm,.collectionAddTool{padding:14px}.collectionEntryList .btn{padding:7px 9px}}
