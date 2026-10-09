@@ -47,6 +47,8 @@ jobs:
       - name: Explore visual and interaction audit
         run: node scripts/explore-quality-check.mjs
       - name: Full platform quality pass
+        id: full_quality
+        continue-on-error: true
         run: node scripts/full-quality-check.mjs
       - name: Cross-browser smoke
         run: node scripts/cross-browser-check.mjs
@@ -91,4 +93,8 @@ jobs:
           if-no-files-found: error
       - name: Enforce axe result
         if: steps.axe.outcome == 'failure'
+        run: exit 1
+
+      - name: Enforce full-platform quality result
+        if: steps.full_quality.outcome == 'failure'
         run: exit 1
