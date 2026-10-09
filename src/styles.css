@@ -2475,3 +2475,6 @@ html[data-site-targets="large"] input[type="checkbox"],html[data-site-targets="l
 html[data-site-focus="enhanced"] :where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid var(--accent,#ffd400)!important;outline-offset:3px!important}
 @media(prefers-contrast:more){html:not([data-site-contrast="soft"]) body{--muted:color-mix(in srgb,var(--text) 85%,var(--bg))}}
 @media(max-width:600px){html[data-site-spacing="wide"] .wrap{padding-inline:16px}}
+
+.headerNotification:not([open])>.headerNotificationPanel{display:none!important}
+@media(max-width:850px){.headerNotificationMobile[open]>.headerNotificationPanel{position:fixed;left:12px;right:12px;top:68px;width:auto;max-width:none;max-height:calc(100dvh - 82px)}}
