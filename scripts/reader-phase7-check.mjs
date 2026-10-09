@@ -4,7 +4,7 @@ import {createReaderEnhancements} from '../src/reader-enhancements.js';
 
 let restored=0,scrolled=0,disconnected=false;
 const classState=new Set(),values={};
-const element=id=>({id,textContent:'',value:'0',style:{},setAttribute:(k,v)=>values[id+':'+k]=v,focus(){}});
+const element=id=>({id,textContent:'',value:'0',style:{},setAttribute:(k,v)=>values[id+':'+k]=v,addEventListener:()=>{},focus(){}});
 const labels=Object.fromEntries(['readerFloatTitle','readerFloatMeta','readerFloatPercentage','readerFloatFill','readerFloatSeek','readerFloatChapterJump'].map(id=>[id,element(id)]));
 const floating={classList:{add:cls=>classState.add(cls),remove:cls=>classState.delete(cls)},matches:()=>false};
 const stream={querySelectorAll:()=>[]};
