@@ -2437,3 +2437,16 @@ html[data-site-corners="square"] .btn,html[data-site-corners="square"] .novelCar
 html[data-site-corners="soft"] .btn,html[data-site-corners="soft"] .novelCard,html[data-site-corners="soft"] .readerEditCard,html[data-site-corners="soft"] .siteAppearancePanel{border-radius:25px}
 html[data-site-motion="reduce"] *,html[data-site-motion="reduce"] *::before,html[data-site-motion="reduce"] *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
 @media(prefers-reduced-motion:reduce){html:not([data-site-motion="full"]) *,html:not([data-site-motion="full"]) *::before,html:not([data-site-motion="full"]) *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
+
+/* Navigation customization phase 2 */
+.siteNavVisibility{display:grid;grid-template-columns:repeat(auto-fit,minmax(145px,1fr));gap:10px}
+.siteNavVisibilityItem{display:flex;align-items:center;gap:10px;padding:12px;border:1px solid var(--line);background:var(--panel2);border-radius:12px;cursor:pointer}
+.siteNavVisibilityItem input{accent-color:var(--accent);width:18px;height:18px}.siteNavVisibilityItem:has(input:disabled){opacity:.75}
+.navMore{position:relative;align-self:center}.navMore>summary{cursor:pointer;list-style:none;border:1px solid var(--line);border-radius:11px;padding:9px 12px;white-space:nowrap}.navMore>summary::-webkit-details-marker{display:none}
+.navMorePanel{position:absolute;right:0;top:calc(100% + 7px);z-index:60;min-width:180px;padding:6px;border:1px solid var(--line);background:var(--panel);border-radius:13px;box-shadow:var(--shadow)}
+.navMorePanel .navLink{display:block;padding:10px 12px}
+html[data-site-header="static"] .top{position:relative}
+html[data-site-header="auto"] .top{transition:transform .22s ease}
+html[data-site-header="auto"].headerScrollHidden .top{transform:translateY(-105%)}
+@media(prefers-reduced-motion:reduce){html[data-site-header="auto"] .top{transition:none}}
+@media(max-width:850px){.navMorePanel{position:static;box-shadow:none;margin-top:5px}.navMore{width:100%}}
