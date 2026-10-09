@@ -107,7 +107,7 @@ export function createReaderAnnotations({state,request,requestAll,escape,flow,op
  }
  function titleFor(x){return x.sections?.title||x.section_id===current()?.id?x.sections?.title||current()?.title||'Capítulo':'Capítulo guardado'}
  function titleOf(x){return x.translations?.novels?.title||x.translations?.title||'Novela'}
- function labelFor(x){return x.kind==='bookmark'?'Marcador':x.kind==='note'?'Nota':'Subrayado'}
+ function labelFor(x){return x.kind==='bookmark'?(x.note?'Marcador · nota':'Marcador'):x.kind==='note'?'Nota':x.note?'Subrayado · nota':'Subrayado'}
  function card(x,library=false){
   return '<article class="readerAnnotationCard" data-annotation-id="'+esc(x.id)+'">'+
    '<div class="readerAnnotationCardHead"><span class="readerAnnotationKind">'+esc(labelFor(x))+'</span><span class="readerAnnotationDate">'+esc((x.created_at||'').slice(0,10))+'</span></div>'+
@@ -257,7 +257,7 @@ export function createReaderAnnotations({state,request,requestAll,escape,flow,op
    '<dialog id="readerAnnotationEditor" class="readerAnnotationEditor" aria-labelledby="readerAnnotationDialogTitle"><form id="readerAnnotationForm"><h2 id="readerAnnotationDialogTitle">Nueva anotación</h2><label for="readerAnnotationNoteInput">Nota privada (opcional)</label><textarea id="readerAnnotationNoteInput" maxlength="4000" rows="5" placeholder="Escribe lo que quieras recordar de esta escena..."></textarea><label for="readerAnnotationColor">Color de subrayado</label><select id="readerAnnotationColor"><option value="amber">Ámbar</option><option value="mint">Menta</option><option value="rose">Rosa</option><option value="blue">Azul</option></select><div class="readerAnnotationEditorButtons"><button id="readerAnnotationCancel" type="button">Cancelar</button><button type="submit" class="btn primary">Guardar anotación</button></div></form></dialog>';
  }
  function libraryUi(){
-  const list=all().filter(x=>libraryFilter==='all'||x.kind===libraryFilter);
+  const list=all().filter(x=>libraryFilter==='all'||x.kind===libraryFilter||(libraryFilter==='note'&&!!x.note));
   return '<section class="readerAnnotationsLibrary" aria-labelledby="readerAnnotationsLibraryTitle"><div class="sectionHead"><div><span class="librarySectionKicker">TUS RECUERDOS</span><h2 id="readerAnnotationsLibraryTitle">Mis marcas y notas</h2><p>Marcadores, subrayados y notas privadas. Solo tú puedes verlos.</p></div></div>'+
    '<div class="readerAnnotationFilters" role="group" aria-label="Filtrar anotaciones">'+[['all','Todas'],['bookmark','Marcadores'],['highlight','Subrayados'],['note','Notas']].map(([kind,title])=>'<button type="button" data-annotation-filter="'+kind+'" class="'+(libraryFilter===kind?'active':'')+'" aria-pressed="'+(libraryFilter===kind)+'">'+title+'</button>').join('')+'</div>'+
    '<p class="muted">'+list.length+' anotaciones</p><div class="readerAnnotationLibraryGrid">'+(list.length?list.map(x=>card(x,true)).join(''):'<div class="empty"><strong>Aún no has guardado anotaciones.</strong><p>Abre un capítulo, selecciona un fragmento o añade un marcador.</p></div>')+'</div></section>';
