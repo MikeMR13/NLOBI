@@ -1,6 +1,6 @@
 // NLOBI reader phase 8 — private per-user bookmarks, highlights and notes.
 // Text anchors reference content block indices + plain-text offsets (never alter published blocks).
-export function createReaderAnnotations({state,request,escape,flow,openChapter,renderApp,notify}){
+export function createReaderAnnotations({state,request,escape,flow,openChapter,renderApp,notify,cancelAutoResume=()=>{}}){
  const S=()=>state();
  let entries=[],owner=null,loading=null,root=null,streamObserver=null,controller=null,chosen=null,editing=null,libraryFilter='all',pendingJump=null,lastViewed=null;
  const table='/rest/v1/reader_annotations';
@@ -202,6 +202,7 @@ export function createReaderAnnotations({state,request,escape,flow,openChapter,r
   const paper=flow.paper(x.section_id);if(!paper){pendingJump=x;return}
   const target=paper.querySelector('[data-block-index="'+x.start_block+'"]');
   if(!target){pendingJump=null;return}
+  cancelAutoResume();
   const pos=x.anchor_mode==='block'?Number(x.start_offset||0)/1000:0;
   const rect=target.getBoundingClientRect(),top=Math.max(0,window.scrollY+rect.top+rect.height*pos-window.innerHeight*.32);
   window.scrollTo({top,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
