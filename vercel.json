@@ -56,27 +56,5 @@
       "source": "/media/:path*",
       "destination": "https://hfbpsizgwzvvznrktiuq.supabase.co/storage/v1/object/public/nlobi-media/:path*"
     }
-  ],
-  "images": {
-    "sizes": [
-      256,
-      480,
-      640,
-      960,
-      1200
-    ],
-    "qualities": [
-      70
-    ],
-    "formats": [
-      "image/webp",
-      "image/avif"
-    ],
-    "minimumCacheTTL": 86400,
-    "localPatterns": [
-      {
-        "pathname": "^/media/.*$"
-      }
-    ]
-  }
+  ]
 }
