@@ -1394,7 +1394,7 @@ async function loadPublicGroupData(id){
  const rows=await jreq(`/rest/v1/translator_groups?id=eq.${id}&select=id,slug,name,description,avatar_url,banner_url,primary_color,secondary_color&limit=1`);
  const g=rows?.[0];if(!g)throw new Error('Equipo no encontrado.');
  const [translations,support,stats]=await Promise.all([
-  jreq(`/rest/v1/translations?group_id=eq.${id}&status=in.(active,complete,paused)&select=id,title,status,language_code,novels(id,title,synopsis,cover_url),translator_groups(id,name)&order=updated_at.desc`),
+  jreq(`/rest/v1/translations?group_id=eq.${id}&status=in.(active,complete,paused)&select=id,title,status,language_code,novels(id,title,synopsis,cover_url,author_name,genres),translator_groups(id,name)&order=updated_at.desc`),
   jreq(`/rest/v1/support_links?group_id=eq.${id}&select=id,label,url&order=created_at.asc`),
   jreq('/rest/v1/rpc/get_public_translator_group_stats',{method:'POST',body:JSON.stringify({p_group_id:id})})
  ]);
