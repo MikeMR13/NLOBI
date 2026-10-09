@@ -230,7 +230,7 @@ export function createReaderAnnotations({state,request,requestAll,escape,flow,op
    const target=event.target.closest('button');if(!target)return;
    if(target.id==='readerAddBookmark'){const x=paragraphAnchor();if(x)openEditor(x,'bookmark')}
    if(target.id==='readerAnnotationsToggle'){const panel=root.querySelector('#readerAnnotationsPanel');if(panel){panel.hidden=!panel.hidden;if(!panel.hidden){refreshReader();panel.querySelector('button')?.focus({preventScroll:true})}}}
-   if(target.id==='readerAnnotationsClose'){root.querySelector('#readerAnnotationsPanel').hidden=true}
+   if(target.id==='readerAnnotationsClose'){root.querySelector('#readerAnnotationsPanel').hidden=true;root.querySelector('#readerAnnotationsToggle')?.focus({preventScroll:true})}
    if(target.dataset.readerSelection==='highlight'){const x=chosen;if(x){void save({...x,kind:'highlight'});hideSelection()}}
    if(target.dataset.readerSelection==='note'&&chosen)openEditor({...chosen,kind:'note'},'note');
    if(target.dataset.annotationGo)navigate(target.dataset.annotationGo);
