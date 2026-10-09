@@ -432,6 +432,42 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   await context.close();
  }
 
+
+
+ // Phase 7 browser QA: exact paragraph resume, mobile dock and illustration viewer.
+ {
+  const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});await prepare(context);
+  const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+  await page.goto(base+'#home',{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>!!window.__NLOBI_QA__);
+  const imgData='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Y9ZpTQAAAAASUVORK5CYII=';
+  const chapter={...section1,translation_id:'project-1',novel_title:'Obra QA',volume_number:1,navigation:[{...section1,volume_number:1},{...section2,volume_number:1}],content:[...section1.content,{type:'image',url:imgData,alt:'Escena de prueba',caption:'Ilustración de control'},{type:'paragraph',text:'Fin de la escena. '.repeat(160)}]};
+  await page.evaluate(section=>{
+   localStorage.setItem('nlobi_reader_position_section-1',JSON.stringify({block:1,offset:.65,percent:38,updatedAt:Date.now()}));
+   window.__NLOBI_QA__.setState({user:null,readerSection:section,view:'reader:section-1'});
+  },chapter);
+  await page.locator('.readerIllustrationOpen').waitFor();
+  await page.waitForTimeout(160);
+  const resumed=await page.evaluate(()=>{
+   const block=document.querySelector('.readerPaper [data-block-index="1"]'),rect=block.getBoundingClientRect();
+   return {scroll:window.scrollY,offset:Math.abs(rect.top+rect.height*.65-window.innerHeight*.35),float:!!document.querySelector('#readerFloatDock'),caption:document.querySelector('#readerFloatTitle')?.textContent}
+  });
+  await page.locator('.readerIllustrationOpen').click();
+  const dialogOpened=await page.locator('#readerIllustrationDialog').evaluate(el=>el.open);
+  await page.locator('#readerLightboxZoomIn').click();
+  const zoom=await page.locator('#readerLightboxImage').evaluate(el=>el.style.width);
+  await page.keyboard.press('Escape');
+  const dialogClosed=await page.locator('#readerIllustrationDialog').evaluate(el=>!el.open);
+  const before=await page.evaluate(()=>window.scrollY);
+  await page.locator('#readerFloatSettings').click();
+  const setting=await page.evaluate(()=>({open:document.querySelector('#readerSettings')?.open,floating:document.querySelector('#readerSettings')?.dataset.floatingOpen,scroll:window.scrollY}));
+  await page.locator('#readerFloatSettings').click();
+  const settingClosed=await page.locator('#readerSettings').evaluate(el=>!el.open);
+  if(runtime.length||!resumed.float||!resumed.caption||resumed.scroll<30||resumed.offset>110||!dialogOpened||zoom!=='150%'||!dialogClosed||!setting.open||setting.floating!=='true'||Math.abs(setting.scroll-before)>50||!settingClosed)
+   failures.push({scenario:'reader-phase7-mobile-resume-dock-illustrations',runtime,resumed,dialogOpened,zoom,dialogClosed,before,setting,settingClosed});
+  await context.close();
+ }
+
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');
