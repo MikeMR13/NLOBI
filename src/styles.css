@@ -2081,3 +2081,14 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .collectionSharePreview strong{overflow-wrap:anywhere}
 .collectionSharePreview .row{flex-wrap:wrap}
 @media(max-width:540px){.collectionBooks{flex-wrap:wrap}.collectionDraggable{gap:4px}.collectionFeatureCover{width:62px;height:92px}}
+
+.discoverCollectionsHero{padding:clamp(24px,5vw,56px);border:1px solid var(--line);border-radius:22px;background:var(--panel);margin:20px 0 24px}
+.discoverCollectionsHero h1{font-size:clamp(1.8rem,4vw,3rem);margin:12px 0}
+.discoverCollectionsHero p{max-width:65ch;color:var(--muted)}
+.discoverCollectionsTools{display:grid;grid-template-columns:minmax(180px,2fr) repeat(2,minmax(145px,1fr));gap:14px;margin:22px 0}
+.discoverCollectionsTools label{display:grid;gap:8px;font-weight:600}
+.discoverCollectionsTools input,.discoverCollectionsTools select{width:100%;min-width:0}
+.discoverCollectionCard h2{font-size:1.15rem;margin:0;overflow-wrap:anywhere}
+.discoverCollectionCard .row{flex-wrap:wrap;margin-top:auto}
+.discoverCollectionCard .collectionBooks{min-height:116px}
+@media(max-width:680px){.discoverCollectionsTools{grid-template-columns:1fr}.discoverCollectionsHero{padding:22px}.discoverCollectionCard .row>.btn{flex:1}}
