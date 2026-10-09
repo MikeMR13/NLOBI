@@ -141,18 +141,19 @@ for(const [vpName,width,height] of viewports){
   if(name==='creator-project'){const edit=page.locator('[data-edit-section="section-1"]');if(await edit.count()){await edit.click();await page.waitForTimeout(15);if(!(await page.locator('#editSectionTitle').count()))failures.push({...row,error:'editor-open-failed'})}}
   if(name==='user-library'){const b=page.locator('[data-library-filter="favorites"]');if(await b.count())await b.click()}
   if(name==='user-library-collections-form'){
-   const form=page.locator('#collectionForm'),collections=page.locator('.libraryCollections'),bookTab=page.locator('[data-library-tab="books"]');
-   if(!(await form.count())||!(await collections.count()))failures.push({...row,error:'collections-form-not-rendered'});
+   const form=page.locator('#collectionForm'),collections=page.locator('.libraryCollections'),bookTab=page.locator('[data-library-tab="books"]'),editor=page.locator('.collectionEditor'),preview=page.locator('.collectionPreviewPanel'),sections=page.locator('.collectionFormSection');
+   if(!(await form.count())||!(await collections.count())||!(await editor.count())||!(await preview.count())||(await sections.count())!==3)failures.push({...row,error:'collections-phase1-editor-not-rendered'});
    const cls=await bookTab.getAttribute('class');
    if(String(cls||'').includes('<')||String(cls||'').length>80)failures.push({...row,error:'collections-html-leaked-into-tab-class'});
-   const box=await form.boundingBox();
-   if(box&&width>=768&&box.width<520)failures.push({...row,error:'collections-form-too-narrow'});
+   const box=await form.boundingBox(),editorBox=await editor.boundingBox(),previewBox=await preview.boundingBox();
+   if(box&&width>=768&&box.width<500)failures.push({...row,error:'collections-form-too-narrow'});
+   if(width>=1100&&editorBox&&previewBox&&previewBox.x<=editorBox.x+100)failures.push({...row,error:'collections-preview-not-side-by-side'});
   }
   if(name==='admin')for(const tab of ['applications','users','teams','reports','content','links','beta','audit']){const b=page.locator('[data-admin-tab="'+tab+'"]:visible');if(await b.count())await b.first().click({timeout:5000})}
   if(name==='readonly-studio' && ((await page.locator('[data-v="studio:new"]:visible').count())||(await page.locator('[data-v="studio:import"]:visible').count())))failures.push({...row,error:'readonly-studio-exposes-editor-actions'});
   if(name==='readonly-project' && ((await page.locator('#createVolume:visible').count())||(await page.locator('#saveDiscoveryMeta:visible').count())||(await page.locator('[data-new-section]:visible').count())))failures.push({...row,error:'readonly-project-exposes-editor-actions'});
   if(name==='readonly-team' && ((await page.locator('#saveTeamProfile:visible').count())||(await page.locator('#addSupportLink:visible').count())||(await page.locator('[data-media-open]:visible').count())))failures.push({...row,error:'readonly-team-exposes-editor-actions'});
-  if((vpName==='mobile-390'||vpName==='desktop-1280')&&['public-home','public-detail','public-reader','user-library','creator-project','creator-team','import-edit','admin'].includes(name))await page.screenshot({path:'quality-results/'+vpName+'-'+name+'.png',fullPage:true});
+  if((vpName==='mobile-390'||vpName==='desktop-1280')&&['public-home','public-detail','public-reader','user-library','user-library-collections-form','creator-project','creator-team','import-edit','admin'].includes(name))await page.screenshot({path:'quality-results/'+vpName+'-'+name+'.png',fullPage:true});
   await context.close();
  }
 }
