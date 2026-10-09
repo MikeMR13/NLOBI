@@ -102,8 +102,9 @@ for (const required of [
 ]) {
   if (!app.includes(required)) throw new Error("Library collections phase 1: falta " + required);
 }
+const collectionCss = fs.readFileSync("src/styles.css", "utf8");
 for (const required of [".collectionEditor{",".collectionVisibilitySwitch{",".collectionPreviewPanel{",".collectionPreviewCard{"]) {
-  if (!css.includes(required)) throw new Error("Library collections phase 1 CSS: falta " + required);
+  if (!collectionCss.includes(required)) throw new Error("Library collections phase 1 CSS: falta " + required);
 }
 
 console.log("Validation OK");
