@@ -159,7 +159,7 @@ export function createReaderEnhancements({flow,state,readPosition,openChapter,sa
   },{signal});
   const slider=$('readerFloatSeek');
   if(slider)slider.addEventListener('change',()=>{
-   seekTo(Number(slider.value),active()?.id);showDock();
+   cancelRestore();seekTo(Number(slider.value),active()?.id);showDock();
    requestAnimationFrame(updateDock);
   },{signal});
   const dialog=$('readerIllustrationDialog');
