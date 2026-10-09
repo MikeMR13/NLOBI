@@ -441,10 +441,9 @@ for (const marker of [
   "function setReaderMode(mode,scope='global',volumeId=null){",
   'data-reading-mode',
   'hydrateReaderPreferences()',
-  'appearance.readerFlow=checked',
   "localStorage.setItem('reader_flow',siteAppearance.readerDefaults.flow)",
   "localStorage.removeItem('reader_flow')",
-  "readerFlow:chosenReaderFlow",
+  'readerDefaults:o.readerDefaults||null',
  ];
  for(const key of expected)if(!app.includes(key))throw new Error('Selector de lectura: falta '+key);
  const begin=app.indexOf('function readerView(){'),end=app.indexOf('function accessibilityViewTitle(){',begin);
