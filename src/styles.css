@@ -2450,3 +2450,15 @@ html[data-site-header="auto"] .top{transition:transform .22s ease}
 html[data-site-header="auto"].headerScrollHidden .top{transform:translateY(-105%)}
 @media(prefers-reduced-motion:reduce){html[data-site-header="auto"] .top{transition:none}}
 @media(max-width:850px){.navMorePanel{position:static;box-shadow:none;margin-top:5px}.navMore{width:100%}}
+
+/* Reader library customization */
+.libraryShelf.libraryDensity-compact{gap:10px}
+.libraryShelf.libraryDensity-compact .libraryShelfCard{padding:9px;gap:10px}
+.libraryShelf.libraryDensity-compact .libraryShelfCover{max-width:135px}
+.libraryShelf.libraryDensity-comfortable{gap:26px}
+.libraryShelf.libraryDensity-comfortable .libraryShelfCard{padding:22px;gap:18px}
+.libraryShelf.libraryDensity-comfortable .libraryShelfCover{max-width:235px}
+.libraryShelf.libraryHideTeam .libraryShelfTeam{display:none}
+.libraryShelf.libraryHideProgress .libraryProgress,.libraryShelf.libraryHideProgress .libraryShelfProgress{display:none}
+.libraryShelf.libraryHideBadges .libraryShelfBadges{display:none}
+@media(max-width:600px){.libraryShelf.libraryDensity-comfortable .libraryShelfCard{padding:14px}.libraryShelf.libraryDensity-comfortable{gap:15px}}
