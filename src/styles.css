@@ -2423,3 +2423,17 @@ html[data-site-theme="graphite"] body{--accent:#8c98a4;--accent2:#bbc6d0;--accen
 .siteNavOrder li span:last-child{display:flex;gap:7px}.siteNavOrder button{border:1px solid var(--line);border-radius:9px;padding:6px 11px;color:var(--text);background:var(--panel);cursor:pointer}.siteNavOrder button:disabled{opacity:.35;cursor:default}
 .siteAppearanceFooter{border-top:1px solid var(--line);padding-top:14px;display:flex;align-items:center;gap:15px;flex-wrap:wrap}
 @media(max-width:600px){.siteAppearancePanel{padding:15px}.siteAppearanceOptions{gap:7px}.siteAppearanceOptions button{padding:10px 12px}}
+
+/* Appearance phase 1: density, corner shape and motion */
+html[data-site-density="compact"] .wrap{padding-top:15px}
+html[data-site-density="compact"] .bar{padding-top:6px;padding-bottom:6px;gap:12px}
+html[data-site-density="compact"] .novelGrid{gap:10px}
+html[data-site-density="compact"] .cardBody{padding:10px}
+html[data-site-density="comfortable"] .wrap{padding-top:36px}
+html[data-site-density="comfortable"] .bar{padding-top:17px;padding-bottom:17px}
+html[data-site-density="comfortable"] .novelGrid{gap:24px}
+html[data-site-density="comfortable"] .cardBody{padding:21px}
+html[data-site-corners="square"] .btn,html[data-site-corners="square"] .novelCard,html[data-site-corners="square"] .readerEditCard,html[data-site-corners="square"] .siteAppearancePanel{border-radius:3px}
+html[data-site-corners="soft"] .btn,html[data-site-corners="soft"] .novelCard,html[data-site-corners="soft"] .readerEditCard,html[data-site-corners="soft"] .siteAppearancePanel{border-radius:25px}
+html[data-site-motion="reduce"] *,html[data-site-motion="reduce"] *::before,html[data-site-motion="reduce"] *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+@media(prefers-reduced-motion:reduce){html:not([data-site-motion="full"]) *,html:not([data-site-motion="full"]) *::before,html:not([data-site-motion="full"]) *::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}}
