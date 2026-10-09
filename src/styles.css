@@ -2462,3 +2462,16 @@ html[data-site-header="auto"].headerScrollHidden .top{transform:translateY(-105%
 .libraryShelf.libraryHideProgress .libraryProgress,.libraryShelf.libraryHideProgress .libraryShelfProgress{display:none}
 .libraryShelf.libraryHideBadges .libraryShelfBadges{display:none}
 @media(max-width:600px){.libraryShelf.libraryDensity-comfortable .libraryShelfCard{padding:14px}.libraryShelf.libraryDensity-comfortable{gap:15px}}
+
+/* Accessibility and comfort settings (phase 4) */
+html[data-site-contrast="high"] body{--muted:color-mix(in srgb,var(--text) 88%,var(--bg));--line:color-mix(in srgb,var(--text) 58%,var(--bg))}
+html[data-site-contrast="high"] .btn,html[data-site-contrast="high"] input,html[data-site-contrast="high"] select,html[data-site-contrast="high"] textarea{border-width:2px}
+html[data-site-contrast="soft"] body{--muted:color-mix(in srgb,var(--text) 60%,var(--bg));--line:color-mix(in srgb,var(--text) 18%,var(--bg))}
+html[data-site-spacing="wide"] .wrap{line-height:1.75}
+html[data-site-spacing="wide"] .readerEditCard,html[data-site-spacing="wide"] .siteAppearancePanel,html[data-site-spacing="wide"] .libraryShelfCard{padding:clamp(20px,3vw,32px)}
+html[data-site-spacing="wide"] .field{margin-block:16px}
+html[data-site-targets="large"] button,html[data-site-targets="large"] .navLink,html[data-site-targets="large"] .accountDropdown summary,html[data-site-targets="large"] .readerSettingsTab{min-height:48px;min-width:44px}
+html[data-site-targets="large"] input[type="checkbox"],html[data-site-targets="large"] input[type="radio"]{min-width:22px;min-height:22px}
+html[data-site-focus="enhanced"] :where(a,button,input,select,textarea,summary,[tabindex]):focus-visible{outline:3px solid var(--accent,#ffd400)!important;outline-offset:3px!important}
+@media(prefers-contrast:more){html:not([data-site-contrast="soft"]) body{--muted:color-mix(in srgb,var(--text) 85%,var(--bg))}}
+@media(max-width:600px){html[data-site-spacing="wide"] .wrap{padding-inline:16px}}
