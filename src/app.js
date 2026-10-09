@@ -1765,6 +1765,7 @@ async function boot(isRetry=false){
    const sessionTask=S.token?(async()=>{
     try{
      await ensureFreshSession();await loadUser();render();
+     await safeOptionalLoad('mis valoraciones',loadRatings());render();
      await flushProgressQueue();
     }catch(e){
      if(e?.status===401||!S.token){clearSession();S.user=S.profile=null;console.warn('Sesión no renovable',e)}
