@@ -336,3 +336,45 @@ for (const marker of [
  'Introduce un enlace HTTPS válido.',
  'Introduce colores válidos en formato #RRGGBB.',
 ]) if (!app.includes(marker)) throw new Error(`Regresión de perfiles de equipo: ${marker}`);
+
+
+// Reader personalization regression checks (pre-deploy gate).
+{
+  const required = [
+    'function readSiteAppearance(){',
+    'function readLibraryPreferences(){',
+    'function resetLocalReaderUiPreferences(){',
+    'async function syncReaderUiPreferences(){',
+    "const UI_PREF_OWNER='nlobi_ui_prefs_owner'",
+    "const UI_PREF_DIRTY='nlobi_ui_prefs_modified_at'",
+    'data-site-header=', 'data-site-contrast=', 'data-site-motion=',
+    'data-library-custom-toggle=', 'data-nav-visible=',
+    'reader_ui_preferences?user_id=eq.',
+    'previousOwner&&previousOwner!==uid',
+    'libraryCustomization.hideCompleted',
+  ];
+  for (const marker of required) {
+    if (!app.includes(marker)) throw new Error('Preferencias lector: falta '+marker);
+  }
+  const cssRules = ['data-site-header="auto"','data-site-contrast="high"','data-site-focus="enhanced"','.libraryShelf.libraryDensity-compact'];
+  for (const marker of cssRules) {
+    if (!css.includes(marker)) throw new Error('Estilos de preferencias: falta '+marker);
+  }
+  const appearanceSource = app.slice(app.indexOf('function readSiteAppearance(){'),app.indexOf('let siteAppearance='));
+  const librarySource = app.slice(app.indexOf('function readLibraryPreferences(){'),app.indexOf('let libraryCustomization='));
+  if (!appearanceSource.includes('return {') || !librarySource.includes('return{')) throw new Error('Preferencias: no se pueden aislar los analizadores.');
+  const local = new Map();
+  const localStorage = {getItem:(k)=>local.has(k)?local.get(k):null,setItem:(k,v)=>local.set(k,String(v)),removeItem:(k)=>local.delete(k)};
+  const sandbox={localStorage,SITE_NAV_DEFAULT:['home','translators','explore','collections','library'],SITE_THEMES:{amber:'Ámbar',forest:'Bosque'},SITE_FONTS:{system:'Sistema',serif:'Serifa'},LIB_PREF_KEY:'nlobi_library_personalization'};
+  vm.runInNewContext(appearanceSource+librarySource+';globalThis.readers={site:readSiteAppearance,library:readLibraryPreferences};',sandbox);
+  const {site,library}=sandbox.readers;
+  if(site().startPage!=='home'||site().navOrder.length!==5||library().view!=='grid') throw new Error('Preferencias: valores iniciales inválidos.');
+  localStorage.setItem('nlobi_site_appearance',JSON.stringify({navOrder:['library','library','unknown'],hiddenNav:['home','library'],mode:'dark',startPage:'explore'}));
+  const configured=site();
+  if(configured.navOrder.join(',')!=='library,home,translators,explore,collections'||configured.hiddenNav.includes('home')||configured.mode!=='dark')throw new Error('Preferencias: normalización de menú fallida.');
+  localStorage.setItem('nlobi_library_view','list');
+  localStorage.setItem('nlobi_library_personalization',JSON.stringify({view:'grid',sort:'favorites',hideCompleted:true}));
+  if(library().view!=='grid'||library().sort!=='favorites'||!library().hideCompleted)throw new Error('Preferencias: la vista guardada no prevalece.');
+  localStorage.setItem('nlobi_site_appearance','{invalid');
+  if(site().navOrder.length!==5)throw new Error('Preferencias: no se recupera JSON dañado.');
+}
