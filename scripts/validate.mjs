@@ -106,6 +106,20 @@ const collectionCss = fs.readFileSync("src/styles.css", "utf8");
 for (const required of [".collectionEditor{",".collectionVisibilitySwitch{",".collectionPreviewPanel{",".collectionPreviewCard{"]) {
   if (!collectionCss.includes(required)) throw new Error("Library collections phase 1 CSS: falta " + required);
 }
+for (const required of [
+  'function bindCollectionEditorPreview(){',
+  'data-collection-color=',
+  'id="collectionPreviewTitle"',
+  'id="collectionPreviewDescription"',
+  'id="collectionPreviewBadge"',
+  'id="collectionPreviewCoverLabel"',
+  'id="collectionColorValue"'
+]) {
+  if (!app.includes(required)) throw new Error("Library collections phase 2: falta " + required);
+}
+for (const required of [".collectionColorSwatches{",".collectionColorSwatch{",".collectionCustomColor{",".collectionPreviewAutoCover{"]) {
+  if (!collectionCss.includes(required)) throw new Error("Library collections phase 2 CSS: falta " + required);
+}
 
 console.log("Validation OK");
 if (/(^|[^$])\$\('\[data-[^']+'\)\.forEach/m.test(app)) throw new Error("Selector simple usado con forEach; usa $() para NodeList.");

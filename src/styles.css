@@ -2148,9 +2148,23 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .collectionFormEnhanced .collectionFormSection>label:not(.collectionVisibilitySwitch),.collectionAppearanceGrid label{display:block;margin:13px 0 8px;font-size:.86rem;font-weight:750;letter-spacing:.015em}
 .collectionFormEnhanced input:not([type=checkbox]),.collectionFormEnhanced textarea,.collectionFormEnhanced select{width:100%;min-width:0;min-height:48px;border-radius:13px}
 .collectionFormEnhanced textarea{min-height:116px}
-.collectionAppearanceGrid{display:grid;grid-template-columns:minmax(145px,.4fr) minmax(220px,1.6fr);gap:18px;align-items:end}
+.collectionAppearanceGrid{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(220px,.8fr);gap:20px;align-items:end}
 .collectionAppearanceGrid>div{min-width:0}
-.collectionFormEnhanced #collectionAccent{width:112px;min-width:112px;height:50px}
+.collectionFieldLabel{display:block;margin:13px 0 8px;font-size:.86rem;font-weight:750;letter-spacing:.015em}
+.collectionColorControl{min-width:0}
+.collectionColorSwatches{display:flex;flex-wrap:wrap;gap:8px}
+.collectionColorSwatch{position:relative;display:grid;place-items:center;width:44px;height:44px;flex:0 0 44px;padding:0;border:2px solid color-mix(in srgb,var(--swatch) 72%,var(--line));border-radius:13px;background:var(--swatch);cursor:pointer;box-shadow:inset 0 0 0 1px rgba(255,255,255,.12);transition:transform .16s ease,box-shadow .16s ease,border-color .16s ease}
+.collectionColorSwatch:hover{transform:translateY(-2px)}
+.collectionColorSwatch.active{border-color:var(--text);box-shadow:0 0 0 3px var(--panel),0 0 0 5px var(--accent)}
+.collectionColorSwatch.active::after{content:"✓";display:grid;place-items:center;width:22px;height:22px;border-radius:999px;background:rgba(0,0,0,.68);color:#fff;font-size:.76rem;font-weight:900}
+.collectionColorSwatch:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.collectionAppearanceGrid .collectionCustomColor{display:inline-flex;align-items:center;gap:10px;margin:10px 0 0;padding:8px 10px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);cursor:pointer;max-width:220px}
+.collectionCustomColor>span{color:var(--muted);font-size:.8rem;font-weight:700}
+.collectionCustomColor>strong{font-size:.78rem;font-variant-numeric:tabular-nums;letter-spacing:.035em}
+.collectionFormEnhanced .collectionCustomColor #collectionAccent{width:42px;min-width:42px;height:34px;min-height:34px;padding:2px;border-radius:9px;cursor:pointer}
+.collectionPreviewAutoCover{width:68px;height:102px}
+.collectionPreviewCard,.collectionPreviewShelf,.collectionPreviewBadge,.collectionPreviewMeta h4,.collectionPreviewMeta p{transition:background .18s ease,border-color .18s ease,color .18s ease}
+
 .collectionVisibilitySwitch{position:relative;display:flex!important;align-items:center;justify-content:space-between;gap:18px;margin:0!important;padding:15px 16px;border:1px solid var(--line);border-radius:16px;background:var(--panel2);cursor:pointer}
 .collectionVisibilityText{min-width:0}
 .collectionVisibilityText strong{display:block;margin-bottom:3px;font-size:.98rem}
