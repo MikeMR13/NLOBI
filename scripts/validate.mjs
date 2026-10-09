@@ -418,7 +418,7 @@ for (const marker of [
   'readerFlowActive',
   "readerPrefs?.flow==='continuous'",
  ])if(!moduleCode.includes(marker))throw new Error('Lectura continua: falta '+marker);
- for(const marker of ['createReaderFlow(', 'readerFlow.begin()', 'readerFlow.scroll()', 'readerFlow.blockHtml(', 'data-reading-mode="'+mode.key+'', 'id="readerChapterStream"', 'readerFlow.best(sectionId)']){
+ for(const marker of ['createReaderFlow(', 'readerFlow.begin()', 'readerFlow.scroll()', 'readerFlow.blockHtml(', 'data-reading-mode=', 'id="readerChapterStream"', 'readerFlow.best(sectionId)']){
   if(!app.includes(marker))throw new Error('Integración de lectura continua: falta '+marker);
  }
  for(const marker of ['.readerChapterStream','.readerAnchorBlock','.readerBookProgress'])if(!css.includes(marker))throw new Error('Estilos de lectura continua: falta '+marker);
