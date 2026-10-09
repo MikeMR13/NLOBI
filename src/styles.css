@@ -1827,3 +1827,16 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 [data-team-settings-panel]:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 #teamColorHint{font-size:.8rem;line-height:1.5;margin:0 0 14px}
 @media(max-width:400px){.teamSettingsNav{grid-template-columns:1fr 1fr}.teamSettingsTab{font-size:.76rem;line-height:1.35;overflow-wrap:anywhere}}
+
+/* Novedades reales de volúmenes publicados */
+.catalogCoverButton{position:relative}
+.newVolumeTag{display:inline-flex;align-items:center;flex-wrap:wrap;gap:5px;background:#ab292f;color:#fff;padding:6px 9px;border-radius:8px;font-weight:850;font-size:.68rem;line-height:1.2;letter-spacing:.035em;box-shadow:0 3px 12px #0004}
+.newVolumeTag span{border-left:1px solid #ffffff80;padding-left:6px;font-weight:650;letter-spacing:0}
+.catalogCoverButton>.newVolumeTag{position:absolute;z-index:3;left:8px;top:8px;max-width:calc(100% - 16px)}
+.newVolumeTag.compact{font-size:.61rem;padding:4px 6px;border-radius:6px}
+.newVolumeAnnouncement{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:22px 25px;margin:20px 0;border:1px solid var(--border);border-radius:18px;background:var(--surface);box-shadow:0 7px 23px #0000000a}
+.newVolumeAnnouncement strong{display:block;font-size:clamp(1.05rem,2vw,1.4rem);letter-spacing:.04em}
+.newVolumeAnnouncement p{margin:6px 0 0;color:var(--muted)}
+.newVolumeAnnouncement .btn{flex-shrink:0}
+@media(max-width:600px){.newVolumeAnnouncement{flex-direction:column;align-items:flex-start;padding:18px}.newVolumeAnnouncement .btn{width:100%;justify-content:center}.catalogCoverButton>.newVolumeTag{font-size:.6rem;left:6px;top:6px}}
+@media(forced-colors:active){.newVolumeTag{border:2px solid ButtonText}}
