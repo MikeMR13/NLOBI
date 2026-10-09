@@ -2067,3 +2067,17 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .collectionEntryList>div{flex-wrap:wrap}
 .collectionEntryList>div>button:first-child{flex:1;min-width:130px}
 @media(max-width:550px){.collectionForm,.collectionAddTool{padding:14px}.collectionEntryList .btn{padding:7px 9px}}
+
+
+/* Personalización visual de colecciones */
+.collectionCard{border-top:4px solid var(--collection-accent,#ad794e)}
+.collectionFeatureCover{width:80px;height:116px;object-fit:cover;border-radius:9px;box-shadow:0 5px 18px rgba(0,0,0,.18)}
+.collectionDraggable[draggable="true"]{cursor:grab;border:1px solid transparent;border-radius:8px;padding:4px 0;min-width:0}
+.collectionDraggable[draggable="true"]:active{cursor:grabbing}
+.collectionDraggable:focus-within{border-color:var(--collection-accent,#ad794e)}
+.collectionForm input[type="color"]{min-width:90px;width:115px;height:48px;padding:4px;cursor:pointer}
+.collectionForm select{width:100%;min-width:0}
+.collectionSharePreview{margin:16px 0;padding:16px;border-radius:16px;border:1px solid var(--line);display:grid;gap:8px}
+.collectionSharePreview strong{overflow-wrap:anywhere}
+.collectionSharePreview .row{flex-wrap:wrap}
+@media(max-width:540px){.collectionBooks{flex-wrap:wrap}.collectionDraggable{gap:4px}.collectionFeatureCover{width:62px;height:92px}}
