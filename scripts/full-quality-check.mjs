@@ -106,9 +106,10 @@ async function inspect(page){
  return page.evaluate(()=>{
   const root=document.documentElement,text=document.body.innerText;
   const controls=[...document.querySelectorAll('button,.btn,.navLink,select,input,textarea')].filter(el=>{const r=el.getBoundingClientRect(),cs=getComputedStyle(el);return cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>0&&r.height>0});
+  const inHorizontalScroller=el=>{for(let a=el.parentElement;a&&a!==document.body;a=a.parentElement){const cs=getComputedStyle(a);if(/auto|scroll/.test(cs.overflowX)&&a.scrollWidth>a.clientWidth+2)return true}return false};
   return {
    overflow:root.scrollWidth-root.clientWidth,
-   clipped:controls.map(el=>{const r=el.getBoundingClientRect();return{label:(el.textContent||el.getAttribute('aria-label')||el.getAttribute('placeholder')||'').trim().slice(0,90),left:r.left,right:r.right,width:r.width,height:r.height}}).filter(x=>x.left<-2||x.right>root.clientWidth+2),
+   clipped:controls.filter(el=>!inHorizontalScroller(el)).map(el=>{const r=el.getBoundingClientRect();return{label:(el.textContent||el.getAttribute('aria-label')||el.getAttribute('placeholder')||'').trim().slice(0,90),left:r.left,right:r.right,width:r.width,height:r.height}}).filter(x=>x.left<-2||x.right>root.clientWidth+2),
    tiny:controls.filter(el=>el.matches('button,.btn,.navLink,select')).map(el=>{const r=el.getBoundingClientRect();return{label:(el.textContent||el.getAttribute('aria-label')||'').trim().slice(0,90),width:r.width,height:r.height}}).filter(x=>x.width<40||x.height<40),
    badText:['undefined','[object Object]','NaN','Infinity'].filter(v=>text.includes(v)),
    main:!!document.querySelector('main'),content:(document.querySelector('main')?.innerText||'').trim().length
