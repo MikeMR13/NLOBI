@@ -1164,7 +1164,7 @@ function bindReaderExperience(){
  const bookmark=document.getElementById('readerBookmark');if(bookmark)bookmark.onclick=()=>{void readerFlow.save(true);toast('Posición de lectura guardada.','ok')};
  const resume=document.getElementById('readerResume');if(resume)resume.onclick=()=>{const p=readReaderPosition(S.readerSection?.id);if(p){readerEnhancements.restoreStable(p);resume.hidden=true}};
  const panel=document.getElementById('readerSettings');if(panel){
-  const outside=e=>{if(!panel.isConnected){document.removeEventListener('pointerdown',outside);return}if(panel.open&&!panel.contains(e.target))panel.open=false};
+  const outside=e=>{if(!panel.isConnected){document.removeEventListener('pointerdown',outside);return}if(panel.open&&!panel.contains(e.target)&&!e.target.closest?.('#readerFloatSettings'))panel.open=false};
   document.addEventListener('pointerdown',outside);
  }
  if(!window.__nlobiReaderKeyboardBound){
