@@ -468,3 +468,47 @@ for (const marker of [
  values.set('nlobi_site_appearance',JSON.stringify({readerFlow:'invalid'}));
  if(read().readerFlow!=='continuous')throw new Error('Selector de lectura: opción desconocida no vuelve al modo válido');
 }
+
+
+// Reader phase 7: floating navigation, precise resume and illustration viewer.
+{
+ const enhanced=fs.readFileSync('src/reader-enhancements.js','utf8');
+ const required=[
+  'export function createReaderEnhancements(',
+  'function updateDock(){',
+  'function stableRestore(',
+  'Promise.resolve(document.fonts?.ready)',
+  "img.addEventListener('load'",
+  'cancelRestore()',
+  'MutationObserver(',
+  'function prepareImages(){',
+  'dialog.showModal()',
+  "dialog.addEventListener('close'",
+  "dialog.addEventListener('keydown'",
+  'function setZoom(value)',
+  'return {bind,refresh:updateDock,restoreStable:stableRestore,cancelRestore,clear}',
+ ];
+ for(const marker of required)if(!enhanced.includes(marker))throw new Error('Fase 7 módulo: falta '+marker);
+ for(const marker of [
+  "import { createReaderEnhancements } from './reader-enhancements.js'",
+  'const readerEnhancements=createReaderEnhancements(',
+  'readerEnhancements.bind()',
+  'readerEnhancements.refresh()',
+  'readerEnhancements.restoreStable(',
+  'readerEnhancements.clear()',
+  'id="readerFloatDock"',
+  'id="readerFloatChapterJump"',
+  'id="readerFloatSeek"',
+  'id="readerFloatBookmark"',
+  'id="readerFloatSettings"',
+  'id="readerIllustrationDialog"',
+  'id="readerLightboxImage"',
+  'id="readerLightboxZoomIn"',
+ ])if(!app.includes(marker))throw new Error('Fase 7 app: falta '+marker);
+ for(const marker of ['.readerFloatDock{','.readerFloatDock.readerFloatHidden{','.readerLightbox{','.readerLightbox::backdrop{','.readerIllustrationOpen{'])if(!css.includes(marker))throw new Error('Fase 7 CSS: falta '+marker);
+ const template=app.slice(app.indexOf('function readerView(){'),app.indexOf('function accessibilityViewTitle(){'));
+ if(!template.includes('</dialog></main>'))throw new Error('Fase 7: el visor no cierra el marcado de la vista');
+ const build=fs.readFileSync('scripts/build.mjs','utf8'),sw=fs.readFileSync('public/sw.js','utf8');
+ for(const marker of ['assets/reader-enhancements.js','reader-enhancements.js'])if(!build.includes(marker))throw new Error('Fase 7 build: falta '+marker);
+ if(!sw.includes('/assets/reader-enhancements.js'))throw new Error('Fase 7 PWA: módulo ausente de caché');
+}
