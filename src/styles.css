@@ -1964,3 +1964,12 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .rankingInfo{flex:1;min-width:0}.rankingInfo h2{font-size:1rem;overflow-wrap:anywhere;margin:0 0 6px}.rankingInfo p{margin:0 0 6px;color:var(--muted);font-size:.82rem}.rankingInfo span{font-size:.82rem;font-weight:700}
 @media(max-width:540px){.rankingItem{flex-wrap:wrap;gap:10px}.rankingItem>.btn{width:100%;justify-content:center}.ratingPanel{flex-direction:column;align-items:flex-start}}
 @media(forced-colors:active){.ratingStar.selected{border:2px solid Highlight}}
+
+/* Búsqueda avanzada: campos combinables y accesibles */
+.exploreFilterGrid>.field{min-width:0}
+.exploreFilterGrid>.field>label:not(.srOnly){display:block;font-size:.78rem;font-weight:700;color:var(--muted);margin-bottom:7px}
+.exploreFilterGrid select{max-width:100%;min-height:44px;width:100%}
+.exploreFilterGrid select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media(min-width:721px){.exploreEditorial .exploreFilterGrid{grid-template-columns:repeat(3,minmax(0,1fr));gap:15px}}
+@media(max-width:720px){.exploreEditorial .exploreFilterGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}}
+@media(max-width:480px){.exploreEditorial .exploreFilterGrid{grid-template-columns:1fr}}
