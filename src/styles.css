@@ -1862,3 +1862,19 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 @media(max-width:360px){.homeVolumeReleaseGrid{grid-template-columns:1fr 1fr;gap:8px}.volumeReleaseBadge{font-size:.54rem;padding:5px}}
 @media(prefers-reduced-motion:reduce){.volumeReleaseCover img{transition:none}}
 @media(forced-colors:active){.volumeReleaseBadge{border:1px solid CanvasText}}
+
+/* Fase 2: publicaciones recientes de capítulos */
+.homeChapterReleases{margin:26px 0 36px;min-width:0}
+.homeChapterList{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}
+.homeChapterItem{display:flex;align-items:center;gap:13px;min-width:0;border:1px solid var(--border);background:var(--surface);padding:12px;border-radius:14px}
+.homeChapterCover{width:64px;min-width:64px;height:88px;border-radius:7px;overflow:hidden;background:var(--surface-tertiary,#eee9e1);display:flex;align-items:center;justify-content:center;color:var(--muted);font:700 1.35rem Georgia,serif}
+.homeChapterCover img{width:100%;height:100%;object-fit:cover}
+.homeChapterInfo{flex:1;min-width:0}
+.homeChapterType{font-size:.7rem;font-weight:800;letter-spacing:.045em;color:var(--accent)}
+.homeChapterInfo h3{font-size:.91rem;line-height:1.4;margin:4px 0;overflow-wrap:anywhere}
+.homeChapterInfo p{font-size:.77rem;line-height:1.45;color:var(--muted);margin:0 0 5px;overflow-wrap:anywhere}
+.homeChapterInfo time{font-size:.72rem;color:var(--muted)}
+.homeChapterRead{flex-shrink:0;font-size:.78rem;min-height:42px}
+@media(max-width:980px){.homeChapterList{grid-template-columns:1fr}}
+@media(max-width:540px){.homeChapterItem{gap:10px;padding:10px;flex-wrap:wrap}.homeChapterCover{width:56px;min-width:56px;height:77px}.homeChapterRead{width:100%;justify-content:center}}
+@media(forced-colors:active){.homeChapterItem{border:1px solid CanvasText}}
