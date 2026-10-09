@@ -102,6 +102,14 @@ export function createReaderFlow(deps){
   const selection=document.getElementById('readerChapterJump');
   if(counter&&idx>=0)counter.textContent='CAPÍTULO '+(idx+1)+' DE '+next.navigation.length;
   if(selection)selection.value=next.id;
+  // Keep chapter navigation in sync with the visible chapter, not the initial one.
+  const upcoming=next.navigation[idx+1],preceding=next.navigation[idx-1];
+  const topNext=document.querySelector('.readerTop [data-finish-next]');
+  const bottomNext=document.getElementById('finishAndNext');
+  const topPrevious=document.querySelector('.readerTop [data-read-section]');
+  if(topNext){topNext.hidden=!upcoming;if(upcoming){topNext.dataset.finishNext=upcoming.id;topNext.setAttribute('aria-label','Finalizar y pasar a '+(upcoming.title||'siguiente capítulo'))}}
+  if(bottomNext){bottomNext.hidden=!upcoming;if(upcoming)bottomNext.dataset.nextSection=upcoming.id}
+  if(topPrevious){topPrevious.hidden=!preceding;if(preceding){topPrevious.dataset.readSection=preceding.id;topPrevious.setAttribute('aria-label','Capítulo anterior: '+(preceding.title||'Anterior'))}}
  }
  function markup(chapter,original){
   const el=document.createElement('article');
