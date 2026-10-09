@@ -1935,3 +1935,8 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 @media(max-width:1040px){.translatorsDirectoryGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.translatorsDirectoryGrid{grid-template-columns:1fr}.translatorsSearchBar{align-items:stretch;flex-direction:column;gap:9px}.translatorsSearchBar input{min-width:0;width:100%}}
 @media(forced-colors:active){.translatorDirectoryCard,.translatorsSearchBar{border:1px solid CanvasText}}
+
+/* Evitar que las etiquetas de novedades hereden el texto tenue de los chips de género. */
+.homeBookTags .newVolumeTag,.homeBookTags .newVolumeTag span{color:#fff;background:#ab292f}
+.homeBookTags .newVolumeTag{border:1px solid #ab292f}
+.homeBookTags .newVolumeTag span{border:0;border-left:1px solid rgba(255,255,255,.7);border-radius:0;padding-left:6px}
