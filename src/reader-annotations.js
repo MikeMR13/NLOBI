@@ -2,7 +2,7 @@
 // Text anchors reference content block indices + plain-text offsets (never alter published blocks).
 export function createReaderAnnotations({state,request,escape,flow,openChapter,renderApp,notify}){
  const S=()=>state();
- let entries=[],owner=null,loading=null,root=null,streamObserver=null,controller=null,chosen=null,editing=null,libraryFilter='all',pendingJump=null;
+ let entries=[],owner=null,loading=null,root=null,streamObserver=null,controller=null,chosen=null,editing=null,libraryFilter='all',pendingJump=null,lastViewed=null;
  const table='/rest/v1/reader_annotations';
  const cleanId=id=>/^[0-9a-f-]{36}$/i.test(String(id||''))?String(id):'';
  const safeKind=kind=>['bookmark','highlight','note'].includes(kind)?kind:'bookmark';
@@ -15,7 +15,7 @@ export function createReaderAnnotations({state,request,escape,flow,openChapter,r
  function reset(){
   controller?.abort();controller=null;
   streamObserver?.disconnect();streamObserver=null;
-  owner=null;entries=[];loading=null;chosen=null;editing=null;pendingJump=null;root=null;
+  owner=null;entries=[];loading=null;chosen=null;editing=null;pendingJump=null;lastViewed=null;root=null;
  }
  async function load(){
   const uid=S().user?.id;
@@ -130,9 +130,8 @@ export function createReaderAnnotations({state,request,escape,flow,openChapter,r
   let node,offset=0,nodes=[];
   while(node=walker.nextNode()){
    const n=node.textContent?.length||0;
-   if(n&&node.parentElement&&!node.parentElement.closest('script,style,rt,.readerAnnotationFloating')){
-    nodes.push({node,start:offset,end:offset+n});offset+=n
-   }
+   if(n&&node.parentElement&&!node.parentElement.closest('script,style,rt,.readerAnnotationFloating'))nodes.push({node,start:offset,end:offset+n});
+   offset+=n;
   }
   for(const part of nodes){
    const begin=Math.max(0,from-part.start),finish=Math.min(part.end-part.start,to-part.start);
@@ -171,6 +170,7 @@ export function createReaderAnnotations({state,request,escape,flow,openChapter,r
    }
   }
  }
+ function track(){const id=current()?.id;if(id&&lastViewed!==id){lastViewed=id;refreshReader()}}
  function hideSelection(){const popup=root?.querySelector('#readerSelectionActions');if(popup)popup.hidden=true}
  function showSelection(){
   if(!root?.isConnected)return;
@@ -242,7 +242,7 @@ export function createReaderAnnotations({state,request,escape,flow,openChapter,r
    if(ok){root.querySelector('#readerAnnotationEditor')?.close();editing=null;chosen=null}
   },{signal});
   if(content){streamObserver=new MutationObserver(records=>{if(records.some(r=>[...r.addedNodes].some(n=>n.nodeType===1&&n.matches?.('.readerPaper')))){refreshReader();if(pendingJump)requestAnimationFrame(()=>restoreAnnotation(pendingJump))}});streamObserver.observe(content,{childList:true})}
-  refreshReader();
+  lastViewed=current()?.id;refreshReader();
   if(pendingJump&&pendingJump.section_id===current()?.id)requestAnimationFrame(()=>requestAnimationFrame(()=>restoreAnnotation(pendingJump)));
  }
  function readerUi(){
@@ -271,5 +271,5 @@ export function createReaderAnnotations({state,request,escape,flow,openChapter,r
   if(x&&root&&flow.paper(x.section_id)){pendingEdit=null;openEditor(x,x.kind)}
  }
  const previousBind=bindReader;
- return {load,reset,all,readerUi,libraryUi,bindLibrary,bindReader(){previousBind();requestAnimationFrame(maybeOpenPendingEdit)},refresh:refreshReader,navigate};
+ return {load,reset,all,readerUi,libraryUi,bindLibrary,bindReader(){previousBind();requestAnimationFrame(maybeOpenPendingEdit)},refresh:refreshReader,track,navigate};
 }
