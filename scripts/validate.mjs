@@ -130,6 +130,7 @@ for (const required of [
 ]) {
   if (!app.includes(required)) throw new Error("Library collections phase 3: falta " + required);
 }
+// Library collections phase 3 retry marker: visual cover picker QA.
 for (const required of [".collectionCoverChooser{",".collectionCoverChoice{",".collectionCoverNative{",".collectionCoverChoiceCheck{",".collectionCoverChoiceFallback"]) {
   if (!collectionCss.includes(required)) throw new Error("Library collections phase 3 CSS: falta " + required);
 }
