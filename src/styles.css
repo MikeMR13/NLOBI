@@ -2092,3 +2092,12 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .discoverCollectionCard .row{flex-wrap:wrap;margin-top:auto}
 .discoverCollectionCard .collectionBooks{min-height:116px}
 @media(max-width:680px){.discoverCollectionsTools{grid-template-columns:1fr}.discoverCollectionsHero{padding:22px}.discoverCollectionCard .row>.btn{flex:1}}
+
+
+.savedCollections{margin:36px 0 8px;padding-top:24px;border-top:1px solid var(--line)}
+.collectionLeaderGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.collectionLeaders{margin:22px 0}
+.collectionLeader{display:flex;flex-direction:column;gap:9px;align-items:flex-start;text-align:left;padding:18px;border-radius:14px;border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--panel);color:inherit;cursor:pointer}
+.collectionLeader strong{overflow-wrap:anywhere}.collectionLeader span{color:var(--muted)}
+.collectionLeader:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+@media(max-width:680px){.collectionLeaderGrid{grid-template-columns:1fr}.savedCollections>.sectionHead{flex-wrap:wrap;gap:12px}}
