@@ -378,3 +378,27 @@ for (const marker of [
   localStorage.setItem('nlobi_site_appearance','{invalid');
   if(site().navOrder.length!==5)throw new Error('Preferencias: no se recupera JSON dañado.');
 }
+
+
+// Phase 6: editorial reader enhancements.
+{
+ const readerMarkers=[
+  'function readReaderFocusMode(){',
+  'function toggleReaderFocusMode(force){',
+  'id="readerChapterJump"',
+  'id="readerFocusToggle"',
+  'id="readerFocusExit"',
+  'data-reader-quick="width"',
+  'data-reader-quick="paragraphSpace"',
+  'Atajos: Mayús +',
+  "if(!event.shiftKey||event.altKey",
+  "finishReaderAndNavigate(chapters[index+1].id,section.translation_id)",
+ ];
+ for(const marker of readerMarkers)if(!app.includes(marker))throw new Error('Reader phase 6: falta '+marker);
+ for(const marker of ['.readerExperience .readerTopJump select','.readerExperience.readerFocused .readerTop','body:has(.readerExperience.readerFocused) .top','.readerExperience .readerFocusExit'])if(!css.includes(marker))throw new Error('Reader phase 6 estilos: falta '+marker);
+ const begin=app.indexOf('function readerView(){');
+ const end=app.indexOf('function accessibilityViewTitle(){',begin);
+ if(begin<0||end<begin)throw new Error('Reader phase 6: vista no encontrada');
+ const view=app.slice(begin,end);
+ if(!view.includes('data-finish-next=')||!view.includes('id="markReaderDone"')||!view.includes('id="readerFontFamily"')||!view.includes('readerAdvanced'))throw new Error('Reader phase 6: no se conservaron funciones anteriores');
+}
