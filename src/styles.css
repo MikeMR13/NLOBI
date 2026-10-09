@@ -2208,3 +2208,13 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
    Theme-level --muted and --text can otherwise resolve to dark colors. */
 .publicReaderHero .readerSocialBar{color:#e0e0e0}
 .publicReaderHero .readerSocialBar strong{color:#fff}
+
+
+/* Targeted axe-core contrast fix: public team catalog cards on white. */
+.teamPublicPage .catalogStatusTag{color:#544400}
+body.dark .teamPublicPage .catalogStatusTag{color:#ffdf40}
+/* At 320px with two narrow library columns the fixed popover's containing
+   block is slightly offset. Preserve 16px+ inset for all its controls. */
+@media(max-width:350px){
+  .libraryShelfMenuPanel{left:calc(50% + 24px)}
+}
