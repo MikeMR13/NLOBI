@@ -1143,7 +1143,7 @@ function bindReaderExperience(){
    if(['INPUT','TEXTAREA','SELECT'].includes(tag)||event.target?.isContentEditable)return;
    if(event.key==='Escape'&&readReaderFocusMode()){toggleReaderFocusMode(false);return}
    if(!event.shiftKey||event.altKey||!['ArrowLeft','ArrowRight'].includes(event.key))return;
-   const section=S.readerSection;if(!section)return;
+   const section=readerFlow.active();if(!section)return;
    const chapters=section.navigation||[],index=chapters.findIndex(c=>c.id===section.id);
    if(index<0)return;
    event.preventDefault();
@@ -1248,6 +1248,7 @@ function observeShelves(){
 function render(){
  const app=document.getElementById('app');
  if(!app)return;
+ const readerRestore=S.view.startsWith('reader:')&&readerFlow.paper(readerFlow.active()?.id)?readerFlow.beforeRender():null;
  try{
   let html=S.view==='home'?home():'';
   if(S.view==='explore')html=explore();
@@ -1277,6 +1278,7 @@ function render(){
   app.innerHTML=html;
   enhanceAccessibility();
   bind();
+  if(readerRestore)requestAnimationFrame(()=>readerFlow.restore(readerRestore));
   applyStudioActionAccess();
   setNetworkBadge();
  }catch(e){
