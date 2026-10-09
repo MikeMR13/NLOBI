@@ -1,0 +1,2 @@
+-- Migration already applied in Supabase: 20261009000313.
+-- This placeholder records the migration identity; see Supabase history for exact DDL.
