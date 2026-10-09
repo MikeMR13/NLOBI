@@ -208,7 +208,8 @@ function readSiteAppearance(){
 let siteAppearance=readSiteAppearance();
 const LEGACY_READER_PREFS={...S.readerPrefs,flow:siteAppearance.readerFlow};
 function hydrateReaderPreferences(){
- siteAppearance.readerDefaults=normalizeReaderSettings(siteAppearance.readerDefaults||LEGACY_READER_PREFS,LEGACY_READER_PREFS);
+ const fallback={...LEGACY_READER_PREFS,flow:siteAppearance.readerFlow};
+ siteAppearance.readerDefaults=normalizeReaderSettings(siteAppearance.readerDefaults||fallback,fallback);
  siteAppearance.readerVolumes=cleanVolumeSettings(siteAppearance.readerVolumes);
  S.readerPrefs=readerScopedValues(siteAppearance,S.view.startsWith('reader:')?S.readerSection?.volume_id:null);
 }
@@ -264,6 +265,8 @@ function resetLocalReaderUiPreferences(){
  localStorage.removeItem(UI_PREF_DIRTY);
  localStorage.removeItem(UI_PREF_OWNER);
  siteAppearance=readSiteAppearance();
+ siteAppearance.readerDefaults={...READER_GLOBAL_DEFAULTS};
+ siteAppearance.readerVolumes={};
  hydrateReaderPreferences();
  libraryCustomization=readLibraryPreferences();
  S.librarySort=null;
