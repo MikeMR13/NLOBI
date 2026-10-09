@@ -2573,3 +2573,13 @@ body:has(.readerExperience.readerFocused) .top{display:none!important}
  .readerExperience .readerControlDock{justify-content:stretch}
  .readerExperience .readerSettingsPanel{max-width:calc(100vw - 24px)}
 }
+
+/* Continuous chapter reading */
+.readerChapterStream{display:grid;grid-template-columns:minmax(0,1fr);row-gap:24px;min-width:0}
+.readerChapterStream .readerPaper{width:100%;min-width:0;scroll-margin-top:80px}
+.readerChapterStream .readerStreamHeading{font:700 clamp(1.6rem,3vw,2.45rem)/1.2 Georgia,serif;margin:0 0 25px;color:inherit}
+.readerAnchorBlock{min-width:0;overflow-wrap:anywhere}
+.readerBookProgress{color:var(--reader-secondary);font-size:.83rem;white-space:nowrap}
+.readerStreamStatus{color:var(--reader-secondary);font-size:.85rem;min-height:1.2em;text-align:center;margin:8px 0 16px}
+.readerExperience .readerQuickGroup:first-child .readerQuickChoices button{flex:1 1 118px}
+@media(max-width:600px){.readerChapterStream{row-gap:16px}.readerBookProgress{white-space:normal}}
