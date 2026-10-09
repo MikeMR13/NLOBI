@@ -1117,15 +1117,45 @@ function readerGoToPercent(percent){
  const rect=paper.getBoundingClientRect(),start=window.scrollY+rect.top,end=start+rect.height-window.innerHeight*0.65;
  window.scrollTo({top:start+Math.max(0,Math.min(100,percent))/100*Math.max(0,end-start),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
 }
+function readReaderFocusMode(){return localStorage.getItem('nlobi_reader_focus')==='1'}
+function toggleReaderFocusMode(force){
+ const enabled=typeof force==='boolean'?force:!readReaderFocusMode();
+ try{localStorage.setItem('nlobi_reader_focus',enabled?'1':'0')}catch{}
+ const root=document.querySelector('.readerExperience');
+ if(!root)return;
+ root.classList.toggle('readerFocused',enabled);
+ const button=document.getElementById('readerFocusToggle');
+ if(button){button.setAttribute('aria-pressed',String(enabled));button.textContent=enabled?'Salir de enfoque':'◧ Modo enfoque'}
+ if(enabled){const settings=document.getElementById('readerSettings');if(settings)settings.open=false}
+}
 function bindReaderExperience(){
  if(!S.view.startsWith('reader:'))return;
  document.querySelectorAll('[data-reader-quick]').forEach(button=>button.onclick=()=>setReaderPref(button.dataset.readerQuick,button.dataset.readerQuick==='fontSize'?Number(button.dataset.readerValue):button.dataset.readerValue));
+ const jump=document.getElementById('readerChapterJump');if(jump)jump.onchange=()=>{const id=jump.value;if(id&&id!==S.readerSection?.id)openReader(id,S.readerSection?.translation_id)};
+ const focus=document.getElementById('readerFocusToggle');if(focus)focus.onclick=()=>toggleReaderFocusMode();
+ const focusExit=document.getElementById('readerFocusExit');if(focusExit)focusExit.onclick=()=>toggleReaderFocusMode(false);
  const close=document.getElementById('closeReaderSettings');if(close)close.onclick=()=>{const d=document.getElementById('readerSettings');if(d)d.open=false};
  const bookmark=document.getElementById('readerBookmark');if(bookmark)bookmark.onclick=()=>{const percent=readerScrollPercent();try{localStorage.setItem(readerPositionKey(S.readerSection.id),JSON.stringify({percent,updatedAt:Date.now()}))}catch{}toast('Posición de lectura guardada.','ok')};
  const resume=document.getElementById('readerResume');if(resume)resume.onclick=()=>{const p=readReaderPosition(S.readerSection?.id);if(p){readerGoToPercent(p.percent);resume.hidden=true}};
  const panel=document.getElementById('readerSettings');if(panel){
   const outside=e=>{if(!panel.isConnected){document.removeEventListener('pointerdown',outside);return}if(panel.open&&!panel.contains(e.target))panel.open=false};
   document.addEventListener('pointerdown',outside);
+ }
+ if(!window.__nlobiReaderKeyboardBound){
+  window.__nlobiReaderKeyboardBound=true;
+  document.addEventListener('keydown',event=>{
+   if(!S.view.startsWith('reader:')||event.defaultPrevented||event.repeat||event.ctrlKey||event.metaKey)return;
+   const tag=event.target?.tagName;
+   if(['INPUT','TEXTAREA','SELECT'].includes(tag)||event.target?.isContentEditable)return;
+   if(event.key==='Escape'&&readReaderFocusMode()){toggleReaderFocusMode(false);return}
+   if(!event.altKey||!['ArrowLeft','ArrowRight'].includes(event.key))return;
+   const section=S.readerSection;if(!section)return;
+   const chapters=section.navigation||[],index=chapters.findIndex(c=>c.id===section.id);
+   if(index<0)return;
+   event.preventDefault();
+   if(event.key==='ArrowLeft'&&index>0)openReader(chapters[index-1].id,section.translation_id);
+   if(event.key==='ArrowRight'&&index<chapters.length-1)finishReaderAndNavigate(chapters[index+1].id,section.translation_id);
+  });
  }
  if(!window.__nlobiReaderProgressBound){
   window.__nlobiReaderProgressBound=true;
@@ -1142,13 +1172,15 @@ function readerView(){
  const embedded=[...new Set((R.epub_fonts||[]).map(x=>x.family).filter(Boolean))],selectedEpubIndex=fontFamily.startsWith('epub:')?Number(fontFamily.slice(5)):0,activeEpubIndex=fontFamily==='original'?0:selectedEpubIndex,validEpub=Number.isInteger(activeEpubIndex)&&activeEpubIndex>=0&&activeEpubIndex<embedded.length,epubFontCss=validEpub?'\"NLOBI-EPUB-'+activeEpubIndex+'\", Georgia, serif':'Georgia, serif',epubFingerprint=JSON.stringify(R.epub_fonts||[]),embeddedReady=S.epubFontLoaded===epubFingerprint;
 
  const readingPosition=readReaderPosition(R.id);
- return `${nav()}<main class="wrap readerExperience readerSurface-${esc(theme)}"><div class="readerProgressTrack" aria-hidden="true"><span id="readerProgressFill"></span></div><div class="readerShell">
- <nav class="readerTop" aria-label="Navegación entre capítulos"><button class="btn" data-back-detail="${R.translation_id}">← Obra</button><div class="row">${prev?`<button class="btn" data-read-section="${prev.id}" data-translation="${R.translation_id}" aria-label="Capítulo anterior: ${esc(prev.title||'Anterior')}">← Anterior</button>`:''}${next?`<button class="btn primary" data-finish-next="${next.id}" data-translation="${R.translation_id}" aria-label="Marcar capítulo como leído y pasar a: ${esc(next.title||'Siguiente')}">Siguiente →</button>`:''}</div></nav>
- <div class="readerControlDock"><details class="readerSettings" id="readerSettings"><summary aria-label="Abrir ajustes de lectura"><span aria-hidden="true">⚙</span> Lectura</summary><div class="readerSettingsPanel"><div class="readerSettingsHead"><div><strong>Ajustes de lectura</strong><small>Elige cómo quieres leer</small></div><button type="button" class="readerSettingsClose" id="closeReaderSettings" aria-label="Cerrar ajustes">×</button></div>
+ return `${nav()}<main class="wrap readerExperience readerSurface-${esc(theme)} ${readReaderFocusMode()?'readerFocused':''}"><div class="readerProgressTrack" aria-hidden="true"><span id="readerProgressFill"></span></div><div class="readerShell">
+ <nav class="readerTop" aria-label="Navegación entre capítulos"><button class="btn" data-back-detail="${R.translation_id}">← Obra</button><div class="readerTopJump"><label class="srOnly" for="readerChapterJump">Ir a capítulo</label><select id="readerChapterJump" aria-label="Ir a otro capítulo">${ns.map((chapter,j)=>`<option value="${esc(chapter.id)}" ${chapter.id===R.id?'selected':''}>Vol. ${esc(chapter.volume_number??'—')} · ${esc(chapter.title||'Capítulo '+(j+1))}</option>`).join('')}</select></div><div class="row">${prev?`<button class="btn" data-read-section="${prev.id}" data-translation="${R.translation_id}" aria-label="Capítulo anterior: ${esc(prev.title||'Anterior')}">← Anterior</button>`:''}${next?`<button class="btn primary" data-finish-next="${next.id}" data-translation="${R.translation_id}" aria-label="Marcar capítulo como leído y pasar a: ${esc(next.title||'Siguiente')}">Siguiente →</button>`:''}</div></nav>
+ <div class="readerControlDock"><button type="button" class="readerFocusButton" id="readerFocusToggle" aria-pressed="${readReaderFocusMode()}" aria-label="Cambiar modo de concentración">${readReaderFocusMode()?'Salir de enfoque':'◧ Modo enfoque'}</button><details class="readerSettings" id="readerSettings"><summary aria-label="Abrir ajustes de lectura"><span aria-hidden="true">⚙</span> Lectura</summary><div class="readerSettingsPanel"><div class="readerSettingsHead"><div><strong>Ajustes de lectura</strong><small>Elige cómo quieres leer</small></div><button type="button" class="readerSettingsClose" id="closeReaderSettings" aria-label="Cerrar ajustes">×</button></div>
 <div class="readerQuickGroup"><span class="readerQuickLabel">Tamaño de letra</span><div class="readerQuickChoices" role="group" aria-label="Tamaño de letra">${[16,18,21,24].map(n=>`<button type="button" data-reader-quick="fontSize" data-reader-value="${n}" class="${Number(S.readerPrefs.fontSize||18)===n?'selected':''}" aria-pressed="${Number(S.readerPrefs.fontSize||18)===n}">${n===16?'A−':n===18?'A':n===21?'A+':'A++'}</button>`).join('')}</div></div>
 <div class="readerQuickGroup"><span class="readerQuickLabel">Interlineado</span><div class="readerQuickChoices" role="group" aria-label="Interlineado">${[['compact','Compacto'],['comfortable','Normal'],['relaxed','Amplio']].map(([v,label])=>`<button type="button" data-reader-quick="lineHeight" data-reader-value="${v}" class="${lineHeight===v?'selected':''}" aria-pressed="${lineHeight===v}">${label}</button>`).join('')}</div></div>
 <div class="readerQuickGroup"><span class="readerQuickLabel">Tipografía</span><div class="readerQuickChoices" role="group" aria-label="Tipografía">${[['original','Original EPUB'],['serif','Serif'],['sans','Sans']].map(([v,label])=>`<button type="button" data-reader-quick="fontFamily" data-reader-value="${v}" class="${fontFamily===v?'selected':''}" aria-pressed="${fontFamily===v}">${label}</button>`).join('')}</div></div>
 <div class="readerQuickGroup"><span class="readerQuickLabel">Tema de lectura</span><div class="readerQuickChoices" role="group" aria-label="Tema de lectura">${[['light','Claro'],['sepia','Sepia'],['dark','Oscuro']].map(([v,label])=>`<button type="button" data-reader-quick="theme" data-reader-value="${v}" class="${theme===v?'selected':''}" aria-pressed="${theme===v}">${label}</button>`).join('')}</div></div>
+<div class="readerQuickGroup"><span class="readerQuickLabel">Ancho de página</span><div class="readerQuickChoices" role="group" aria-label="Ancho de lectura">${[['narrow','Estrecho'],['normal','Equilibrado'],['wide','Amplio']].map(([v,label])=>`<button type="button" data-reader-quick="width" data-reader-value="${v}" class="${width===v?'selected':''}" aria-pressed="${width===v}">${label}</button>`).join('')}</div></div>
+<div class="readerQuickGroup"><span class="readerQuickLabel">Espaciado de párrafos</span><div class="readerQuickChoices" role="group" aria-label="Espaciado de párrafos">${[['compact','Corto'],['normal','Normal'],['wide','Amplio']].map(([v,label])=>`<button type="button" data-reader-quick="paragraphSpace" data-reader-value="${v}" class="${paragraphSpace===v?'selected':''}" aria-pressed="${paragraphSpace===v}">${label}</button>`).join('')}</div></div>
 <details class="readerAdvanced" id="readerAdvanced"><summary>Más opciones <span aria-hidden="true">⌄</span></summary><section class="readerControls" aria-label="Preferencias avanzadas de lectura">
   <label for="readerTheme">Tema</label><select id="readerTheme"><option value="light" ${theme==='light'?'selected':''}>Claro</option><option value="sepia" ${theme==='sepia'?'selected':''}>Sepia</option><option value="dark" ${theme==='dark'?'selected':''}>Oscuro</option></select>
   <label for="readerFont">Tamaño <output id="readerFontValue" for="readerFont">${Number(S.readerPrefs.fontSize||18)} px</output></label><input id="readerFont" type="range" min="14" max="30" value="${Number(S.readerPrefs.fontSize||18)}" aria-describedby="readerFontValue">
@@ -1163,6 +1195,7 @@ function readerView(){
   <label for="readerImages">Ilustraciones</label><select id="readerImages"><option value="show" ${(S.readerPrefs.images||"show")==="show"?"selected":""}>Mostrar</option><option value="hide" ${S.readerPrefs.images==="hide"?"selected":""}>Ocultar</option></select>
  </section></details></div></details></div>\n ${fontFamily==='original'&&embedded.length?`<p class="muted readerFontNotice">Fuentes del EPUB: ${embedded.map(esc).join(', ')}</p>`:''}
  <div class="readerReadingTools"><span class="readerChapterIndex">${i>=0&&ns.length?`CAPÍTULO ${i+1} DE ${ns.length}`:'TU LECTURA'}</span><div class="readerReadingActions"><span id="readerProgressLabel" role="status" aria-live="off">0% leído</span><button type="button" class="btn readerBookmarkButton" id="readerBookmark" title="Guardar la posición actual">♧ Guardar punto</button>${readingPosition?.percent>5&&readingPosition.percent<98?`<button type="button" class="btn readerResumeButton" id="readerResume">↳ Continuar desde ${Math.round(readingPosition.percent)}%</button>`:''}</div></div>
+ <p class="readerKeyboardHint">Atajos: Alt + ← capítulo anterior · Alt + → finalizar y avanzar · Esc salir del modo enfoque</p><button type="button" class="readerFocusExit" id="readerFocusExit" aria-label="Salir del modo de concentración">Salir del modo enfoque ✕</button>
  <article class="readerPaper reader-${esc(theme)} reader-${esc(width)} reader-line-${esc(lineHeight)} reader-font-${esc((fontFamily==='original'||fontFamily.startsWith('epub:'))&&validEpub&&embeddedReady?'original':fontFamily.startsWith('epub:')?'serif':fontFamily==='original'?'serif':fontFamily)} reader-space-${esc(paragraphSpace)} reader-indent-${esc(S.readerPrefs.indent||"none")} reader-align-${esc(S.readerPrefs.align||"left")} reader-contrast-${esc(S.readerPrefs.contrast||"standard")} reader-images-${esc(S.readerPrefs.images||"show")}" style="font-size:${Number(S.readerPrefs.fontSize||18)}px;--epub-reader-font:${esc(epubFontCss)}" aria-labelledby="chapterTitle"><div class="readerMeta">${esc(R.novel_title||'El Obi del Lector')}${R.volume_number!=null?` · Vol. ${esc(R.volume_number)}`:''}</div><h1 id="chapterTitle">${esc(R.title||'Capítulo')}</h1><div class="readerChapterDivider" aria-hidden="true"></div>${(R.content||[]).map(renderReaderBlock).join('')}</article>
  <nav class="readerBottom" aria-label="Continuar lectura"><button class="btn" id="markReaderDone" type="button">✓ Marcar como leído</button>${next?`<button class="btn primary" id="finishAndNext" data-next-section="${next.id}" data-translation="${R.translation_id}">Finalizar y leer siguiente →</button>`:`<button class="btn primary" id="finishAndReturn" data-translation="${R.translation_id}">✓ Finalizar capítulo y volver a la obra</button>`}</nav>
  </div></main>`;
