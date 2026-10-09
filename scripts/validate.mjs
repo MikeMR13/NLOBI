@@ -88,6 +88,11 @@ for (const required of [
 }
 if (app.includes("x.demo?'Demo':'Publicada'")) throw new Error("Novel display QA: las tarjetas siguen ocultando el estado real.");
 
+// Library collections DOM regression: never execute collectionsTab() inside a class attribute.
+if (app.includes("class=\"\${S.libraryTab==='collections'?collectionsTab():''}")) throw new Error("Library collections: collectionsTab() volvió a filtrarse dentro del atributo class.");
+if (!app.includes("\${S.libraryTab==='collections'?collectionsTab():''}")) throw new Error("Library collections: falta renderizado normal de la pestaña Colecciones.");
+if (!app.includes("collectionEmptySaved")) throw new Error("Library collections: falta estado vacío visual de colecciones guardadas.");
+
 console.log("Validation OK");
 if (/(^|[^$])\$\('\[data-[^']+'\)\.forEach/m.test(app)) throw new Error("Selector simple usado con forEach; usa $() para NodeList.");
 
