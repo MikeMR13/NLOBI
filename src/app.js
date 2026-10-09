@@ -199,12 +199,16 @@ let siteAppearance=readSiteAppearance();
 function applySiteAppearance(){document.body.classList.toggle('dark',siteAppearance.mode==='dark'||(siteAppearance.mode==='auto'&&window.matchMedia('(prefers-color-scheme: dark)').matches));document.documentElement.dataset.siteMode=siteAppearance.mode;document.documentElement.dataset.siteDensity=siteAppearance.density;document.documentElement.dataset.siteCorners=siteAppearance.corners;document.documentElement.dataset.siteMotion=siteAppearance.motion;document.documentElement.dataset.siteHeader=siteAppearance.headerMode;document.documentElement.dataset.siteContrast=siteAppearance.contrast;document.documentElement.dataset.siteSpacing=siteAppearance.spacing;document.documentElement.dataset.siteTargets=siteAppearance.targets;document.documentElement.dataset.siteFocus=siteAppearance.focusHelp?'enhanced':'standard';document.documentElement.dataset.siteTheme=siteAppearance.theme;document.documentElement.dataset.siteFont=siteAppearance.font;document.documentElement.style.setProperty('--site-font-scale',siteAppearance.scale+'%')}
 window.matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{if(siteAppearance.mode==="auto")applySiteAppearance()});
 const UI_PREF_DIRTY='nlobi_ui_prefs_modified_at';
+const UI_PREF_OWNER='nlobi_ui_prefs_owner';
 let uiPrefsTimer=null;
 let uiPrefsLoadedFor=null;
 let uiPrefsWriteSerial=Promise.resolve();
 async function syncReaderUiPreferences(){
  if(!S.user?.id||!S.token||!navigator.onLine)return;
  const uid=S.user.id;
+ const previousOwner=localStorage.getItem(UI_PREF_OWNER);
+ if(previousOwner&&previousOwner!==uid){resetLocalReaderUiPreferences()}
+ localStorage.setItem(UI_PREF_OWNER,uid);
  try{
   const rows=await jreq('/rest/v1/reader_ui_preferences?user_id=eq.'+encodeURIComponent(uid)+'&select=appearance,library,updated_at&limit=1');
   if(S.user?.id!==uid)return;
@@ -213,6 +217,7 @@ async function syncReaderUiPreferences(){
    if(localChanged>remoteChanged){await pushReaderUiPreferences();return}
    localStorage.setItem('nlobi_site_appearance',JSON.stringify(remote.appearance||{}));
    localStorage.setItem(LIB_PREF_KEY,JSON.stringify(remote.library||{}));
+   if(remote.library?.view)localStorage.setItem('nlobi_library_view',remote.library.view);
    siteAppearance=readSiteAppearance();libraryCustomization=readLibraryPreferences();
    S.librarySort=libraryCustomization.sort;applySiteAppearance();
    localStorage.removeItem(UI_PREF_DIRTY);
@@ -227,6 +232,18 @@ async function pushReaderUiPreferences(){
  const task=async()=>{if(S.user?.id!==uid)return;await jreq('/rest/v1/reader_ui_preferences?on_conflict=user_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({user_id:uid,appearance,library,updated_at:new Date(changedAt||Date.now()).toISOString()})});if(S.user?.id===uid&&Number(localStorage.getItem(UI_PREF_DIRTY)||0)<=changedAt)localStorage.removeItem(UI_PREF_DIRTY)};
  uiPrefsWriteSerial=uiPrefsWriteSerial.catch(()=>{}).then(task);
  return uiPrefsWriteSerial;
+}
+function resetLocalReaderUiPreferences(){
+ if(uiPrefsTimer){clearTimeout(uiPrefsTimer);uiPrefsTimer=null}
+ localStorage.removeItem('nlobi_site_appearance');
+ localStorage.removeItem(LIB_PREF_KEY);
+ localStorage.removeItem('nlobi_library_view');
+ localStorage.removeItem(UI_PREF_DIRTY);
+ localStorage.removeItem(UI_PREF_OWNER);
+ siteAppearance=readSiteAppearance();
+ libraryCustomization=readLibraryPreferences();
+ S.librarySort=null;
+ applySiteAppearance();
 }
 function queueUiPreferencesSync(){
  localStorage.setItem(UI_PREF_DIRTY,String(Date.now()));
@@ -465,12 +482,12 @@ function collectionView(){
 function libraryProgressFor(id){return S.readingProgress.find(x=>x.translation_id===id)||null}
 function cachedChapterIndex(){try{return JSON.parse(localStorage.getItem('nlobi_cached_chapters')||'[]')}catch{return[]}}
 const LIB_PREF_KEY='nlobi_library_personalization';
-function readLibraryPreferences(){try{const o=JSON.parse(localStorage.getItem(LIB_PREF_KEY)||'{}');return{view:o.view==='list'?'list':localStorage.getItem('nlobi_library_view')==='list'?'list':'grid',density:['compact','normal','comfortable'].includes(o.density)?o.density:'normal',sort:['recent','title','progress','favorites'].includes(o.sort)?o.sort:'recent',hideCompleted:o.hideCompleted===true,showTeam:o.showTeam!==false,showProgress:o.showProgress!==false,showBadges:o.showBadges!==false}}catch{return{view:'grid',density:'normal',sort:'recent',hideCompleted:false,showTeam:true,showProgress:true,showBadges:true}}}
+function readLibraryPreferences(){try{const o=JSON.parse(localStorage.getItem(LIB_PREF_KEY)||'{}');return{view:o.view==='list'?'list':o.view==='grid'?'grid':localStorage.getItem('nlobi_library_view')==='list'?'list':'grid',density:['compact','normal','comfortable'].includes(o.density)?o.density:'normal',sort:['recent','title','progress','favorites'].includes(o.sort)?o.sort:'recent',hideCompleted:o.hideCompleted===true,showTeam:o.showTeam!==false,showProgress:o.showProgress!==false,showBadges:o.showBadges!==false}}catch{return{view:'grid',density:'normal',sort:'recent',hideCompleted:false,showTeam:true,showProgress:true,showBadges:true}}}
 let libraryCustomization=readLibraryPreferences();
 function persistLibraryCustomization(){localStorage.setItem(LIB_PREF_KEY,JSON.stringify(libraryCustomization));localStorage.setItem('nlobi_library_view',libraryCustomization.view);S.librarySort=libraryCustomization.sort;queueUiPreferencesSync()}
 function libraryCustomizationPanel(){const choices=(key,items)=>'<div class="siteAppearanceOptions">'+items.map(([value,label])=>'<button type="button" class="siteFontOption '+(libraryCustomization[key]===value?'selected':'')+'" data-library-custom="'+key+'" data-custom-value="'+value+'" aria-pressed="'+(libraryCustomization[key]===value)+'">'+label+'</button>').join('')+'</div>';const toggles=[['showTeam','Mostrar equipo traductor'],['showProgress','Mostrar progreso'],['showBadges','Mostrar etiquetas y novedades'],['hideCompleted','Ocultar novelas completadas']];return '<section class="siteAppearancePanel"><h3>Personaliza tu biblioteca</h3><p class="muted">Configura cómo se muestran tus novelas. No modifica tus datos ni tu progreso.</p><h4>Presentación</h4>'+choices('view',[['grid','Cuadrícula'],['list','Lista']])+'<h4>Densidad</h4>'+choices('density',[['compact','Compacta'],['normal','Normal'],['comfortable','Cómoda']])+'<h4>Orden por defecto</h4>'+choices('sort',[['recent','Recientes'],['title','Título'],['progress','Mayor progreso'],['favorites','Favoritas primero']])+'<h4>Elementos visibles</h4><div class="siteNavVisibility">'+toggles.map(([key,label])=>'<label class="siteNavVisibilityItem"><input type="checkbox" data-library-custom-toggle="'+key+'" '+(libraryCustomization[key]?'checked':'')+'><span>'+label+'</span></label>').join('')+'</div><div class="siteAppearanceFooter"><button type="button" class="btn" id="resetLibraryCustom">Restablecer biblioteca</button><span class="muted">Se guarda en este navegador.</span></div></section>'}
 function bindLibraryCustomization(){document.querySelectorAll('[data-library-custom]').forEach(b=>b.onclick=()=>{libraryCustomization[b.dataset.libraryCustom]=b.dataset.customValue;persistLibraryCustomization();render()});document.querySelectorAll('[data-library-custom-toggle]').forEach(b=>b.onchange=()=>{libraryCustomization[b.dataset.libraryCustomToggle]=b.checked;persistLibraryCustomization();render()});const reset=document.getElementById('resetLibraryCustom');if(reset)reset.onclick=()=>{localStorage.removeItem(LIB_PREF_KEY);libraryCustomization=readLibraryPreferences();persistLibraryCustomization();render()}}
-function libraryFiltered(){let items=S.library.filter(x=>S.libraryFilter==='all'||(S.libraryFilter==='favorites'?x.is_favorite:x.status===S.libraryFilter));const q=(S.libraryQuery||'').trim().toLocaleLowerCase();if(q)items=items.filter(x=>[x.translations?.novels?.title,x.translations?.title,x.translations?.translator_groups?.name].some(t=>String(t||'').toLocaleLowerCase().includes(q)));if(libraryCustomization.hideCompleted)items=items.filter(x=>x.status!=='completed');const sort=S.librarySort||libraryCustomization.sort;return items.slice().sort((a,b)=>sort==='favorites'?(Number(Boolean(b.is_favorite))-Number(Boolean(a.is_favorite))||new Date(b.updated_at||0)-new Date(a.updated_at||0)):sort==='title'?String(a.translations?.novels?.title||a.translations?.title||'').localeCompare(String(b.translations?.novels?.title||b.translations?.title||''),'es'):sort==='progress'?Number(libraryProgressFor(b.translation_id)?.progress_percent||0)-Number(libraryProgressFor(a.translation_id)?.progress_percent||0):new Date(b.updated_at||0)-new Date(a.updated_at||0))}
+function libraryFiltered(){let items=S.library.filter(x=>S.libraryFilter==='all'||(S.libraryFilter==='favorites'?x.is_favorite:x.status===S.libraryFilter));const q=(S.libraryQuery||'').trim().toLocaleLowerCase();if(q)items=items.filter(x=>[x.translations?.novels?.title,x.translations?.title,x.translations?.translator_groups?.name].some(t=>String(t||'').toLocaleLowerCase().includes(q)));if(libraryCustomization.hideCompleted&&S.libraryFilter!=='completed')items=items.filter(x=>x.status!=='completed');const sort=S.librarySort||libraryCustomization.sort;return items.slice().sort((a,b)=>sort==='favorites'?(Number(Boolean(b.is_favorite))-Number(Boolean(a.is_favorite))||new Date(b.updated_at||0)-new Date(a.updated_at||0)):sort==='title'?String(a.translations?.novels?.title||a.translations?.title||'').localeCompare(String(b.translations?.novels?.title||b.translations?.title||''),'es'):sort==='progress'?Number(libraryProgressFor(b.translation_id)?.progress_percent||0)-Number(libraryProgressFor(a.translation_id)?.progress_percent||0):new Date(b.updated_at||0)-new Date(a.updated_at||0))}
 
 async function loadMyCollections(){
  if(!S.user){S.readerCollections=[];return}
@@ -1764,7 +1781,7 @@ async function login(){try{setAuthError('');const email=$('#email').value.trim()
 function authRedirectUrl(){return location.origin+'/'}
 async function signup(){try{setAuthError('');const email=$('#email').value.trim(),password=$('#pass').value,name=$('#name').value.trim(),account_type=document.querySelector('input[name=atype]:checked').value;const d=await jreq('/auth/v1/signup?redirect_to='+encodeURIComponent(authRedirectUrl()),{method:'POST',body:JSON.stringify({email,password,data:{display_name:name,account_type}})});if(d?.access_token)persistSession(d);toast(d?.access_token?'Cuenta creada y sesión iniciada.':'Cuenta creada. Te enviamos un correo de verificación.','ok');if(d?.access_token){await loadUser();go('home',true)}else{S.authMode='login';render()}}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
 async function resendVerification(){try{setAuthError('');const email=$('#email')?.value.trim();if(!email){setAuthError('Escribe tu correo para reenviar la verificación.');return}await jreq('/auth/v1/resend?redirect_to='+encodeURIComponent(authRedirectUrl()),{method:'POST',body:JSON.stringify({type:'signup',email})});toast('Correo de verificación reenviado. Revisa también Spam o Promociones.','ok')}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
-function logout(){const token=S.token;if(token)fetch(URL+'/auth/v1/logout',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+token}}).catch(()=>{});clearSession();S.user=S.profile=null;S.groups=[];S.library=[];S.readerCollections=[];S.savedCollections=[];S.collectionSaveCounts=new Map();S.discoverCollections=[];S.readerFollows=[];S.followedReaderProfiles=[];S.readerActivity=[];S.readerDirectory=[];S.readSections=[];S.readingProgress=[];S.readingHistory=[];S.notes=[];S.admin=false;S.adminUsers=[];S.adminTeams=[];S.adminReports=[];S.adminReviewReports=[];S.adminContent=[];S.adminVolumes=[];S.adminSections=[];S.adminPurchaseLinks=[];S.adminBetaFeedback=[];S.adminAudit=[];S.view='home';render()}
+function logout(){resetLocalReaderUiPreferences();const token=S.token;if(token)fetch(URL+'/auth/v1/logout',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+token}}).catch(()=>{});clearSession();S.user=S.profile=null;S.groups=[];S.library=[];S.readerCollections=[];S.savedCollections=[];S.collectionSaveCounts=new Map();S.discoverCollections=[];S.readerFollows=[];S.followedReaderProfiles=[];S.readerActivity=[];S.readerDirectory=[];S.readSections=[];S.readingProgress=[];S.readingHistory=[];S.notes=[];S.admin=false;S.adminUsers=[];S.adminTeams=[];S.adminReports=[];S.adminReviewReports=[];S.adminContent=[];S.adminVolumes=[];S.adminSections=[];S.adminPurchaseLinks=[];S.adminBetaFeedback=[];S.adminAudit=[];S.view='home';render()}
 async function loadCatalog(earlyRender=false){
  const catalogRequest=jreqAllRows('/rest/v1/translations?select=id,title,status,language_code,popularity_score,updated_at,novels(id,title,synopsis,cover_url,author_name,demography,genres,tags),translator_groups(id,name)&status=in.(active,complete,paused)&order=updated_at.desc');
  const volumeRequest=jreq('/rest/v1/volumes?select=id,translation_id,volume_number,title,cover_url,published_at,status&status=eq.published&published_at=not.is.null&order=published_at.desc&limit=200');
