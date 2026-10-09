@@ -126,7 +126,7 @@ for (const required of [
   'class="collectionCoverChoice',
   'class="collectionCoverNative"',
   'collectionPreviewChosenFallback',
-  "$('[data-collection-cover]').forEach"
+  "document.querySelectorAll('[data-collection-cover]').forEach"
 ]) {
   if (!app.includes(required)) throw new Error("Library collections phase 3: falta " + required);
 }
