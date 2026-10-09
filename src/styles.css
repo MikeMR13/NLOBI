@@ -2373,3 +2373,5 @@ body.dark .teamPublicPage .catalogStatusTag{color:#ffdf40}
 .readerSettingsPanel[data-preference-panel="notices"]{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}
 .readerSettingsPanel[data-preference-panel="notices"] .notificationSettings{margin:18px 0}
 @media(max-width:600px){.readerSettingsTabs{gap:5px}.readerSettingsTab{flex-basis:calc(50% - 6px);padding:11px 8px}}
+
+.accountNotificationLink{display:flex!important;align-items:center;gap:9px;width:100%;text-align:left}.accountBell{font-size:1.05rem;line-height:1}.accountUnreadCount{margin-left:auto;display:inline-flex;min-width:23px;height:23px;padding:0 6px;border-radius:999px;align-items:center;justify-content:center;background:var(--accent);color:#111;font-size:.75rem;font-weight:800;font-variant-numeric:tabular-nums}
