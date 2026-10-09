@@ -468,6 +468,59 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   await context.close();
  }
 
+
+
+ // Phase 8 end-to-end: user-owned bookmarks, text highlights and private library shelf.
+ {
+  const uid='33333333-3333-4333-8333-333333333333',sid='11111111-1111-4111-8111-111111111111',tid='22222222-2222-4222-8222-222222222222';
+  const rows=[],context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});
+  await prepare(context);
+  await context.route('**/rest/v1/reader_annotations*',async route=>{
+   const req=route.request(),method=req.method();
+   if(method==='GET')return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(rows)});
+   if(method==='POST'){
+    const data=JSON.parse(req.postData()||'{}'),item={...data,id:crypto.randomUUID(),created_at:new Date().toISOString(),updated_at:new Date().toISOString(),sections:{title:'Capítulo de prueba'},translations:{title:'Obra privada QA',novels:{title:'Obra privada QA'}}};
+    rows.unshift(item);
+    return route.fulfill({status:201,contentType:'application/json',body:JSON.stringify([item])});
+   }
+   if(method==='DELETE'){const id=new URL(req.url()).searchParams.get('id')?.slice(3),at=rows.findIndex(x=>x.id===id);if(at>=0)rows.splice(at,1);return route.fulfill({status:204,body:''})}
+   return route.fulfill({status:400,body:'[]'});
+  });
+  const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+  await page.goto(base+'#home',{waitUntil:'networkidle'});
+  await page.waitForFunction(()=>!!window.__NLOBI_QA__);
+  const chapter={...section1,id:sid,translation_id:tid,volume_id:'volume-1',novel_title:'Obra privada QA',volume_number:1,
+   navigation:[{id:sid,volume_number:1,title:'Capítulo de prueba',translation_id:tid}],
+   content:[{type:'paragraph',text:'Primera escena de la novela. '.repeat(70)},{type:'paragraph',text:'Texto para seleccionar y destacar. '.repeat(100)}]};
+  await page.evaluate(async ({uid,chapter})=>{
+   window.__NLOBI_QA__.setState({user:{id:uid,email:'lector@ejemplo.test'},readerSection:chapter,view:'reader:'+chapter.id,libraryTab:'books',readingProgress:[]});
+   await window.__NLOBI_QA__.loadAnnotations();
+  },{uid,chapter});
+  await page.locator('#readerAddBookmark').click();
+  await page.locator('#readerAnnotationNoteInput').fill('Revisar esta escena después');
+  await page.locator('#readerAnnotationForm button[type="submit"]').click();
+  await page.waitForFunction(()=>window.__NLOBI_QA__.annotationCount()===1);
+  await page.evaluate(()=>{
+   const paragraph=document.querySelector('[data-block-index="1"] p');
+   const text=paragraph.firstChild,r=document.createRange();
+   r.setStart(text,5);r.setEnd(text,65);
+   const selection=window.getSelection();selection.removeAllRanges();selection.addRange(r);
+   paragraph.dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));
+  });
+  await page.locator('[data-reader-selection="highlight"]').click();
+  await page.waitForFunction(()=>window.__NLOBI_QA__.annotationCount()===2);
+  const marks=await page.locator('.readerPaper mark.readerMarkedText').count();
+  await page.locator('#readerAnnotationsToggle').click();
+  const panel=await page.locator('#readerAnnotationsPanel .readerAnnotationCard').count();
+  await page.evaluate(()=>window.__NLOBI_QA__.setState({view:'library',libraryTab:'annotations'}));
+  const library=await page.locator('.readerAnnotationsLibrary .readerAnnotationCard').count();
+  const privateLabel=await page.locator('#readerAnnotationsLibraryTitle').textContent();
+  if(runtime.length||marks<1||panel!==2||library!==2||rows.length!==2||!privateLabel?.includes('Mis marcas')){
+   failures.push({scenario:'reader-phase8-private-bookmarks-highlights-library',runtime,marks,panel,library,rows:rows.length,privateLabel});
+  }
+  await context.close();
+ }
+
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');
