@@ -2604,3 +2604,7 @@ body:has(.readerExperience.readerFocused) .top{display:none!important}
 .readerReadingPreferences .readingModeHelp{margin-top:16px}
 @media(max-width:650px){.readingModeOptions{grid-template-columns:1fr}.readingModeOption{min-height:82px;padding:14px}.volumeReadingMode{margin:14px 0 23px}.readingModeIcon{flex-basis:35px;height:35px;font-size:1.35rem}}
 @media(prefers-reduced-motion:reduce){.readingModeOption{transition:none}}
+
+.volumeReadingModeAction{display:flex;justify-content:flex-start;margin-top:18px}
+.volumeReadingModeAction .btn{min-height:44px}
+@media(max-width:650px){.volumeReadingModeAction .btn{width:100%}}
