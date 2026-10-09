@@ -1,4 +1,5 @@
 import { createReaderFlow } from './reader-flow.js';
+import { createReaderEnhancements } from './reader-enhancements.js';
 const CONFIG = window.__NLOBI_CONFIG__ || {};
 const URL = CONFIG.supabaseUrl;
 const KEY = CONFIG.supabasePublishableKey;
@@ -11,6 +12,7 @@ const S={view:'home',authMode:'login',user:null,token:localStorage.getItem('nlob
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const readerFlow=createReaderFlow({state:()=>S,renderBlock:renderReaderBlock,escapeText:esc,request:jreq,readCache:readCachedChapter,writeCache:cacheReaderChapter,queueProgress,markRead:recordSectionCompleted,readIds:readSectionIds});
+const readerEnhancements=createReaderEnhancements({flow:readerFlow,state:()=>S,readPosition:readReaderPosition,openChapter:id=>openReader(id,readerFlow.active()?.translation_id),savePosition:()=>readerFlow.save(true).then(()=>toast('Punto de lectura guardado.','ok')),openSettings:()=>{const settings=document.getElementById('readerSettings');if(settings){settings.open=true;settings.querySelector('summary')?.focus()}},seekTo:readerGoToPercent});
 const safeUrl=u=>{if(!u)return'#';try{const v=/^https?:\/\//i.test(String(u))?String(u):'https://'+String(u);const x=new globalThis.URL(v);return ['http:','https:'].includes(x.protocol)?x.href:'#'}catch{return'#'}};const safeMediaUrl=u=>{const raw=String(u||'');if(/^data:image\/(png|jpeg|jpg|gif|webp);base64,/i.test(raw))return raw;const url=safeUrl(raw);try{const parsed=new globalThis.URL(url),origin=new globalThis.URL(URL),prefix='/storage/v1/object/public/nlobi-media/';if(parsed.origin===origin.origin&&parsed.pathname.startsWith(prefix))return '/media/'+parsed.pathname.slice(prefix.length)+parsed.search} catch{}return url};const safeCssUrl=u=>safeUrl(u).replace(/[\\'"()]/g,c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0').toUpperCase());
 const titleOf=x=>x?.novels?.title||x?.title||'Novela';
 const coverOf=x=>x?.novels?.cover_url||null;
@@ -1135,7 +1137,7 @@ function readerScrollPercent(){
  return Math.round(Math.max(0,Math.min(100,(window.scrollY-start)/Math.max(1,end-start)*100)));
 }
 let readerScrollFrame=0,readerLastPersist=0;
-function updateReaderProgress(){if(S.view.startsWith('reader:')&&S.readerSection)readerFlow.scroll()}
+function updateReaderProgress(){if(S.view.startsWith('reader:')&&S.readerSection){readerFlow.scroll();readerEnhancements.refresh()}}
 function readerGoToPercent(percent,sectionId=readerFlow.active()?.id){
  const paper=readerFlow.paper(sectionId);if(!paper)return;
  const rect=paper.getBoundingClientRect(),start=window.scrollY+rect.top,end=start+rect.height-window.innerHeight*0.65;
@@ -1160,7 +1162,7 @@ function bindReaderExperience(){
  const focusExit=document.getElementById('readerFocusExit');if(focusExit)focusExit.onclick=()=>toggleReaderFocusMode(false);
  const close=document.getElementById('closeReaderSettings');if(close)close.onclick=()=>{const d=document.getElementById('readerSettings');if(d)d.open=false};
  const bookmark=document.getElementById('readerBookmark');if(bookmark)bookmark.onclick=()=>{void readerFlow.save(true);toast('Posición de lectura guardada.','ok')};
- const resume=document.getElementById('readerResume');if(resume)resume.onclick=()=>{const p=readReaderPosition(S.readerSection?.id);if(p){readerFlow.restore(p);resume.hidden=true}};
+ const resume=document.getElementById('readerResume');if(resume)resume.onclick=()=>{const p=readReaderPosition(S.readerSection?.id);if(p){readerEnhancements.restoreStable(p);resume.hidden=true}};
  const panel=document.getElementById('readerSettings');if(panel){
   const outside=e=>{if(!panel.isConnected){document.removeEventListener('pointerdown',outside);return}if(panel.open&&!panel.contains(e.target))panel.open=false};
   document.addEventListener('pointerdown',outside);
@@ -1187,6 +1189,7 @@ function bindReaderExperience(){
   window.addEventListener('resize',()=>{if(S.view.startsWith('reader:'))updateReaderProgress()},{passive:true});
  }
  readerFlow.begin();
+ readerEnhancements.bind();
  requestAnimationFrame(updateReaderProgress);
 }
 function readerView(){
@@ -1223,7 +1226,16 @@ function readerView(){
  <p class="readerKeyboardHint">Atajos: Mayús + ← capítulo anterior · Mayús + → finalizar y avanzar · Esc salir del modo enfoque</p><button type="button" class="readerFocusExit" id="readerFocusExit" aria-label="Salir del modo de concentración">Salir del modo enfoque ✕</button>
  <div class="readerChapterStream" id="readerChapterStream"><article data-section-id="${esc(R.id)}" class="readerPaper reader-${esc(theme)} reader-${esc(width)} reader-line-${esc(lineHeight)} reader-font-${esc((fontFamily==='original'||fontFamily.startsWith('epub:'))&&validEpub&&embeddedReady?'original':fontFamily.startsWith('epub:')?'serif':fontFamily==='original'?'serif':fontFamily)} reader-space-${esc(paragraphSpace)} reader-indent-${esc(S.readerPrefs.indent||"none")} reader-align-${esc(S.readerPrefs.align||"left")} reader-contrast-${esc(S.readerPrefs.contrast||"standard")} reader-images-${esc(S.readerPrefs.images||"show")}" style="font-size:${Number(S.readerPrefs.fontSize||18)}px;--epub-reader-font:${esc(epubFontCss)}" aria-labelledby="chapterTitle"><div class="readerMeta">${esc(R.novel_title||'El Obi del Lector')}${R.volume_number!=null?` · Vol. ${esc(R.volume_number)}`:''}</div><h1 id="chapterTitle">${esc(R.title||'Capítulo')}</h1><div class="readerChapterDivider" aria-hidden="true"></div>${readerFlow.blockHtml(R.content||[])}</article></div><p class="readerStreamStatus" id="readerStreamStatus" role="status" aria-live="polite"></p>
  <nav class="readerBottom" aria-label="Continuar lectura"><button class="btn" id="markReaderDone" type="button">✓ Marcar como leído</button>${next?`<button class="btn primary" id="finishAndNext" data-next-section="${next.id}" data-translation="${R.translation_id}">Finalizar y leer siguiente →</button>`:`<button class="btn primary" id="finishAndReturn" data-translation="${R.translation_id}">✓ Finalizar capítulo y volver a la obra</button>`}</nav>
- </div></main>`;
+ </div>
+ <aside class="readerFloatDock" id="readerFloatDock" aria-label="Navegación rápida de lectura">
+  <div class="readerFloatInfo"><span id="readerFloatMeta">Vol. ${esc(R.volume_number??'—')} · Capítulo ${i+1} de ${ns.length}</span><strong id="readerFloatTitle">${esc(R.title||'Capítulo')}</strong></div>
+  <div class="readerFloatProgress"><label class="srOnly" for="readerFloatSeek">Avanzar dentro del capítulo</label><input type="range" id="readerFloatSeek" min="0" max="100" value="0" aria-label="Posición en el capítulo"><span id="readerFloatFill" aria-hidden="true"></span></div>
+  <span id="readerFloatPercentage" class="readerFloatPercentage" aria-hidden="true">0%</span>
+  <div class="readerFloatActions"><details id="readerFloatIndex" class="readerFloatIndex"><summary aria-label="Abrir índice de capítulos" title="Índice de capítulos">☷ <span>Índice</span></summary><div class="readerFloatIndexPanel"><label for="readerFloatChapterJump">Ir al capítulo</label><select id="readerFloatChapterJump">${ns.map((chapter,j)=>`<option value="${esc(chapter.id)}" ${chapter.id===R.id?'selected':''}>Vol. ${esc(chapter.volume_number??'—')} · ${esc(chapter.title||'Capítulo '+(j+1))}</option>`).join('')}</select></div></details><button type="button" id="readerFloatBookmark" aria-label="Guardar posición de lectura" title="Guardar punto">♧ <span>Guardar</span></button><button type="button" id="readerFloatSettings" aria-label="Abrir ajustes de lectura" title="Ajustes">⚙ <span>Ajustes</span></button></div>
+ </aside>
+ <dialog id="readerIllustrationDialog" class="readerLightbox" aria-label="Visor de ilustraciones">
+  <div class="readerLightboxShell"><header class="readerLightboxTop"><span id="readerLightboxCount">Ilustración</span><div class="readerLightboxControls"><button id="readerLightboxZoomOut" type="button" aria-label="Reducir imagen">−</button><span id="readerLightboxZoomLabel" aria-live="off">100%</span><button id="readerLightboxZoomIn" type="button" aria-label="Ampliar imagen">＋</button><button id="readerLightboxZoomReset" type="button">Restablecer</button><button id="readerLightboxClose" type="button" aria-label="Cerrar ilustración">✕</button></div></header><div class="readerLightboxStage" id="readerLightboxStage"><img id="readerLightboxImage" alt=""><p id="readerLightboxError" hidden>No fue posible abrir esta ilustración.</p></div><footer class="readerLightboxBottom"><button id="readerLightboxPrev" type="button" aria-label="Ilustración anterior">←</button><span id="readerLightboxCaption"></span><button id="readerLightboxNext" type="button" aria-label="Ilustración siguiente">→</button></footer></div>
+ </dialog></main>`;
 }
 function accessibilityViewTitle(){
  if(S.view==='home')return'Inicio';
@@ -1304,10 +1316,11 @@ function render(){
   else if(S.view.startsWith('studio:project:'))html=studioProjectView();
   else if(S.view.startsWith('studio:team:'))html=studioTeamView();
   else if(S.view.startsWith('studio:media:'))html=studioMediaView();
+  if(!S.view.startsWith('reader:'))readerEnhancements.clear();
   app.innerHTML=html;
   enhanceAccessibility();
   bind();
-  if(readerRestore)requestAnimationFrame(()=>readerFlow.restore(readerRestore));
+  if(readerRestore)readerEnhancements.restoreStable(readerRestore);
   applyStudioActionAccess();
   setNetworkBadge();
  }catch(e){
