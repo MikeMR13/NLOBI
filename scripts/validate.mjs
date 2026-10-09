@@ -418,7 +418,7 @@ for (const marker of [
   'readerFlowActive',
   "readerPrefs?.flow==='continuous'",
  ])if(!moduleCode.includes(marker))throw new Error('Lectura continua: falta '+marker);
- for(const marker of ['createReaderFlow(', 'readerFlow.begin()', 'readerFlow.scroll()', 'readerFlow.blockHtml(', 'data-reading-mode="${mode.key}"', 'id="readerChapterStream"', 'readerFlow.best(sectionId)']){
+ for(const marker of ['createReaderFlow(', 'readerFlow.begin()', 'readerFlow.scroll()', 'readerFlow.blockHtml(', 'data-reading-mode="'+mode.key+'', 'id="readerChapterStream"', 'readerFlow.best(sectionId)']){
   if(!app.includes(marker))throw new Error('Integración de lectura continua: falta '+marker);
  }
  for(const marker of ['.readerChapterStream','.readerAnchorBlock','.readerBookProgress'])if(!css.includes(marker))throw new Error('Estilos de lectura continua: falta '+marker);
@@ -433,16 +433,16 @@ for (const marker of [
 {
  const expected=[
   'function readerModeOptions(context=',
-  "readerModeOptions('volume')",
+  "readerModeOptions('volume',chosen.id)",
   "readerModeOptions('preferences')",
   'data-preference-tab="reading"',
   'data-preference-panel="reading"',
   'readerReadingPreferencesPanel()',
-  'function setReaderMode(mode){',
+  "function setReaderMode(mode,scope='global',volumeId=null){",
   'data-reading-mode',
-  'S.readerPrefs.flow=siteAppearance.readerFlow',
-  'siteAppearance.readerFlow=mode',
-  "localStorage.setItem('reader_flow',mode)",
+  'hydrateReaderPreferences()',
+  'appearance.readerFlow=checked',
+  "localStorage.setItem('reader_flow',siteAppearance.readerDefaults.flow)",
   "localStorage.removeItem('reader_flow')",
   "readerFlow:chosenReaderFlow",
  ];
@@ -451,9 +451,9 @@ for (const marker of [
  if(begin<0||end<begin)throw new Error('Selector de lectura: no aparece la vista de capítulos');
  if(app.slice(begin,end).includes('data-reader-quick="flow"'))throw new Error('Selector de lectura: no debe mostrarse dentro del lector');
  const volume=app.slice(app.indexOf('function detailView(){'),app.indexOf('function publicGroupView(){'));
- if(!volume.includes("readerModeOptions('volume')")||volume.indexOf("readerModeOptions('volume')")>volume.indexOf('class="volumeChapterList"'))throw new Error('Selector de lectura: debe aparecer antes del índice de capítulos');
+ if(!volume.includes("readerModeOptions('volume',chosen.id)")||volume.indexOf("readerModeOptions('volume',chosen.id)")>volume.indexOf('class="volumeChapterList"'))throw new Error('Selector de lectura: debe aparecer antes del índice de capítulos');
  if(!volume.includes('class="volumeChapterList">${chapters.map'))throw new Error('Selector de lectura: lista de capítulos con HTML inválido');
- if(volume.indexOf('class="volumeReadingModeAction"')<volume.indexOf("readerModeOptions('volume')"))throw new Error('Selector de lectura: botón Continuar debe estar después de escoger modo');
+ if(volume.indexOf('class="volumeReadingModeAction"')<volume.indexOf("readerModeOptions('volume',chosen.id)"))throw new Error('Selector de lectura: botón Continuar debe estar después de escoger modo');
  for(const key of ['.volumeReadingMode','.readingModeOptions','.readingModeOption:focus-visible','@media(max-width:650px)'])if(!css.includes(key))throw new Error('Selector de lectura CSS: falta '+key);
  // Confirm legacy site-appearance preferences still parse and preserve the reader mode.
  const appearanceSource=app.slice(app.indexOf('function readSiteAppearance(){'),app.indexOf('let siteAppearance='));
@@ -551,4 +551,20 @@ for (const marker of [
  for(const x of ['enable row level security','reader_annotations_select_own','reader_annotations_insert_own','reader_annotations_update_own','reader_annotations_delete_own','auth.uid()','grant select, insert, update, delete on public.reader_annotations to authenticated','revoke all on public.reader_annotations from public, anon'])if(!migration.includes(x))throw new Error('Phase 8: falta RLS '+x);
  const sw=fs.readFileSync('public/sw.js','utf8'),build=fs.readFileSync('scripts/build.mjs','utf8');
  for(const x of [sw,build])if(!x.includes('reader-annotations.js'))throw new Error('Phase 8: asset missing in PWA/build');
+}
+
+
+// Phase 9: scoped global and individual volume preferences + page reader.
+{
+ const prefs=fs.readFileSync('src/reader-preferences.js','utf8');
+ const pages=fs.readFileSync('src/reader-pagination.js','utf8');
+ for(const key of ['readerScopedValues','setReaderSetting','resetReaderVolume','normalizeReaderSettings','cleanVolumeSettings'])if(!prefs.includes(key))throw Error('Phase 9: falta '+key);
+ for(const key of ["flow:'chapter'", "'paged'", "swipe:'on'"])if(!prefs.includes(key))throw Error('Phase 9: falta modo '+key);
+ for(const key of ["const readerPagination=createReaderPagination(","readerPagination.bind()","readerPagination.unbind()","readerScopedControls","readerScopeControls('volume',chosen.id)","readerScopeControls('global')","data-reader-reset-volume","readerPagedMode","id=\"readerPagePrev\"","id=\"readerPageNext\"","function setReaderPref(k,v){"])if(!app.includes(key))throw Error('Phase 9: falta conexión '+key);
+ for(const key of ['function move(delta)','function position(){','function restore(pos)','touchstart','ArrowRight','PageDown','readerPageStatus'])if(!pages.includes(key))throw Error('Phase 9: falta paginación '+key);
+ for(const key of ['.readerPagedMode .readerPageControls','.readerScopeFields{','.readerVolumeAdvanced{'])if(!css.includes(key))throw Error('Phase 9: falta CSS '+key);
+ const build=fs.readFileSync('scripts/build.mjs','utf8'),sw=fs.readFileSync('public/sw.js','utf8');
+ for(const file of ['reader-preferences.js','reader-pagination.js'])if(!build.includes(file)||!sw.includes('/assets/'+file))throw Error('Phase 9: build/PWA no incluyen '+file);
+ const test=spawnSync(process.execPath,['scripts/reader-phase9-check.mjs'],{stdio:'inherit'});
+ if(test.status!==0)throw Error('Phase 9: fallaron pruebas de preferencias/paginación');
 }
