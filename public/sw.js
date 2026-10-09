@@ -1,6 +1,6 @@
-const CACHE='nlobi-shell-v20-20';
-const CORE=['/','/index.html','/assets/styles.css','/assets/app.js','/assets/reader-flow.js','/assets/reader-enhancements.js','/runtime-config.js','/manifest.webmanifest','/icon.svg','/icon-192.png','/icon-512.png'];
-const NETWORK_FIRST=new Set(['/index.html','/assets/styles.css','/assets/app.js','/assets/reader-flow.js','/assets/reader-enhancements.js','/runtime-config.js']);
+const CACHE='nlobi-shell-v20-21';
+const CORE=['/','/index.html','/assets/styles.css','/assets/app.js','/assets/reader-flow.js','/assets/reader-enhancements.js','/assets/reader-annotations.js','/runtime-config.js','/manifest.webmanifest','/icon.svg','/icon-192.png','/icon-512.png'];
+const NETWORK_FIRST=new Set(['/index.html','/assets/styles.css','/assets/app.js','/assets/reader-flow.js','/assets/reader-enhancements.js','/assets/reader-annotations.js','/runtime-config.js']);
 
 self.addEventListener('install',event=>{
   event.waitUntil(
