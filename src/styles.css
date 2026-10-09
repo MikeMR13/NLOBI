@@ -2101,3 +2101,39 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .collectionLeader strong{overflow-wrap:anywhere}.collectionLeader span{color:var(--muted)}
 .collectionLeader:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @media(max-width:680px){.collectionLeaderGrid{grid-template-columns:1fr}.savedCollections>.sectionHead{flex-wrap:wrap;gap:12px}}
+
+
+/* Comunidad de lectores: descubrimiento, seguimiento y accesibilidad móvil */
+.readerSocialBar,.readerSocialActions{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.readerSocialBar{color:var(--muted);font-size:.93rem}
+.readerSocialBar strong{color:var(--text);font-variant-numeric:tabular-nums}
+.readerSocialActions .btn{min-height:42px}
+.readerFollowActive{border-color:var(--accent)!important}
+.readerDirectory{padding-bottom:44px}
+.readerDirectoryHero{padding:clamp(24px,5vw,48px);border-radius:22px;background:var(--panel);border:1px solid var(--line);margin:24px 0}
+.readerDirectoryHero h1{font-size:clamp(1.8rem,4vw,2.9rem);margin:12px 0}
+.readerDirectoryHero p{max-width:65ch;color:var(--muted);line-height:1.6}
+.readerDirectoryHero .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.readerDirectoryTabs{display:flex;gap:8px;border-bottom:1px solid var(--line);margin:24px 0}
+.readerDirectoryTabs button{background:transparent;border:0;border-bottom:3px solid transparent;color:var(--muted);padding:12px 16px;font:inherit;font-weight:650;cursor:pointer}
+.readerDirectoryTabs button.active{border-color:var(--accent);color:var(--text)}
+.readerDirectoryTools{display:grid;grid-template-columns:minmax(180px,2fr) repeat(2,minmax(145px,1fr));gap:14px;margin:20px 0}
+.readerDirectoryTools label{display:grid;gap:8px;font-weight:600}
+.readerDirectoryTools input,.readerDirectoryTools select{width:100%;min-width:0}
+.readerDirectoryGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));gap:18px;margin:20px 0}
+.readerDirectoryCard{display:flex;flex-direction:column;gap:14px;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px;min-width:0}
+.readerDirectoryIdentity{display:flex;align-items:center;gap:12px;min-width:0}
+.readerDirectoryIdentity>div{min-width:0}
+.readerDirectoryIdentity h2{margin:0;font-size:1.12rem;overflow-wrap:anywhere}
+.readerDirectoryAvatar{display:grid;place-items:center;flex:0 0 58px;width:58px;height:58px;border-radius:50%;overflow:hidden;background:var(--accent);color:#fff;font-size:1.4rem;font-weight:700}
+.readerDirectoryAvatar img{height:100%;width:100%;object-fit:cover}
+.readerDirectoryBio{margin:0;line-height:1.55;color:var(--muted);overflow-wrap:anywhere}
+.readerDirectoryChips{display:flex;flex-wrap:wrap;gap:6px;min-height:24px}
+.readerDirectoryChips span{font-size:.8rem;padding:4px 8px;border-radius:999px;background:var(--surface-soft,rgba(128,128,128,.14));border:1px solid var(--line)}
+.readerDirectoryChips .readerSharedTaste{border-color:var(--accent);font-weight:700}
+.readerDirectoryMetrics{display:flex;flex-wrap:wrap;gap:8px 14px;color:var(--muted);font-size:.84rem}
+.readerDirectoryActions{display:flex;gap:9px;flex-wrap:wrap;margin-top:auto}
+.readerDirectoryActions .btn{min-height:42px}
+.readerPrivacyNote{margin:20px 0;color:var(--muted);font-size:.86rem;line-height:1.5}
+@media(max-width:680px){.readerDirectoryTools{grid-template-columns:1fr}.readerDirectoryHero{padding:22px}.readerDirectoryActions .btn{flex:1}.readerSocialActions .btn{flex:1}}
+@media(max-width:360px){.readerDirectoryCard{padding:14px}.readerDirectoryTabs button{padding:10px}}
