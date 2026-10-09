@@ -1902,3 +1902,13 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 @media(max-width:750px){.releasesFilters{grid-template-columns:1fr 1fr}.releasesFilters label:last-child{grid-column:1/-1}}
 @media(max-width:540px){.releasesFilters{grid-template-columns:1fr}.releasesFilters label:last-child{grid-column:auto}.releasesItem{gap:11px;flex-wrap:wrap;padding:11px}.releasesCover{width:65px;min-width:65px;height:91px}.releasesItem>.btn{width:100%;justify-content:center}.releasesBody h2{font-size:.94rem}}
 @media(forced-colors:active){.releasesFilters,.releasesItem{border:1px solid CanvasText}}
+
+/* Galería rotativa accesible de novelas destacadas */
+.featuredCarouselControls{display:flex;align-items:center;gap:12px;margin-top:17px}
+.featuredCarouselArrow{display:inline-flex;align-items:center;justify-content:center;min-width:39px;min-height:39px;border:1px solid var(--border);border-radius:50%;background:transparent;color:inherit;cursor:pointer;font-size:1.65rem;line-height:1}
+.featuredCarouselDots{display:flex;align-items:center;flex-wrap:wrap;gap:7px}
+.featuredCarouselDot{height:9px;width:9px;border:0;border-radius:50%;background:var(--muted);opacity:.55;padding:0;cursor:pointer}
+.featuredCarouselDot.active{width:23px;border-radius:9px;background:var(--accent);opacity:1}
+.featuredCarouselControls button:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media(max-width:540px){.featuredCarouselControls{justify-content:center}.featuredCarouselArrow{min-width:44px;min-height:44px}.featuredCarouselDot{height:11px;width:11px}}
+@media(forced-colors:active){.featuredCarouselDot{border:1px solid ButtonText}.featuredCarouselDot.active{background:Highlight}}
