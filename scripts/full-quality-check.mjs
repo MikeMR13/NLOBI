@@ -62,6 +62,9 @@ function importState(step){
  return {step,file:null,type:'docx',name:'volumen-de-prueba-con-nombre-largo.docx',text:'Texto importado '.repeat(120),parsedBlocks:sections.flatMap(x=>x.blocks),sections,warnings:['Advertencia QA de ejemplo con texto largo para comprobar el ajuste.'],translationId:'project-1',volumeNumber:'1',volumeTitle:'Volumen de prueba',existingAction:'append',busy:false,message:''};
 }
 
+const collectionTranslation={...translation,novels:{...translation.novels,cover_url:'https://example.test/qa-collection-cover.jpg'}};
+const collectionFixture={id:'collection-qa',title:'Colección QA',description:'Descripción inicial QA',is_public:false,accent_color:'#ad794e',cover_translation_id:null,created_at:now,updated_at:now,reader_collection_items:[{translation_id:'project-1',created_at:now,sort_order:1}]};
+
 const scenarios=[
  ['public-home','home',{catalog:[translation]}],
  ['public-explore','explore',{catalog:[translation]}],
@@ -77,6 +80,7 @@ const scenarios=[
  ['user-library','library',authBase],
  ['user-library-collections','library',{...authBase,libraryTab:'collections',readerCollections:[],savedCollections:[],discoverCollections:[],collectionFormOpen:false}],
  ['user-library-collections-form','library',{...authBase,libraryTab:'collections',readerCollections:[],savedCollections:[],discoverCollections:[],collectionFormOpen:true,collectionEditingId:null}],
+ ['user-library-collections-edit','library',{...authBase,catalog:[collectionTranslation],libraryTab:'collections',readerCollections:[collectionFixture],savedCollections:[],discoverCollections:[],collectionFormOpen:true,collectionEditingId:'collection-qa'}],
  ['user-profile','auth',authBase],['user-notifications','notifications',authBase],['user-beta','beta',authBase],
  ['creator-studio','studio',authBase],['creator-new','studio:new',authBase],
  ['creator-project','studio:project:project-1',{...authBase,studioProject:translation,teamMembers}],
@@ -148,12 +152,32 @@ for(const [vpName,width,height] of viewports){
    const box=await form.boundingBox(),editorBox=await editor.boundingBox(),previewBox=await preview.boundingBox();
    if(box&&width>=768&&box.width<500)failures.push({...row,error:'collections-form-too-narrow'});
    if(width>=1100&&editorBox&&previewBox&&previewBox.x<=editorBox.x+100)failures.push({...row,error:'collections-preview-not-side-by-side'});
+   await page.locator('#collectionTitle').fill('Vista en vivo QA');
+   await page.locator('#collectionDescription').fill('Descripción que debe aparecer inmediatamente en la vista previa.');
+   await page.locator('[data-collection-color="#4f9dd9"]').click();
+   await page.locator('#collectionPublic').check({force:true});
+   const live=await page.evaluate(()=>({
+    title:document.querySelector('#collectionPreviewTitle')?.textContent,
+    description:document.querySelector('#collectionPreviewDescription')?.textContent,
+    badge:document.querySelector('#collectionPreviewBadge')?.textContent,
+    color:document.querySelector('#collectionPreviewCard')?.style.getPropertyValue('--collection-preview-color'),
+    inputColor:document.querySelector('#collectionAccent')?.value,
+    swatch:document.querySelector('[data-collection-color="#4f9dd9"]')?.getAttribute('aria-pressed'),
+    visibility:document.querySelector('#collectionVisibilityLabel')?.textContent
+   }));
+   if(live.title!=='Vista en vivo QA'||!live.description?.startsWith('Descripción que debe')||live.badge!=='Pública'||live.color!=='#4f9dd9'||live.inputColor!=='#4f9dd9'||live.swatch!=='true'||live.visibility!=='Colección pública')failures.push({...row,live,error:'collections-live-preview-failed'});
+  }
+  if(name==='user-library-collections-edit'){
+   const cover=page.locator('#collectionCover');
+   if(await cover.count()){await cover.selectOption('project-1');await page.waitForTimeout(20)}
+   const coverState=await page.evaluate(()=>({label:document.querySelector('#collectionPreviewCoverLabel')?.textContent,images:document.querySelectorAll('#collectionPreviewCovers img.collectionPreviewCoverImage').length}));
+   if(coverState.label!=='Portada elegida'||coverState.images!==1)failures.push({...row,coverState,error:'collections-cover-preview-failed'});
   }
   if(name==='admin')for(const tab of ['applications','users','teams','reports','content','links','beta','audit']){const b=page.locator('[data-admin-tab="'+tab+'"]:visible');if(await b.count())await b.first().click({timeout:5000})}
   if(name==='readonly-studio' && ((await page.locator('[data-v="studio:new"]:visible').count())||(await page.locator('[data-v="studio:import"]:visible').count())))failures.push({...row,error:'readonly-studio-exposes-editor-actions'});
   if(name==='readonly-project' && ((await page.locator('#createVolume:visible').count())||(await page.locator('#saveDiscoveryMeta:visible').count())||(await page.locator('[data-new-section]:visible').count())))failures.push({...row,error:'readonly-project-exposes-editor-actions'});
   if(name==='readonly-team' && ((await page.locator('#saveTeamProfile:visible').count())||(await page.locator('#addSupportLink:visible').count())||(await page.locator('[data-media-open]:visible').count())))failures.push({...row,error:'readonly-team-exposes-editor-actions'});
-  if((vpName==='mobile-390'||vpName==='desktop-1280')&&['public-home','public-detail','public-reader','user-library','user-library-collections-form','creator-project','creator-team','import-edit','admin'].includes(name))await page.screenshot({path:'quality-results/'+vpName+'-'+name+'.png',fullPage:true});
+  if((vpName==='mobile-390'||vpName==='desktop-1280')&&['public-home','public-detail','public-reader','user-library','user-library-collections-form','user-library-collections-edit','creator-project','creator-team','import-edit','admin'].includes(name))await page.screenshot({path:'quality-results/'+vpName+'-'+name+'.png',fullPage:true});
   await context.close();
  }
 }
