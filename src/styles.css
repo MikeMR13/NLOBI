@@ -2020,3 +2020,17 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
  .reviewEditor .row{align-items:stretch;flex-direction:column}
  .reviewEditor .row .btn{width:100%}
 }
+
+
+.reviewRatingSummary{display:grid;grid-template-columns:minmax(100px,160px) 1fr;gap:20px;align-items:center;margin:16px 0;padding:20px;border:1px solid var(--line);border-radius:18px}
+.reviewRatingSummary>div:first-child{display:flex;flex-direction:column;gap:4px}
+.reviewRatingSummary>div:first-child strong{font-size:2rem}
+.reviewRatingSummary>div:first-child span{color:var(--muted)}
+.reviewRatingBars{display:grid;gap:6px}
+.reviewRatingBar{display:grid;grid-template-columns:36px minmax(0,1fr) 26px;gap:10px;align-items:center;font-size:.85rem}
+.reviewRatingBar progress{width:100%;height:10px;accent-color:var(--accent)}
+.reviewSortRow{display:flex;justify-content:flex-end;align-items:center;gap:12px;margin:18px 0}
+.reviewSortRow select{max-width:180px}
+.reviewActions{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+.reviewActions>span{color:var(--muted);font-size:.86rem;margin-right:auto}
+@media(max-width:620px){.reviewRatingSummary{grid-template-columns:1fr}.reviewActions .btn{flex:1}.reviewSortRow{justify-content:space-between}}
