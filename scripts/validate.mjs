@@ -336,3 +336,9 @@ for (const marker of [
  'Introduce un enlace HTTPS válido.',
  'Introduce colores válidos en formato #RRGGBB.',
 ]) if (!app.includes(marker)) throw new Error(`Regresión de perfiles de equipo: ${marker}`);
+
+// Mobile LCP: real hero is visible before data finishes; supplemental fonts do not block initial HTML.
+if (html.includes('href="https://fonts.googleapis.com/css2?')) throw new Error('LCP: bloqueo por Google Fonts en HTML.');
+for (const required of ["function homeShowcaseCopy(){","if(S.catalogLoading)return `\${nav()}<main class=\"wrap homeEditorial\"","\${homeShowcaseCopy()}<div class=\"homeFeatured\"","if(S.view!=='home')ensureSupplementalFonts();","await loadCatalog();if(S.view==='home'){S.catalogLoaded=true;S.catalogLoading=false;S.err='';render()}"]) {
+ if (!app.includes(required))throw new Error('LCP: falta '+required);
+}
