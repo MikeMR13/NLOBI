@@ -151,7 +151,7 @@ for (const required of [
 ]) {
   if (!app.includes(required)) throw new Error(`Deep links: falta ${required}`);
 }
-if (!/const CACHE='nlobi-shell-v\\d+-\\d+';/.test(sw)) throw new Error('Service worker: falta versión de caché válida');
+if (!/const CACHE='nlobi-shell-v\d+-\d+';/.test(sw)) throw new Error('Service worker: falta versión de caché válida');
 for (const required of [
   "url.pathname.startsWith('/media/')",
   "'/assets/app.js'",
