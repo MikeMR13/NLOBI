@@ -2478,3 +2478,73 @@ html[data-site-focus="enhanced"] :where(a,button,input,select,textarea,summary,[
 
 .headerNotification:not([open])>.headerNotificationPanel{display:none!important}
 @media(max-width:850px){.headerNotificationMobile[open]>.headerNotificationPanel{position:fixed;left:12px;right:12px;top:68px;width:auto;max-width:none;max-height:calc(100dvh - 82px)}}
+
+/* READER EXPERIENCE 2.0 — focused chapter view inspired by editorial reading interfaces */
+.readerExperience{--reader-stage:#faf9f6;--reader-ink:#252424;--reader-secondary:#6b6d72;--reader-rule:#d9d8d3;--reader-ui:#ffffff;--reader-ui-soft:#f2f1ed;--reader-action:#a85f25;background:var(--reader-stage);color:var(--reader-ink);min-height:100dvh;max-width:none;padding:22px 20px 75px}
+.readerExperience.readerSurface-sepia{--reader-stage:#f1e5cd;--reader-ink:#402e21;--reader-secondary:#7a6655;--reader-rule:#d2bfa0;--reader-ui:#fff4dd;--reader-ui-soft:#e7d7ba;--reader-action:#92551b}
+.readerExperience.readerSurface-dark{--reader-stage:#141519;--reader-ink:#e6e7eb;--reader-secondary:#969ba5;--reader-rule:#313339;--reader-ui:#191b20;--reader-ui-soft:#22252c;--reader-action:#eea24b}
+.readerExperience .readerShell{max-width:1100px;margin:auto;position:relative}
+.readerExperience .readerTop{border-bottom:1px solid var(--reader-rule);padding:0 0 17px;margin-bottom:14px;gap:12px}
+.readerExperience .readerTop .btn,.readerExperience .readerBottom .btn,.readerExperience .readerReadingTools .btn{color:var(--reader-ink);background:var(--reader-ui-soft);border:1px solid var(--reader-rule);box-shadow:none}
+.readerExperience .readerTop .btn.primary,.readerExperience .readerBottom .btn.primary{background:var(--reader-action);border-color:var(--reader-action);color:var(--reader-stage);font-weight:750}
+.readerExperience .readerTop .btn:hover,.readerExperience .readerBottom .btn:hover,.readerExperience .readerReadingTools .btn:hover{filter:brightness(1.08)}
+.readerControlDock{position:relative;z-index:20;display:flex;justify-content:flex-end;margin:0 0 10px}
+.readerExperience .readerSettings{padding:0;margin:0;background:transparent;border:0;position:relative}
+.readerExperience .readerSettings>summary{list-style:none;display:inline-flex;align-items:center;gap:8px;cursor:pointer;padding:10px 15px;background:var(--reader-ui);border:1px solid var(--reader-rule);color:var(--reader-ink);border-radius:12px;font-weight:750;min-height:44px;user-select:none}
+.readerExperience .readerSettings>summary::-webkit-details-marker{display:none}
+.readerExperience .readerSettings[open]>summary{border-color:var(--reader-action);color:var(--reader-action)}
+.readerExperience .readerSettingsPanel{position:absolute;right:0;top:calc(100% + 8px);width:min(390px,calc(100vw - 32px));max-height:min(78dvh,700px);overflow-y:auto;overscroll-behavior:contain;background:var(--reader-ui);color:var(--reader-ink);border:1px solid var(--reader-rule);border-radius:16px;box-shadow:0 20px 65px rgba(0,0,0,.24);padding:19px;z-index:24}
+.readerExperience .readerSettings:not([open])>.readerSettingsPanel{display:none!important}
+.readerSettingsHead{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:17px}
+.readerSettingsHead strong{display:block;font-size:1.08rem}
+.readerSettingsHead small{display:block;color:var(--reader-secondary);margin-top:4px}
+.readerExperience .readerSettingsClose{width:34px;height:34px;flex-shrink:0;display:grid;place-items:center;border:1px solid var(--reader-rule);color:var(--reader-ink);background:transparent;border-radius:9px;font-size:1.25rem}
+.readerQuickGroup{margin-bottom:18px}
+.readerQuickLabel{display:block;font-size:.72rem;letter-spacing:.11em;text-transform:uppercase;font-weight:800;color:var(--reader-secondary);margin-bottom:8px}
+.readerQuickChoices{display:flex;gap:7px;flex-wrap:wrap}
+.readerQuickChoices button{border-radius:10px;border:1px solid var(--reader-rule);background:transparent;color:var(--reader-ink);padding:10px 12px;flex:1 0 auto;min-height:43px;font-size:.86rem;font-weight:700}
+.readerQuickChoices button:hover{background:var(--reader-ui-soft)}
+.readerQuickChoices button.selected{border-color:var(--reader-action);background:color-mix(in srgb,var(--reader-action) 14%,var(--reader-ui));color:var(--reader-action)}
+.readerAdvanced{border-top:1px solid var(--reader-rule);margin-top:6px;padding-top:9px}
+.readerAdvanced>summary{cursor:pointer;display:flex;align-items:center;justify-content:space-between;list-style:none;color:var(--reader-ink);font-size:.92rem;font-weight:700;min-height:42px}
+.readerAdvanced>summary::-webkit-details-marker{display:none}
+.readerExperience .readerControls{display:grid;grid-template-columns:1fr;gap:7px;padding:7px 0 4px}
+.readerExperience .readerControls label{font-size:.78rem;color:var(--reader-secondary);margin-top:7px}
+.readerExperience .readerControls input,.readerExperience .readerControls select{width:100%;min-height:42px;background:var(--reader-ui-soft);border:1px solid var(--reader-rule);border-radius:9px;color:var(--reader-ink);padding:8px}
+.readerExperience .readerControls .btn{margin-top:8px;border:1px solid var(--reader-rule);color:var(--reader-ink);background:var(--reader-ui-soft)}
+.readerExperience .readerReadingTools{display:flex;justify-content:space-between;align-items:center;gap:12px;margin:13px auto 0;max-width:870px;flex-wrap:wrap}
+.readerChapterIndex{color:var(--reader-action);letter-spacing:.12em;text-transform:uppercase;font-size:.75rem;font-weight:850}
+.readerReadingActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.readerReadingActions #readerProgressLabel{font-size:.82rem;color:var(--reader-secondary);font-variant-numeric:tabular-nums}
+.readerExperience .readerReadingTools .btn{padding:7px 12px;min-height:36px;font-size:.8rem}
+.readerExperience .readerPaper{max-width:870px;background:transparent!important;color:var(--reader-ink)!important;border:0!important;box-shadow:none!important;border-radius:0;padding:26px clamp(6px,3vw,28px) 50px;margin:0 auto}
+.readerExperience .readerPaper.reader-narrow{max-width:680px}.readerExperience .readerPaper.reader-wide{max-width:1060px}
+.readerExperience .readerMeta{color:var(--reader-secondary);letter-spacing:.025em;font-size:.86rem;margin:0 0 12px;overflow-wrap:anywhere}
+.readerExperience .readerPaper h1{font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.9rem,3.7vw,2.9rem);line-height:1.25;letter-spacing:-.015em;color:var(--reader-ink);overflow-wrap:anywhere;margin:0 0 20px}
+.readerChapterDivider{height:1px;background:var(--reader-rule);margin:12px 0 35px}
+.readerExperience .readerPaper p{font-size:1em;color:inherit}
+.readerExperience .readerPaper blockquote,.readerExperience .readerPaper .translatorNote{max-width:100%;overflow-wrap:anywhere}
+.readerExperience .readerPaper.reader-line-compact p,.readerExperience .readerPaper.reader-line-compact blockquote{line-height:1.55}
+.readerExperience .readerPaper.reader-line-comfortable p,.readerExperience .readerPaper.reader-line-comfortable blockquote{line-height:1.9}
+.readerExperience .readerPaper.reader-line-relaxed p,.readerExperience .readerPaper.reader-line-relaxed blockquote{line-height:2.15}
+.readerExperience .readerPaper .readerIllustration img{display:block;max-width:100%;height:auto;object-fit:contain;margin:auto}
+.readerExperience .readerFontNotice{max-width:870px;margin:0 auto 8px;color:var(--reader-secondary)}
+.readerExperience .readerBottom{max-width:870px;margin:auto;border-top:1px solid var(--reader-rule);padding:22px 0}
+.readerExperience .readerProgressTrack{position:fixed;top:0;left:0;right:0;height:3px;z-index:55;background:transparent;pointer-events:none}
+.readerExperience .readerProgressTrack span{display:block;width:0;height:100%;background:var(--reader-action);transition:width .14s linear}
+.readerExperience :where(button,summary,select,input):focus-visible{outline:3px solid var(--reader-action);outline-offset:3px}
+@media(max-width:700px){
+ .readerExperience{padding:12px 14px 60px}
+ .readerExperience .readerTop{gap:8px}
+ .readerExperience .readerTop .row{display:flex;gap:6px}
+ .readerExperience .readerTop .btn{padding:8px;font-size:.82rem}
+ .readerExperience .readerControlDock{margin-bottom:12px}
+ .readerExperience .readerSettingsPanel{right:0;max-height:min(75dvh,640px);padding:16px}
+ .readerExperience .readerReadingTools{align-items:flex-start;gap:9px}
+ .readerExperience .readerReadingActions{gap:7px}
+ .readerExperience .readerPaper{padding:20px 2px 35px}
+ .readerExperience .readerPaper h1{font-size:clamp(1.75rem,7vw,2.4rem)}
+ .readerExperience .readerPaper p{overflow-wrap:break-word}
+ .readerExperience .readerBottom .btn{width:100%}
+}
+@media(prefers-reduced-motion:reduce){.readerExperience .readerProgressTrack span{transition:none}}
