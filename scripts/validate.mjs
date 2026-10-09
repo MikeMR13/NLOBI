@@ -92,6 +92,19 @@ if (app.includes("x.demo?'Demo':'Publicada'")) throw new Error("Novel display QA
 if (app.includes("class=\"\${S.libraryTab==='collections'?collectionsTab():''}")) throw new Error("Library collections: collectionsTab() volvió a filtrarse dentro del atributo class.");
 if (!app.includes("\${S.libraryTab==='collections'?collectionsTab():''}")) throw new Error("Library collections: falta renderizado normal de la pestaña Colecciones.");
 if (!app.includes("collectionEmptySaved")) throw new Error("Library collections: falta estado vacío visual de colecciones guardadas.");
+for (const required of [
+  'class="collectionEditor"',
+  'class="collectionEditorHead"',
+  'class="collectionFormSection"',
+  'class="collectionVisibilitySwitch"',
+  'class="collectionPreviewPanel"',
+  'class="collectionPreviewCard"'
+]) {
+  if (!app.includes(required)) throw new Error("Library collections phase 1: falta " + required);
+}
+for (const required of [".collectionEditor{",".collectionVisibilitySwitch{",".collectionPreviewPanel{",".collectionPreviewCard{"]) {
+  if (!css.includes(required)) throw new Error("Library collections phase 1 CSS: falta " + required);
+}
 
 console.log("Validation OK");
 if (/(^|[^$])\$\('\[data-[^']+'\)\.forEach/m.test(app)) throw new Error("Selector simple usado con forEach; usa $() para NodeList.");
