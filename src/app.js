@@ -1026,7 +1026,15 @@ function render(){
   else if(S.view.startsWith('studio:project:'))html=studioProjectView();
   else if(S.view.startsWith('studio:team:'))html=studioTeamView();
   else if(S.view.startsWith('studio:media:'))html=studioMediaView();
-  app.innerHTML=html;
+  // Keep the exact H1 node through loading/catalog refresh so LCP is not re-triggered.
+  const previousHomeHeading=S.view==='home'?app.querySelector('.homeShowcaseCopy h1'):null;
+  if(previousHomeHeading){
+   const next=document.createElement('template');
+   next.innerHTML=html;
+   const nextHeading=next.content.querySelector('.homeShowcaseCopy h1');
+   if(nextHeading)nextHeading.replaceWith(previousHomeHeading);
+   app.replaceChildren(next.content);
+  }else app.innerHTML=html;
   if(S.view!=='home')ensureSupplementalFonts();
   enhanceAccessibility();
   bind();
