@@ -177,6 +177,21 @@ for (const required of [
 const pkg = JSON.parse(fs.readFileSync("package.json","utf8"));
 if (pkg.engines?.node !== "22.x") throw new Error("Node debe quedar fijado en 22.x");
 
+// Pagination invariants for result sets that can grow beyond Supabase's API row cap.
+if (!app.includes("async function jreqAllRows(")) throw new Error("Data pagination: falta helper paginado.");
+const pagedQueryUses=(app.match(/jreqAllRows\(/g)||[]).length;
+if (pagedQueryUses < 7) throw new Error("Data pagination: catálogo, equipos, biblioteca, progreso, capítulos leídos y Studio deben usar consultas paginadas.");
+for (const fragment of [
+  "jreqAllRows('/rest/v1/translations?select=id,title,status",
+  "jreqAllRows('/rest/v1/translator_groups?select=id,name,slug",
+  "jreqAllRows(\`/rest/v1/library_entries?user_id=eq.\${uid}",
+  "jreqAllRows(\`/rest/v1/reading_progress?user_id=eq.\${uid}",
+  "jreqAllRows('/rest/v1/read_sections?user_id=eq.'+uid",
+  "S.studioTranslations=await jreqAllRows("
+]) {
+  if (!app.includes(fragment)) throw new Error("Data pagination: falta " + fragment);
+}
+
 // Storage refresh invariants
 for (const required of [
   "await ensureFreshSession();",
