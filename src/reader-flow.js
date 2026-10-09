@@ -1,7 +1,7 @@
 // Continuous reader: progressive chapter loading, stable paragraph anchors and account sync.
 // Uses the existing reading_progress.anchor field; no privileged backend access is required.
 export function createReaderFlow(deps){
- const {state,renderBlock,escapeText,request,readCache,writeCache,queueProgress,markRead,readIds}=deps;
+ const {state,renderBlock,escapeText,request,readCache,writeCache,queueProgress,markRead,readIds,pagedPosition=()=>null,pagedRestore=()=>false}=deps;
  const chapters=new Map(),maxSeen=new Map();
  let loading=false,token=0,lastLocal=0,lastCloud=0,saving=false,pending=null,failedNext=null;
  const S=()=>state();
@@ -16,6 +16,7 @@ export function createReaderFlow(deps){
   return Number.isSafeInteger(block)&&block>=0&&block<100000&&Number.isFinite(offset)&&offset>=0&&offset<=1&&Number.isFinite(percent)&&percent>=0&&percent<=100?{block,offset,percent}:null;
  }
  function position(id=active()?.id){
+  if(S().readerPrefs?.flow==='paged'){const pos=pagedPosition();if(pos)return pos}
   const root=paper(id);if(!root)return null;
   const aim=window.innerHeight*.35;
   const blocks=[...root.querySelectorAll('[data-block-index]')];
@@ -32,6 +33,7 @@ export function createReaderFlow(deps){
   return saved&&(!local||timestamp>local.updatedAt)?{...saved,updatedAt:timestamp}:local;
  }
  function restore(pos,id=active()?.id){
+  if(S().readerPrefs?.flow==='paged'&&pagedRestore(pos))return;
   const root=paper(id);if(!root||!pos)return;
   const target=Number.isInteger(pos.block)?root.querySelector('[data-block-index="'+pos.block+'"]'):null;
   if(target){
@@ -124,7 +126,7 @@ export function createReaderFlow(deps){
   if(!stream||!roots.length)return;
   const last=roots.at(-1),chapter=chapters.get(last.dataset.sectionId),nav=chapter?.navigation||[];
   const idx=nav.findIndex(x=>x.id===chapter?.id),next=idx>=0?nav[idx+1]:null;
-  if(!next||failedNext===next.id||last.getBoundingClientRect().bottom>window.innerHeight*2)return;
+  if(!next||next.volume_id!==chapter.volume_id||failedNext===next.id||last.getBoundingClientRect().bottom>window.innerHeight*2)return;
   const currentToken=token;loading=true;
   const msg=document.getElementById('readerStreamStatus');
   if(msg)msg.textContent='Cargando el siguiente capítulo…';
