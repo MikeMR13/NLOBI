@@ -120,6 +120,20 @@ for (const required of [
 for (const required of [".collectionColorSwatches{",".collectionColorSwatch{",".collectionCustomColor{",".collectionPreviewAutoCover{"]) {
   if (!collectionCss.includes(required)) throw new Error("Library collections phase 2 CSS: falta " + required);
 }
+for (const required of [
+  'data-collection-cover=',
+  'class="collectionCoverChooser"',
+  'class="collectionCoverChoice',
+  'class="collectionCoverNative"',
+  'collectionPreviewChosenFallback',
+  "document.querySelectorAll('[data-collection-cover]').forEach"
+]) {
+  if (!app.includes(required)) throw new Error("Library collections phase 3: falta " + required);
+}
+// Library collections phase 3 retry marker: visual cover picker QA.
+for (const required of [".collectionCoverChooser{",".collectionCoverChoice{",".collectionCoverNative{",".collectionCoverChoiceCheck{",".collectionCoverChoiceFallback"]) {
+  if (!collectionCss.includes(required)) throw new Error("Library collections phase 3 CSS: falta " + required);
+}
 
 console.log("Validation OK");
 if (/(^|[^$])\$\('\[data-[^']+'\)\.forEach/m.test(app)) throw new Error("Selector simple usado con forEach; usa $() para NodeList.");

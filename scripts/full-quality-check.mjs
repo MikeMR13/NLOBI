@@ -145,8 +145,9 @@ for(const [vpName,width,height] of viewports){
   if(name==='creator-project'){const edit=page.locator('[data-edit-section="section-1"]');if(await edit.count()){await edit.click();await page.waitForTimeout(15);if(!(await page.locator('#editSectionTitle').count()))failures.push({...row,error:'editor-open-failed'})}}
   if(name==='user-library'){const b=page.locator('[data-library-filter="favorites"]');if(await b.count())await b.click()}
   if(name==='user-library-collections-form'){
-   const form=page.locator('#collectionForm'),collections=page.locator('.libraryCollections'),bookTab=page.locator('[data-library-tab="books"]'),editor=page.locator('.collectionEditor'),preview=page.locator('.collectionPreviewPanel'),sections=page.locator('.collectionFormSection');
+   const form=page.locator('#collectionForm'),collections=page.locator('.libraryCollections'),bookTab=page.locator('[data-library-tab="books"]'),editor=page.locator('.collectionEditor'),preview=page.locator('.collectionPreviewPanel'),sections=page.locator('.collectionFormSection'),coverChoices=page.locator('[data-collection-cover]');
    if(!(await form.count())||!(await collections.count())||!(await editor.count())||!(await preview.count())||(await sections.count())!==3)failures.push({...row,error:'collections-phase1-editor-not-rendered'});
+   if((await coverChoices.count())<1)failures.push({...row,error:'collections-phase3-cover-picker-missing'});
    const cls=await bookTab.getAttribute('class');
    if(String(cls||'').includes('<')||String(cls||'').length>80)failures.push({...row,error:'collections-html-leaked-into-tab-class'});
    const box=await form.boundingBox(),editorBox=await editor.boundingBox(),previewBox=await preview.boundingBox();
@@ -168,10 +169,25 @@ for(const [vpName,width,height] of viewports){
    if(live.title!=='Vista en vivo QA'||!live.description?.startsWith('Descripción que debe')||live.badge!=='Pública'||live.color!=='#4f9dd9'||live.inputColor!=='#4f9dd9'||live.swatch!=='true'||live.visibility!=='Colección pública')failures.push({...row,live,error:'collections-live-preview-failed'});
   }
   if(name==='user-library-collections-edit'){
-   const cover=page.locator('#collectionCover');
-   if(await cover.count()){await cover.selectOption('project-1');await page.waitForTimeout(20)}
-   const coverState=await page.evaluate(()=>({label:document.querySelector('#collectionPreviewCoverLabel')?.textContent,images:document.querySelectorAll('#collectionPreviewCovers img.collectionPreviewCoverImage').length}));
-   if(coverState.label!=='Portada elegida'||coverState.images!==1)failures.push({...row,coverState,error:'collections-cover-preview-failed'});
+   const chooser=page.locator('.collectionCoverChooser'),automatic=page.locator('[data-collection-cover=""]'),specific=page.locator('[data-collection-cover="project-1"]');
+   if(!(await chooser.count())||!(await automatic.count())||!(await specific.count()))failures.push({...row,error:'collections-cover-chooser-not-rendered'});
+   if(await specific.count()){await specific.click();await page.waitForTimeout(20)}
+   const selectedState=await page.evaluate(()=>({
+    value:document.querySelector('#collectionCover')?.value,
+    label:document.querySelector('#collectionPreviewCoverLabel')?.textContent,
+    images:document.querySelectorAll('#collectionPreviewCovers img.collectionPreviewCoverImage').length,
+    pressed:document.querySelector('[data-collection-cover="project-1"]')?.getAttribute('aria-pressed'),
+    autoPressed:document.querySelector('[data-collection-cover=""]')?.getAttribute('aria-pressed')
+   }));
+   if(selectedState.value!=='project-1'||selectedState.label!=='Portada elegida'||selectedState.images!==1||selectedState.pressed!=='true'||selectedState.autoPressed!=='false')failures.push({...row,selectedState,error:'collections-visual-cover-selection-failed'});
+   if(await automatic.count()){await automatic.click();await page.waitForTimeout(20)}
+   const autoState=await page.evaluate(()=>({
+    value:document.querySelector('#collectionCover')?.value,
+    label:document.querySelector('#collectionPreviewCoverLabel')?.textContent,
+    images:document.querySelectorAll('#collectionPreviewCovers img.collectionPreviewCoverImage').length,
+    pressed:document.querySelector('[data-collection-cover=""]')?.getAttribute('aria-pressed')
+   }));
+   if(autoState.value!==''||autoState.label!=='Portada automática'||autoState.images<1||autoState.pressed!=='true')failures.push({...row,autoState,error:'collections-automatic-cover-selection-failed'});
   }
   if(name==='admin')for(const tab of ['applications','users','teams','reports','content','links','beta','audit']){const b=page.locator('[data-admin-tab="'+tab+'"]:visible');if(await b.count())await b.first().click({timeout:5000})}
   if(name==='readonly-studio' && ((await page.locator('[data-v="studio:new"]:visible').count())||(await page.locator('[data-v="studio:import"]:visible').count())))failures.push({...row,error:'readonly-studio-exposes-editor-actions'});

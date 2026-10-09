@@ -1,6 +1,6 @@
 {
   "name": "nlobi",
-  "version": "0.19.4-beta",
+  "version": "0.19.5-beta",
   "private": true,
   "type": "module",
   "scripts": {
