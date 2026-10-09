@@ -28,12 +28,16 @@ create index if not exists reader_annotations_user_section_idx
 alter table public.reader_annotations enable row level security;
 revoke all on public.reader_annotations from public, anon;
 grant select, insert, update, delete on public.reader_annotations to authenticated;
+drop policy if exists "reader_annotations_select_own" on public.reader_annotations;
 create policy "reader_annotations_select_own" on public.reader_annotations
  for select to authenticated using ((select auth.uid()) = user_id);
+drop policy if exists "reader_annotations_insert_own" on public.reader_annotations;
 create policy "reader_annotations_insert_own" on public.reader_annotations
  for insert to authenticated with check ((select auth.uid()) = user_id);
+drop policy if exists "reader_annotations_update_own" on public.reader_annotations;
 create policy "reader_annotations_update_own" on public.reader_annotations
  for update to authenticated using ((select auth.uid()) = user_id)
  with check ((select auth.uid()) = user_id);
+drop policy if exists "reader_annotations_delete_own" on public.reader_annotations;
 create policy "reader_annotations_delete_own" on public.reader_annotations
  for delete to authenticated using ((select auth.uid()) = user_id);
