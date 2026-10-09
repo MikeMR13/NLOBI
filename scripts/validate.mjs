@@ -418,7 +418,7 @@ for (const marker of [
   'readerFlowActive',
   "readerPrefs?.flow==='continuous'",
  ])if(!moduleCode.includes(marker))throw new Error('Lectura continua: falta '+marker);
- for(const marker of ['createReaderFlow(', 'readerFlow.begin()', 'readerFlow.scroll()', 'readerFlow.blockHtml(', 'data-reader-quick="flow"', 'id="readerChapterStream"', 'readerFlow.best(sectionId)']){
+ for(const marker of ['createReaderFlow(', 'readerFlow.begin()', 'readerFlow.scroll()', 'readerFlow.blockHtml(', 'data-reading-mode="${mode.key}"', 'id="readerChapterStream"', 'readerFlow.best(sectionId)']){
   if(!app.includes(marker))throw new Error('Integración de lectura continua: falta '+marker);
  }
  for(const marker of ['.readerChapterStream','.readerAnchorBlock','.readerBookProgress'])if(!css.includes(marker))throw new Error('Estilos de lectura continua: falta '+marker);
@@ -426,4 +426,43 @@ for (const marker of [
  if(!sw.includes('/assets/reader-flow.js'))throw new Error('PWA: módulo de lectura continua ausente de caché');
  const test=spawnSync(process.execPath,['scripts/reader-flow-check.mjs'],{stdio:'inherit'});
  if(test.status!==0)throw new Error('Fallaron pruebas de anclas del lector continuo');
+}
+
+
+// Reader mode was moved from the in-reader quick controls into two pre-reading locations.
+{
+ const expected=[
+  'function readerModeOptions(context=',
+  "readerModeOptions('volume')",
+  "readerModeOptions('preferences')",
+  'data-preference-tab="reading"',
+  'data-preference-panel="reading"',
+  'readerReadingPreferencesPanel()',
+  'function setReaderMode(mode){',
+  'data-reading-mode',
+  'S.readerPrefs.flow=siteAppearance.readerFlow',
+  'siteAppearance.readerFlow=mode',
+  "localStorage.setItem('reader_flow',mode)",
+  "localStorage.removeItem('reader_flow')",
+  "readerFlow:chosenReaderFlow",
+ ];
+ for(const key of expected)if(!app.includes(key))throw new Error('Selector de lectura: falta '+key);
+ const begin=app.indexOf('function readerView(){'),end=app.indexOf('function accessibilityViewTitle(){',begin);
+ if(begin<0||end<begin)throw new Error('Selector de lectura: no aparece la vista de capítulos');
+ if(app.slice(begin,end).includes('data-reader-quick="flow"'))throw new Error('Selector de lectura: no debe mostrarse dentro del lector');
+ const volume=app.slice(app.indexOf('function detailView(){'),app.indexOf('function publicGroupView(){'));
+ if(!volume.includes("readerModeOptions('volume')")||volume.indexOf("readerModeOptions('volume')")>volume.indexOf('class="volumeChapterList"'))throw new Error('Selector de lectura: debe aparecer antes del índice de capítulos');
+ for(const key of ['.volumeReadingMode','.readingModeOptions','.readingModeOption:focus-visible','@media(max-width:650px)'])if(!css.includes(key))throw new Error('Selector de lectura CSS: falta '+key);
+ // Confirm legacy site-appearance preferences still parse and preserve the reader mode.
+ const appearanceSource=app.slice(app.indexOf('function readSiteAppearance(){'),app.indexOf('let siteAppearance='));
+ const values=new Map([['reader_flow','continuous']]);
+ const testStorage={getItem:key=>values.has(key)?values.get(key):null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)};
+ const sandbox={localStorage:testStorage,SITE_NAV_DEFAULT:['home','explore'],SITE_THEMES:{amber:'Ámbar'},SITE_FONTS:{system:'Sistema'}};
+ vm.runInNewContext(appearanceSource+';globalThis.readerAppearance=readSiteAppearance;',sandbox);
+ const read=sandbox.readerAppearance;
+ if(read().readerFlow!=='continuous')throw new Error('Selector de lectura: no se conservó el modo local anterior');
+ values.set('nlobi_site_appearance',JSON.stringify({readerFlow:'chapter'}));
+ if(read().readerFlow!=='chapter')throw new Error('Selector de lectura: no se aplica el modo remoto');
+ values.set('nlobi_site_appearance',JSON.stringify({readerFlow:'invalid'}));
+ if(read().readerFlow!=='continuous')throw new Error('Selector de lectura: opción desconocida no vuelve al modo válido');
 }
