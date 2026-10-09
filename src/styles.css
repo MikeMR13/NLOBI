@@ -1878,3 +1878,27 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 @media(max-width:980px){.homeChapterList{grid-template-columns:1fr}}
 @media(max-width:540px){.homeChapterItem{gap:10px;padding:10px;flex-wrap:wrap}.homeChapterCover{width:56px;min-width:56px;height:77px}.homeChapterRead{width:100%;justify-content:center}}
 @media(forced-colors:active){.homeChapterItem{border:1px solid CanvasText}}
+
+/* Fase 3: historial cronológico de lanzamientos */
+.releasesPage{padding-bottom:48px}
+.releasesHeader{padding:28px 0 16px}
+.releasesHeader h1{margin:6px 0 10px;font-size:clamp(1.9rem,4vw,2.8rem)}
+.releasesHeader p{color:var(--muted);margin:0;max-width:65ch;line-height:1.6}
+.releasesFilters{display:grid;grid-template-columns:minmax(140px,1fr) minmax(180px,1fr) minmax(180px,1.4fr);gap:12px;padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--surface)}
+.releasesFilters label{display:flex;flex-direction:column;gap:7px;min-width:0;font-size:.81rem;font-weight:700}
+.releasesFilters select,.releasesFilters input{width:100%;min-width:0;min-height:44px;padding:9px 11px;border:1px solid var(--border);border-radius:10px;background:var(--bg,#fff);color:var(--text);font:inherit}
+.releasesFilters :is(select,input):focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.releasesCount{color:var(--muted);font-size:.84rem;margin:16px 0}
+.releasesList{display:flex;flex-direction:column;gap:12px}
+.releasesItem{display:flex;gap:17px;align-items:center;min-width:0;padding:14px;border-radius:15px;border:1px solid var(--border);background:var(--surface)}
+.releasesCover{display:flex;align-items:center;justify-content:center;overflow:hidden;width:82px;min-width:82px;height:112px;border-radius:8px;background:var(--surface-tertiary,#eee);font:700 1.7rem Georgia,serif;color:var(--muted)}
+.releasesCover img{width:100%;height:100%;object-fit:cover}
+.releasesBody{flex:1;min-width:0}
+.releasesKind{font-size:.72rem;font-weight:800;letter-spacing:.065em;color:var(--accent)}
+.releasesBody h2{font-size:1.06rem;line-height:1.35;margin:7px 0 5px;overflow-wrap:anywhere}
+.releasesBody p{margin:0 0 8px;overflow-wrap:anywhere;font-size:.89rem}
+.releasesBody small{display:block;color:var(--muted);line-height:1.5}
+.releasesItem>.btn{flex-shrink:0;min-height:44px}
+@media(max-width:750px){.releasesFilters{grid-template-columns:1fr 1fr}.releasesFilters label:last-child{grid-column:1/-1}}
+@media(max-width:540px){.releasesFilters{grid-template-columns:1fr}.releasesFilters label:last-child{grid-column:auto}.releasesItem{gap:11px;flex-wrap:wrap;padding:11px}.releasesCover{width:65px;min-width:65px;height:91px}.releasesItem>.btn{width:100%;justify-content:center}.releasesBody h2{font-size:.94rem}}
+@media(forced-colors:active){.releasesFilters,.releasesItem{border:1px solid CanvasText}}
