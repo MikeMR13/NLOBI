@@ -2548,3 +2548,28 @@ html[data-site-focus="enhanced"] :where(a,button,input,select,textarea,summary,[
  .readerExperience .readerBottom .btn{width:100%}
 }
 @media(prefers-reduced-motion:reduce){.readerExperience .readerProgressTrack span{transition:none}}
+
+/* Reader phase 6: fast chapter navigation and distraction-free reading. */
+.readerExperience .readerTopJump{flex:1 1 220px;min-width:0;max-width:390px}
+.readerExperience .readerTopJump select{width:100%;min-width:0;min-height:44px;padding:9px 32px 9px 12px;border:1px solid var(--reader-rule);border-radius:11px;background:var(--reader-ui);color:var(--reader-ink);font:inherit;font-size:.88rem;text-overflow:ellipsis}
+.readerExperience .readerControlDock{gap:9px;align-items:center}
+.readerExperience .readerFocusButton{padding:10px 14px;min-height:44px;border:1px solid var(--reader-rule);border-radius:12px;background:var(--reader-ui);color:var(--reader-ink);font-size:.85rem;font-weight:750}
+.readerExperience .readerFocusButton:hover{border-color:var(--reader-action)}
+.readerExperience .readerKeyboardHint{max-width:870px;margin:0 auto;padding:5px clamp(6px,3vw,28px);color:var(--reader-secondary);font-size:.75rem;text-align:right}
+.readerExperience .readerFocusExit{display:none}
+.readerExperience.readerFocused .readerTop,.readerExperience.readerFocused .readerControlDock,.readerExperience.readerFocused .readerReadingTools,.readerExperience.readerFocused .readerKeyboardHint{display:none!important}
+body:has(.readerExperience.readerFocused) .top{display:none!important}
+.readerExperience.readerFocused .readerFocusExit{display:block;position:fixed;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:70;padding:9px 13px;border-radius:100px;background:var(--reader-ui);color:var(--reader-ink);border:1px solid var(--reader-rule);box-shadow:0 3px 15px rgba(0,0,0,.15);font-size:.8rem}
+.readerExperience.readerFocused .readerPaper{padding-top:36px}
+.readerExperience .readerPaper{max-width:780px}
+.readerExperience .readerPaper.reader-narrow{max-width:640px}
+.readerExperience .readerPaper.reader-wide{max-width:990px}
+@media(max-width:700px){
+ .readerExperience .readerTopJump{order:3;flex-basis:100%;max-width:none}
+ .readerExperience .readerTop{align-items:center}
+ .readerExperience .readerTopJump select{font-size:16px}
+ .readerExperience .readerKeyboardHint{display:none}
+ .readerExperience .readerFocusButton{flex:1}
+ .readerExperience .readerControlDock{justify-content:stretch}
+ .readerExperience .readerSettingsPanel{max-width:calc(100vw - 24px)}
+}
