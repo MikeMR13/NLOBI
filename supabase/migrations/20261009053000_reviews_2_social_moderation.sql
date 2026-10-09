@@ -33,7 +33,8 @@ create policy review_reports_select_own_admin on public.translation_review_repor
 drop policy if exists review_reports_insert_own on public.translation_review_reports;
 create policy review_reports_insert_own on public.translation_review_reports for insert to authenticated with check(reporter_id=(select auth.uid()) and exists(select 1 from public.translation_reviews r where r.id=review_id and r.user_id<>(select auth.uid())));
 
-create or replace function public.get_translation_reviews(p_translation_id uuid)
+drop function if exists public.get_translation_reviews(uuid);
+create function public.get_translation_reviews(p_translation_id uuid)
 returns table (id uuid,user_id uuid,display_name text,username text,avatar_url text,body text,contains_spoilers boolean,created_at timestamptz,updated_at timestamptz,helpful_count bigint,my_helpful boolean)
 language sql stable security definer set search_path='' as $$
 select r.id,r.user_id,p.display_name,p.username,p.avatar_url,r.body,r.contains_spoilers,r.created_at,r.updated_at,
