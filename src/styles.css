@@ -2361,3 +2361,9 @@ body.dark .teamPublicPage .catalogStatusTag{color:#ffdf40}
  .collectionCoverChoice{flex-basis:92px}
  .collectionCoverChoiceArt{width:68px;height:98px}
 }
+
+/* LCP móvil: pintar texto editorial antes del catálogo y reservar espacio visual para la portada. */
+.homeFeaturedLoading{min-height:320px;display:grid;justify-items:center;align-content:center;gap:15px;padding:28px;color:var(--muted);font-size:.86rem;font-weight:700;text-align:center}
+.homeFeaturedLoading .homeLoadingCover{width:min(185px,75%);height:240px;margin:0 auto}
+.homeLoadingBelow{margin-top:22px}
+@media(max-width:700px){.homeFeaturedLoading{min-height:210px;padding:20px}.homeFeaturedLoading .homeLoadingCover{height:150px;width:105px}.homeLoadingBelow{margin-top:12px}}

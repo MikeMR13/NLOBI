@@ -46,6 +46,8 @@ jobs:
         run: node scripts/layout-check.mjs
       - name: Mobile interaction audit (Chromium + WebKit)
         run: node scripts/mobile-interactions-check.mjs
+      - name: Home LCP hydration regression
+        run: node scripts/lcp-home-check.mjs
       - name: Explore visual and interaction audit
         run: node scripts/explore-quality-check.mjs
       - name: Full platform quality pass
