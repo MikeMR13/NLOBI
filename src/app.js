@@ -40,6 +40,7 @@ function persistSession(data){
  if(S.tokenExpiresAt)localStorage.setItem('nlobi_token_expires_at',String(S.tokenExpiresAt));else localStorage.removeItem('nlobi_token_expires_at')
 }
 function clearSession(){
+ readerAnnotations.reset();
  S.token='';S.refreshToken='';S.tokenExpiresAt=0;
  localStorage.removeItem('nlobi_token');localStorage.removeItem('nlobi_refresh_token');localStorage.removeItem('nlobi_token_expires_at')
 }
