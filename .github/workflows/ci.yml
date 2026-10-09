@@ -22,6 +22,8 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run build
+      - name: PWA cache regression
+        run: node scripts/pwa-cache-check.mjs
       - name: Start preview server
         run: |
           npx --yes serve@14.2.4 dist -l 4173 > /tmp/nlobi-serve.log 2>&1 &
