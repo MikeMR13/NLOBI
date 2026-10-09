@@ -2137,3 +2137,15 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .readerPrivacyNote{margin:20px 0;color:var(--muted);font-size:.86rem;line-height:1.5}
 @media(max-width:680px){.readerDirectoryTools{grid-template-columns:1fr}.readerDirectoryHero{padding:22px}.readerDirectoryActions .btn{flex:1}.readerSocialActions .btn{flex:1}}
 @media(max-width:360px){.readerDirectoryCard{padding:14px}.readerDirectoryTabs button{padding:10px}}
+
+
+.readerFeed{margin:22px 0;padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}
+.readerFeed .sectionHead{margin-bottom:18px}
+.readerFeedList{display:grid;gap:10px}
+.readerFeedItem{padding:15px;border:1px solid var(--line);border-radius:12px;background:var(--surface-soft,transparent);display:flex;flex-direction:column;align-items:flex-start;gap:8px;min-width:0}
+.readerFeedItem>div{display:flex;align-items:center;flex-wrap:wrap;gap:3px}
+.readerFeedItem>div>button{border:0;background:transparent;color:inherit;padding:0;font-weight:700;text-align:left;cursor:pointer}
+.readerFeedItem>div>button:hover{text-decoration:underline}
+.readerFeedItem p{margin:0;line-height:1.5;overflow-wrap:anywhere}
+.readerFeedItem .btn{align-self:flex-start}
+@media(max-width:540px){.readerFeed{padding:14px}.readerFeedItem{padding:12px}}
