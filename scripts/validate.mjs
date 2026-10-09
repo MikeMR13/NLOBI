@@ -342,3 +342,5 @@ if (html.includes('href="https://fonts.googleapis.com/css2?')) throw new Error('
 for (const required of ["function homeShowcaseCopy(){","if(S.catalogLoading)return `\${nav()}<main class=\"wrap homeEditorial\"","\${homeShowcaseCopy()}<div class=\"homeFeatured\"","if(S.view!=='home')ensureSupplementalFonts();","await loadCatalog();if(S.view==='home'){S.catalogLoaded=true;S.catalogLoading=false;S.err='';render()}"]) {
  if (!app.includes(required))throw new Error('LCP: falta '+required);
 }
+
+if(!app.includes("const previousHomeHeading=S.view==='home'?app.querySelector('.homeShowcaseCopy h1'):null;"))throw new Error('LCP: el H1 del inicio se reemplaza durante la carga.');
