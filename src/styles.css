@@ -2196,3 +2196,15 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
   outline:3px solid var(--accent);
   outline-offset:2px;
 }
+
+
+/* WCAG: yellow eyebrow text lacks contrast on light team-profile cards.
+   Retain bright yellow only where a truly dark background is guaranteed. */
+.teamPublicPage .teamPublicOverview .eyebrow,
+.teamPublicPage .teamPublicSection .eyebrow{
+  color:var(--accentText)!important;
+}
+/* Reader social totals sit inside a permanently dark (#252525) hero.
+   Theme-level --muted and --text can otherwise resolve to dark colors. */
+.publicReaderHero .readerSocialBar{color:#e0e0e0}
+.publicReaderHero .readerSocialBar strong{color:#fff}
