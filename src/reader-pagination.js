@@ -11,7 +11,7 @@ export function createReaderPagination({state,flow,onNext,updateProgress}){
   const css=getComputedStyle(paper),gap=parseFloat(css.columnGap)||36;
   return Math.max(100,paper.clientWidth-(parseFloat(css.paddingLeft)||0)-(parseFloat(css.paddingRight)||0)+gap);
  }
- function count(){return paper?Math.max(1,Math.ceil((Math.max(0,paper.scrollWidth-paper.clientWidth)-2)/stride())+1):1}
+ function count(){return paper?Math.max(1,Math.round(Math.max(0,paper.scrollWidth-paper.clientWidth)/stride())+1):1}
  function index(){return paper?Math.min(count()-1,Math.max(0,Math.round(paper.scrollLeft/stride()))):0}
  function refresh(){
   if(!active()||!paper)return;
