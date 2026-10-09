@@ -33,7 +33,7 @@ export function createReaderAnnotations({state,request,escape,flow,openChapter,r
   })();
   return loading;
  }
- function ensureUser(){if(!S().user?.id){notify('Inicia sesión para guardar marcadores, subrayados y notas privadas.','bad');return false}if(!navigator.onLine){notify('Conéctate a internet para guardar anotaciones en tu cuenta.','bad');return false}if(owner!==S().user.id){void load();notify('Cargando tus anotaciones, inténtalo de nuevo.','bad');return false}return true}
+ function ensureUser(){if(!S().user?.id){notify('Inicia sesión para guardar marcadores, subrayados y notas privadas.','bad');return false}if(loading){notify('Cargando tus anotaciones, inténtalo de nuevo.','bad');return false}if(!navigator.onLine){notify('Conéctate a internet para guardar anotaciones en tu cuenta.','bad');return false}if(owner!==S().user.id){void load();notify('Cargando tus anotaciones, inténtalo de nuevo.','bad');return false}return true}
  function segmentText(block,start=0,end=170){return String(block?.textContent||'').trim().slice(start,end)}
  function paragraphAnchor(){
   const r=current(),paper=flow.paper(r?.id);if(!paper)return null;
@@ -223,6 +223,8 @@ export function createReaderAnnotations({state,request,escape,flow,openChapter,r
   root.addEventListener('mouseup',event=>{if(event.target.closest('button,dialog'))return;requestAnimationFrame(showSelection)},{signal});
   root.addEventListener('keyup',event=>{if(event.key==='Shift'||event.key.startsWith('Arrow'))requestAnimationFrame(showSelection)},{signal});
   root.addEventListener('touchend',()=>requestAnimationFrame(showSelection),{passive:true,signal});
+  document.addEventListener('selectionchange',()=>{const sel=document.getSelection();if(sel&&!sel.isCollapsed&&root?.contains(sel.anchorNode))requestAnimationFrame(showSelection)},{signal});
+  window.addEventListener('scroll',hideSelection,{passive:true,signal});
   root.addEventListener('click',event=>{
    const target=event.target.closest('button');if(!target)return;
    if(target.id==='readerAddBookmark'){const x=paragraphAnchor();if(x)openEditor(x,'bookmark')}
