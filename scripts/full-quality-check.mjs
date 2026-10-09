@@ -168,10 +168,16 @@ for(const [vpName,width,height] of viewports){
    if(live.title!=='Vista en vivo QA'||!live.description?.startsWith('Descripción que debe')||live.badge!=='Pública'||live.color!=='#4f9dd9'||live.inputColor!=='#4f9dd9'||live.swatch!=='true'||live.visibility!=='Colección pública')failures.push({...row,live,error:'collections-live-preview-failed'});
   }
   if(name==='user-library-collections-edit'){
-   const cover=page.locator('#collectionCover');
-   if(await cover.count()){await cover.selectOption('project-1');await page.waitForTimeout(20)}
-   const coverState=await page.evaluate(()=>({label:document.querySelector('#collectionPreviewCoverLabel')?.textContent,images:document.querySelectorAll('#collectionPreviewCovers img.collectionPreviewCoverImage').length}));
-   if(coverState.label!=='Portada elegida'||coverState.images!==1)failures.push({...row,coverState,error:'collections-cover-preview-failed'});
+   const visualChoices=page.locator('[data-collection-cover]');
+   if((await visualChoices.count())<2)failures.push({...row,error:'collections-cover-gallery-missing-options'});
+   const manual=page.locator('[data-collection-cover="project-1"]');
+   if(await manual.count()){await manual.click();await page.waitForTimeout(20)}
+   let coverState=await page.evaluate(()=>({value:document.querySelector('#collectionCover')?.value,label:document.querySelector('#collectionPreviewCoverLabel')?.textContent,images:document.querySelectorAll('#collectionPreviewCovers img.collectionPreviewCoverImage').length,pressed:document.querySelector('[data-collection-cover="project-1"]')?.getAttribute('aria-pressed')}));
+   if(coverState.value!=='project-1'||coverState.label!=='Portada elegida'||coverState.images!==1||coverState.pressed!=='true')failures.push({...row,coverState,error:'collections-cover-gallery-manual-failed'});
+   const automatic=page.locator('[data-collection-cover=""]');
+   if(await automatic.count()){await automatic.click();await page.waitForTimeout(20)}
+   coverState=await page.evaluate(()=>({value:document.querySelector('#collectionCover')?.value,label:document.querySelector('#collectionPreviewCoverLabel')?.textContent,pressed:document.querySelector('[data-collection-cover=""]')?.getAttribute('aria-pressed')}));
+   if(coverState.value!==''||coverState.label!=='Portada automática'||coverState.pressed!=='true')failures.push({...row,coverState,error:'collections-cover-gallery-auto-failed'});
   }
   if(name==='admin')for(const tab of ['applications','users','teams','reports','content','links','beta','audit']){const b=page.locator('[data-admin-tab="'+tab+'"]:visible');if(await b.count())await b.first().click({timeout:5000})}
   if(name==='readonly-studio' && ((await page.locator('[data-v="studio:new"]:visible').count())||(await page.locator('[data-v="studio:import"]:visible').count())))failures.push({...row,error:'readonly-studio-exposes-editor-actions'});
