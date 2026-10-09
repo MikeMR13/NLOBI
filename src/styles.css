@@ -1940,3 +1940,10 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .homeBookTags .newVolumeTag,.homeBookTags .newVolumeTag span{color:#fff;background:#ab292f}
 .homeBookTags .newVolumeTag{border:1px solid #ab292f}
 .homeBookTags .newVolumeTag span{border:0;border-left:1px solid rgba(255,255,255,.7);border-radius:0;padding-left:6px}
+
+/* Seguimiento de novelas y señales de novedades de lectura */
+.followNovelButton{min-height:44px;display:inline-flex;align-items:center;gap:7px;white-space:normal;text-align:center}
+.followNovelButton.following{border-color:var(--accent);color:var(--text);background:var(--panel2)}
+.followNovelButton:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.libraryNewChapters{display:inline-flex;align-items:center;border-radius:99px;padding:5px 8px;font-size:.75rem;font-weight:800;line-height:1.2;background:#92252b;color:#fff;border:1px solid #92252b}
+@media(forced-colors:active){.libraryNewChapters,.followNovelButton.following{border:2px solid Highlight}}
