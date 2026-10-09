@@ -559,7 +559,7 @@ for (const marker of [
  const pages=fs.readFileSync('src/reader-pagination.js','utf8');
  for(const key of ['readerScopedValues','setReaderSetting','resetReaderVolume','normalizeReaderSettings','cleanVolumeSettings'])if(!prefs.includes(key))throw Error('Phase 9: falta '+key);
  for(const key of ["flow:'chapter'", "'paged'", "swipe:'on'"])if(!prefs.includes(key))throw Error('Phase 9: falta modo '+key);
- for(const key of ["const readerPagination=createReaderPagination(","readerPagination.bind()","readerPagination.unbind()","readerScopedControls","readerScopeControls('volume',chosen.id)","readerScopeControls('global')","data-reader-reset-volume","readerPagedMode","id=\"readerPagePrev\"","id=\"readerPageNext\"","function setReaderPref(k,v){"])if(!app.includes(key))throw Error('Phase 9: falta conexión '+key);
+ for(const key of ["const readerPagination=createReaderPagination(","readerPagination.bind()","readerPagination.unbind()","function readerScopeControls(","readerScopeControls('volume',chosen.id)","readerScopeControls('global')","data-reader-reset-volume","readerPagedMode","id=\"readerPagePrev\"","id=\"readerPageNext\"","function setReaderPref(k,v){"])if(!app.includes(key))throw Error('Phase 9: falta conexión '+key);
  for(const key of ['function move(delta)','function position(){','function restore(pos)','touchstart','ArrowRight','PageDown','readerPageStatus'])if(!pages.includes(key))throw Error('Phase 9: falta paginación '+key);
  for(const key of ['.readerPagedMode .readerPageControls','.readerScopeFields{','.readerVolumeAdvanced{'])if(!css.includes(key))throw Error('Phase 9: falta CSS '+key);
  const build=fs.readFileSync('scripts/build.mjs','utf8'),sw=fs.readFileSync('public/sw.js','utf8');
