@@ -519,3 +519,36 @@ for (const marker of [
  const t=spawnSync(process.execPath,['scripts/reader-phase7-check.mjs'],{stdio:'inherit'});
  if(t.status!==0)throw new Error('Fase 7: fallaron regresiones de la barra flotante y reanudación');
 }
+
+
+// Phase 8: server-private reading annotations, interface + persistence.
+{
+ const m=fs.readFileSync('src/reader-annotations.js','utf8');
+ const migration=fs.readFileSync('supabase/migrations/20261009173100_reader_annotations.sql','utf8');
+ for(const x of [
+  'export function createReaderAnnotations(',
+  'function capture(){','function blockOffset(','function applyHighlights(){',
+  'function markText(','function paragraphAnchor(){',
+  "kind:'bookmark'","kind:'highlight'",'readerAnnotationEditor',
+  "function bindLibrary(){",'function libraryUi(){','function track(){',
+  'openChapter(x.section_id,x.translation_id)',
+  "owner&&S().user?.id===owner",
+  "method:'POST'","method:'PATCH'","method:'DELETE'"
+ ])if(!m.includes(x))throw new Error('Phase 8: falta componente '+x);
+ for(const x of [
+  "import { createReaderAnnotations } from './reader-annotations.js';",
+  "const readerAnnotations=createReaderAnnotations(",
+  'readerAnnotations.bindReader()',
+  'readerAnnotations.readerUi()',
+  'readerAnnotations.libraryUi()',
+  'readerAnnotations.bindLibrary()',
+  "readerAnnotations.load()",
+  "readerAnnotations.reset()",
+  'data-library-tab="annotations"'
+ ])if(!app.includes(x))throw new Error('Phase 8: falta integración '+x);
+ for(const x of ['.readerAnnotationTools{','.readerAnnotationsPanel{','.readerAnnotationLibraryGrid{','.readerAnchorBlock mark.readerMarkedText{'])
+  if(!css.includes(x))throw new Error('Phase 8: falta CSS '+x);
+ for(const x of ['enable row level security','reader_annotations_select_own','reader_annotations_insert_own','reader_annotations_update_own','reader_annotations_delete_own','auth.uid()','grant select, insert, update, delete on public.reader_annotations to authenticated','revoke all on public.reader_annotations from public, anon'])if(!migration.includes(x))throw new Error('Phase 8: falta RLS '+x);
+ const sw=fs.readFileSync('public/sw.js','utf8'),build=fs.readFileSync('scripts/build.mjs','utf8');
+ for(const x of [sw,build])if(!x.includes('reader-annotations.js'))throw new Error('Phase 8: asset missing in PWA/build');
+}
