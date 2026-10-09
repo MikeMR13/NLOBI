@@ -2361,3 +2361,15 @@ body.dark .teamPublicPage .catalogStatusTag{color:#ffdf40}
  .collectionCoverChoice{flex-basis:92px}
  .collectionCoverChoiceArt{width:68px;height:98px}
 }
+
+/* Reader account preference divisions */
+.readerSettingsTabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0 22px;padding:7px;border:1px solid var(--line);border-radius:16px;background:var(--panel2)}
+.readerSettingsTab{flex:1 1 130px;border:1px solid transparent;border-radius:11px;background:transparent;padding:12px 15px;color:var(--text);font-weight:750;cursor:pointer}
+.readerSettingsTab:hover{background:var(--panel)}
+.readerSettingsTab.active{background:var(--panel);border-color:var(--line);box-shadow:var(--shadow2)}
+.readerSettingsTab:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.readerSettingsPanel[hidden]{display:none!important}
+.readerSettingsPanel{min-width:0}
+.readerSettingsPanel[data-preference-panel="notices"]{padding:22px;border:1px solid var(--line);border-radius:18px;background:var(--panel)}
+.readerSettingsPanel[data-preference-panel="notices"] .notificationSettings{margin:18px 0}
+@media(max-width:600px){.readerSettingsTabs{gap:5px}.readerSettingsTab{flex-basis:calc(50% - 6px);padding:11px 8px}}
