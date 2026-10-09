@@ -20,7 +20,7 @@ const translation={id:'project-1',title:longTitle,status:'active',language_code:
  translator_groups:{id:'group-1',name:'Equipo traductor con un nombre largo de control de calidad'},
  volumes:[
   {id:'volume-1',volume_number:1,title:'Volumen uno con un subtítulo muy largo para probar la vista editorial',status:'published',cover_url:null,sections:[section1,section2]},
-  {id:'volume-2',volume_number:2,title:'Volumen borrador',status:'draft',cover_url:null,sections:[]}
+  {id:'volume-2',volume_number:2,title:'Volumen borrador',status:'draft',cover_url:'https://example.test/cover-volume-2.jpg',sections:[{id:'section-3',volume_id:'volume-2',title:'Capítulo de prueba',section_type:'chapter',section_number:1,status:'draft',sort_order:1,content:[{type:'paragraph',text:'Contenido suficiente para realizar la publicación editorial de prueba.'}]}]}
  ],
  links:{purchase:[{id:'buy-1',volume_number:1,store_name:'Tienda oficial de ejemplo',region:'JP',language_code:'ja',format:'digital',url:'https://example.test/buy'}],support:[{id:'support-1',label:'Apoyar al equipo',url:'https://example.test/support'}],downloads:[{id:'download-1',volume_id:'volume-1',format:'epub',provider:'Drive',url:'https://example.test/download'}]},
  purchase_links:[{id:'buy-1',volume_number:1,store_name:'Tienda oficial',region:'JP',language_code:'ja',format:'digital',url:'https://example.test/buy',is_verified:true}],
