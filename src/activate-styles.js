@@ -1,0 +1,1 @@
+(function(){function enable(id){const link=document.getElementById(id);if(!link)return;const done=()=>{link.media='all'};link.addEventListener('load',done,{once:true});if(link.sheet)done()}enable('siteStyles');enable('readerFonts')})();
