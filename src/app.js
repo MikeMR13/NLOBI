@@ -1590,7 +1590,33 @@ function authRedirectUrl(){return location.origin+'/'}
 async function signup(){try{setAuthError('');const email=$('#email').value.trim(),password=$('#pass').value,name=$('#name').value.trim(),account_type=document.querySelector('input[name=atype]:checked').value;const d=await jreq('/auth/v1/signup?redirect_to='+encodeURIComponent(authRedirectUrl()),{method:'POST',body:JSON.stringify({email,password,data:{display_name:name,account_type}})});if(d?.access_token)persistSession(d);toast(d?.access_token?'Cuenta creada y sesión iniciada.':'Cuenta creada. Te enviamos un correo de verificación.','ok');if(d?.access_token){await loadUser();go('home',true)}else{S.authMode='login';render()}}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
 async function resendVerification(){try{setAuthError('');const email=$('#email')?.value.trim();if(!email){setAuthError('Escribe tu correo para reenviar la verificación.');return}await jreq('/auth/v1/resend?redirect_to='+encodeURIComponent(authRedirectUrl()),{method:'POST',body:JSON.stringify({type:'signup',email})});toast('Correo de verificación reenviado. Revisa también Spam o Promociones.','ok')}catch(e){const msg=friendlyError(e);setAuthError(msg);toast(msg,'bad')}}
 function logout(){const token=S.token;if(token)fetch(URL+'/auth/v1/logout',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+token}}).catch(()=>{});clearSession();S.user=S.profile=null;S.groups=[];S.library=[];S.readerCollections=[];S.savedCollections=[];S.collectionSaveCounts=new Map();S.discoverCollections=[];S.readerFollows=[];S.followedReaderProfiles=[];S.readerActivity=[];S.readerDirectory=[];S.readSections=[];S.readingProgress=[];S.readingHistory=[];S.notes=[];S.admin=false;S.adminUsers=[];S.adminTeams=[];S.adminReports=[];S.adminReviewReports=[];S.adminContent=[];S.adminVolumes=[];S.adminSections=[];S.adminPurchaseLinks=[];S.adminBetaFeedback=[];S.adminAudit=[];S.view='home';render()}
-async function loadCatalog(){const [catalog,volumes,sections,teams]=await Promise.all([jreqAllRows('/rest/v1/translations?select=id,title,status,language_code,popularity_score,updated_at,novels(id,title,synopsis,cover_url,author_name,demography,genres,tags),translator_groups(id,name)&status=in.(active,complete,paused)&order=updated_at.desc'),jreq('/rest/v1/volumes?select=id,translation_id,volume_number,title,cover_url,published_at,status&status=eq.published&published_at=not.is.null&order=published_at.desc&limit=200'),jreq('/rest/v1/sections?select=id,volume_id,title,section_type,section_number,published_at,status&status=eq.published&published_at=not.is.null&order=published_at.desc&limit=200'),jreqAllRows('/rest/v1/translator_groups?select=id,name,slug,description,avatar_url&order=name.asc')]);S.translatorDirectory=teams||[];S.publishedVolumes=[...new Map((volumes||[]).filter(v=>v.status==='published'&&v.published_at).map(v=>[v.id,v])).values()];S.publishedSections=[...new Map((sections||[]).filter(v=>v.status==='published'&&v.published_at).map(v=>[v.id,v])).values()];const latest=new Map();for(const v of volumes||[])if(!latest.has(v.translation_id))latest.set(v.translation_id,v);S.catalog=(catalog||[]).map(x=>({...x,latestPublishedVolume:latest.get(x.id)||null}))}
+async function loadCatalog(earlyRender=false){
+ const catalogRequest=jreqAllRows('/rest/v1/translations?select=id,title,status,language_code,popularity_score,updated_at,novels(id,title,synopsis,cover_url,author_name,demography,genres,tags),translator_groups(id,name)&status=in.(active,complete,paused)&order=updated_at.desc');
+ const volumeRequest=jreq('/rest/v1/volumes?select=id,translation_id,volume_number,title,cover_url,published_at,status&status=eq.published&published_at=not.is.null&order=published_at.desc&limit=200');
+ const sectionRequest=jreq('/rest/v1/sections?select=id,volume_id,title,section_type,section_number,published_at,status&status=eq.published&published_at=not.is.null&order=published_at.desc&limit=200');
+ const teamRequest=jreqAllRows('/rest/v1/translator_groups?select=id,name,slug,description,avatar_url&order=name.asc');
+ // Each request starts in parallel, but the first real paint needs only translations.
+ const catalog=await catalogRequest;
+ S.catalog=(catalog||[]).map(x=>({...x,latestPublishedVolume:null}));
+ const enrich=async()=>{
+  const [volumeResult,sectionResult,teamResult]=await Promise.allSettled([volumeRequest,sectionRequest,teamRequest]);
+  if(volumeResult.status==='fulfilled'){
+   const volumes=volumeResult.value||[];
+   S.publishedVolumes=[...new Map(volumes.filter(v=>v.status==='published'&&v.published_at).map(v=>[v.id,v])).values()];
+   const latest=new Map();
+   for(const v of volumes)if(!latest.has(v.translation_id))latest.set(v.translation_id,v);
+   S.catalog=S.catalog.map(x=>({...x,latestPublishedVolume:latest.get(x.id)||null}));
+  }else console.warn('[NLOBI] No se pudieron cargar volúmenes publicados',volumeResult.reason);
+  if(sectionResult.status==='fulfilled'){
+   S.publishedSections=[...new Map((sectionResult.value||[]).filter(v=>v.status==='published'&&v.published_at).map(v=>[v.id,v])).values()];
+  }else console.warn('[NLOBI] No se pudieron cargar capítulos publicados',sectionResult.reason);
+  if(teamResult.status==='fulfilled')S.translatorDirectory=teamResult.value||[];
+  else console.warn('[NLOBI] No se pudo cargar directorio de traductores',teamResult.reason);
+  if(earlyRender&&['home','releases','explore','translators'].includes(S.view))render();
+ };
+ if(earlyRender){void enrich().catch(e=>console.warn('[NLOBI] Error de datos secundarios',e));return}
+ await enrich();
+}
 async function safeOptionalLoad(label,promise){try{return await promise}catch(e){console.warn('[NLOBI] No se pudo cargar '+label,e);return null}}
 async function loadUser(){if(!S.token)return;try{S.user=await jreq('/auth/v1/user');const uid=S.user.id;const [p,g,l,rp,rh,a,n,np,me]=await Promise.all([
  jreq(`/rest/v1/profiles?id=eq.${uid}&select=id,username,display_name,avatar_url,banner_url,bio,account_type,public_library,public_activity,discoverable_reader`),
@@ -1757,7 +1783,7 @@ async function boot(isRetry=false){
  S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();
  try{
   if(navigator.onLine){
-   await loadCatalog();
+   await loadCatalog(S.view==='home');
    S.catalogLoaded=true;S.catalogLoading=false;S.err='';
    // El contenido principal y su portada no esperan valoraciones ni información de cuenta.
    render();
