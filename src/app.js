@@ -1751,8 +1751,41 @@ function registerPwa(){
 }
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;S.pwaInstallReady=true;render()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;S.pwaInstallReady=false;toast('El Obi del Lector quedó instalado.','ok');render()});
-async function boot(isRetry=false){S.admin=false;S.catalogLoading=true;if(localStorage.getItem('nlobi_dark')==='1')document.body.classList.add('dark');S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();try{if(navigator.onLine){await loadCatalog();if(S.view==='collections')await loadPublicCollections();
- if(S.view==='readers')await loadReaderDirectory();await loadRatings();S.catalogLoaded=true;S.err='';if(S.token){try{await ensureFreshSession();await loadUser();await loadRatings();await flushProgressQueue()}catch(e){if(e?.status===401||!S.token){clearSession();S.user=S.profile=null;console.warn('Sesión no renovable',e)}else{S.err=friendlyError(e,'No se pudieron cargar algunos datos de tu cuenta.');console.warn('Error temporal al recuperar datos de la cuenta',e)}}}await resolveDynamicRoute(S.view);if(isRetry)toast('Conexión restablecida.','ok')}else{await resolveDynamicRoute(S.view);S.err=''}}catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}finally{S.catalogLoading=false}render();const notice=sessionStorage.getItem('nlobi_auth_notice');if(notice){sessionStorage.removeItem('nlobi_auth_notice');const bad=notice.startsWith('error:'),msg=notice.slice(notice.indexOf(':')+1);toast(bad?'No se pudo confirmar el correo: '+msg:msg,bad?'bad':'ok')}}
+async function boot(isRetry=false){
+ S.admin=false;S.catalogLoading=true;
+ if(localStorage.getItem('nlobi_dark')==='1')document.body.classList.add('dark');
+ S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();
+ try{
+  if(navigator.onLine){
+   await loadCatalog();
+   S.catalogLoaded=true;S.catalogLoading=false;S.err='';
+   // El contenido principal y su portada no esperan valoraciones ni información de cuenta.
+   render();
+   if(isRetry)toast('Conexión restablecida.','ok');
+   const sessionTask=S.token?(async()=>{
+    try{
+     await ensureFreshSession();await loadUser();render();
+     await flushProgressQueue();
+    }catch(e){
+     if(e?.status===401||!S.token){clearSession();S.user=S.profile=null;console.warn('Sesión no renovable',e)}
+     else{console.warn('Error temporal al recuperar datos de la cuenta',e)}
+     render();
+    }
+   })():Promise.resolve();
+   // Valoraciones solo enriquecen vistas secundarias: nunca bloquean el hero.
+   const ratingsTask=safeOptionalLoad('valoraciones',loadRatings()).then(()=>render());
+   // Las rutas privadas de Studio sí necesitan el contexto de sesión.
+   if(S.view.startsWith('studio:'))await sessionTask;
+   await resolveDynamicRoute(S.view);
+   render();
+   // Evitar promesas sin manejar; estas tareas siguen independientemente del primer render.
+   void ratingsTask;void sessionTask;
+  }else{await resolveDynamicRoute(S.view);S.err=''}
+ }catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}
+ finally{S.catalogLoading=false;render()}
+ const notice=sessionStorage.getItem('nlobi_auth_notice');
+ if(notice){sessionStorage.removeItem('nlobi_auth_notice');const bad=notice.startsWith('error:'),msg=notice.slice(notice.indexOf(':')+1);toast(bad?'No se pudo confirmar el correo: '+msg:msg,bad?'bad':'ok')}
+}
 // Mantener lanzamientos sincronizados sin reordenar la interfaz durante la lectura.
 let releasesRefreshPending=false,lastReleasesRefresh=0;
 async function refreshPublicReleases(force=false){
