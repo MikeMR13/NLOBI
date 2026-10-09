@@ -6,6 +6,8 @@ const mustExist = [
   "src/index.html",
   "src/styles.css",
   "src/app.js",
+  "src/reader-flow.js",
+  "scripts/reader-flow-check.mjs",
   "public/manifest.webmanifest",
   "public/sw.js",
   "vercel.json",
@@ -15,7 +17,7 @@ for (const file of mustExist) {
   if (!fs.existsSync(file)) throw new Error(`Falta ${file}`);
 }
 
-for (const file of ["src/app.js", "public/sw.js", "scripts/build.mjs", "scripts/generate-config.mjs", "scripts/validate.mjs"]) {
+for (const file of ["src/app.js", "src/reader-flow.js", "scripts/reader-flow-check.mjs", "public/sw.js", "scripts/build.mjs", "scripts/generate-config.mjs", "scripts/validate.mjs"]) {
   const result = spawnSync(process.execPath, ["--check", file], { stdio: "inherit" });
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
@@ -401,4 +403,27 @@ for (const marker of [
  if(begin<0||end<begin)throw new Error('Reader phase 6: vista no encontrada');
  const view=app.slice(begin,end);
  if(!view.includes('data-finish-next=')||!view.includes('id="markReaderDone"')||!view.includes('id="readerFontFamily"')||!view.includes('readerAdvanced'))throw new Error('Reader phase 6: no se conservaron funciones anteriores');
+}
+
+
+// Continuous reader regressions: stable anchors, lazy loading and legacy controls.
+{
+ const moduleCode=fs.readFileSync('src/reader-flow.js','utf8');
+ for(const marker of [
+  'export function createReaderFlow(',
+  "reading_progress?on_conflict=user_id,translation_id",
+  'data-block-index',
+  'async function loadMore()',
+  "status=eq.published",
+  'readerFlowActive',
+  "readerPrefs?.flow==='continuous'",
+ ])if(!moduleCode.includes(marker))throw new Error('Lectura continua: falta '+marker);
+ for(const marker of ['createReaderFlow(', 'readerFlow.begin()', 'readerFlow.scroll()', 'readerFlow.blockHtml(', 'data-reader-quick="flow"', 'id="readerChapterStream"', 'readerFlow.best(sectionId)']){
+  if(!app.includes(marker))throw new Error('Integración de lectura continua: falta '+marker);
+ }
+ for(const marker of ['.readerChapterStream','.readerAnchorBlock','.readerBookProgress'])if(!css.includes(marker))throw new Error('Estilos de lectura continua: falta '+marker);
+ const sw=fs.readFileSync('public/sw.js','utf8');
+ if(!sw.includes('/assets/reader-flow.js'))throw new Error('PWA: módulo de lectura continua ausente de caché');
+ const test=spawnSync(process.execPath,['scripts/reader-flow-check.mjs'],{stdio:'inherit'});
+ if(test.status!==0)throw new Error('Fallaron pruebas de anclas del lector continuo');
 }
