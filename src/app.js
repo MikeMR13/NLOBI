@@ -1596,10 +1596,11 @@ async function loadCatalog(earlyRender=false){
  const sectionRequest=jreq('/rest/v1/sections?select=id,volume_id,title,section_type,section_number,published_at,status&status=eq.published&published_at=not.is.null&order=published_at.desc&limit=200');
  const teamRequest=jreqAllRows('/rest/v1/translator_groups?select=id,name,slug,description,avatar_url&order=name.asc');
  // Each request starts in parallel, but the first real paint needs only translations.
+ const secondaryResults=Promise.allSettled([volumeRequest,sectionRequest,teamRequest]);
  const catalog=await catalogRequest;
  S.catalog=(catalog||[]).map(x=>({...x,latestPublishedVolume:null}));
  const enrich=async()=>{
-  const [volumeResult,sectionResult,teamResult]=await Promise.allSettled([volumeRequest,sectionRequest,teamRequest]);
+  const [volumeResult,sectionResult,teamResult]=await secondaryResults;
   if(volumeResult.status==='fulfilled'){
    const volumes=volumeResult.value||[];
    S.publishedVolumes=[...new Map(volumes.filter(v=>v.status==='published'&&v.published_at).map(v=>[v.id,v])).values()];
