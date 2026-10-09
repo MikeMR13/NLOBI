@@ -132,8 +132,8 @@ for(const [vpName,width,height] of viewports){
   const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!/favicon|Failed to load resource/i.test(m.text()))runtime.push(m.text())});
   await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__);
   await page.evaluate(({state,view})=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView(view)},{state,view});await page.waitForTimeout(25);
-  const check=await inspect(page),axe=await new AxeBuilder({page}).analyze(),serious=axe.violations.filter(v=>['serious','critical'].includes(v.impact||'')).map(v=>v.id);
-  const row={viewport:vpName,scenario:name,...check,runtime,axeSerious:serious};report.push(row);
+  const check=await inspect(page),axe=await new AxeBuilder({page}).analyze(),seriousViolations=axe.violations.filter(v=>['serious','critical'].includes(v.impact||'')),serious=seriousViolations.map(v=>v.id),axeDetails=seriousViolations.flatMap(v=>v.nodes.slice(0,7).map(n=>({id:v.id,selector:n.target,reason:n.failureSummary?.slice(0,220),html:n.html?.slice(0,130)})));
+  const row={viewport:vpName,scenario:name,...check,runtime,axeSerious:serious,axeDetails};report.push(row);
   if(check.overflow>2)failures.push({...row,error:'horizontal-overflow'});if(check.clipped.length)failures.push({...row,error:'clipped-controls'});if(check.tiny.length)failures.push({...row,error:'small-targets'});if(check.badText.length)failures.push({...row,error:'bad-visible-text'});if(!check.main||check.content<2)failures.push({...row,error:'empty-main'});if(runtime.length)failures.push({...row,error:'runtime-error'});if(serious.length)failures.push({...row,error:'axe-serious'});
   if(name==='creator-project'){const edit=page.locator('[data-edit-section="section-1"]');if(await edit.count()){await edit.click();await page.waitForTimeout(15);if(!(await page.locator('#editSectionTitle').count()))failures.push({...row,error:'editor-open-failed'})}}
   if(name==='user-library'){const b=page.locator('[data-library-filter="favorites"]');if(await b.count())await b.click()}
