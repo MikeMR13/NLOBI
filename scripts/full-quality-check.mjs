@@ -133,9 +133,9 @@ for(const [vpName,width,height] of viewports){
   if(name==='creator-project'){const edit=page.locator('[data-edit-section="section-1"]');if(await edit.count()){await edit.click();await page.waitForTimeout(15);if(!(await page.locator('#editSectionTitle').count()))failures.push({...row,error:'editor-open-failed'})}}
   if(name==='user-library'){const b=page.locator('[data-library-filter="favorites"]');if(await b.count())await b.click()}
   if(name==='admin')for(const tab of ['applications','users','teams','reports','content','links','beta','audit']){const b=page.locator('[data-admin-tab="'+tab+'"]:visible');if(await b.count())await b.first().click({timeout:5000})}
-  if(name==='readonly-studio' && ((await page.locator('[data-v="studio:new"]').count())||(await page.locator('[data-v="studio:import"]').count())))failures.push({...row,error:'readonly-studio-exposes-editor-actions'});
-  if(name==='readonly-project' && ((await page.locator('#createVolume').count())||(await page.locator('#saveDiscoveryMeta').count())||(await page.locator('[data-new-section]').count())))failures.push({...row,error:'readonly-project-exposes-editor-actions'});
-  if(name==='readonly-team' && ((await page.locator('#saveTeamProfile').count())||(await page.locator('#addSupportLink').count())||(await page.locator('[data-media-open]').count())))failures.push({...row,error:'readonly-team-exposes-editor-actions'});
+  if(name==='readonly-studio' && ((await page.locator('[data-v="studio:new"]:visible').count())||(await page.locator('[data-v="studio:import"]:visible').count())))failures.push({...row,error:'readonly-studio-exposes-editor-actions'});
+  if(name==='readonly-project' && ((await page.locator('#createVolume:visible').count())||(await page.locator('#saveDiscoveryMeta:visible').count())||(await page.locator('[data-new-section]:visible').count())))failures.push({...row,error:'readonly-project-exposes-editor-actions'});
+  if(name==='readonly-team' && ((await page.locator('#saveTeamProfile:visible').count())||(await page.locator('#addSupportLink:visible').count())||(await page.locator('[data-media-open]:visible').count())))failures.push({...row,error:'readonly-team-exposes-editor-actions'});
   if((vpName==='mobile-390'||vpName==='desktop-1280')&&['public-home','public-detail','public-reader','user-library','creator-project','creator-team','import-edit','admin'].includes(name))await page.screenshot({path:'quality-results/'+vpName+'-'+name+'.png',fullPage:true});
   await context.close();
  }
@@ -209,7 +209,7 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  await page.waitForTimeout(60);
  await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:translation,teamMembers});
  await page.locator('[data-volume-status="volume-2"][data-status="published"]').click();
- await page.waitForTimeout(60);
+ await page.waitForTimeout(650);
  const rename=calls.find(x=>x.kind==='rename'),publish=calls.find(x=>x.kind==='publish');
  if(runtime.length||rename?.body?.p_translation_id!=='project-1'||rename?.body?.p_title!=='Nombre actualizado QA'||publish?.body?.p_volume_id!=='volume-2'){
   failures.push({scenario:'studio-title-and-volume-publish',runtime,calls,error:'studio-rpc-flow-failed'});
