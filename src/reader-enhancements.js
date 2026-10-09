@@ -1,12 +1,12 @@
 // Reader phase 7: quiet floating navigation, image lightbox, and layout-stable resuming.
 // Does not replace the existing progress store; it stabilizes the same paragraph anchor.
 export function createReaderEnhancements({flow,state,readPosition,openChapter,savePosition,openSettings,seekTo}){
- let root=null,observer=null,controller=null,restoreToken=0,lastScrollY=0,lastChapterId=null;
+ let root=null,observer=null,layoutObserver=null,controller=null,restoreToken=0,lastScrollY=0,lastChapterId=null;
  let images=[],galleryIndex=0,zoom=1,returnFocus=null,touchStartX=null;
  const $=id=>root?.querySelector('#'+id);
  const active=()=>flow.active();
  const reader=()=>state().view.startsWith('reader:');
- function cancelRestore(){restoreToken++}
+ function cancelRestore(){restoreToken++;layoutObserver?.disconnect();layoutObserver=null}
  function clear(){
   cancelRestore();
   observer?.disconnect();observer=null;
@@ -56,7 +56,8 @@ export function createReaderEnhancements({flow,state,readPosition,openChapter,sa
  }
  function stableRestore(position,sectionId=active()?.id){
   if(!root||!reader()||!position||!sectionId)return;
-  const current=++restoreToken;
+  cancelRestore();
+  const current=restoreToken;
   const article=flow.paper(sectionId);
   if(!article)return;
   const apply=()=>{
@@ -69,6 +70,11 @@ export function createReaderEnhancements({flow,state,readPosition,openChapter,sa
   // image/font changes retain the original block anchor unless user interacts.
   requestAnimationFrame(()=>{apply();requestAnimationFrame(apply)});
   Promise.resolve(document.fonts?.ready).then(()=>requestAnimationFrame(apply)).catch(()=>{});
+  if(typeof ResizeObserver==='function'){
+   layoutObserver=new ResizeObserver(()=>requestAnimationFrame(apply));
+   layoutObserver.observe(article);
+  }
+  document.fonts?.addEventListener?.('loadingdone',()=>requestAnimationFrame(apply),{signal:controller.signal});
   article.querySelectorAll('img').forEach(img=>{
    if(!img.complete)img.addEventListener('load',()=>requestAnimationFrame(apply),{once:true,signal:controller.signal});
   });
