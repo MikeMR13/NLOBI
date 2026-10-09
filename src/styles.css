@@ -2583,3 +2583,24 @@ body:has(.readerExperience.readerFocused) .top{display:none!important}
 .readerStreamStatus{color:var(--reader-secondary);font-size:.85rem;min-height:1.2em;text-align:center;margin:8px 0 16px}
 .readerExperience .readerQuickGroup:first-child .readerQuickChoices button{flex:1 1 118px}
 @media(max-width:600px){.readerChapterStream{row-gap:16px}.readerBookProgress{white-space:normal}}
+
+/* Shared reading mode chooser (volume detail and account Reading preferences) */
+.volumeReadingMode{margin:20px 0 28px;padding:clamp(17px,3vw,26px);border:1px solid var(--line);border-radius:18px;background:var(--panel)}
+.volumeReadingModeHead h3,.readerReadingPreferences h4{margin:6px 0 8px;color:var(--text)}
+.volumeReadingModeHead p,.readerReadingPreferences>p{margin:0 0 18px;max-width:72ch}
+.readingModeOptions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.readingModeOption{display:flex;align-items:flex-start;gap:12px;min-width:0;min-height:110px;padding:18px;border:2px solid var(--line);border-radius:15px;background:var(--panel2);color:var(--text);text-align:left;cursor:pointer;transition:border-color .16s ease,background-color .16s ease}
+.readingModeOption:hover{border-color:var(--accent);background:var(--panel)}
+.readingModeOption.selected{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--panel))}
+.readingModeOption:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.readingModeIcon{flex:0 0 40px;height:40px;display:grid;place-items:center;font-size:1.55rem;border:1px solid var(--line);background:var(--panel);border-radius:11px}
+.readingModeText{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
+.readingModeText strong{font-size:1rem;line-height:1.4}
+.readingModeText small{color:var(--muted);font-size:.87rem;line-height:1.55;font-weight:400}
+.readingModeCheck{opacity:0;color:var(--text);font-weight:900}
+.readingModeOption.selected .readingModeCheck{opacity:1}
+.readingModeStatus{margin:12px 0 0;font-size:.84rem}
+.readingModeStatus:empty{display:none}
+.readerReadingPreferences .readingModeHelp{margin-top:16px}
+@media(max-width:650px){.readingModeOptions{grid-template-columns:1fr}.readingModeOption{min-height:82px;padding:14px}.volumeReadingMode{margin:14px 0 23px}.readingModeIcon{flex-basis:35px;height:35px;font-size:1.35rem}}
+@media(prefers-reduced-motion:reduce){.readingModeOption{transition:none}}
