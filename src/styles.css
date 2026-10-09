@@ -1947,3 +1947,20 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .followNovelButton:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
 .libraryNewChapters{display:inline-flex;align-items:center;border-radius:99px;padding:5px 8px;font-size:.75rem;font-weight:800;line-height:1.2;background:#92252b;color:#fff;border:1px solid #92252b}
 @media(forced-colors:active){.libraryNewChapters,.followNovelButton.following{border:2px solid Highlight}}
+
+/* Fase 2: rankings y valoraciones por lectores */
+.ratingPanel{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:17px;padding:17px 20px;margin:18px 0;border-radius:15px;background:var(--panel);border:1px solid var(--line)}
+.ratingPanel strong{font-size:.95rem}.ratingPanel p{margin:6px 0 0;color:var(--muted);font-size:.83rem}
+.ratingVoting{display:flex;flex-direction:column;gap:5px}.ratingVoting>span{color:var(--muted);font-size:.78rem}
+.ratingVoting [role=group]{display:flex;gap:4px}
+.ratingStar{width:43px;height:44px;border:1px solid var(--line);background:var(--panel2);border-radius:8px;color:var(--muted);font-size:1.3rem;cursor:pointer}
+.ratingStar.selected{color:#f3b837}.ratingStar:disabled{opacity:.5;cursor:not-allowed}.ratingStar:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.rankingsPage{padding-bottom:52px}.rankingsHeader{padding:28px 0 15px}.rankingsHeader h1{font-size:clamp(1.9rem,4vw,2.65rem);margin:9px 0}.rankingsHeader p{color:var(--muted);line-height:1.6}
+.rankingTabs{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:20px}.rankingTabs .btn{min-height:44px}
+.rankingList{display:flex;flex-direction:column;gap:12px}.rankingItem{display:flex;gap:16px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:15px;padding:12px}
+.rankingPlace{font-weight:800;font-size:1.3rem;min-width:27px;text-align:center;color:var(--accent)}
+.rankingCover{width:58px;height:82px;flex:none;border-radius:7px;overflow:hidden;background:var(--panel2)}
+.rankingCover img{width:100%;height:100%;object-fit:cover}.rankingCover .catalogCoverFallback{font-size:.65rem}
+.rankingInfo{flex:1;min-width:0}.rankingInfo h2{font-size:1rem;overflow-wrap:anywhere;margin:0 0 6px}.rankingInfo p{margin:0 0 6px;color:var(--muted);font-size:.82rem}.rankingInfo span{font-size:.82rem;font-weight:700}
+@media(max-width:540px){.rankingItem{flex-wrap:wrap;gap:10px}.rankingItem>.btn{width:100%;justify-content:center}.ratingPanel{flex-direction:column;align-items:flex-start}}
+@media(forced-colors:active){.ratingStar.selected{border:2px solid Highlight}}
