@@ -45,6 +45,7 @@ for(const theme of themes){
     await page.evaluate(()=>window.__NLOBI_QA__.setState({
      user:{id:'phase4-reader',email:'qa@example.test'},profile:{id:'phase4-reader',display_name:'QA Lector'},notes:[],admin:true
     }));
+    await page.waitForFunction(expected=>Math.abs(parseFloat(getComputedStyle(document.documentElement).fontSize)-expected)<.6,16*scale/100,{timeout:3500});
     for(const viewport of viewports){
      await page.setViewportSize({width:viewport.width,height:viewport.height});
      await page.evaluate(()=>window.scrollTo(0,0));
@@ -76,7 +77,7 @@ for(const theme of themes){
        const colors=el=>{if(!el)return null;const c=getComputedStyle(el);return {fg:c.color,bg:c.backgroundColor}};
        return {dialog:rect(panel),toggle:rect(toggle),active:rect(active),close:rect(close),
         open:menu.open,expanded:toggle.getAttribute('aria-expanded'),
-        locked:document.body.style.position==='fixed',backdropVisible:getComputedStyle(document.querySelector('.mobileNavBackdrop')).display!=='none',
+        locked:document.documentElement.classList.contains('mobileNavOpen')&&getComputedStyle(document.documentElement).overflowY==='hidden',backdropVisible:getComputedStyle(document.querySelector('.mobileNavBackdrop')).display!=='none',
         activeColors:colors(active),toggleColors:colors(toggle),actionColors:colors(action),action:rect(action),
         theme:document.documentElement.dataset.siteTheme,
         navLinks:[...panel.querySelectorAll('#nlobiMobileMenu .navLink')].filter(el=>el.getClientRects().length).length
@@ -100,7 +101,7 @@ for(const theme of themes){
       closedAgain=await page.evaluate(()=>({
        open:document.querySelector('.mobileNav').open,
        expanded:document.querySelector('.mobileNav>summary').getAttribute('aria-expanded'),
-       lock:document.body.style.position==='fixed',
+       lock:document.documentElement.classList.contains('mobileNavOpen')||getComputedStyle(document.documentElement).overflowY==='hidden',
        focused:document.activeElement===document.querySelector('.mobileNav>summary')
       }));
       if(closedAgain.open||closedAgain.expanded!=='false'||closedAgain.lock||!closedAgain.focused)failures.push({...key,state:'dismissed',error:'Escape failed to restore menu state',closedAgain});
