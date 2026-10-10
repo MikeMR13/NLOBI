@@ -2669,8 +2669,8 @@ body:has(.readerExperience.readerFocused) .top{display:none!important}
  .mobileNav .quickSearchForm,.mobileNav .accountDropdownPanel{position:static;box-shadow:none;width:100%;margin:7px 0 0}
  .mobileNav #installPwaMobile{display:flex;align-items:center;justify-content:flex-start;width:100%;min-height:44px;padding:9px 12px;background:transparent;color:var(--text);border:1px dashed var(--line);border-radius:11px;font-size:.88rem;font-weight:600}
  html.mobileNavOpen{overflow:hidden;overscroll-behavior:none}
- html.mobileNavOpen .top{transform:none!important}
- body.mobileNavOpen{overflow:hidden;touch-action:none;overscroll-behavior:none}
+ html.mobileNavOpen .top{transform:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ body.mobileNavOpen{overflow:hidden;overscroll-behavior:none}
 }
 @media(max-width:460px){
  .top .brand .brandFull{display:none}
