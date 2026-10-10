@@ -458,6 +458,10 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   const zoom=await page.locator('#readerLightboxImage').evaluate(el=>el.style.width);
   await page.keyboard.press('Escape');
   const dialogClosed=await page.locator('#readerIllustrationDialog').evaluate(el=>!el.open);
+  // The floating dock intentionally auto-hides while scrolling down; a small upward
+  // gesture reveals it, matching the real reader interaction before pressing Ajustes.
+  await page.mouse.wheel(0,-180);
+  await page.waitForTimeout(330);
   const before=await page.evaluate(()=>window.scrollY);
   await page.locator('#readerFloatSettings').click();
   const setting=await page.evaluate(()=>({open:document.querySelector('#readerSettings')?.open,floating:document.querySelector('#readerSettings')?.dataset.floatingOpen,scroll:window.scrollY}));
