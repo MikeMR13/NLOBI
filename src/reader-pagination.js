@@ -69,14 +69,17 @@ export function createReaderPagination({state,flow,onNext,updateProgress}){
   paper.addEventListener('scroll',()=>{if(frame)return;frame=requestAnimationFrame(()=>{frame=0;refresh();updateProgress()})},{passive:true,signal});
   paper.addEventListener('touchstart',event=>{
    if(S().readerPrefs.swipe==='off'||event.touches.length!==1)return;
-   touchStart={x:event.touches[0].clientX,y:event.touches[0].clientY};
+   touchStart={x:event.touches[0].clientX,y:event.touches[0].clientY,page:index()};
   },{passive:true,signal});
   paper.addEventListener('touchend',event=>{
    if(!touchStart||S().readerPrefs.swipe==='off')return;
    const x=event.changedTouches[0]?.clientX,y=event.changedTouches[0]?.clientY;
-   const dx=x-touchStart.x,dy=y-touchStart.y;touchStart=null;
+   const dx=x-touchStart.x,dy=y-touchStart.y,oldPage=touchStart.page;touchStart=null;
    if(Math.abs(dx)<65||Math.abs(dx)<Math.abs(dy)*1.4||!document.getSelection()?.isCollapsed)return;
-   move(dx<0?1:-1);
+   const target=oldPage+(dx<0?1:-1),last=count()-1;
+   if(target>last){const next=nextChapter();if(next)onNext(next.id,flow.active()?.translation_id);return}
+   paper.scrollTo({left:Math.max(0,Math.min(paper.scrollWidth-paper.clientWidth,Math.max(0,target)*stride())),behavior:reduced()?'instant':'smooth'});
+   requestAnimationFrame(()=>{refresh();updateProgress()});
   },{passive:true,signal});
   document.addEventListener('keydown',event=>{
    if(!active()||event.defaultPrevented||event.repeat||event.shiftKey||event.ctrlKey||event.metaKey||event.altKey)return;
@@ -93,6 +96,8 @@ export function createReaderPagination({state,flow,onNext,updateProgress}){
    // Observe viewport container, not scrollWidth changes induced by new columns.
    layoutObserver.observe(root.querySelector('.readerShell')||root);
   }
+  paper.querySelectorAll('img').forEach(img=>{if(!img.complete)img.addEventListener('load',refresh,{signal,once:true})});
+  Promise.resolve(document.fonts?.ready).then(()=>{if(root?.isConnected)refresh()}).catch(()=>{});
   requestAnimationFrame(refresh);
  }
  return {active,bind,unbind,refresh,position,restore,move};
