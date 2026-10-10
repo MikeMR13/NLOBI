@@ -1263,7 +1263,7 @@ function readerScrollPercentSingle(){
 function readerActiveChapter(){
  const st=S.readerContinuous;
  if(!st)return {id:S.readerSection?.id,percent:readerScrollPercentSingle()};
- const rows=[...document.querySelectorAll('.readerContinuousChapter')],threshold=window.innerHeight*.35;
+ const rows=[...document.querySelectorAll('.readerContinuousChapter')],nearEnd=document.documentElement.scrollHeight-window.scrollY-window.innerHeight<Math.max(100,window.innerHeight*.25),threshold=window.innerHeight*(nearEnd?0.72:0.35);
  if(!rows.length)return{id:S.readerSection?.id,percent:0};
  let active=rows[0];for(const row of rows){if(row.getBoundingClientRect().top<=threshold)active=row;else break}
  const r=active.getBoundingClientRect(),distance=Math.max(1,r.height-window.innerHeight*.45);
