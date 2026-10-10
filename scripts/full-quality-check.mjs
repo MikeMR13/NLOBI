@@ -407,7 +407,7 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('nlobi_reader_settings_guest')||'{}'));
   await page.evaluate(state=>window.__NLOBI_QA__.setState(state),{user:null,readerSection:{...section1,translation_id:'project-1',novel_title:'Obra QA',volume_number:1,navigation:[{...section1,volume_number:1},{...section2,volume_number:1}]},view:'reader:section-1'});
   const continuous=await page.locator('#readerContinuousChapters').count();
-  if(await page.locator('#readerContinuousMore:visible').count())await page.locator('#readerContinuousMore').scrollIntoViewIfNeeded();
+  await page.evaluate(()=>{const sentinel=document.getElementById('readerContinuousMore');if(sentinel&&!sentinel.hidden)sentinel.scrollIntoView({block:'end'});});
   await page.waitForSelector('[data-reader-chapter-id="section-2"]',{timeout:12000});
   await page.evaluate(()=>{document.querySelector('[data-reader-chapter-id="section-2"]')?.scrollIntoView({block:'start'});window.dispatchEvent(new Event('scroll'));});
   await page.waitForFunction(()=>JSON.parse(localStorage.getItem('nlobi_read_sections_guest')||'[]').includes('section-1'),undefined,{timeout:5000});
