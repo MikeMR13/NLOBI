@@ -44,6 +44,8 @@ jobs:
         run: node scripts/axe-check.mjs
       - name: Visual layout audit
         run: node scripts/layout-check.mjs
+      - name: Site appearance contrast audit (six palettes)
+        run: node scripts/appearance-contrast-check.mjs
       - name: Mobile interaction audit (Chromium + WebKit)
         run: node scripts/mobile-interactions-check.mjs
       - name: Explore visual and interaction audit
