@@ -40,10 +40,10 @@ for(const view of cases){
    if(!await page.locator('.mobileNavBackdrop').isVisible())throw Error('Backdrop invisible');
    if(await toggle.getAttribute('aria-expanded')!=='true')throw Error('aria-expanded is not true');
    const locked=await page.evaluate(()=>({position:document.body.style.position,overflow:document.documentElement.scrollWidth-innerWidth,activeInPanel:document.querySelector('.mobileNavPanel').contains(document.activeElement)}));
-   if(locked.position!=='fixed'||!locked.activeInPanel||locked.overflow>2)throw Error('Missing body lock, focus placement or horizontal overflow '+JSON.stringify(locked));
+   if(!await page.evaluate(()=>document.documentElement.classList.contains('mobileNavOpen'))||!locked.activeInPanel||locked.overflow>2)throw Error('Missing body lock, focus placement or horizontal overflow '+JSON.stringify(locked));
    await page.keyboard.press('Escape');
    await page.waitForFunction(()=>!document.querySelector('.mobileNav').open);
-   if(await page.evaluate(()=>document.body.style.position==='fixed'))throw Error('Body lock retained after Escape');
+   if(await page.evaluate(()=>document.documentElement.classList.contains('mobileNavOpen')))throw Error('Body lock retained after Escape');
    if(!await toggle.evaluate(el=>el===document.activeElement))throw Error('Focus not restored after Escape');
    const restored=await page.evaluate(()=>window.scrollY);
    if(Math.abs(restored-savedScroll)>2)throw Error('Scroll position not restored: '+savedScroll+' / '+restored);
@@ -63,7 +63,7 @@ for(const view of cases){
    await account.click();
    await page.locator('#nlobiMobileMenu [data-v="explore"]').click();
    await page.waitForFunction(()=>window.__NLOBI_QA__.getState().view==='explore');
-   if(await page.evaluate(()=>document.body.classList.contains('mobileNavOpen')||document.body.style.position==='fixed'))throw Error('Menu stayed open after navigating');
+   if(await page.evaluate(()=>document.body.classList.contains('mobileNavOpen')||document.documentElement.classList.contains('mobileNavOpen')))throw Error('Menu stayed open after navigating');
    const pref=await page.evaluate(()=>JSON.parse(localStorage.getItem('nlobi_site_appearance')||'{}'));
    if(pref.theme!=='graphite'||pref.mode!=='dark')throw Error('Appearance preferences reset');
    if(view.width===390&&view.scale===135){
