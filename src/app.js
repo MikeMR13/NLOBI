@@ -1436,7 +1436,7 @@ function bindReaderExperience(){
   window.addEventListener('resize',()=>{if(S.view.startsWith('reader:'))updateReaderProgress()},{passive:true});
  }
  bindContinuousReader();
- if(!S.readerContinuous&&S.readerRestore?.volumeId===S.readerSection?.volume_id&&S.readerRestore.sectionId===S.readerSection.id){
+ if(!S.readerContinuous&&S.readerRestore&&S.readerRestore.volumeId===S.readerSection?.volume_id&&S.readerRestore.sectionId===S.readerSection.id){
   const restore=S.readerRestore;S.readerRestore=null;requestAnimationFrame(()=>readerGoToPercent(restore.percent));
  }
  requestAnimationFrame(updateReaderProgress);
