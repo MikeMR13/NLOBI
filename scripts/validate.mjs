@@ -402,3 +402,32 @@ for (const marker of [
  const view=app.slice(begin,end);
  if(!view.includes('data-finish-next=')||!view.includes('id="markReaderDone"')||!view.includes('id="readerFontFamily"')||!view.includes('readerAdvanced'))throw new Error('Reader phase 6: no se conservaron funciones anteriores');
 }
+
+
+// Reader phases 7–9: configurable global and per-volume modes, recovery, and regressions.
+(function validateAdvancedReader(){
+ const start=app.indexOf('const READER_DEFAULTS='),stop=app.indexOf('let readerScrollFrame=0',start);
+ if(start<0||stop<start)throw new Error('Lector 7–9: faltan preferencias y estado.');
+ for(const marker of ['data-preference-tab="reading"','data-preference-panel="reading"','readerVolumePreferencesPanel(chosen)','data-reader-continue=','id="readerContinuousChapters"','function loadNextContinuousChapter(){','function persistReaderPosition(','function recordContinuousBoundary(','function resumeReaderVolume(','nlobi_reader_settings_','async function saveReaderProgress(percent=100,announce=true,sectionOverride=null)']){
+  if(!app.includes(marker))throw new Error('Lector 7–9: falta '+marker);
+ }
+ for(const marker of ['.readerVolumeOptions{','.readerScopedFields{','.readerContinuousChapter{','#readerContinuousMore{']){
+  if(!css.includes(marker))throw new Error('Lector 7–9: falta estilo '+marker);
+ }
+ const storage=new Map(),localStorage={getItem:k=>storage.has(k)?storage.get(k):null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)},S={user:null,readerPrefs:{},readerSection:null,token:''},esc=s=>String(s).replace(/[&<>"']/g,'');
+ const sandbox={localStorage,S,window:{},navigator:{onLine:false},render:()=>{},toast:()=>{},jreq:async()=>{},esc};
+ vm.runInNewContext(app.slice(start,stop)+';globalThis.testReader={readReaderSettings,setReaderSetting,getReaderMode,getReaderPreferencesForVolume,clearReaderVolumeSettings,readerSettingsFields,hydrateReaderSettings}',sandbox);
+ const api=sandbox.testReader,A='volume-test-1',B='volume-test-2';
+ const check=(condition,msg)=>{if(!condition)throw new Error('Lector 7–9: '+msg)};
+ check(api.getReaderMode(A)==='chapter','modo inicial inválido');
+ api.setReaderSetting('global','','mode','continuous');check(api.getReaderMode(B)==='continuous','modo global no heredado');
+ api.setReaderSetting('volume',A,'mode','chapter');check(api.getReaderMode(A)==='chapter'&&api.getReaderMode(B)==='continuous','configuración por volumen no aislada');
+ api.setReaderSetting('volume',A,'fontSize',29);check(api.getReaderPreferencesForVolume(A).fontSize===29&&api.getReaderPreferencesForVolume(B).fontSize===18,'fuentes mezcladas entre volúmenes');
+ api.setReaderSetting('volume',A,'theme','dark');check(api.getReaderPreferencesForVolume(A).theme==='dark','tema de volumen perdido');
+ api.clearReaderVolumeSettings(A);check(api.getReaderMode(A)==='continuous'&&api.getReaderPreferencesForVolume(A).theme==='light','restauración de herencia inválida');
+ api.setReaderSetting('volume',A,'mode','chapter');
+ S.user={id:'user-qa',user_metadata:{}};api.hydrateReaderSettings();check(api.getReaderMode(A)==='chapter'&&api.getReaderMode(B)==='chapter','preferencias cruzadas entre usuarios');
+ S.user=null;api.hydrateReaderSettings();check(api.getReaderMode(B)==='continuous','preferencias de invitado perdidas');
+ storage.set('nlobi_reader_settings_guest','{invalid');check(api.getReaderMode(A)==='chapter','JSON inválido bloquea el lector');
+ check(api.readerSettingsFields('global').includes('Lectura continua'),'selector de modo ausente');
+})();
