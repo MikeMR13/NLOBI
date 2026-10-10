@@ -521,6 +521,44 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   await context.close();
  }
 
+
+
+ // Phase 9: per-volume mode overrides and paged navigation on a small screen.
+ {
+  const context=await browser.newContext({viewport:{width:390,height:844},serviceWorkers:'block'});await prepare(context);
+  const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+  await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__);
+  const va='aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',vb='bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',ca='cccccccc-cccc-4ccc-8ccc-cccccccccccc',cb='dddddddd-dddd-4ddd-8ddd-dddddddddddd';
+  const chapterA={...section1,id:ca,volume_id:va,title:'Capítulo de libro',content:[{type:'paragraph',text:'Texto extenso para paginación. '.repeat(900)}],section_number:1,status:'published'};
+  const chapterB={...section2,id:cb,volume_id:vb,title:'Capítulo del segundo volumen',status:'published'};
+  const work={...translation,volumes:[{...translation.volumes[0],id:va,status:'published',sections:[chapterA]},
+   {...translation.volumes[0],id:vb,volume_number:2,status:'published',title:'Volumen dos',sections:[chapterB]}]};
+  await page.evaluate(({work})=>window.__NLOBI_QA__.setState({user:null,view:'detail:project-1',currentDetail:work,detailVolumeId:null,detailVolumeTranslationId:'project-1'}),{work});
+  await page.locator('[data-open-volume="'+va+'"]').click();
+  await page.locator('.volumeReadingMode [data-reading-mode="paged"]').click();
+  await page.locator('.readerVolumeAdvanced>summary').click();
+  await page.locator('[data-reader-scope="volume"][data-reader-scope-key="theme"]').selectOption('sepia');
+  const selectedA=await page.evaluate(()=>({mode:document.querySelector('.volumeReadingMode [data-reading-mode="paged"]')?.getAttribute('aria-pressed'),
+    theme:document.querySelector('[data-reader-scope="volume"][data-reader-scope-key="theme"]')?.value}));
+  await page.locator('[data-volume-gallery]').click();
+  await page.locator('[data-open-volume="'+vb+'"]').click();
+  const selectedB=await page.evaluate(()=>document.querySelector('.volumeReadingMode [data-reading-mode="chapter"]')?.getAttribute('aria-pressed'));
+  await page.evaluate(({ca,va,cb,vb,chapterA,chapterB})=>window.__NLOBI_QA__.setState({
+   view:'reader:'+ca,readerSection:{...chapterA,translation_id:'project-1',novel_title:'Obra de prueba',volume_number:1,navigation:[{id:ca,volume_id:va,volume_number:1,title:'Capítulo de libro'}, {id:cb,volume_id:vb,volume_number:2,title:'Segundo volumen'}]}}),{ca,va,cb,vb,chapterA,chapterB});
+  await page.waitForTimeout(100);
+  const paged=await page.evaluate(()=>({
+   mode:document.querySelector('.readerExperience')?.classList.contains('readerPagedMode'),
+   theme:document.querySelector('.readerExperience')?.classList.contains('readerSurface-sepia'),
+   widths:[document.querySelector('.readerPaper')?.scrollWidth,document.querySelector('.readerPaper')?.clientWidth],
+   count:document.querySelector('#readerPageCount')?.textContent
+  }));
+  await page.locator('#readerPageNext').click();await page.waitForTimeout(180);
+  const moved=await page.locator('.readerPaper').evaluate(x=>x.scrollLeft);
+  if(runtime.length||selectedA.mode!=='true'||selectedA.theme!=='sepia'||selectedB!=='true'||!paged.mode||!paged.theme||!paged.widths[0]||paged.widths[0]<=paged.widths[1]||moved<10)
+   failures.push({scenario:'reader-phase9-volume-presets-and-paged-mobile',runtime,selectedA,selectedB,paged,moved});
+  await context.close();
+ }
+
 await browser.close();
 fs.writeFileSync('quality-results/full-quality-report.json',JSON.stringify({testedAt:new Date().toISOString(),renderedScenarios:report.length,failures,report},null,2));
 console.log('Full quality pass: '+report.length+' rendered scenarios; '+failures.length+' failure(s).');
