@@ -46,6 +46,8 @@ jobs:
         run: node scripts/layout-check.mjs
       - name: Site appearance contrast audit (six palettes)
         run: node scripts/appearance-contrast-check.mjs
+      - name: Visual cohesion phase 3 audit
+        run: node scripts/visual-unification-phase3-check.mjs
       - name: Mobile navigation phase 2 interaction audit
         run: node scripts/mobile-navigation-phase2-check.mjs
       - name: Mobile interaction audit (Chromium + WebKit)
