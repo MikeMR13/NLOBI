@@ -2599,3 +2599,8 @@ body:has(.readerExperience.readerFocused) .top{display:none!important}
 @media(max-width:900px){.readerScopedFields{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.readerScopedFields{grid-template-columns:1fr}.readerVolumeOptionsHeader{flex-wrap:wrap}.readerVolumeOptions{padding:16px}.readerScopedField select{font-size:16px}.readerExperience .readerContinuousChapter+.readerContinuousChapter{margin-top:70px;padding-top:40px}}
 @media(prefers-reduced-motion:reduce){.readerVolumeOptions,.readerScopedField select,.readerExperience #readerContinuousMore{scroll-behavior:auto}}
+
+.readerVolumeAdvanced{margin-top:16px;border-top:1px solid var(--line,rgba(150,150,150,.35));padding-top:12px}
+.readerVolumeAdvanced>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:.92rem;font-weight:750;line-height:1.4}
+.readerVolumeAdvanced .readerScopedFields{margin-top:15px}
+.readerVolumeAdvanced>summary:focus-visible{outline:3px solid #e4ad19;outline-offset:3px;border-radius:5px}
