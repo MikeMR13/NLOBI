@@ -2407,6 +2407,26 @@ html[data-site-theme="forest"] body{--accent:#48ac76;--accent2:#7cda9c;--accentS
 html[data-site-theme="wine"] body{--accent:#d05a7e;--accent2:#f092b0;--accentSoft:#ffe5ed;--accentText:#7e2141}
 html[data-site-theme="ocean"] body{--accent:#329cc0;--accent2:#83d1e4;--accentSoft:#e0f4fb;--accentText:#10546e}
 html[data-site-theme="graphite"] body{--accent:#8c98a4;--accent2:#bbc6d0;--accentSoft:#e8edf1;--accentText:#374552}
+
+/* Visual audit · phase 1: dark mode gets its own readable palette.
+   Theme preference identifiers and light-mode colors are deliberately unchanged. */
+html[data-site-theme="amber"] body.dark{--accent:#ffd400;--accent2:#ffda53;--accentSoft:#2b2500;--accentText:#ffe16b}
+html[data-site-theme="indigo"] body.dark{--accent:#aab8ff;--accent2:#859bfd;--accentSoft:#1d2545;--accentText:#d3dcff}
+html[data-site-theme="forest"] body.dark{--accent:#89d9ad;--accent2:#70c993;--accentSoft:#152e23;--accentText:#b8f1ce}
+html[data-site-theme="wine"] body.dark{--accent:#f59cb9;--accent2:#e97fa2;--accentSoft:#351e2a;--accentText:#ffd0df}
+html[data-site-theme="ocean"] body.dark{--accent:#83d2eb;--accent2:#63bcd9;--accentSoft:#152e3b;--accentText:#b9edff}
+html[data-site-theme="graphite"] body.dark{--accent:#b7c8d8;--accent2:#97adbf;--accentSoft:#242c35;--accentText:#e0ebf4}
+
+/* Keep navigation and secondary actions readable across all appearance choices. */
+body.dark .mobileNav #themeMobile{color:var(--accentText)}
+@media(max-width:720px){
+ body.dark .mobileNav>summary,
+ body.dark .mobileNav .navLink.active{color:var(--accentText)}
+ body.dark .mobileNav .navLink.active{background:var(--accentSoft);border-color:color-mix(in srgb,var(--accent) 58%,var(--line))}
+ .mobileNav nav button,
+ .mobileNav nav .navLink{min-height:44px}
+}
+
 .siteAppearancePanel{padding:22px;min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--panel);display:grid;gap:14px}
 .siteAppearancePanel h3{margin:0;font-size:1.4rem}.siteAppearancePanel h4{margin:17px 0 0;font-size:1rem}.siteAppearancePanel p{margin:0}
 .siteAppearanceOptions{display:flex;gap:10px;flex-wrap:wrap}
