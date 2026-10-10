@@ -1,4 +1,5 @@
-const CACHE='nlobi-shell-v20-22';
+const CACHE='nlobi-shell-v20-23';
+const OFFLINE_MEDIA='nlobi-offline-volume-media-v1';
 const CORE=['/','/index.html','/assets/styles.css','/assets/app.js','/assets/reader-flow.js','/assets/reader-enhancements.js','/assets/reader-annotations.js','/assets/reader-pagination.js','/assets/reader-preferences.js','/runtime-config.js','/manifest.webmanifest','/icon.svg','/icon-192.png','/icon-512.png'];
 const NETWORK_FIRST=new Set(['/index.html','/assets/styles.css','/assets/app.js','/assets/reader-flow.js','/assets/reader-enhancements.js','/assets/reader-annotations.js','/assets/reader-pagination.js','/assets/reader-preferences.js','/runtime-config.js']);
 
@@ -13,7 +14,7 @@ self.addEventListener('install',event=>{
 self.addEventListener('activate',event=>{
   event.waitUntil(
     caches.keys()
-      .then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))
+      .then(keys=>Promise.all(keys.filter(k=>k!==CACHE&&k!==OFFLINE_MEDIA).map(k=>caches.delete(k))))
       .then(()=>self.clients.claim())
   );
 });
@@ -25,7 +26,10 @@ async function networkFirst(req,cacheKey=req){
     if(fresh.ok)await cache.put(cacheKey,fresh.clone());
     return fresh;
   }catch{
-    return (await cache.match(cacheKey)) || Response.error();
+    const stored=await cache.match(cacheKey);
+    if(stored)return stored;
+    if(new URL(req.url).pathname.startsWith('/media/'))return (await (await caches.open(OFFLINE_MEDIA)).match(req)) || Response.error();
+    return Response.error();
   }
 }
 
