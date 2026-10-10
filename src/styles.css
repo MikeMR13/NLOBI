@@ -2516,7 +2516,7 @@ html[data-site-focus="enhanced"] :where(a,button,input,select,textarea,summary,[
 .readerChapterIndex{color:var(--reader-action);letter-spacing:.12em;text-transform:uppercase;font-size:.75rem;font-weight:850}
 .readerReadingActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .readerReadingActions #readerProgressLabel{font-size:.82rem;color:var(--reader-secondary);font-variant-numeric:tabular-nums}
-.readerExperience .readerReadingTools .btn{padding:7px 12px;min-height:36px;font-size:.8rem}
+.readerExperience .readerReadingTools .btn{padding:10px 14px;min-height:44px;font-size:.8rem}
 .readerExperience .readerPaper{max-width:870px;background:transparent!important;color:var(--reader-ink)!important;border:0!important;box-shadow:none!important;border-radius:0;padding:26px clamp(6px,3vw,28px) 50px;margin:0 auto}
 .readerExperience .readerPaper.reader-narrow{max-width:680px}.readerExperience .readerPaper.reader-wide{max-width:1060px}
 .readerExperience .readerMeta{color:var(--reader-secondary);letter-spacing:.025em;font-size:.86rem;margin:0 0 12px;overflow-wrap:anywhere}
