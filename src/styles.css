@@ -2624,3 +2624,62 @@ body:has(.readerExperience.readerFocused) .top{display:none!important}
 .readerVolumeAdvanced>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:.92rem;font-weight:750;line-height:1.4}
 .readerVolumeAdvanced .readerScopedFields{margin-top:15px}
 .readerVolumeAdvanced>summary:focus-visible{outline:3px solid #e4ad19;outline-offset:3px;border-radius:5px}
+
+/* Visual audit · phase 2: responsive navigation */
+.brandCompact{display:none}
+.mobileNavBackdrop{display:none}
+@media(min-width:1101px){
+ .mobileNav{display:none}
+ .themeMobileQuick{display:none}
+ .headerNotificationMobile{display:none}
+}
+@media(max-width:1100px){
+ .top{overflow:visible}
+ .top .bar{display:flex;align-items:center;flex-wrap:nowrap;min-width:0;gap:clamp(6px,1.5vw,12px);padding:10px max(12px,env(safe-area-inset-right))}
+ .top .bar>.nav{display:none}
+ .top .brand{display:flex;align-items:center;flex:1 1 auto;min-width:0;margin-right:auto;gap:8px;font-size:.88rem;letter-spacing:.025em}
+ .top .brand .brandMark{flex:none;width:34px;height:34px}
+ .top .brand .brandFull{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .top .headerNotificationMobile{display:inline-flex;flex:0 0 auto;margin-left:0}
+ .top .headerNotificationMobile>summary{width:44px;height:44px}
+ .top .themeMobileQuick{appearance:none;display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);font-size:1.35rem;cursor:pointer}
+ .mobileNav{display:block!important;position:static!important;flex:0 0 auto;overflow:visible!important;max-height:none!important}
+ .mobileNav>summary{position:relative;z-index:103;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:46px;min-height:44px;padding:9px 12px;white-space:nowrap;list-style:none;cursor:pointer;font-weight:750;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:12px}
+ .mobileNav>summary::-webkit-details-marker{display:none}
+ .mobileNav>summary:focus-visible,.mobileNavClose:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+ .mobileNav[open]>summary{color:var(--accentText);background:var(--accentSoft);border-color:var(--accent)}
+ .mobileNavGlyph{font-size:1.22rem;line-height:1}
+ .mobileNavBackdrop{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);backdrop-filter:blur(3px)}
+ body.mobileNavOpen .mobileNavBackdrop{display:block}
+ .mobileNavPanel{position:absolute;z-index:102;top:calc(100% + 8px);right:max(12px,env(safe-area-inset-right));display:flex;flex-direction:column;width:min(380px,calc(100vw - 24px));max-height:min(580px,calc(100dvh - 100px));padding:14px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--text);box-shadow:0 20px 54px rgba(0,0,0,.36)}
+ .mobileNav:not([open]) .mobileNavPanel{display:none}
+ .mobileNavHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 2px 10px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+ .mobileNavHead strong{font-size:.87rem;letter-spacing:.065em;text-transform:uppercase;color:var(--muted)}
+ .mobileNavClose{flex:0 0 44px;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);font-size:1.15rem;cursor:pointer}
+ .mobileNav nav{display:block!important;position:static!important;left:auto;right:auto;top:auto;z-index:auto;width:100%;max-height:none!important;overflow:visible!important;min-width:0;padding:0!important;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;text-align:left}
+ .mobileNavLinks{display:grid;gap:3px}
+ .mobileNav nav .navLink{display:flex;align-items:center;min-width:0;width:100%;min-height:44px;padding:10px 12px;font-size:.95rem;line-height:1.35;white-space:normal;text-decoration:none;border-radius:11px}
+ .mobileNav nav .navLink.active{font-weight:780;border:1px solid color-mix(in srgb,var(--accent) 55%,var(--line));background:var(--accentSoft);color:var(--accentText)}
+ .mobileNavSecondary{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:10px 0;border-top:1px solid var(--line)}
+ .mobileNavSecondary:empty{display:none}
+ .mobileNavSecondary>.navLink{flex:1 1 auto;justify-content:center;width:auto!important;min-height:44px;background:var(--panel2);border:1px solid var(--line)}
+ .mobileNavUtilities{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+ .mobileNav .quickSearchMenu,.mobileNav .accountDropdown{display:block;width:100%;margin:0}
+ .mobileNav .quickSearchMenu>summary,.mobileNav .accountDropdown>summary{width:100%;min-height:44px;justify-content:flex-start;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:9px 12px;color:var(--text)}
+ .mobileNav .quickSearchForm,.mobileNav .accountDropdownPanel{position:static;box-shadow:none;width:100%;margin:7px 0 0}
+ .mobileNav #installPwaMobile{display:flex;align-items:center;justify-content:flex-start;width:100%;min-height:44px;padding:9px 12px;background:transparent;color:var(--text);border:1px dashed var(--line);border-radius:11px;font-size:.88rem;font-weight:600}
+ html.mobileNavOpen{overflow:hidden;overscroll-behavior:none}
+ html.mobileNavOpen .top{transform:none!important}
+ body.mobileNavOpen{overflow:hidden;touch-action:none;overscroll-behavior:none}
+}
+@media(max-width:460px){
+ .top .brand .brandFull{display:none}
+ .top .brand .brandCompact{display:inline;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:900}
+ .mobileNavMenuLabel{display:none}
+ .mobileNav>summary{width:46px;padding-inline:10px}
+ .mobileNavPanel{width:calc(100vw - 24px);max-height:calc(100dvh - 100px);padding:12px}
+ .mobileNavSecondary{margin-top:8px}
+}
+@media(prefers-reduced-motion:reduce){
+ .mobileNavBackdrop,.mobileNavPanel{animation:none!important;transition:none!important}
+}
