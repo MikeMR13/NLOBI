@@ -1197,6 +1197,7 @@ let readerScrollFrame=0,readerLastPersist=0;
 function updateReaderProgress(){if(S.view.startsWith('reader:')&&S.readerSection){readerFlow.scroll();readerEnhancements.refresh();readerAnnotations.track()}}
 function readerGoToPercent(percent,sectionId=readerFlow.active()?.id){
  const paper=readerFlow.paper(sectionId);if(!paper)return;
+ if(S.readerPrefs.flow==='paged'&&readerPagination.restore({percent})){updateReaderProgress();return}
  const rect=paper.getBoundingClientRect(),start=window.scrollY+rect.top,end=start+rect.height-window.innerHeight*0.65;
  window.scrollTo({top:start+Math.max(0,Math.min(100,percent))/100*Math.max(0,end-start),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
 }
