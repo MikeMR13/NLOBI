@@ -1112,11 +1112,11 @@ function readReaderSettings(){
  const global={...READER_DEFAULTS,...old};
  for(const [k,v] of Object.entries(parsed?.global||{}))if(Object.hasOwn(READER_DEFAULTS,k))global[k]=readerSanitizeSetting(k,v);
  const volumes={};for(const [id,opts] of Object.entries(parsed?.volumes||{})){
-  if(!/^[0-9a-f-]{20,}$/i.test(id)||!opts||typeof opts!=='object')continue;
+  if(!/^[A-Za-z0-9_-]{1,128}$/.test(id)||!opts||typeof opts!=='object')continue;
   const clean={};for(const [k,v] of Object.entries(opts))if(k==='mode'||Object.hasOwn(READER_DEFAULTS,k))clean[k]=readerSanitizeSetting(k,v);
   if(Object.keys(clean).length)volumes[id]=clean;
  }
- const positions={};for(const [id,p] of Object.entries(parsed?.positions||{}))if(/^[0-9a-f-]{20,}$/i.test(id)&&p?.sectionId&&Number.isFinite(Number(p.percent)))positions[id]={sectionId:String(p.sectionId),percent:Math.max(0,Math.min(100,Number(p.percent))),updatedAt:Number(p.updatedAt)||0};
+ const positions={};for(const [id,p] of Object.entries(parsed?.positions||{}))if(/^[A-Za-z0-9_-]{1,128}$/.test(id)&&p?.sectionId&&Number.isFinite(Number(p.percent)))positions[id]={sectionId:String(p.sectionId),percent:Math.max(0,Math.min(100,Number(p.percent))),updatedAt:Number(p.updatedAt)||0};
  return {global,mode:readerSanitizeSetting('mode',parsed?.mode),volumes,positions,updatedAt:Number(parsed?.updatedAt)||0};
 }
 
@@ -1303,7 +1303,7 @@ function updateReaderProgress(){
 function readerGoToPercent(percent,sectionId=null){
  const p=sectionId?document.querySelector('.readerContinuousChapter[data-reader-chapter-id="'+CSS.escape(sectionId)+'"]'):null;
  const paper=p||document.querySelector('.readerExperience .readerPaper');if(!paper)return;
- const r=paper.getBoundingClientRect(),start=window.scrollY+r.top,end=start+r.height-window.innerHeight*.65;
+ const r=paper.getBoundingClientRect(),start=window.scrollY+r.top-(p?window.innerHeight*.35:0),end=start+r.height-window.innerHeight*(p?.45:.65);
  window.scrollTo({top:start+Math.max(0,Math.min(100,percent))/100*Math.max(0,end-start),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
 }
 
@@ -2115,8 +2115,8 @@ function nonRegressingPercent(candidate){
 function readSectionIds(){let local=[];try{local=JSON.parse(localStorage.getItem('nlobi_read_sections_'+(S.user?.id||'guest'))||'[]')}catch{}return new Set([...local,...(S.readSections||[])])}
 function markSectionCompletedLocal(id){if(!id)return;const ids=readSectionIds();ids.add(id);S.readSections=[...ids];try{localStorage.setItem('nlobi_read_sections_'+(S.user?.id||'guest'),JSON.stringify([...ids].slice(-2500)))}catch{}}
 async function recordSectionCompleted(id){if(!id)return;markSectionCompletedLocal(id);if(S.user&&navigator.onLine){try{await jreq('/rest/v1/read_sections?on_conflict=user_id,section_id',{method:'POST',headers:{Prefer:'resolution=ignore-duplicates,return=minimal'},body:JSON.stringify({user_id:S.user.id,section_id:id})})}catch(e){console.warn('El estado leído se conservará localmente hasta sincronizar',e)}}}
-async function finishReaderAndNavigate(nextId,translationId){if(S.readerTransitionBusy)return;S.readerTransitionBusy=true;try{await recordSectionCompleted(S.readerContinuous?.activeId||S.readerSection?.id);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(true)),false);if(nextId)await openReader(nextId,translationId);else await openDetail(translationId)}finally{S.readerTransitionBusy=false}}
-async function markCurrentSectionRead(){await recordSectionCompleted(S.readerContinuous?.activeId||S.readerSection?.id);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(true)),true)}
+async function finishReaderAndNavigate(nextId,translationId){if(S.readerTransitionBusy)return;S.readerTransitionBusy=true;try{await recordSectionCompleted(S.readerContinuous?.activeId||S.readerSection?.id);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(true)),false,S.readerContinuous?.activeId||null);if(nextId)await openReader(nextId,translationId);else await openDetail(translationId)}finally{S.readerTransitionBusy=false}}
+async function markCurrentSectionRead(){await recordSectionCompleted(S.readerContinuous?.activeId||S.readerSection?.id);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(true)),true,S.readerContinuous?.activeId||null)}
 function chapterCacheKey(id){return `nlobi_chapter_${id}`}
 function cacheReaderChapter(r){try{localStorage.setItem(chapterCacheKey(r.id),JSON.stringify({...r,cached_at:new Date().toISOString()}));const idx=JSON.parse(localStorage.getItem('nlobi_cached_chapters')||'[]').filter(x=>x.id!==r.id);idx.unshift({id:r.id,title:r.title||'Capítulo',novel_title:r.novel_title||'',cached_at:new Date().toISOString()});localStorage.setItem('nlobi_cached_chapters',JSON.stringify(idx.slice(0,30)))}catch(e){console.warn('No se pudo guardar capítulo offline',e)}}
 function readCachedChapter(id){try{return JSON.parse(localStorage.getItem(chapterCacheKey(id))||'null')}catch{return null}}
