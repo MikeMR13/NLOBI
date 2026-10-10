@@ -294,7 +294,7 @@ function readerScopeControls(scope='global',volumeId=null){
  const selectedVolume=forVolume?S.currentDetail?.volumes?.find(v=>v.id===volumeId):null;
  const embeddedFamilies=[...new Set((selectedVolume?.epub_fonts||[]).map(font=>font.family).filter(Boolean))];
  const embeddedChoices=embeddedFamilies.map((family,index)=>['epub:'+index,'EPUB · '+family]);
- if(/^epub:\\d+$/.test(prefs.fontFamily)&&!embeddedChoices.some(([id])=>id===prefs.fontFamily))embeddedChoices.push([prefs.fontFamily,'Fuente del EPUB guardada']);
+ if(/^epub:\d+$/.test(prefs.fontFamily)&&!embeddedChoices.some(([id])=>id===prefs.fontFamily))embeddedChoices.push([prefs.fontFamily,'Fuente del EPUB guardada']);
  const groups=[
   ['theme','Tema',[['light','Claro'],['sepia','Sepia'],['dark','Oscuro']]],
   ['fontSize','Tamaño del texto',Array.from({length:17},(_,i)=>[i+14,(i+14)+' px'])],
