@@ -376,7 +376,7 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   }));
   await page.locator('#closeReaderSettings').click();
   await page.locator('#readerBookmark').click();
-  const readerBookmark=await page.evaluate(()=>!!localStorage.getItem('nlobi_reader_position_section-1'));
+  const readerBookmark=await page.evaluate(()=>!!localStorage.getItem('nlobi_reader_position_guest_section-1'));
   await page.locator('#markReaderDone').click();
   const read=await page.evaluate(()=>JSON.parse(localStorage.getItem('nlobi_read_sections_guest')||'[]').includes('section-1'));
   await page.evaluate(state=>window.__NLOBI_QA__.setState(state),{user:null,view:'detail:project-1',currentDetail:translation});
@@ -387,6 +387,42 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   await context.close();
  }
 
+
+
+ // Continuous reading and volume-only settings: load next published chapter, save its position and keep global mode unchanged.
+ {
+  const context=await browser.newContext({viewport:{width:1280,height:900},serviceWorkers:'block'});
+  await prepare(context);
+  await context.route(api+'/rest/v1/sections?*',r=>{
+   const url=new URL(r.request().url()),id=url.searchParams.get('id')||'';
+   return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify(id.includes('section-2')?[section2]:id.includes('section-1')?[section1]:[])});
+  });
+  const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
+  await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__);
+  await page.evaluate(state=>window.__NLOBI_QA__.setState(state),{user:null,view:'detail:project-1',currentDetail:translation});
+  await page.locator('[data-open-volume="volume-1"]').click();
+  const volumeControls=await page.locator('[data-reader-scope="volume"]').count();
+  await page.locator('[data-reader-setting="mode"][data-reader-scope="volume"]').selectOption('continuous');
+  await page.locator('[data-reader-setting="theme"][data-reader-scope="volume"]').selectOption('sepia');
+  const saved=await page.evaluate(()=>JSON.parse(localStorage.getItem('nlobi_reader_settings_guest')||'{}'));
+  await page.evaluate(state=>window.__NLOBI_QA__.setState(state),{user:null,readerSection:{...section1,translation_id:'project-1',novel_title:'Obra QA',volume_number:1,navigation:[{...section1,volume_number:1},{...section2,volume_number:1}]},view:'reader:section-1'});
+  const continuous=await page.locator('#readerContinuousChapters').count();
+  await page.locator('#readerContinuousMore').scrollIntoViewIfNeeded();
+  await page.waitForSelector('[data-reader-chapter-id="section-2"]',{timeout:12000});
+  await page.evaluate(()=>{document.querySelector('[data-reader-chapter-id="section-2"]')?.scrollIntoView({block:'start'});window.dispatchEvent(new Event('scroll'));});
+  await page.waitForFunction(()=>JSON.parse(localStorage.getItem('nlobi_read_sections_guest')||'[]').includes('section-1'),{timeout:5000});
+  await page.evaluate(()=>document.getElementById('readerBookmark')?.click());
+  const active=await page.evaluate(()=>({
+   chapter:window.__NLOBI_QA__.getState().readerContinuous?.activeId,
+   read:JSON.parse(localStorage.getItem('nlobi_read_sections_guest')||'[]').includes('section-1'),
+   position:JSON.parse(localStorage.getItem('nlobi_reader_settings_guest')||'{}').positions?.['volume-1']?.sectionId,
+   count:document.querySelectorAll('.readerContinuousChapter').length,
+   chapter2:document.body.textContent.includes('Segundo capítulo.')
+  }));
+  if(runtime.length||volumeControls<6||saved.mode!=='chapter'||saved.volumes?.['volume-1']?.mode!=='continuous'||saved.volumes?.['volume-1']?.theme!=='sepia'||!continuous||!active.read||active.chapter!=='section-2'||active.position!=='section-2'||active.count!==2||!active.chapter2)
+   failures.push({scenario:'reader-continuous-per-volume-position-and-completion',runtime,volumeControls,saved,continuous,active});
+  await context.close();
+ }
 
  // The work page shows volume covers first, then chapters after selecting a volume.
  {
