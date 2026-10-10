@@ -59,13 +59,13 @@ for (const palette of paletteNames) {
           profile: { id: 'qa-theme-user', display_name: 'QA' },
           notes: [],
         }));
-        if (viewport.width <= 720) await page.locator('.mobileNav > summary').click();
+        if (viewport.width <= 1100) await page.locator('.mobileNav > summary').click();
         const state = await page.evaluate(() => {
-          const selectors = innerWidth <= 720
+          const selectors = innerWidth <= 1100
             ? {
                 'Menú móvil': '.mobileNav > summary',
                 'Sección activa': '#nlobiMobileMenu .navLink.active',
-                'Tema en menú': '#themeMobile',
+                'Cerrar menú': '.mobileNavClose',
                 'Instalación PWA': '#installPwaMobile',
                 'Tema rápido': '#themeMobileQuick',
               }
