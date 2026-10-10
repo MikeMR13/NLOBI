@@ -2786,3 +2786,9 @@ body:has(.readerExperience.readerFocused) .top{display:none!important}
 @media(prefers-reduced-motion:reduce){
  .readerExperience.readerPagedMode .readerChapterStream .readerPaper{scroll-behavior:auto}
 }
+
+/* Phase 9: the volume's primary read and offline actions must never clip on mobile. */
+.volumeReadingModeAction{gap:10px;flex-wrap:wrap;align-items:stretch}
+.volumeReadingModeAction .btn{min-width:0;max-width:100%}
+#volumeOfflineStatus{margin:8px 0 0;font-size:.82rem}
+@media(max-width:650px){.volumeReadingModeAction{flex-direction:column}.volumeReadingModeAction .btn{width:100%}}
