@@ -48,6 +48,8 @@ jobs:
         run: node scripts/appearance-contrast-check.mjs
       - name: Visual cohesion phase 3 audit
         run: node scripts/visual-unification-phase3-check.mjs
+      - name: Appearance visual regression phase 4 matrix
+        run: node scripts/visual-regression-phase4-check.mjs
       - name: Mobile navigation phase 2 interaction audit
         run: node scripts/mobile-navigation-phase2-check.mjs
       - name: Mobile interaction audit (Chromium + WebKit)
@@ -83,6 +85,16 @@ jobs:
           name: full-platform-quality-report
           path: quality-results/
           if-no-files-found: error
+      - name: Upload phase 4 visual regression snapshots
+        if: always()
+        continue-on-error: true
+        uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08
+        with:
+          name: visual-regression-phase4-report
+          path: |
+            visual-results/phase4-appearance-matrix.json
+            visual-results/phase4-snapshots/
+          if-no-files-found: warn
       - name: Upload visual layout report
         if: always()
         continue-on-error: true
