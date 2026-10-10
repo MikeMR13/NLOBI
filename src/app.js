@@ -280,9 +280,11 @@ let headerScrollLast=0;
 window.addEventListener('scroll',()=>{if(siteAppearance.headerMode!=='auto'){document.documentElement.classList.remove('headerScrollHidden');return}const y=window.scrollY;if(y<90||y<headerScrollLast-12)document.documentElement.classList.remove('headerScrollHidden');else if(y>headerScrollLast+8)document.documentElement.classList.add('headerScrollHidden');headerScrollLast=y},{passive:true});
 
 let mobileNavLockedScroll=null;
+let mobileNavOpenedView=null;
 function mobileNavClose(restoreFocus=false){
  const menu=document.querySelector('.mobileNav');
  if(menu)menu.open=false;
+ mobileNavOpenedView=null;
  document.body.classList.remove('mobileNavOpen');
  document.documentElement.classList.remove('mobileNavOpen');
  if(mobileNavLockedScroll!==null){
@@ -304,6 +306,7 @@ function bindMobileNav(){
   summary.setAttribute('aria-expanded',String(open));
   summary.setAttribute('aria-label',open?'Cerrar menú de navegación':'Abrir menú de navegación');
   if(open){
+   mobileNavOpenedView=S.view;
    if(mobileNavLockedScroll===null){
     mobileNavLockedScroll=window.scrollY;
    }
@@ -1616,10 +1619,22 @@ function render(){
   else if(S.view.startsWith('studio:project:'))html=studioProjectView();
   else if(S.view.startsWith('studio:team:'))html=studioTeamView();
   else if(S.view.startsWith('studio:media:'))html=studioMediaView();
-  if(mobileNavLockedScroll!==null)mobileNavClose(false);
+  const preserveMobileNav=mobileNavLockedScroll!==null&&mobileNavOpenedView===S.view&&
+   window.innerWidth<=1100&&!!app.querySelector('.mobileNav[open]');
+  if(mobileNavLockedScroll!==null&&!preserveMobileNav)mobileNavClose(false);
   app.innerHTML=html;
+  if(preserveMobileNav){
+   const replacement=app.querySelector('.mobileNav');
+   if(replacement){
+    replacement.open=true;
+    const toggle=replacement.querySelector(':scope > summary');
+    toggle?.setAttribute('aria-expanded','true');
+    toggle?.setAttribute('aria-label','Cerrar menú de navegación');
+   }
+  }
   enhanceAccessibility();
   bind();
+  if(preserveMobileNav)app.querySelector('.mobileNavClose')?.focus({preventScroll:true});
   applyStudioActionAccess();
   setNetworkBadge();
  }catch(e){
