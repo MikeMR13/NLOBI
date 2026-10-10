@@ -41,7 +41,7 @@ for(const theme of themes){
    page.on('pageerror',error=>errors.push(error.message));
    try{
     await page.goto('http://127.0.0.1:4173/#home',{waitUntil:'domcontentloaded',timeout:12000});
-    await page.waitForFunction(()=>!!window.__NLOBI_QA__,null,{timeout:12000});
+    await page.waitForFunction(()=>!!window.__NLOBI_QA__&&!window.__NLOBI_QA__.getState().catalogLoading,null,{timeout:12000});
     await page.evaluate(()=>window.__NLOBI_QA__.setState({
      user:{id:'phase4-reader',email:'qa@example.test'},profile:{id:'phase4-reader',display_name:'QA Lector'},notes:[],admin:true
     }));
