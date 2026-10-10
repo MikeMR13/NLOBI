@@ -278,20 +278,83 @@ function bindSiteAppearance(){
 applySiteAppearance();
 let headerScrollLast=0;
 window.addEventListener('scroll',()=>{if(siteAppearance.headerMode!=='auto'){document.documentElement.classList.remove('headerScrollHidden');return}const y=window.scrollY;if(y<90||y<headerScrollLast-12)document.documentElement.classList.remove('headerScrollHidden');else if(y>headerScrollLast+8)document.documentElement.classList.add('headerScrollHidden');headerScrollLast=y},{passive:true});
+
+let mobileNavLockedScroll=null;
+let mobileNavOpenedView=null;
+function mobileNavClose(restoreFocus=false){
+ const menu=document.querySelector('.mobileNav');
+ if(menu)menu.open=false;
+ mobileNavOpenedView=null;
+ document.body.classList.remove('mobileNavOpen');
+ document.documentElement.classList.remove('mobileNavOpen');
+ if(mobileNavLockedScroll!==null){
+  const at=mobileNavLockedScroll;mobileNavLockedScroll=null;
+  window.scrollTo({top:at,behavior:'instant'});
+ }
+ const toggle=menu?.querySelector(':scope > summary');
+ if(toggle){toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Abrir menú de navegación')}
+ if(restoreFocus)toggle?.focus();
+}
+function bindMobileNav(){
+ const menu=document.querySelector('.mobileNav');
+ if(!menu)return;
+ const summary=menu.querySelector(':scope > summary');
+ const panel=menu.querySelector('.mobileNavPanel');
+ const sync=()=>{
+  if(!menu.isConnected)return;
+  const open=menu.open;
+  summary.setAttribute('aria-expanded',String(open));
+  summary.setAttribute('aria-label',open?'Cerrar menú de navegación':'Abrir menú de navegación');
+  if(open){
+   mobileNavOpenedView=S.view;
+   if(mobileNavLockedScroll===null){
+    mobileNavLockedScroll=window.scrollY;
+   }
+   document.body.classList.add('mobileNavOpen');
+   document.documentElement.classList.add('mobileNavOpen');
+   panel.querySelector('.mobileNavClose')?.focus({preventScroll:true});
+  }else if(mobileNavLockedScroll!==null)mobileNavClose(false);
+ };
+ menu.addEventListener('toggle',sync);
+ menu.querySelector('.mobileNavClose')?.addEventListener('click',()=>mobileNavClose(true));
+ document.querySelector('.mobileNavBackdrop')?.addEventListener('click',()=>mobileNavClose(true));
+ if(!window.__nlobiMobileNavEvents){
+  window.__nlobiMobileNavEvents=true;
+  document.addEventListener('pointerdown',event=>{
+   const current=document.querySelector('.mobileNav');
+   if(!current?.open||current.contains(event.target)||event.target.closest?.('.mobileNavBackdrop'))return;
+   mobileNavClose(false);
+  });
+  document.addEventListener('keydown',event=>{
+   const current=document.querySelector('.mobileNav');
+   if(!current?.open)return;
+   if(event.key==='Escape'){event.preventDefault();mobileNavClose(true);return}
+   if(event.key!=='Tab')return;
+   const dialog=current.querySelector('.mobileNavPanel');
+   const focusable=[...dialog.querySelectorAll('a[href],button:not([disabled]),summary,input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')].filter(el=>el.getClientRects().length&&!el.closest('[hidden]'));
+   if(!focusable.length){event.preventDefault();dialog.focus();return}
+   const first=focusable[0],last=focusable[focusable.length-1];
+   if(event.shiftKey&&(document.activeElement===first||!dialog.contains(document.activeElement))){event.preventDefault();last.focus()}
+   else if(!event.shiftKey&&(document.activeElement===last||!dialog.contains(document.activeElement))){event.preventDefault();first.focus()}
+  });
+  document.addEventListener('touchmove',event=>{if(document.querySelector('.mobileNav')?.open&&!event.target.closest?.('.mobileNavPanel'))event.preventDefault()},{passive:false});
+  window.addEventListener('resize',()=>{if(window.innerWidth>1100&&document.querySelector('.mobileNav')?.open)mobileNavClose(false)});
+ }
+}
 function nav(){
  const unread=S.notes.filter(x=>!x.read_at).length;
  const isActive=v=>S.view===v||S.view.startsWith(v+':');
  const link=(v,label)=>`<a class="navLink ${isActive(v)?'active':''}" href="#${v}" data-v="${v}"${isActive(v)?' aria-current="page"':''}>${label}</a>`;
- return `<header class="top"><div class="bar"><a class="brand" href="#home" data-v="home" aria-label="El Obi del Lector, ir al inicio"><span class="brandMark" aria-hidden="true">オ</span><span>El Obi del Lector</span></a><nav class="nav" aria-label="Navegación principal">
+ return `<header class="top"><div class="bar"><a class="brand" href="#home" data-v="home" aria-label="El Obi del Lector, ir al inicio"><span class="brandMark" aria-hidden="true">オ</span><span class="brandFull">El Obi del Lector</span><span class="brandCompact" aria-hidden="true">El Obi</span></a><nav class="nav" aria-label="Navegación principal">
  ${siteAppearance.navOrder.filter(v=>!siteAppearance.hiddenNav.includes(v)).map(v=>link(v,SITE_NAV_LABELS[v])).join('')}${siteAppearance.hiddenNav.length?`<details class="navMore"><summary>Más ▾</summary><div class="navMorePanel">${siteAppearance.navOrder.filter(v=>siteAppearance.hiddenNav.includes(v)).map(v=>link(v,SITE_NAV_LABELS[v])).join('')}</div></details>`:''}
  ${S.user?link('beta','Beta'):''}
  ${S.admin?link('admin','Admin'):''}
- ${quickSearchMenu()}${notificationBell()}${accountDropdown()}${S.pwaInstallReady?'<button id="installPwa" class="installHint" type="button">＋ Instalar</button>':''}<button id="theme" type="button" aria-label="${document.body.classList.contains('dark')?'Cambiar a tema claro':'Cambiar a tema oscuro'}" aria-pressed="${document.body.classList.contains('dark')?'true':'false'}" title="Cambiar tema">◐</button></nav>${notificationBell(true)}<button id="themeMobileQuick" class="themeMobileQuick" type="button" aria-label="${document.body.classList.contains('dark')?'Activar modo claro':'Activar modo oscuro'}" title="${document.body.classList.contains('dark')?'Modo claro':'Modo oscuro'}">${document.body.classList.contains('dark')?'☀':'☾'}</button><details class="mobileNav"><summary aria-label="Abrir menú de navegación" aria-controls="nlobiMobileMenu">☰ Menú</summary><nav id="nlobiMobileMenu" aria-label="Navegación móvil">
+ ${quickSearchMenu()}${notificationBell()}${accountDropdown()}${S.pwaInstallReady?'<button id="installPwa" class="installHint" type="button">＋ Instalar</button>':''}<button id="theme" type="button" aria-label="${document.body.classList.contains('dark')?'Cambiar a tema claro':'Cambiar a tema oscuro'}" aria-pressed="${document.body.classList.contains('dark')?'true':'false'}" title="Cambiar tema">◐</button></nav>${notificationBell(true)}<button id="themeMobileQuick" class="themeMobileQuick" type="button" aria-label="${document.body.classList.contains('dark')?'Activar modo claro':'Activar modo oscuro'}" title="${document.body.classList.contains('dark')?'Modo claro':'Modo oscuro'}">${document.body.classList.contains('dark')?'☀':'☾'}</button><div class="mobileNavBackdrop" aria-hidden="true"></div><details class="mobileNav"><summary aria-label="Abrir menú de navegación" aria-controls="nlobiMobileMenu" aria-expanded="false"><span class="mobileNavGlyph" aria-hidden="true">☰</span><span class="mobileNavMenuLabel">Menú</span></summary><div class="mobileNavPanel" role="dialog" aria-modal="true" aria-labelledby="mobileNavTitle" tabindex="-1"><div class="mobileNavHead"><strong id="mobileNavTitle">Navegación</strong><button class="mobileNavClose" type="button" aria-label="Cerrar menú">✕</button></div><nav id="nlobiMobileMenu" aria-label="Secciones de la plataforma"><div class="mobileNavLinks" role="group" aria-label="Secciones principales">
  ${siteAppearance.navOrder.filter(v=>!siteAppearance.hiddenNav.includes(v)).map(v=>link(v,SITE_NAV_LABELS[v])).join('')}${siteAppearance.hiddenNav.length?`<details class="navMore"><summary>Más ▾</summary><div class="navMorePanel">${siteAppearance.navOrder.filter(v=>siteAppearance.hiddenNav.includes(v)).map(v=>link(v,SITE_NAV_LABELS[v])).join('')}</div></details>`:''}
- ${S.user?link('beta','Beta'):''}
- ${S.admin?link('admin','Admin'):''}
- ${quickSearchMenu(true)}${accountDropdown(true)}${!window.matchMedia('(display-mode: standalone)').matches&&!navigator.standalone?'<button id="installPwaMobile" class="installHint" type="button">＋ Instalar aplicación</button>':''}<button id="themeMobile" type="button" aria-label="Cambiar tema">${document.body.classList.contains('dark')?'☀ Activar modo claro':'☾ Activar modo oscuro'}</button>
- </nav></details></div></header>${!S.online?'<div class="offlinePill" role="status">Sin conexión · modo lectura offline</div>':''}` }
+ </div><div class="mobileNavSecondary" role="group" aria-label="Otras secciones">${S.user?link('beta','Beta'):''}
+ ${S.admin?link('admin','Admin'):''}</div>
+ <div class="mobileNavUtilities" role="group" aria-label="Herramientas y cuenta">${quickSearchMenu(true)}${accountDropdown(true)}${!window.matchMedia('(display-mode: standalone)').matches&&!navigator.standalone?'<button id="installPwaMobile" class="installHint" type="button">＋ Instalar aplicación</button>':''}</div>
+ </nav></div></details></div></header>${!S.online?'<div class="offlinePill" role="status">Sin conexión · modo lectura offline</div>':''}` }
 function status(){return S.err?`<div class="status bad" role="alert"><strong>Hay un problema de conexión.</strong><div>${esc(S.err)}</div><div style="margin-top:8px"><button class="btn" id="retryBackend">Reintentar</button></div></div>`:''}
 function coverMarkup(x,detail=false){
  const img=coverOf(x), t=esc(titleOf(x));
@@ -1556,9 +1619,22 @@ function render(){
   else if(S.view.startsWith('studio:project:'))html=studioProjectView();
   else if(S.view.startsWith('studio:team:'))html=studioTeamView();
   else if(S.view.startsWith('studio:media:'))html=studioMediaView();
+  const preserveMobileNav=mobileNavLockedScroll!==null&&mobileNavOpenedView===S.view&&
+   window.innerWidth<=1100&&!!app.querySelector('.mobileNav[open]');
+  if(mobileNavLockedScroll!==null&&!preserveMobileNav)mobileNavClose(false);
   app.innerHTML=html;
+  if(preserveMobileNav){
+   const replacement=app.querySelector('.mobileNav');
+   if(replacement){
+    replacement.open=true;
+    const toggle=replacement.querySelector(':scope > summary');
+    toggle?.setAttribute('aria-expanded','true');
+    toggle?.setAttribute('aria-label','Cerrar menú de navegación');
+   }
+  }
   enhanceAccessibility();
   bind();
+  if(preserveMobileNav)app.querySelector('.mobileNavClose')?.focus({preventScroll:true});
   applyStudioActionAccess();
   setNetworkBadge();
  }catch(e){
@@ -1569,7 +1645,7 @@ function render(){
 function bindAdminModeration(){const root=document.querySelector('[data-admin-moderation]');if(!root)return;const search=root.querySelector('[data-moderation-search]'),filter=root.querySelector('[data-moderation-filter]'),cards=[...root.querySelectorAll('.adminModerationItem')],count=root.querySelector('[data-moderation-count]'),empty=root.querySelector('[data-moderation-empty]');for(const value of [...new Set(cards.map(c=>c.querySelector('.badge')?.textContent?.trim()).filter(Boolean))].sort()){const opt=document.createElement('option');opt.value=value;opt.textContent=value;filter.append(opt)}const draw=()=>{let visible=0;const q=search.value.trim().toLocaleLowerCase(),state=filter.value;cards.forEach(c=>{const show=(!q||c.textContent.toLocaleLowerCase().includes(q))&&(!state||c.querySelector('.badge')?.textContent?.trim()===state);c.hidden=!show;if(show)visible++});count.textContent='Mostrando '+visible+' de '+cards.length+' registros cargados';empty.hidden=visible!==0};search.addEventListener('input',draw);filter.addEventListener('change',draw);root.querySelector('[data-moderation-clear]')?.addEventListener('click',()=>{search.value='';filter.value='';draw();search.focus()});draw()}
 function bindAdminEditorial(){const root=document.querySelector('[data-editorial]');if(!root)return;const input=root.querySelector('[data-editorial-search]'),select=root.querySelector('[data-editorial-status]'),cards=[...root.querySelectorAll('.adminEditorialCard')],counter=root.querySelector('[data-editorial-count]'),empty=root.querySelector('[data-editorial-empty]');for(const label of [...new Set(cards.map(c=>c.querySelector('.badge')?.textContent?.trim()||'').filter(Boolean))].sort()){const option=document.createElement('option');option.value=label;option.textContent=label;select.append(option)}const update=()=>{const q=input.value.trim().toLocaleLowerCase(),status=select.value;let shown=0;for(const c of cards){const ok=(!q||c.textContent.toLocaleLowerCase().includes(q))&&(!status||c.querySelector('.badge')?.textContent?.trim()===status);c.hidden=!ok;if(ok)shown++}counter.textContent='Mostrando '+shown+' de '+cards.length+' registros cargados';empty.hidden=shown!==0};input.addEventListener('input',update);select.addEventListener('change',update);root.querySelector('[data-editorial-clear]')?.addEventListener('click',()=>{input.value='';select.value='';update();input.focus()});update()}
 function bindAdminDirectory(){const root=document.querySelector('[data-admin-directory]');if(!root)return;const input=root.querySelector('[data-admin-directory-search]'),filter=root.querySelector('[data-admin-directory-filter]'),sort=root.querySelector('[data-admin-directory-sort]'),rows=[...root.querySelectorAll('[data-admin-directory-row]')],count=root.querySelector('[data-admin-directory-count]'),empty=root.querySelector('[data-admin-directory-empty]'),pageLabel=root.querySelector('[data-admin-directory-page]'),prev=root.querySelector('[data-admin-directory-prev]'),next=root.querySelector('[data-admin-directory-next]');let page=0;const draw=()=>{const q=(input?.value||'').trim().toLocaleLowerCase(),kind=filter?.value||'',direction=sort?.value||'asc';const filtered=rows.filter(el=>(!q||el.dataset.search.includes(q))&&(!kind||el.dataset.kind===kind)).sort((a,b)=>direction==='asc'?a.dataset.name.localeCompare(b.dataset.name,'es'):b.dataset.name.localeCompare(a.dataset.name,'es'));const pages=Math.max(1,Math.ceil(filtered.length/12));page=Math.min(page,pages-1);rows.forEach(el=>el.hidden=true);const tbody=root.querySelector('tbody');filtered.forEach(el=>tbody.appendChild(el));filtered.slice(page*12,(page+1)*12).forEach(el=>el.hidden=false);count.textContent='Mostrando '+(filtered.length?Math.min(12,filtered.length-page*12):0)+' de '+filtered.length+' resultados ('+rows.length+' registros cargados)';empty.hidden=filtered.length!==0;pageLabel.textContent='Página '+(page+1)+' de '+pages;prev.disabled=page===0;next.disabled=page>=pages-1};for(const el of [input,filter,sort])if(el)el.addEventListener(el===input?'input':'change',()=>{page=0;draw()});prev.onclick=()=>{page=Math.max(0,page-1);draw()};next.onclick=()=>{page++;draw()};draw()}
-function bind(){if(S.view==='auth:edit'){bindSiteAppearance();bindLibraryCustomization();
+function bind(){bindMobileNav();if(S.view==='auth:edit'){bindSiteAppearance();bindLibraryCustomization();
  const tabs=[...document.querySelectorAll('[data-preference-tab]')],panels=[...document.querySelectorAll('[data-preference-panel]')];
  const select=key=>{S.preferenceTab=key;for(const b of tabs){const selected=b.dataset.preferenceTab===key;b.classList.toggle('active',selected);b.setAttribute('aria-selected',String(selected))}for(const p of panels)p.hidden=p.dataset.preferencePanel!==key};
  for(const b of tabs)b.onclick=()=>select(b.dataset.preferenceTab);

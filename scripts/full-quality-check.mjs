@@ -210,8 +210,8 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
  await page.goto(base+'#access_token=qa-confirm-token&refresh_token=qa-confirm-refresh&expires_in=3600&type=signup',{waitUntil:'networkidle'});
  await page.waitForTimeout(80);
- const authResult=await page.evaluate(()=>({hash:location.hash,token:localStorage.getItem('nlobi_token'),refresh:localStorage.getItem('nlobi_refresh_token'),text:document.body.innerText}));
- if(runtime.length||authResult.hash!=='#home'||authResult.token!=='qa-confirm-token'||authResult.refresh!=='qa-confirm-refresh'||!authResult.text.includes('El Obi del Lector'))failures.push({scenario:'email-confirmation-callback',runtime,authResult,error:'auth-callback-not-consumed'});
+ const authResult=await page.evaluate(()=>({hash:location.hash,token:localStorage.getItem('nlobi_token'),refresh:localStorage.getItem('nlobi_refresh_token'),title:document.title,text:document.body.innerText}));
+ if(runtime.length||authResult.hash!=='#home'||authResult.token!=='qa-confirm-token'||authResult.refresh!=='qa-confirm-refresh'||!authResult.title.includes('El Obi del Lector'))failures.push({scenario:'email-confirmation-callback',runtime,authResult,error:'auth-callback-not-consumed'});
  await context.close();
 }
 

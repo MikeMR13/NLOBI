@@ -2407,6 +2407,26 @@ html[data-site-theme="forest"] body{--accent:#48ac76;--accent2:#7cda9c;--accentS
 html[data-site-theme="wine"] body{--accent:#d05a7e;--accent2:#f092b0;--accentSoft:#ffe5ed;--accentText:#7e2141}
 html[data-site-theme="ocean"] body{--accent:#329cc0;--accent2:#83d1e4;--accentSoft:#e0f4fb;--accentText:#10546e}
 html[data-site-theme="graphite"] body{--accent:#8c98a4;--accent2:#bbc6d0;--accentSoft:#e8edf1;--accentText:#374552}
+
+/* Visual audit · phase 1: dark mode gets its own readable palette.
+   Theme preference identifiers and light-mode colors are deliberately unchanged. */
+html[data-site-theme="amber"] body.dark{--accent:#ffd400;--accent2:#ffda53;--accentSoft:#2b2500;--accentText:#ffe16b}
+html[data-site-theme="indigo"] body.dark{--accent:#aab8ff;--accent2:#859bfd;--accentSoft:#1d2545;--accentText:#d3dcff}
+html[data-site-theme="forest"] body.dark{--accent:#89d9ad;--accent2:#70c993;--accentSoft:#152e23;--accentText:#b8f1ce}
+html[data-site-theme="wine"] body.dark{--accent:#f59cb9;--accent2:#e97fa2;--accentSoft:#351e2a;--accentText:#ffd0df}
+html[data-site-theme="ocean"] body.dark{--accent:#83d2eb;--accent2:#63bcd9;--accentSoft:#152e3b;--accentText:#b9edff}
+html[data-site-theme="graphite"] body.dark{--accent:#b7c8d8;--accent2:#97adbf;--accentSoft:#242c35;--accentText:#e0ebf4}
+
+/* Keep navigation and secondary actions readable across all appearance choices. */
+body.dark .mobileNav #themeMobile{color:var(--accentText)}
+@media(max-width:720px){
+ body.dark .mobileNav>summary,
+ body.dark .mobileNav .navLink.active{color:var(--accentText)}
+ body.dark .mobileNav .navLink.active{background:var(--accentSoft);border-color:color-mix(in srgb,var(--accent) 58%,var(--line))}
+ .mobileNav nav button,
+ .mobileNav nav .navLink{min-height:44px}
+}
+
 .siteAppearancePanel{padding:22px;min-width:0;border:1px solid var(--line);border-radius:18px;background:var(--panel);display:grid;gap:14px}
 .siteAppearancePanel h3{margin:0;font-size:1.4rem}.siteAppearancePanel h4{margin:17px 0 0;font-size:1rem}.siteAppearancePanel p{margin:0}
 .siteAppearanceOptions{display:flex;gap:10px;flex-wrap:wrap}
@@ -2604,3 +2624,206 @@ body:has(.readerExperience.readerFocused) .top{display:none!important}
 .readerVolumeAdvanced>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-size:.92rem;font-weight:750;line-height:1.4}
 .readerVolumeAdvanced .readerScopedFields{margin-top:15px}
 .readerVolumeAdvanced>summary:focus-visible{outline:3px solid #e4ad19;outline-offset:3px;border-radius:5px}
+
+/* Visual audit · phase 2: responsive navigation */
+.brandCompact{display:none}
+.mobileNavBackdrop{display:none}
+@media(min-width:1101px){
+ .mobileNav{display:none}
+ .themeMobileQuick{display:none}
+ .headerNotificationMobile{display:none}
+}
+@media(max-width:1100px){
+ .top{overflow:visible}
+ .top .bar{display:flex;align-items:center;flex-wrap:nowrap;min-width:0;gap:clamp(6px,1.5vw,12px);padding:10px max(12px,env(safe-area-inset-right))}
+ .top .bar>.nav{display:none}
+ .top .brand{display:flex;align-items:center;flex:1 1 auto;min-width:0;margin-right:auto;gap:8px;font-size:.88rem;letter-spacing:.025em}
+ .top .brand .brandMark{flex:none;width:34px;height:34px}
+ .top .brand .brandFull{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .top .headerNotificationMobile{display:inline-flex;flex:0 0 auto;margin-left:0}
+ .top .headerNotificationMobile>summary{width:44px;height:44px}
+ .top .themeMobileQuick{appearance:none;display:grid;place-items:center;flex:0 0 44px;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);font-size:1.35rem;cursor:pointer}
+ .mobileNav{display:block!important;position:static!important;flex:0 0 auto;overflow:visible!important;max-height:none!important}
+ .mobileNav>summary{position:relative;z-index:103;display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:46px;min-height:44px;padding:9px 12px;white-space:nowrap;list-style:none;cursor:pointer;font-weight:750;color:var(--text);background:var(--panel2);border:1px solid var(--line);border-radius:12px}
+ .mobileNav>summary::-webkit-details-marker{display:none}
+ .mobileNav>summary:focus-visible,.mobileNavClose:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+ .mobileNav[open]>summary{color:var(--accentText);background:var(--accentSoft);border-color:var(--accent)}
+ .mobileNavGlyph{font-size:1.22rem;line-height:1}
+ .mobileNavBackdrop{position:fixed;inset:0;z-index:100;background:rgba(0,0,0,.6);backdrop-filter:blur(3px)}
+ body.mobileNavOpen .mobileNavBackdrop{display:block}
+ .mobileNavPanel{position:absolute;z-index:102;top:calc(100% + 8px);right:max(12px,env(safe-area-inset-right));display:flex;flex-direction:column;width:min(380px,calc(100vw - 24px));max-height:min(580px,calc(100dvh - 100px));padding:14px;overflow-y:auto;overscroll-behavior:contain;touch-action:pan-y;border:1px solid var(--line);border-radius:18px;background:var(--panel);color:var(--text);box-shadow:0 20px 54px rgba(0,0,0,.36)}
+ .mobileNav:not([open]) .mobileNavPanel{display:none}
+ .mobileNavHead{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:2px 2px 10px;margin-bottom:6px;border-bottom:1px solid var(--line)}
+ .mobileNavHead strong{font-size:.87rem;letter-spacing:.065em;text-transform:uppercase;color:var(--muted)}
+ .mobileNavClose{flex:0 0 44px;width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);color:var(--text);font-size:1.15rem;cursor:pointer}
+ .mobileNav nav{display:block!important;position:static!important;left:auto;right:auto;top:auto;z-index:auto;width:100%;max-height:none!important;overflow:visible!important;min-width:0;padding:0!important;margin:0;border:0;border-radius:0;background:transparent;box-shadow:none;text-align:left}
+ .mobileNavLinks{display:grid;gap:3px}
+ .mobileNav nav .navLink{display:flex;align-items:center;min-width:0;width:100%;min-height:44px;padding:10px 12px;font-size:.95rem;line-height:1.35;white-space:normal;text-decoration:none;border-radius:11px}
+ .mobileNav nav .navLink.active{font-weight:780;border:1px solid color-mix(in srgb,var(--accent) 55%,var(--line));background:var(--accentSoft);color:var(--accentText)}
+ .mobileNavSecondary{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 0;padding:10px 0;border-top:1px solid var(--line)}
+ .mobileNavSecondary:empty{display:none}
+ .mobileNavSecondary>.navLink{flex:1 1 auto;justify-content:center;width:auto!important;min-height:44px;background:var(--panel2);border:1px solid var(--line)}
+ .mobileNavUtilities{display:grid;gap:8px;border-top:1px solid var(--line);padding-top:10px;margin-top:6px}
+ .mobileNav .quickSearchMenu,.mobileNav .accountDropdown{display:block;width:100%;margin:0}
+ .mobileNav .quickSearchMenu>summary,.mobileNav .accountDropdown>summary{width:100%;min-height:44px;justify-content:flex-start;background:var(--panel2);border:1px solid var(--line);border-radius:11px;padding:9px 12px;color:var(--text)}
+ .mobileNav .quickSearchForm,.mobileNav .accountDropdownPanel{position:static;box-shadow:none;width:100%;margin:7px 0 0}
+ .mobileNav #installPwaMobile{display:flex;align-items:center;justify-content:flex-start;width:100%;min-height:44px;padding:9px 12px;background:var(--panel2);color:var(--text);border:1px dashed var(--line);border-radius:11px;font-size:.88rem;font-weight:600}
+ html.mobileNavOpen{overflow:hidden;overscroll-behavior:none}
+ html.mobileNavOpen .top{transform:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+ body.mobileNavOpen{overflow:hidden;overscroll-behavior:none}
+}
+@media(max-width:460px){
+ .top .brand .brandFull{display:none}
+ .top .brand .brandCompact{display:inline;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:900}
+ .mobileNavMenuLabel{display:none}
+ .mobileNav>summary{width:46px;padding-inline:10px}
+ .mobileNavPanel{width:calc(100vw - 24px);max-height:calc(100dvh - 100px);padding:12px}
+ .mobileNavSecondary{margin-top:8px}
+}
+@media(prefers-reduced-motion:reduce){
+ .mobileNavBackdrop,.mobileNavPanel{animation:none!important;transition:none!important}
+}
+
+/* Visual audit · phase 3: unified surfaces and interaction rhythm */
+:root{
+ --ui-surface-radius:18px;
+ --ui-control-radius:11px;
+ --ui-surface-shadow:0 5px 22px rgba(0,0,0,.055);
+ --ui-focus-color:var(--accent);
+}
+body.dark{--ui-surface-shadow:0 8px 28px rgba(0,0,0,.18)}
+/* Editorial content shares one surface language; the reader's paper/font themes are intentionally excluded. */
+:is(.homeEditorial .homeBookCard,.homeEditorial .homeFeatured,.exploreEditorial .catalogEditorialCard,
+ .libraryEditorial .libraryShelfCard,.libraryEditorial .libraryContinueCard,
+ .studioWrap .studioBookCard,.studioWrap .studioVolumeCard,
+ .adminWorkspace .adminDashboardKpi,.adminWorkspace .adminDashboardPanel,.adminWorkspace .adminEditorialCard,
+ .readerVolumeOptions,.readerEditCard,.siteAppearancePanel,.betaDiagnosticPanel){
+ border:1px solid var(--line);
+ border-radius:var(--ui-surface-radius);
+ background:var(--panel);
+ box-shadow:var(--ui-surface-shadow);
+ min-width:0;
+}
+:is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+ .libraryEditorial .libraryShelfCard,.studioWrap .studioBookCard,
+ .adminWorkspace .adminDashboardKpi){
+ transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+:is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+ .libraryEditorial .libraryShelfCard,.studioWrap .studioBookCard,
+ .adminWorkspace .adminDashboardKpi):hover{
+ border-color:color-mix(in srgb,var(--accent) 62%,var(--line));
+ box-shadow:var(--shadow2);
+ transform:translateY(-2px);
+}
+/* The same control height, shape and contrast throughout the creator and reader hubs. */
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace,.readerVolumeOptions,.siteAppearancePanel,.readerSettingsPanel)
+ :is(.btn,.catalogCardActions .btn,.studioBookActions .btn,.studioVolumeContent .btn,.libraryContinueButton){
+ display:inline-flex;align-items:center;justify-content:center;gap:7px;
+ min-height:44px;
+ padding:10px 14px;
+ line-height:1.35;
+ border-radius:var(--ui-control-radius);
+ font-weight:700;
+ text-wrap:balance;
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace,.readerVolumeOptions,.siteAppearancePanel,.readerSettingsPanel)
+ :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){
+ min-width:0;max-width:100%;min-height:44px;
+ border-radius:var(--ui-control-radius);
+ color:var(--text);
+ background:var(--panel);
+ border:1px solid var(--line);
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace,.readerVolumeOptions,.siteAppearancePanel,.readerSettingsPanel)
+ :is(.btn,button,a,input,select,textarea,summary):focus-visible{
+ outline:3px solid var(--ui-focus-color);
+ outline-offset:3px;
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace,.readerVolumeOptions,.siteAppearancePanel,.readerSettingsPanel)
+ :is(input,select,textarea):focus-visible{
+ border-color:var(--accent);
+ box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 17%,transparent);
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace,.readerVolumeOptions,.siteAppearancePanel)
+ :is(.btn.primary,button.primary){color:#111;background:var(--accent);border-color:color-mix(in srgb,var(--accent) 74%,#111)}
+/* Display headings must remain readable at the largest user-selected font scale. */
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace)
+ :is(h1,h2,h3){overflow-wrap:break-word;text-wrap:balance}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace)
+ :is(.sectionHead,.homeSectionHead,.studioSectionHead){min-width:0;gap:clamp(10px,2vw,20px)}
+:is(.homeEditorial .homeSectionHead,.exploreEditorial .exploreResultsBar,
+ .libraryEditorial .libraryShelfTools,.studioWrap .studioCatalogToolbar,
+ .adminWorkspace .adminCurrentHead){min-width:0}
+/* Harmonize editorial panels without flattening the black/yellow signature. */
+:is(.homeEditorial .homeShowcase,.exploreEditorial .exploreShowcase,
+ .libraryEditorial .libraryShowcase,.studioWrap .studioHero,
+ .adminWorkspace .adminWorkspaceHeader){
+ border-radius:clamp(16px,2.3vw,24px);
+}
+:is(.homeEditorial .homeSectionKicker,.libraryEditorial .librarySectionKicker,
+ .studioWrap .eyebrow,.adminWorkspace .adminWorkspaceEyebrow){
+ font-size:clamp(.69rem,.85vw,.8rem);
+ line-height:1.4;
+ font-weight:800;
+ letter-spacing:.095em;
+ text-transform:uppercase;
+}
+:is(.homeEditorial .homeBookDetails,.exploreEditorial .catalogCardContent,
+ .libraryEditorial .libraryShelfInfo,.studioWrap .studioBookDetails){min-width:0}
+:is(.homeEditorial .homeBookDetails h3,.exploreEditorial .catalogEditorialCard h3,
+ .libraryEditorial .libraryShelfTitle,.studioWrap .studioBookDetails h3){
+ line-height:1.4;overflow-wrap:anywhere;
+}
+:is(.exploreEditorial .exploreFilters,.libraryEditorial .libraryTabs,
+ .studioWrap .studioCatalogToolbar,.adminWorkspace .adminCurrentHead){
+ scroll-margin-top:calc(76px + env(safe-area-inset-top,0px));
+}
+/* User customization applies equally to the newly harmonized cards. */
+html[data-site-corners="square"] :is(.homeBookCard,.homeFeatured,.catalogEditorialCard,.libraryShelfCard,.libraryContinueCard,
+ .studioBookCard,.studioVolumeCard,.adminDashboardKpi,.adminDashboardPanel,.adminEditorialCard,.readerVolumeOptions,.betaDiagnosticPanel){border-radius:3px}
+html[data-site-corners="soft"] :is(.homeBookCard,.homeFeatured,.catalogEditorialCard,.libraryShelfCard,.libraryContinueCard,
+ .studioBookCard,.studioVolumeCard,.adminDashboardKpi,.adminDashboardPanel,.adminEditorialCard,.readerVolumeOptions,.betaDiagnosticPanel){border-radius:25px}
+html[data-site-density="compact"] :is(.homeBookGrid,.exploreNovelGrid,.libraryShelf,.studioCatalogGrid,.adminDashboard){gap:10px}
+html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libraryShelf,.studioCatalogGrid,.adminDashboard){gap:clamp(18px,2vw,26px)}
+@media(max-width:720px){
+ :is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace) :is(.btn,button){overflow-wrap:anywhere}
+ :is(.homeEditorial .homeSectionHead,.exploreEditorial .exploreResultsBar,
+  .studioWrap .studioSectionHead,.adminWorkspace .adminDashboardIntro){flex-wrap:wrap;gap:10px}
+ :is(.homeEditorial .homeBookGrid,.exploreEditorial .exploreNovelGrid,.libraryEditorial .libraryShelf,
+  .studioWrap .studioCatalogGrid){gap:clamp(10px,2.5vw,15px)}
+ .libraryEditorial .libraryTabs{scroll-padding-inline:16px;overscroll-behavior-x:contain}
+ .libraryEditorial .libraryTabs::after{content:"";display:block;flex:0 0 6px}
+ .studioWrap .studioHeroActions,.libraryEditorial .libraryHeroActions{gap:8px}
+ .readerVolumeOptions{padding:clamp(14px,4vw,21px)}
+}
+@media(max-width:640px){
+ .homeEditorial .homeShowcase{min-height:0;grid-template-columns:minmax(0,1fr);padding:clamp(16px,4vw,22px);gap:13px;margin-top:10px}
+ .homeEditorial .homeShowcase:before{inset:8px;border-radius:12px}
+ .homeEditorial .homeShowcaseCopy h1{font-size:clamp(1.9rem,8vw,2.75rem);line-height:1.1;margin:11px 0}
+ .homeEditorial .homeShowcaseCopy p{font-size:.95rem;line-height:1.5}
+ .homeEditorial .homeShowcaseActions{gap:8px;margin:13px 0 7px}
+ .homeEditorial .homeFeaturedVisual{min-height:150px;padding:10px}
+ .homeEditorial .homeFeaturedBook{width:min(30vw,116px)}
+ .homeEditorial .homeFeaturedInfo{padding:11px 15px 14px}
+ .homeEditorial .homeFeaturedInfo h2{font-size:1rem;margin:4px 0}
+ .homeEditorial .homeFeaturedInfo p{line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+ .homeEditorial .homeFeaturedFallback strong{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+ .homeEditorial .homeFeatured{display:grid;grid-template-columns:minmax(82px,34%) minmax(0,1fr);align-items:stretch}
+ .homeEditorial .homeFeaturedVisual{min-height:170px;padding:8px}
+ .homeEditorial .homeFeaturedBook{width:min(25vw,100px)}
+ .homeEditorial .homeFeaturedInfo{align-self:center;padding:12px 12px 12px 4px}
+ .homeEditorial .homeFeaturedInfo h2{font-size:.96rem}
+ .homeEditorial .homeFeaturedInfo p{font-size:.78rem;-webkit-line-clamp:2}
+ .homeEditorial .homeFeaturedEmpty{grid-column:1/-1}
+ .homeEditorial .homeQuickLinks{margin-bottom:18px}
+ :is(.exploreEditorial .exploreShowcase,.libraryEditorial .libraryShowcase,.studioWrap .studioHero){padding:clamp(18px,5vw,26px)}
+ .studioWrap .studioHeroCopy h1{font-size:clamp(2rem,8vw,2.8rem);line-height:1.08}
+ .libraryEditorial .libraryShowcase h1,.exploreEditorial .exploreShowcase h1{font-size:clamp(2rem,8vw,2.8rem)}
+}
+@media(prefers-reduced-motion:reduce){
+ :is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,.libraryEditorial .libraryShelfCard,
+  .studioWrap .studioBookCard,.adminWorkspace .adminDashboardKpi){transition:none;transform:none}
+ :is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,.libraryEditorial .libraryShelfCard,
+  .studioWrap .studioBookCard,.adminWorkspace .adminDashboardKpi):hover{transform:none}
+}
