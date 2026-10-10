@@ -291,10 +291,14 @@ function readerModeOptions(context='volume',volumeId=null){
 }
 function readerScopeControls(scope='global',volumeId=null){
  const prefs=readerScopedValues(siteAppearance,scope==='volume'?volumeId:null),forVolume=scope==='volume';
+ const selectedVolume=forVolume?S.currentDetail?.volumes?.find(v=>v.id===volumeId):null;
+ const embeddedFamilies=[...new Set((selectedVolume?.epub_fonts||[]).map(font=>font.family).filter(Boolean))];
+ const embeddedChoices=embeddedFamilies.map((family,index)=>['epub:'+index,'EPUB · '+family]);
+ if(/^epub:\\d+$/.test(prefs.fontFamily)&&!embeddedChoices.some(([id])=>id===prefs.fontFamily))embeddedChoices.push([prefs.fontFamily,'Fuente del EPUB guardada']);
  const groups=[
   ['theme','Tema',[['light','Claro'],['sepia','Sepia'],['dark','Oscuro']]],
-  ['fontSize','Tamaño del texto',[14,16,18,20,22,24,26,28,30].map(v=>[v,v+' px'])],
-  ['fontFamily','Tipografía',[['original','Original del EPUB'],['serif','Serif'],['sans','Sin serif'],['literata','Literata'],['merriweather','Merriweather'],['lora','Lora'],['garamond','Garamond'],['baskerville','Baskerville'],['palatino','Palatino'],['verdana','Verdana'],['arial','Arial']]],
+  ['fontSize','Tamaño del texto',Array.from({length:17},(_,i)=>[i+14,(i+14)+' px'])],
+  ['fontFamily','Tipografía',[['original','Original del EPUB'],...embeddedChoices,['serif','Serif'],['sans','Sin serif'],['literata','Literata'],['merriweather','Merriweather'],['lora','Lora'],['garamond','Garamond'],['baskerville','Baskerville'],['palatino','Palatino'],['verdana','Verdana'],['arial','Arial']]],
   ['width','Ancho',[['narrow','Estrecho'],['normal','Normal'],['wide','Amplio']]],
   ['lineHeight','Interlineado',[['compact','Compacto'],['comfortable','Cómodo'],['relaxed','Amplio']]],
   ['paragraphSpace','Espacio entre párrafos',[['compact','Compacto'],['normal','Normal'],['wide','Amplio']]],
