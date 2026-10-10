@@ -567,3 +567,13 @@ for (const marker of [
  const test=spawnSync(process.execPath,['scripts/reader-phase9-check.mjs'],{stdio:'inherit'});
  if(test.status!==0)throw Error('Phase 9: fallaron pruebas de preferencias/paginación');
 }
+
+
+// Offline volume packs explicitly include serialized chapters and public media.
+{
+ const sw=fs.readFileSync('public/sw.js','utf8');
+ for(const marker of ['async function saveVolumeForOffline(', 'async function cacheOfflineVolumeMedia(', 'data-save-volume-offline', "caches.delete('nlobi-offline-volume-media-v1')", 'readerVolumeAdvanced'])
+  if(!app.includes(marker))throw Error('Phase 9: falta opción offline '+marker);
+ for(const marker of ["const OFFLINE_MEDIA='nlobi-offline-volume-media-v1'",'k!==OFFLINE_MEDIA','caches.open(OFFLINE_MEDIA)'])
+  if(!sw.includes(marker))throw Error('Phase 9: faltan recursos persistentes en PWA '+marker);
+}
