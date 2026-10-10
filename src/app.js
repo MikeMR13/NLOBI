@@ -1956,6 +1956,23 @@ async function markCurrentSectionRead(){await recordSectionCompleted(readerFlow.
 function chapterCacheKey(id){return `nlobi_chapter_${id}`}
 function cacheReaderChapter(r){try{localStorage.setItem(chapterCacheKey(r.id),JSON.stringify({...r,cached_at:new Date().toISOString()}));const idx=JSON.parse(localStorage.getItem('nlobi_cached_chapters')||'[]').filter(x=>x.id!==r.id);idx.unshift({id:r.id,title:r.title||'Capítulo',novel_title:r.novel_title||'',cached_at:new Date().toISOString()});localStorage.setItem('nlobi_cached_chapters',JSON.stringify(idx.slice(0,150)));return true}catch(e){console.warn('No se pudo guardar capítulo offline',e);return false}}
 function readCachedChapter(id){try{return JSON.parse(localStorage.getItem(chapterCacheKey(id))||'null')}catch{return null}}
+async function cacheOfflineVolumeMedia(rawUrls){
+ const urls=[...new Set(rawUrls.filter(Boolean))],pending=[];
+ for(const raw of urls){
+  if(/^data:image\//i.test(String(raw)))continue;
+  const url=safeMediaUrl(raw);
+  if(!url.startsWith('/media/')){pending.push(url);continue}
+  if(!('caches' in window)){pending.push(url);continue}
+  try{
+   const cache=await caches.open('nlobi-offline-volume-media-v1');
+   if(await cache.match(url))continue;
+   const response=await fetch(url,{cache:'no-store'});
+   if(response.ok)await cache.put(url,response.clone());
+   else pending.push(url);
+  }catch(e){console.warn('[NLOBI] Recurso no disponible sin conexión',e);pending.push(url)}
+ }
+ return pending.length;
+}
 async function saveVolumeForOffline(volumeId){
  if(S.offlineVolumeSaving)return;
  if(!navigator.onLine){toast('Conéctate para guardar los capítulos del volumen.','bad');return}
@@ -1966,20 +1983,28 @@ async function saveVolumeForOffline(volumeId){
  S.offlineVolumeSaving=volumeId;
  const navigation=(detail.volumes||[]).filter(v=>v.status==='published').flatMap(v=>(v.sections||[]).filter(c=>c.status==='published').map(c=>({...c,volume_id:v.id,volume_number:v.volume_number})));
  let saved=0,failed=0;const status=document.getElementById('volumeOfflineStatus');
+ const mediaUrls=(volume.epub_fonts||[]).map(f=>f.url).filter(Boolean);if(volume.epub_font_url)mediaUrls.push(volume.epub_font_url);
  try{
   for(const chapter of chapters){
    if(S.offlineVolumeSaving!==volumeId)break;
-   if(readCachedChapter(chapter.id)){saved++;continue}
    try{
-    const result=await jreq('/rest/v1/sections?id=eq.'+encodeURIComponent(chapter.id)+'&volume_id=eq.'+encodeURIComponent(volumeId)+'&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1');
-    if(!result?.[0])throw Error('Capítulo no disponible');
-    const cached={...result[0],translation_id:detail.id,volume_number:volume.volume_number,novel_title:detail.novels?.title||detail.title,navigation,epub_fonts:volume.epub_fonts||[]};
-    if(!cacheReaderChapter(cached)||!readCachedChapter(chapter.id)){failed++;break}
+    let cached=readCachedChapter(chapter.id);
+    if(!cached){
+     const result=await jreq('/rest/v1/sections?id=eq.'+encodeURIComponent(chapter.id)+'&volume_id=eq.'+encodeURIComponent(volumeId)+'&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1');
+     if(!result?.[0])throw Error('Capítulo no disponible');
+     cached={...result[0],translation_id:detail.id,volume_number:volume.volume_number,novel_title:detail.novels?.title||detail.title,navigation,epub_fonts:volume.epub_fonts||[]};
+     if(!cacheReaderChapter(cached)||!readCachedChapter(chapter.id))throw Error('Almacenamiento insuficiente');
+    }
     saved++;
-   }catch(e){console.warn('[NLOBI] Falló descarga individual',e);failed++}
+    for(const block of cached.content||[])if(block?.type==='image'&&block.url)mediaUrls.push(block.url);
+   }catch(e){console.warn('[NLOBI] Falló descarga individual',e);failed++;if(/Almacenamiento insuficiente/.test(String(e.message)))break}
    if(status)status.textContent='Guardando capítulos: '+saved+' de '+chapters.length;
   }
-  toast(failed||saved<chapters.length?saved+' de '+chapters.length+' capítulos disponibles sin conexión. Revisa el espacio libre.': 'Volumen completo disponible sin conexión en este dispositivo.',failed?'bad':'ok');
+  const pending=await cacheOfflineVolumeMedia(mediaUrls);
+  const complete=!failed&&saved===chapters.length&&!pending;
+  const message=complete?'Volumen guardado para leer sin conexión, incluidos sus recursos accesibles.':
+   saved+' de '+chapters.length+' capítulos guardados; '+(pending?pending+' recursos externos podrían requerir internet. ':'')+(failed?'Revisa el espacio disponible.':'');
+  toast(message,complete?'ok':'bad');
  }finally{S.offlineVolumeSaving=null;if(S.view.startsWith('detail:'))render()}
 }
 function queueProgress(payload){try{const q=JSON.parse(localStorage.getItem('nlobi_progress_queue')||'[]');const filtered=q.filter(x=>!(x.user_id===payload.user_id&&x.translation_id===payload.translation_id));filtered.push(payload);localStorage.setItem('nlobi_progress_queue',JSON.stringify(filtered))}catch(e){console.warn(e)}}
