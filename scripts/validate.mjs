@@ -404,6 +404,18 @@ for (const marker of [
 }
 
 
+// Reader 9: active-chapter navigation and restored positions must survive refactoring.
+for(const marker of [
+ "activeId=S.readerContinuous?.activeId||section.id",
+ "if(id&&id!==(S.readerContinuous?.activeId||S.readerSection?.id))",
+ "S.readerScrollIntent&&now-readerLastPersist",
+ "function syncContinuousFinish(){",
+ "finish.disabled=!(st.ended&&last?.id===st.activeId&&readerActiveChapter().percent>=90)",
+ "S.readerScrollIntent=false;applyReaderPreferencesForVolume(vol.id)",
+ "function readReaderVolumePosition(volumeId){",
+ "s.positions={...s.positions,[volumeId]:{sectionId:id,...value}}"
+])if(!app.includes(marker))throw new Error('Lector 9: regresión de capítulo activo o posición: '+marker);
+
 // Reader phases 7–9: configurable global and per-volume modes, recovery, and regressions.
 (function validateAdvancedReader(){
  const start=app.indexOf('const READER_DEFAULTS='),stop=app.indexOf('let readerScrollFrame=0',start);
