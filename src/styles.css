@@ -2807,7 +2807,10 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  .homeEditorial .homeFeaturedBook{width:min(30vw,116px)}
  .homeEditorial .homeFeaturedInfo{padding:11px 15px 14px}
  .homeEditorial .homeFeaturedInfo h2{font-size:1rem;margin:4px 0}
- .homeEditorial .homeFeaturedInfo p{line-height:1.4}
+ .homeEditorial .homeFeaturedInfo p{line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+ .homeEditorial .homeFeaturedFallback strong{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+ .homeEditorial .homeFeaturedVisual{min-height:132px;padding:7px}
+ .homeEditorial .homeFeaturedBook{width:min(27vw,105px)}
  .homeEditorial .homeQuickLinks{margin-bottom:18px}
  :is(.exploreEditorial .exploreShowcase,.libraryEditorial .libraryShowcase,.studioWrap .studioHero){padding:clamp(18px,5vw,26px)}
  .studioWrap .studioHeroCopy h1{font-size:clamp(2rem,8vw,2.8rem);line-height:1.08}
