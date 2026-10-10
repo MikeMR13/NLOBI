@@ -1289,6 +1289,13 @@ function recordContinuousBoundary(id){
  }
 }
 
+function syncContinuousFinish(){
+ const st=S.readerContinuous;if(!st)return;
+ const finish=document.getElementById('finishAndNext')||document.getElementById('finishAndReturn');
+ if(!finish)return;
+ const nav=readerVolumeNavigation(),last=nav.at(-1);
+ finish.disabled=!(st.ended&&last?.id===st.activeId&&readerActiveChapter().percent>=90);
+}
 function updateReaderProgress(){
  if(!S.view.startsWith('reader:')||!S.readerSection)return;
  const pos=readerActiveChapter(),percent=pos.percent;
@@ -1296,11 +1303,12 @@ function updateReaderProgress(){
  const fill=document.getElementById('readerProgressFill'),label=document.getElementById('readerProgressLabel');
  if(fill)fill.style.width=percent+'%';if(label)label.textContent=(S.readerContinuous?'Capítulo · ':'')+percent+'% leído';
  const now=Date.now();
- if(now-readerLastPersist>=1200&&percent>=1){readerLastPersist=now;persistReaderPosition(pos.id,S.readerSection.volume_id,percent)}
- if(S.readerContinuous)readerMaybeLoadNext();
+ if(S.readerScrollIntent&&now-readerLastPersist>=1200&&percent>=1){readerLastPersist=now;persistReaderPosition(pos.id,S.readerSection.volume_id,percent)}
+ if(S.readerContinuous){syncContinuousFinish();readerMaybeLoadNext();}
 }
 
 function readerGoToPercent(percent,sectionId=null){
+ S.readerScrollIntent=true;
  const p=sectionId?document.querySelector('.readerContinuousChapter[data-reader-chapter-id="'+CSS.escape(sectionId)+'"]'):null;
  const paper=p||document.querySelector('.readerExperience .readerPaper');if(!paper)return;
  const r=paper.getBoundingClientRect(),start=window.scrollY+r.top-(p?window.innerHeight*.35:0),end=start+r.height-window.innerHeight*(p?.45:.65);
@@ -1329,7 +1337,7 @@ async function loadNextContinuousChapter(){
   }
   if(st!==S.readerContinuous||R!==S.readerSection)return;
   const entry={id:sec.id,title:sec.title||next.title,content:sec.content||[]};
-  st.entries.push(entry);st.ended=last+2>=nav.length;if(st.ended){const finish=document.getElementById('finishAndNext')||document.getElementById('finishAndReturn');if(finish)finish.disabled=false}
+  st.entries.push(entry);st.ended=last+2>=nav.length;
   const holder=document.getElementById('readerContinuousChapters');if(holder){holder.insertAdjacentHTML('beforeend',readerContinuousChapterMarkup(entry));bindReaderImages(holder)}
   if(more){more.hidden=st.ended;more.textContent='Desplázate para continuar al siguiente capítulo.'}
  }catch(e){
@@ -1387,8 +1395,16 @@ function toggleReaderFocusMode(force){
 }
 function bindReaderExperience(){
  if(!S.view.startsWith('reader:'))return;
+ if(!window.__nlobiReaderIntentBound){
+  window.__nlobiReaderIntentBound=true;
+  const active=()=>S.view.startsWith('reader:');
+  document.addEventListener('wheel',()=>{if(active())S.readerScrollIntent=true},{passive:true});
+  document.addEventListener('touchmove',()=>{if(active())S.readerScrollIntent=true},{passive:true});
+  document.addEventListener('pointerdown',e=>{if(active()&&e.target.closest?.('.readerPaper'))S.readerScrollIntent=true},{passive:true});
+  document.addEventListener('keydown',e=>{if(active()&&!e.target.closest?.('input,textarea,select,[contenteditable]')&&['PageDown','PageUp','ArrowDown','ArrowUp',' ','Home','End'].includes(e.key))S.readerScrollIntent=true});
+ }
  document.querySelectorAll('[data-reader-quick]').forEach(button=>button.onclick=()=>setReaderPref(button.dataset.readerQuick,button.dataset.readerQuick==='fontSize'?Number(button.dataset.readerValue):button.dataset.readerValue));
- const jump=document.getElementById('readerChapterJump');if(jump)jump.onchange=()=>{const id=jump.value;if(id&&id!==S.readerSection?.id)openReader(id,S.readerSection?.translation_id)};
+ const jump=document.getElementById('readerChapterJump');if(jump)jump.onchange=()=>{const id=jump.value;if(id&&id!==(S.readerContinuous?.activeId||S.readerSection?.id))openReader(id,S.readerSection?.translation_id)};
  const focus=document.getElementById('readerFocusToggle');if(focus)focus.onclick=()=>toggleReaderFocusMode();
  const focusExit=document.getElementById('readerFocusExit');if(focusExit)focusExit.onclick=()=>toggleReaderFocusMode(false);
  const close=document.getElementById('closeReaderSettings');if(close)close.onclick=()=>{const d=document.getElementById('readerSettings');if(d)d.open=false};
@@ -1407,7 +1423,7 @@ function bindReaderExperience(){
    if(event.key==='Escape'&&readReaderFocusMode()){toggleReaderFocusMode(false);return}
    if(!event.shiftKey||event.altKey||!['ArrowLeft','ArrowRight'].includes(event.key))return;
    const section=S.readerSection;if(!section)return;
-   const chapters=section.navigation||[],index=chapters.findIndex(c=>c.id===section.id);
+   const chapters=section.navigation||[],activeId=S.readerContinuous?.activeId||section.id,index=chapters.findIndex(c=>c.id===activeId);
    if(index<0)return;
    event.preventDefault();
    if(event.key==='ArrowLeft'&&index>0)openReader(chapters[index-1].id,section.translation_id);
@@ -2122,7 +2138,7 @@ function cacheReaderChapter(r){try{localStorage.setItem(chapterCacheKey(r.id),JS
 function readCachedChapter(id){try{return JSON.parse(localStorage.getItem(chapterCacheKey(id))||'null')}catch{return null}}
 function queueProgress(payload){try{const q=JSON.parse(localStorage.getItem('nlobi_progress_queue')||'[]');const filtered=q.filter(x=>!(x.user_id===payload.user_id&&x.translation_id===payload.translation_id));filtered.push(payload);localStorage.setItem('nlobi_progress_queue',JSON.stringify(filtered))}catch(e){console.warn(e)}}
 async function flushProgressQueue(){if(!navigator.onLine||!S.token)return;let q=[];try{q=JSON.parse(localStorage.getItem('nlobi_progress_queue')||'[]')}catch{}if(!q.length)return;const left=[];for(const p of q){try{await jreq('/rest/v1/reading_progress?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(p.progress)});await jreq('/rest/v1/library_entries?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(p.library)})}catch(e){left.push(p)}}localStorage.setItem('nlobi_progress_queue',JSON.stringify(left));if(q.length&&!left.length)toast('Progreso offline sincronizado.','ok')}
-async function openReader(sectionId,translationId){try{await loadReaderRouteData(sectionId,translationId,{record:true});go('reader:'+sectionId)}catch(e){const cached=readCachedChapter(sectionId);if(cached){S.readerSection=cached;S.readerComments=[];S.readerContinuous=null;applyReaderPreferencesForVolume(cached.volume_id);go('reader:'+sectionId);toast('Mostrando la copia guardada sin conexión.','ok')}else toast(friendlyError(e),'bad')}}
+async function openReader(sectionId,translationId){try{await loadReaderRouteData(sectionId,translationId,{record:true});go('reader:'+sectionId)}catch(e){const cached=readCachedChapter(sectionId);if(cached){S.readerSection=cached;S.readerComments=[];S.readerContinuous=null;S.readerScrollIntent=false;applyReaderPreferencesForVolume(cached.volume_id);go('reader:'+sectionId);toast('Mostrando la copia guardada sin conexión.','ok')}else toast(friendlyError(e),'bad')}}
 async function saveReaderProgress(percent=100,announce=true,sectionOverride=null){try{if(!S.user||!S.readerSection)return;const R=S.readerSection,progress={user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:sectionOverride||R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},currentLib=S.library.find(x=>x.translation_id===R.translation_id),library={user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(currentLib?.status)?currentLib.status:'reading',is_favorite:!!currentLib?.is_favorite};if(!navigator.onLine){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress,library});if(announce)toast('Progreso guardado en este dispositivo. Se sincronizará al volver la conexión.','ok');return}await jreq('/rest/v1/reading_progress?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(progress)});await jreq('/rest/v1/library_entries?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(library)});await loadUser();if(announce)toast(percent>=100?'Lectura marcada como completada.':'Progreso guardado.','ok')}catch(e){const R=S.readerSection;if(S.user&&R){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress:{user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:sectionOverride||R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},library:{user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(S.library.find(x=>x.translation_id===R.translation_id)?.status)?S.library.find(x=>x.translation_id===R.translation_id).status:'reading',is_favorite:!!S.library.find(x=>x.translation_id===R.translation_id)?.is_favorite}});if(announce)toast('No se pudo sincronizar; el progreso quedó guardado localmente.','ok')}else if(announce)toast(friendlyError(e),'bad')}}
 function setAuthError(message){
  const box=document.getElementById('authError');if(!box)return;
@@ -2263,7 +2279,7 @@ async function loadPublicGroupData(id){
 async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}){
  if(!navigator.onLine){
   const cached=readCachedChapter(sectionId);if(!cached)throw new Error('Este capítulo no está disponible sin conexión todavía.');
-  S.readerSection=cached;S.readerComments=[];applyReaderPreferencesForVolume(cached.volume_id);return cached
+  S.readerSection=cached;S.readerComments=[];S.readerScrollIntent=false;applyReaderPreferencesForVolume(cached.volume_id);return cached
  }
  const secRows=await jreq(`/rest/v1/sections?id=eq.${sectionId}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`);
  const sec=secRows?.[0];if(!sec)throw new Error('El capítulo no está disponible.');
@@ -2272,7 +2288,7 @@ async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}
  const trId=translationId||vol.translation_id,tr=await loadTranslationDetail(trId);if(!tr)throw new Error('La obra no está disponible.');
  const navigation=(tr.volumes||[]).filter(v=>v.status==='published').sort((a,b)=>Number(a.volume_number)-Number(b.volume_number)).flatMap(v=>(v.sections||[]).filter(x=>x.status==='published').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(x=>({...x,volume_id:v.id,volume_number:v.volume_number})));
  S.readerSection={...sec,translation_id:trId,volume_number:vol.volume_number,novel_title:tr.novels?.title,navigation,epub_font_url:vol.epub_font_url,epub_font_family:vol.epub_font_family,epub_fonts:vol.epub_fonts?.length?vol.epub_fonts:(vol.epub_font_url?[{url:vol.epub_font_url,family:vol.epub_font_family||'Original',style:'normal',weight:'normal'}]:[])};if(S.readerSection.epub_fonts.length)activateEpubFonts(S.readerSection.epub_fonts);
- cacheReaderChapter(S.readerSection);S.readerContinuous=null;applyReaderPreferencesForVolume(vol.id);
+ cacheReaderChapter(S.readerSection);S.readerContinuous=null;S.readerScrollIntent=false;applyReaderPreferencesForVolume(vol.id);
  if(record&&S.user){await recordReadingHistory(sectionId,trId);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(false)),false)}
  return S.readerSection
 }
