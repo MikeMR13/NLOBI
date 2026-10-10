@@ -6,6 +6,8 @@ const mustExist = [
   "src/index.html",
   "src/styles.css",
   "src/app.js",
+  "src/reader-flow.js",
+  "scripts/reader-flow-check.mjs",
   "public/manifest.webmanifest",
   "public/sw.js",
   "vercel.json",
@@ -15,7 +17,7 @@ for (const file of mustExist) {
   if (!fs.existsSync(file)) throw new Error(`Falta ${file}`);
 }
 
-for (const file of ["src/app.js", "public/sw.js", "scripts/build.mjs", "scripts/generate-config.mjs", "scripts/validate.mjs"]) {
+for (const file of ["src/app.js", "src/reader-flow.js", "scripts/reader-flow-check.mjs", "public/sw.js", "scripts/build.mjs", "scripts/generate-config.mjs", "scripts/validate.mjs"]) {
   const result = spawnSync(process.execPath, ["--check", file], { stdio: "inherit" });
   if (result.status !== 0) process.exit(result.status ?? 1);
 }
@@ -401,4 +403,177 @@ for (const marker of [
  if(begin<0||end<begin)throw new Error('Reader phase 6: vista no encontrada');
  const view=app.slice(begin,end);
  if(!view.includes('data-finish-next=')||!view.includes('id="markReaderDone"')||!view.includes('id="readerFontFamily"')||!view.includes('readerAdvanced'))throw new Error('Reader phase 6: no se conservaron funciones anteriores');
+}
+
+
+// Continuous reader regressions: stable anchors, lazy loading and legacy controls.
+{
+ const moduleCode=fs.readFileSync('src/reader-flow.js','utf8');
+ for(const marker of [
+  'export function createReaderFlow(',
+  "reading_progress?on_conflict=user_id,translation_id",
+  'data-block-index',
+  'async function loadMore()',
+  "status=eq.published",
+  'readerFlowActive',
+  "readerPrefs?.flow==='continuous'",
+ ])if(!moduleCode.includes(marker))throw new Error('Lectura continua: falta '+marker);
+ for(const marker of ['createReaderFlow(', 'readerFlow.begin()', 'readerFlow.scroll()', 'readerFlow.blockHtml(', 'data-reading-mode=', 'id="readerChapterStream"', 'readerFlow.best(sectionId)']){
+  if(!app.includes(marker))throw new Error('Integración de lectura continua: falta '+marker);
+ }
+ for(const marker of ['.readerChapterStream','.readerAnchorBlock','.readerBookProgress'])if(!css.includes(marker))throw new Error('Estilos de lectura continua: falta '+marker);
+ const sw=fs.readFileSync('public/sw.js','utf8');
+ if(!sw.includes('/assets/reader-flow.js'))throw new Error('PWA: módulo de lectura continua ausente de caché');
+ const test=spawnSync(process.execPath,['scripts/reader-flow-check.mjs'],{stdio:'inherit'});
+ if(test.status!==0)throw new Error('Fallaron pruebas de anclas del lector continuo');
+}
+
+
+// Reader mode was moved from the in-reader quick controls into two pre-reading locations.
+{
+ const expected=[
+  'function readerModeOptions(context=',
+  "readerModeOptions('volume',chosen.id)",
+  "readerModeOptions('preferences')",
+  'data-preference-tab="reading"',
+  'data-preference-panel="reading"',
+  'readerReadingPreferencesPanel()',
+  "function setReaderMode(mode,scope='global',volumeId=null){",
+  'data-reading-mode',
+  'hydrateReaderPreferences()',
+  "localStorage.setItem('reader_flow',siteAppearance.readerDefaults.flow)",
+  "localStorage.removeItem('reader_flow')",
+  'readerDefaults:o.readerDefaults||null',
+ ];
+ for(const key of expected)if(!app.includes(key))throw new Error('Selector de lectura: falta '+key);
+ const begin=app.indexOf('function readerView(){'),end=app.indexOf('function accessibilityViewTitle(){',begin);
+ if(begin<0||end<begin)throw new Error('Selector de lectura: no aparece la vista de capítulos');
+ if(app.slice(begin,end).includes('data-reader-quick="flow"'))throw new Error('Selector de lectura: no debe mostrarse dentro del lector');
+ const volume=app.slice(app.indexOf('function detailView(){'),app.indexOf('function publicGroupView(){'));
+ if(!volume.includes("readerModeOptions('volume',chosen.id)")||volume.indexOf("readerModeOptions('volume',chosen.id)")>volume.indexOf('class="volumeChapterList"'))throw new Error('Selector de lectura: debe aparecer antes del índice de capítulos');
+ if(!volume.includes('class="volumeChapterList">${chapters.map'))throw new Error('Selector de lectura: lista de capítulos con HTML inválido');
+ if(volume.indexOf('class="volumeReadingModeAction"')<volume.indexOf("readerModeOptions('volume',chosen.id)"))throw new Error('Selector de lectura: botón Continuar debe estar después de escoger modo');
+ for(const key of ['.volumeReadingMode','.readingModeOptions','.readingModeOption:focus-visible','@media(max-width:650px)'])if(!css.includes(key))throw new Error('Selector de lectura CSS: falta '+key);
+ // Confirm legacy site-appearance preferences still parse and preserve the reader mode.
+ const appearanceSource=app.slice(app.indexOf('function readSiteAppearance(){'),app.indexOf('let siteAppearance='));
+ const values=new Map([['reader_flow','continuous']]);
+ const testStorage={getItem:key=>values.has(key)?values.get(key):null,setItem:(key,value)=>values.set(key,String(value)),removeItem:key=>values.delete(key)};
+ const sandbox={localStorage:testStorage,SITE_NAV_DEFAULT:['home','explore'],SITE_THEMES:{amber:'Ámbar'},SITE_FONTS:{system:'Sistema'}};
+ vm.runInNewContext(appearanceSource+';globalThis.readerAppearance=readSiteAppearance;',sandbox);
+ const read=sandbox.readerAppearance;
+ if(read().readerFlow!=='continuous')throw new Error('Selector de lectura: no se conservó el modo local anterior');
+ values.set('nlobi_site_appearance',JSON.stringify({readerFlow:'chapter'}));
+ if(read().readerFlow!=='chapter')throw new Error('Selector de lectura: no se aplica el modo remoto');
+ values.set('nlobi_site_appearance',JSON.stringify({readerFlow:'invalid'}));
+ if(read().readerFlow!=='continuous')throw new Error('Selector de lectura: opción desconocida no vuelve al modo válido');
+}
+
+
+// Reader phase 7: floating navigation, precise resume and illustration viewer.
+{
+ const enhanced=fs.readFileSync('src/reader-enhancements.js','utf8');
+ const required=[
+  'export function createReaderEnhancements(',
+  'function updateDock(){',
+  'function stableRestore(',
+  'Promise.resolve(document.fonts?.ready)',
+  "img.addEventListener('load'",
+  'cancelRestore()',
+  'MutationObserver(',
+  'function prepareImages(){',
+  'dialog.showModal()',
+  "dialog.addEventListener('close'",
+  "dialog.addEventListener('keydown'",
+  'function setZoom(value)',
+  'return {bind,refresh:updateDock,restoreStable:stableRestore,cancelRestore,clear}',
+ ];
+ for(const marker of required)if(!enhanced.includes(marker))throw new Error('Fase 7 módulo: falta '+marker);
+ for(const marker of [
+  "import { createReaderEnhancements } from './reader-enhancements.js'",
+  'const readerEnhancements=createReaderEnhancements(',
+  'readerEnhancements.bind()',
+  'readerEnhancements.refresh()',
+  'readerEnhancements.restoreStable(',
+  'readerEnhancements.clear()',
+  'id="readerFloatDock"',
+  'id="readerFloatChapterJump"',
+  'id="readerFloatSeek"',
+  'id="readerFloatBookmark"',
+  'id="readerFloatSettings"',
+  'id="readerIllustrationDialog"',
+  'id="readerLightboxImage"',
+  'id="readerLightboxZoomIn"',
+ ])if(!app.includes(marker))throw new Error('Fase 7 app: falta '+marker);
+ for(const marker of ['.readerFloatDock{','.readerFloatDock.readerFloatHidden{','.readerLightbox{','.readerLightbox::backdrop{','.readerIllustrationOpen{'])if(!css.includes(marker))throw new Error('Fase 7 CSS: falta '+marker);
+ const template=app.slice(app.indexOf('function readerView(){'),app.indexOf('function accessibilityViewTitle(){'));
+ if(!template.includes('</dialog></main>'))throw new Error('Fase 7: el visor no cierra el marcado de la vista');
+ const build=fs.readFileSync('scripts/build.mjs','utf8'),sw=fs.readFileSync('public/sw.js','utf8');
+ for(const marker of ['assets/reader-enhancements.js','reader-enhancements.js'])if(!build.includes(marker))throw new Error('Fase 7 build: falta '+marker);
+ if(!sw.includes('/assets/reader-enhancements.js'))throw new Error('Fase 7 PWA: módulo ausente de caché');
+}
+
+
+// Lightweight runtime checks for the phase 7 dock and resume guard.
+{
+ const t=spawnSync(process.execPath,['scripts/reader-phase7-check.mjs'],{stdio:'inherit'});
+ if(t.status!==0)throw new Error('Fase 7: fallaron regresiones de la barra flotante y reanudación');
+}
+
+
+// Phase 8: server-private reading annotations, interface + persistence.
+{
+ const m=fs.readFileSync('src/reader-annotations.js','utf8');
+ const migration=fs.readFileSync('supabase/migrations/20261009173100_reader_annotations.sql','utf8');
+ for(const x of [
+  'export function createReaderAnnotations(',
+  'function capture(){','function blockOffset(','function applyHighlights(){',
+  'function markText(','function paragraphAnchor(){',
+  "kind:'bookmark'","kind:'highlight'",'readerAnnotationEditor',
+  "function bindLibrary(){",'function libraryUi(){','function track(){',
+  'openChapter(x.section_id,x.translation_id)',
+  "owner&&S().user?.id===owner",
+  "method:'POST'","method:'PATCH'","method:'DELETE'"
+ ])if(!m.includes(x))throw new Error('Phase 8: falta componente '+x);
+ for(const x of [
+  "import { createReaderAnnotations } from './reader-annotations.js';",
+  "const readerAnnotations=createReaderAnnotations(",
+  'readerAnnotations.bindReader()',
+  'readerAnnotations.readerUi()',
+  'readerAnnotations.libraryUi()',
+  'readerAnnotations.bindLibrary()',
+  "readerAnnotations.load()",
+  "readerAnnotations.reset()",
+  'data-library-tab="annotations"'
+ ])if(!app.includes(x))throw new Error('Phase 8: falta integración '+x);
+ for(const x of ['.readerAnnotationTools{','.readerAnnotationsPanel{','.readerAnnotationLibraryGrid{','.readerAnchorBlock mark.readerMarkedText{'])
+  if(!css.includes(x))throw new Error('Phase 8: falta CSS '+x);
+ for(const x of ['enable row level security','reader_annotations_select_own','reader_annotations_insert_own','reader_annotations_update_own','reader_annotations_delete_own','auth.uid()','grant select, insert, update, delete on public.reader_annotations to authenticated','revoke all on public.reader_annotations from public, anon'])if(!migration.includes(x))throw new Error('Phase 8: falta RLS '+x);
+ const sw=fs.readFileSync('public/sw.js','utf8'),build=fs.readFileSync('scripts/build.mjs','utf8');
+ for(const x of [sw,build])if(!x.includes('reader-annotations.js'))throw new Error('Phase 8: asset missing in PWA/build');
+}
+
+
+// Phase 9: scoped global and individual volume preferences + page reader.
+{
+ const prefs=fs.readFileSync('src/reader-preferences.js','utf8');
+ const pages=fs.readFileSync('src/reader-pagination.js','utf8');
+ for(const key of ['readerScopedValues','setReaderSetting','resetReaderVolume','normalizeReaderSettings','cleanVolumeSettings'])if(!prefs.includes(key))throw Error('Phase 9: falta '+key);
+ for(const key of ["flow:'chapter'", "'paged'", "swipe:'on'"])if(!prefs.includes(key))throw Error('Phase 9: falta modo '+key);
+ for(const key of ["const readerPagination=createReaderPagination(","readerPagination.bind()","readerPagination.unbind()","function readerScopeControls(","readerScopeControls('volume',chosen.id)","readerScopeControls('global')","data-reader-reset-volume","readerPagedMode","id=\"readerPagePrev\"","id=\"readerPageNext\"","function setReaderPref(k,v){"])if(!app.includes(key))throw Error('Phase 9: falta conexión '+key);
+ for(const key of ['function move(delta)','function position(){','function restore(pos)','touchstart','ArrowRight','PageDown','readerPageStatus'])if(!pages.includes(key))throw Error('Phase 9: falta paginación '+key);
+ for(const key of ['.readerPagedMode .readerPageControls','.readerScopeFields{','.readerVolumeAdvanced{'])if(!css.includes(key))throw Error('Phase 9: falta CSS '+key);
+ const build=fs.readFileSync('scripts/build.mjs','utf8'),sw=fs.readFileSync('public/sw.js','utf8');
+ for(const file of ['reader-preferences.js','reader-pagination.js'])if(!build.includes(file)||!sw.includes('/assets/'+file))throw Error('Phase 9: build/PWA no incluyen '+file);
+ const test=spawnSync(process.execPath,['scripts/reader-phase9-check.mjs'],{stdio:'inherit'});
+ if(test.status!==0)throw Error('Phase 9: fallaron pruebas de preferencias/paginación');
+}
+
+
+// Offline volume packs explicitly include serialized chapters and public media.
+{
+ const sw=fs.readFileSync('public/sw.js','utf8');
+ for(const marker of ['async function saveVolumeForOffline(', 'async function cacheOfflineVolumeMedia(', 'data-save-volume-offline', "caches.delete('nlobi-offline-volume-media-v1')", 'readerVolumeAdvanced'])
+  if(!app.includes(marker))throw Error('Phase 9: falta opción offline '+marker);
+ for(const marker of ["const OFFLINE_MEDIA='nlobi-offline-volume-media-v1'",'k!==OFFLINE_MEDIA','caches.open(OFFLINE_MEDIA)'])
+  if(!sw.includes(marker))throw Error('Phase 9: faltan recursos persistentes en PWA '+marker);
 }

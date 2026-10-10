@@ -1,0 +1,34 @@
+// Unit regressions for Phase 7 without a browser/server.
+import assert from 'node:assert/strict';
+import {createReaderEnhancements} from '../src/reader-enhancements.js';
+
+let restored=0,scrolled=0,disconnected=false;
+const classState=new Set(),values={};
+const element=id=>({id,textContent:'',value:'0',style:{},setAttribute:(k,v)=>values[id+':'+k]=v,addEventListener:()=>{},focus(){}});
+const labels=Object.fromEntries(['readerFloatTitle','readerFloatMeta','readerFloatPercentage','readerFloatFill','readerFloatSeek','readerFloatChapterJump'].map(id=>[id,element(id)]));
+const floating={classList:{add:cls=>classState.add(cls),remove:cls=>classState.delete(cls)},matches:()=>false};
+const stream={querySelectorAll:()=>[]};
+const handlers={};
+const root={isConnected:true,querySelector:selector=>selector==='#readerFloatDock'?floating:selector==='#readerChapterStream'?stream:labels[selector.slice(1)]||null,addEventListener:(type,fn)=>handlers[type]=fn};
+const article={querySelectorAll:()=>[]};
+const r={id:'first',title:'Capítulo primero',volume_number:2,navigation:[{id:'first'},{id:'second'}]};
+const state={view:'reader:first',readerSection:r};
+const saved={block:4,offset:.5,percent:42,updatedAt:Date.now()};
+globalThis.window={innerHeight:800,scrollY:0};
+globalThis.document={querySelector:selector=>selector==='.readerExperience'?root:null,fonts:{ready:Promise.resolve()}};
+globalThis.MutationObserver=class{observe(){}disconnect(){disconnected=true}};
+globalThis.requestAnimationFrame=fn=>{fn();return 1};
+const flow={active:()=>r,paper:()=>article,position:()=>({percent:55}),restore:(pos,id)=>{assert.equal(id,'first');assert.equal(pos,saved);restored++}};
+const reader=createReaderEnhancements({flow,state:()=>state,readPosition:()=>saved,openChapter:()=>{},savePosition:async()=>{},openSettings:()=>{},seekTo:()=>{}});
+reader.bind();
+assert.ok(restored>=2,'restore must run across paint passes');
+assert.equal(labels.readerFloatTitle.textContent,'Capítulo primero','dock must follow active chapter');
+assert.equal(labels.readerFloatPercentage.textContent,'55%');
+assert.equal(labels.readerFloatSeek.value,'55');
+window.scrollY=400;reader.refresh();assert.ok(classState.has('readerFloatHidden'),'hide dock while scrolling down');
+window.scrollY=280;reader.refresh();assert.ok(!classState.has('readerFloatHidden'),'show dock while scrolling back up');
+const before=restored;
+handlers.wheel();await Promise.resolve();await Promise.resolve();
+assert.equal(restored,before,'user scrolling cancels late font-resume positioning');
+reader.clear();assert.ok(disconnected,'observer must disconnect on reader leave');
+console.log('Reader Phase 7 unit regressions OK');

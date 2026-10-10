@@ -10,6 +10,11 @@ fs.mkdirSync(path.join(dist, "assets"), { recursive: true });
 fs.copyFileSync(path.join(root, "src", "index.html"), path.join(dist, "index.html"));
 fs.copyFileSync(path.join(root, "src", "styles.css"), path.join(dist, "assets", "styles.css"));
 fs.copyFileSync(path.join(root, "src", "app.js"), path.join(dist, "assets", "app.js"));
+fs.copyFileSync(path.join(root, "src", "reader-flow.js"), path.join(dist, "assets", "reader-flow.js"));
+fs.copyFileSync(path.join(root, "src", "reader-enhancements.js"), path.join(dist, "assets", "reader-enhancements.js"));
+fs.copyFileSync(path.join(root, "src", "reader-annotations.js"), path.join(dist, "assets", "reader-annotations.js"));
+fs.copyFileSync(path.join(root, "src", "reader-pagination.js"), path.join(dist, "assets", "reader-pagination.js"));
+fs.copyFileSync(path.join(root, "src", "reader-preferences.js"), path.join(dist, "assets", "reader-preferences.js"));
 fs.copyFileSync(path.join(root, "src", "activate-styles.js"), path.join(dist, "assets", "activate-styles.js"));
 
 for (const file of ["manifest.webmanifest", "sw.js", "icon.svg",
@@ -30,6 +35,11 @@ const requiredBuiltFiles = [
   "index.html",
   "assets/styles.css",
   "assets/app.js",
+  "assets/reader-flow.js",
+  "assets/reader-enhancements.js",
+  "assets/reader-annotations.js",
+  "assets/reader-pagination.js",
+  "assets/reader-preferences.js",
   "runtime-config.js",
   "sw.js",
   "manifest.webmanifest",

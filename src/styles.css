@@ -2516,7 +2516,7 @@ html[data-site-focus="enhanced"] :where(a,button,input,select,textarea,summary,[
 .readerChapterIndex{color:var(--reader-action);letter-spacing:.12em;text-transform:uppercase;font-size:.75rem;font-weight:850}
 .readerReadingActions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .readerReadingActions #readerProgressLabel{font-size:.82rem;color:var(--reader-secondary);font-variant-numeric:tabular-nums}
-.readerExperience .readerReadingTools .btn{padding:7px 12px;min-height:36px;font-size:.8rem}
+.readerExperience .readerReadingTools .btn{padding:9px 12px;min-height:44px;font-size:.8rem}
 .readerExperience .readerPaper{max-width:870px;background:transparent!important;color:var(--reader-ink)!important;border:0!important;box-shadow:none!important;border-radius:0;padding:26px clamp(6px,3vw,28px) 50px;margin:0 auto}
 .readerExperience .readerPaper.reader-narrow{max-width:680px}.readerExperience .readerPaper.reader-wide{max-width:1060px}
 .readerExperience .readerMeta{color:var(--reader-secondary);letter-spacing:.025em;font-size:.86rem;margin:0 0 12px;overflow-wrap:anywhere}
@@ -2573,3 +2573,222 @@ body:has(.readerExperience.readerFocused) .top{display:none!important}
  .readerExperience .readerControlDock{justify-content:stretch}
  .readerExperience .readerSettingsPanel{max-width:calc(100vw - 24px)}
 }
+
+/* Continuous chapter reading */
+.readerChapterStream{display:grid;grid-template-columns:minmax(0,1fr);row-gap:24px;min-width:0}
+.readerChapterStream .readerPaper{width:100%;min-width:0;scroll-margin-top:80px}
+.readerChapterStream .readerStreamHeading{font:700 clamp(1.6rem,3vw,2.45rem)/1.2 Georgia,serif;margin:0 0 25px;color:inherit}
+.readerAnchorBlock{min-width:0;overflow-wrap:anywhere}
+.readerBookProgress{color:var(--reader-secondary);font-size:.83rem;white-space:nowrap}
+.readerStreamStatus{color:var(--reader-secondary);font-size:.85rem;min-height:1.2em;text-align:center;margin:8px 0 16px}
+.readerExperience .readerQuickGroup:first-child .readerQuickChoices button{flex:1 1 118px}
+@media(max-width:600px){.readerChapterStream{row-gap:16px}.readerBookProgress{white-space:normal}}
+
+/* Shared reading mode chooser (volume detail and account Reading preferences) */
+.volumeReadingMode{margin:20px 0 28px;padding:clamp(17px,3vw,26px);border:1px solid var(--line);border-radius:18px;background:var(--panel)}
+.volumeReadingModeHead h3,.readerReadingPreferences h4{margin:6px 0 8px;color:var(--text)}
+.volumeReadingModeHead p,.readerReadingPreferences>p{margin:0 0 18px;max-width:72ch}
+.readingModeOptions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.readingModeOption{display:flex;align-items:flex-start;gap:12px;min-width:0;min-height:110px;padding:18px;border:2px solid var(--line);border-radius:15px;background:var(--panel2);color:var(--text);text-align:left;cursor:pointer;transition:border-color .16s ease,background-color .16s ease}
+.readingModeOption:hover{border-color:var(--accent);background:var(--panel)}
+.readingModeOption.selected{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 9%,var(--panel))}
+.readingModeOption:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.readingModeIcon{flex:0 0 40px;height:40px;display:grid;place-items:center;font-size:1.55rem;border:1px solid var(--line);background:var(--panel);border-radius:11px}
+.readingModeText{display:flex;flex-direction:column;gap:5px;flex:1;min-width:0}
+.readingModeText strong{font-size:1rem;line-height:1.4}
+.readingModeText small{color:var(--muted);font-size:.87rem;line-height:1.55;font-weight:400}
+.readingModeCheck{opacity:0;color:var(--text);font-weight:900}
+.readingModeOption.selected .readingModeCheck{opacity:1}
+.readingModeStatus{margin:12px 0 0;font-size:.84rem}
+.readingModeStatus:empty{display:none}
+.readerReadingPreferences .readingModeHelp{margin-top:16px}
+@media(max-width:650px){.readingModeOptions{grid-template-columns:1fr}.readingModeOption{min-height:82px;padding:14px}.volumeReadingMode{margin:14px 0 23px}.readingModeIcon{flex-basis:35px;height:35px;font-size:1.35rem}}
+@media(prefers-reduced-motion:reduce){.readingModeOption{transition:none}}
+
+.volumeReadingModeAction{display:flex;justify-content:flex-start;margin-top:18px}
+.volumeReadingModeAction .btn{min-height:44px}
+@media(max-width:650px){.volumeReadingModeAction .btn{width:100%}}
+
+/* Fase 7 — barra flotante para navegación, discretamente fuera del texto */
+.readerExperience{padding-bottom:clamp(125px,13vh,175px)}
+.readerFloatDock{position:fixed;z-index:58;left:50%;bottom:max(12px,env(safe-area-inset-bottom));transform:translateX(-50%);width:min(980px,calc(100vw - 32px));display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--reader-ui);color:var(--reader-ink);border:1px solid var(--reader-rule);border-radius:19px;box-shadow:0 9px 38px rgba(0,0,0,.19);transition:opacity .22s ease,transform .22s ease,visibility .22s ease}
+.readerFloatDock.readerFloatHidden{opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,125%)}
+.readerFloatDock:focus-within{opacity:1;visibility:visible;pointer-events:auto;transform:translateX(-50%)}
+.readerFloatInfo{display:flex;flex-direction:column;gap:2px;min-width:0;flex:1 1 200px}
+.readerFloatInfo>span{font-size:.7rem;color:var(--reader-secondary)}
+.readerFloatInfo strong{display:block;font-size:.84rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:270px}
+.readerFloatProgress{position:relative;display:flex;align-items:center;flex:2 1 175px;min-width:70px}
+.readerFloatProgress input{width:100%;height:28px;cursor:pointer;position:relative;z-index:1;appearance:none;background:transparent;margin:0}
+.readerFloatProgress::before{content:"";position:absolute;left:0;right:0;height:5px;background:var(--reader-rule);border-radius:20px}
+.readerFloatProgress>span{position:absolute;left:0;top:50%;height:5px;transform:translateY(-50%);background:var(--reader-action);border-radius:20px;pointer-events:none}
+.readerFloatProgress input::-webkit-slider-thumb{appearance:none;width:18px;height:18px;border:3px solid var(--reader-ui);border-radius:50%;box-shadow:0 0 0 1px var(--reader-action);background:var(--reader-action)}
+.readerFloatProgress input::-moz-range-thumb{width:14px;height:14px;border:3px solid var(--reader-ui);border-radius:50%;box-shadow:0 0 0 1px var(--reader-action);background:var(--reader-action)}
+.readerFloatPercentage{font-variant-numeric:tabular-nums;font-weight:750;font-size:.8rem;white-space:nowrap;min-width:35px;text-align:right}
+.readerFloatActions{display:flex;gap:5px;align-items:center;flex-shrink:0}
+.readerFloatActions>button,.readerFloatIndex>summary{display:inline-flex;justify-content:center;align-items:center;gap:6px;min-height:42px;padding:9px 10px;cursor:pointer;border:1px solid transparent;border-radius:11px;background:var(--reader-ui-soft);color:var(--reader-ink);font-size:.83rem;font-weight:700}
+.readerFloatActions>button:hover,.readerFloatIndex>summary:hover{border-color:var(--reader-action)}
+.readerFloatIndex{position:relative}
+.readerFloatIndex>summary{list-style:none}
+.readerFloatIndex>summary::-webkit-details-marker{display:none}
+.readerFloatIndexPanel{position:absolute;bottom:calc(100% + 16px);right:0;width:min(380px,calc(100vw - 38px));padding:16px;border:1px solid var(--reader-rule);border-radius:14px;background:var(--reader-ui);box-shadow:0 8px 28px rgba(0,0,0,.18)}
+.readerFloatIndexPanel label{display:block;font-size:.8rem;margin-bottom:8px}
+.readerFloatIndexPanel select{width:100%;min-height:44px;padding:9px;border:1px solid var(--reader-rule);border-radius:9px;background:var(--reader-ui-soft);color:var(--reader-ink);font-size:16px}
+.readerExperience.readerFocused .readerFloatDock{display:none!important}
+.readerIllustrationOpen{display:block;width:100%;padding:6px;border:1px solid transparent;border-radius:10px;background:none;color:inherit;cursor:zoom-in}
+.readerIllustrationOpen:hover,.readerIllustrationOpen:focus-visible{border-color:var(--reader-action);outline:2px solid var(--reader-action);outline-offset:2px}
+.readerLightbox{box-sizing:border-box;width:min(1100px,98vw);max-width:none;height:min(92dvh,920px);max-height:none;margin:auto;padding:0;background:#101216;color:#f0f0f0;border:1px solid #404348;border-radius:17px;box-shadow:0 18px 70px rgba(0,0,0,.45);overflow:hidden}
+.readerLightbox::backdrop{background:rgba(0,0,0,.85)}
+.readerLightbox:not([open]){display:none}
+.readerLightboxShell{display:flex;flex-direction:column;height:100%;min-height:0}
+.readerLightboxTop,.readerLightboxBottom{display:flex;align-items:center;gap:12px;padding:10px 16px;min-height:56px;background:#191c22;flex-shrink:0}
+.readerLightboxTop{justify-content:space-between;border-bottom:1px solid #343840}
+.readerLightboxBottom{border-top:1px solid #343840;justify-content:space-between}
+.readerLightboxTop>span{font-size:.85rem;white-space:nowrap}
+.readerLightboxControls{display:flex;align-items:center;gap:7px}
+.readerLightboxControls button,.readerLightboxBottom button{min-width:42px;min-height:42px;padding:7px 9px;background:#292d35;border:1px solid #505663;border-radius:9px;color:#fff;cursor:pointer;font:inherit}
+.readerLightboxControls button:disabled,.readerLightboxBottom button:disabled{opacity:.35;cursor:not-allowed}
+.readerLightboxControls button:hover:not(:disabled),.readerLightboxBottom button:hover:not(:disabled){background:#424953}
+.readerLightboxStage{flex:1;display:flex;min-height:0;overflow:auto;align-items:flex-start;justify-content:flex-start;overscroll-behavior:contain;touch-action:pan-x pan-y pinch-zoom}
+.readerLightboxStage img{display:block;flex:none;width:100%;max-width:none;height:auto;object-fit:contain;margin:auto}
+.readerLightboxStage img[hidden]{display:none}
+.readerLightboxStage p{padding:25px;text-align:center;width:100%;color:#fff}
+.readerLightboxBottom>span{font-size:.8rem;text-align:center;overflow-wrap:anywhere;max-height:70px;overflow:auto}
+.readerLightbox :where(button,select):focus-visible{outline:3px solid #f4c07b;outline-offset:3px}
+@media(max-width:690px){
+ .readerFloatDock{width:calc(100vw - 18px);bottom:max(6px,env(safe-area-inset-bottom));padding:8px 9px;gap:7px;border-radius:15px;flex-wrap:wrap}
+ .readerFloatInfo{flex:1 1 calc(65% - 16px)}
+ .readerFloatInfo strong{max-width:none}
+ .readerFloatProgress{order:3;flex:1 1 calc(100% - 65px);margin:0 3px}
+ .readerFloatPercentage{order:4}
+ .readerFloatActions{margin-left:auto}
+ .readerFloatActions>button,.readerFloatIndex>summary{min-width:42px;min-height:42px;padding:8px}
+ .readerFloatActions>button span,.readerFloatIndex>summary span{display:none}
+ .readerLightbox{width:100vw;height:100dvh;border-radius:0;border:0}
+ .readerLightboxTop{gap:7px;padding:8px}
+ .readerLightboxTop>span{font-size:.73rem}
+ .readerLightboxControls{gap:3px}
+ .readerLightboxControls button{padding:6px;min-width:37px}
+ .readerLightboxControls #readerLightboxZoomReset{font-size:.74rem;padding:6px}
+ .readerLightboxBottom{padding:7px 11px;min-height:49px}
+}
+@media(prefers-reduced-motion:reduce){.readerFloatDock{transition:none}}
+
+/* Keep the existing preferences panel accessible from the floating dock,
+   without moving the document scroll position or duplicating settings. */
+.readerExperience .readerSettings[data-floating-open="true"] .readerSettingsPanel{
+ position:fixed;top:auto;left:auto;
+ right:max(12px,calc((100vw - 980px)/2));
+ bottom:calc(90px + env(safe-area-inset-bottom));
+ max-height:min(68dvh,700px);z-index:115
+}
+@media(max-width:690px){
+ .readerExperience .readerSettings[data-floating-open="true"] .readerSettingsPanel{
+  right:9px;left:9px;width:auto;max-width:none;
+  bottom:calc(115px + env(safe-area-inset-bottom));max-height:calc(100dvh - 145px)
+ }
+}
+
+/* Phase 8: account-owned marks, annotations and selection actions. */
+.readerAnnotationTools{display:flex;justify-content:flex-end;gap:9px;flex-wrap:wrap;max-width:870px;margin:12px auto 0}
+.readerAnnotationTools button{border:1px solid var(--reader-rule);background:var(--reader-ui);color:var(--reader-ink);min-height:44px;padding:9px 12px;border-radius:11px;cursor:pointer;font-weight:650}
+.readerAnnotationTools button:hover{border-color:var(--reader-action)}
+.readerAnnotationTools span{font-size:.77rem;color:var(--reader-secondary);padding-left:5px}
+.readerSelectionActions{position:fixed;z-index:150;display:flex;gap:6px;padding:7px;background:var(--reader-ui);border:1px solid var(--reader-rule);border-radius:13px;box-shadow:0 8px 35px rgba(0,0,0,.2)}
+.readerSelectionActions[hidden],.readerAnnotationsPanel[hidden]{display:none!important}
+.readerSelectionActions button{min-height:42px;border:0;border-radius:8px;background:var(--reader-ui-soft);color:var(--reader-ink);padding:8px 13px;cursor:pointer;font-weight:700}
+.readerAnnotationsPanel{position:fixed;right:max(14px,env(safe-area-inset-right));top:max(65px,env(safe-area-inset-top));bottom:calc(85px + env(safe-area-inset-bottom));width:min(395px,calc(100vw - 28px));z-index:110;overflow:auto;overscroll-behavior:contain;border:1px solid var(--reader-rule);border-radius:18px;padding:20px;background:var(--reader-ui);color:var(--reader-ink);box-shadow:0 16px 55px rgba(0,0,0,.23)}
+.readerAnnotationsHeader{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.readerAnnotationsHeader h2{font-size:1.2rem;margin:0}
+.readerAnnotationsHeader button{width:44px;height:44px;border-radius:11px;background:var(--reader-ui-soft);border:1px solid var(--reader-rule);color:var(--reader-ink);cursor:pointer}
+.readerAnnotationsPanel>p{font-size:.82rem;margin:8px 0 20px}
+.readerAnnotationCard{border:1px solid var(--line,var(--reader-rule));background:var(--panel,var(--reader-ui));border-radius:14px;padding:14px;min-width:0;overflow-wrap:anywhere}
+.readerAnnotationsPanel .readerAnnotationCard{border-color:var(--reader-rule);background:var(--reader-ui-soft);margin-bottom:10px}
+.readerAnnotationCardHead{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.readerAnnotationKind{font-weight:750;font-size:.76rem}
+.readerAnnotationDate{font-size:.74rem;opacity:.7}
+.readerAnnotationOrigin{font-size:.82rem;margin-top:8px;color:var(--muted,var(--reader-secondary))}
+.readerAnnotationExcerpt{border-left:4px solid var(--reader-action,var(--accent));padding:8px 10px;margin:10px 0;line-height:1.55;font-size:.92rem;background:color-mix(in srgb,var(--reader-action,var(--accent)) 7%,transparent)}
+.readerAnnotationExcerptColor-mint{border-color:#3b987c}.readerAnnotationExcerptColor-rose{border-color:#c76b90}.readerAnnotationExcerptColor-blue{border-color:#528bcc}
+.readerAnnotationNote{font-size:.9rem;white-space:pre-wrap;overflow-wrap:anywhere;line-height:1.55}
+.readerAnnotationCardActions{display:flex;gap:7px;flex-wrap:wrap}
+.readerAnnotationCardActions button{min-height:42px;cursor:pointer;border:1px solid var(--line,var(--reader-rule));background:transparent;color:inherit;border-radius:9px;padding:8px 10px;font-size:.8rem;font-weight:650}
+.readerAnnotationCardActions button:hover{border-color:var(--reader-action,var(--accent))}
+.readerAnnotationCardActions button.danger{color:#bd5150}
+.readerAnchorBlock mark.readerMarkedText{color:inherit;border-radius:2px;-webkit-box-decoration-break:clone;box-decoration-break:clone;background:rgba(235,189,76,.38);padding:0}
+.readerAnchorBlock mark.readerMarked-mint{background:rgba(92,192,151,.36)}
+.readerAnchorBlock mark.readerMarked-rose{background:rgba(241,130,169,.34)}
+.readerAnchorBlock mark.readerMarked-blue{background:rgba(126,174,245,.36)}
+.readerExperience.readerFocused .readerAnnotationTools{display:none}
+.readerAnnotationEditor{width:min(480px,calc(100vw - 26px));max-width:none;max-height:88dvh;border:1px solid #ccc;border-radius:17px;padding:24px;background:var(--reader-ui,#fff);color:var(--reader-ink,#222);box-shadow:0 18px 65px rgba(0,0,0,.3)}
+.readerAnnotationEditor::backdrop{background:rgba(0,0,0,.65)}
+.readerAnnotationEditor:not([open]){display:none}
+.readerAnnotationEditor h2{font-size:1.25rem;margin:0 0 17px}
+.readerAnnotationEditor label{display:block;margin:14px 0 7px;font-weight:700}
+.readerAnnotationEditor textarea,.readerAnnotationEditor select{font:inherit;color:inherit;background:var(--reader-ui-soft,#f3f3f3);border:1px solid var(--reader-rule,#ccc);border-radius:9px;padding:10px;width:100%;max-width:100%}
+.readerAnnotationEditorButtons{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+.readerAnnotationEditorButtons button{min-height:44px;padding:8px 14px;border-radius:10px}
+.readerAnnotationsLibrary{margin:24px 0 36px}
+.readerAnnotationFilters{display:flex;gap:9px;flex-wrap:wrap;margin:16px 0}
+.readerAnnotationFilters button{min-height:44px;padding:9px 16px;border:1px solid var(--line);border-radius:24px;cursor:pointer;background:var(--panel);color:var(--text)}
+.readerAnnotationFilters button.active{color:var(--accent);border-color:var(--accent);font-weight:750}
+.readerAnnotationLibraryGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.readerAnnotationsLibrary .readerAnnotationCard{background:var(--panel);color:var(--text);border-color:var(--line)}
+.readerAnnotationTools :where(button):focus-visible,.readerAnnotationCardActions button:focus-visible,.readerAnnotationFilters button:focus-visible,.readerAnnotationEditor :where(button,select,textarea):focus-visible{outline:3px solid var(--reader-action,var(--accent));outline-offset:2px}
+@media(max-width:700px){.readerAnnotationLibraryGrid{grid-template-columns:1fr}.readerAnnotationsPanel{top:75px;bottom:calc(106px + env(safe-area-inset-bottom));padding:16px}.readerAnnotationTools{justify-content:stretch}.readerAnnotationTools button{flex:1}}
+@media(prefers-reduced-motion:reduce){.readerSelectionActions{transition:none}}
+
+/* Reader phase 9: global preferences vs individual volume settings. */
+.readingModeOptions{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+.readerReadingPreferences h4{margin:22px 0 10px}
+.readerScopeFields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px;margin:14px 0 18px}
+.readerScopeField{display:flex;flex-direction:column;gap:6px;font-size:.84rem;font-weight:700;color:var(--text)}
+.readerScopeField select{width:100%;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);padding:9px 10px;font:inherit;font-weight:400}
+.readerScopeField select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.readerVolumeAdvanced{margin:14px 0 8px;padding:12px;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+.readerVolumeAdvanced>summary{cursor:pointer;min-height:44px;display:flex;align-items:center;font-weight:750;color:var(--text)}
+.readerVolumeAdvanced[open]>summary{border-bottom:1px solid var(--line);padding-bottom:10px;margin-bottom:14px}
+.readerVolumeReset{min-height:44px;margin:7px 0 4px}
+.readerExperience .readerPageControls{display:none}
+.readerExperience.readerPagedMode .readerPageControls{
+ display:flex;max-width:840px;align-items:center;justify-content:center;gap:14px;
+ flex-wrap:wrap;margin:16px auto 10px;padding:10px 13px;background:var(--reader-ui-soft);
+ border:1px solid var(--reader-rule);border-radius:13px;color:var(--reader-ink)
+}
+.readerPageControls button{min-height:44px;min-width:105px;padding:9px 13px;border-radius:10px;border:1px solid var(--reader-rule);background:var(--reader-ui);color:var(--reader-ink);font:inherit;font-size:.83rem;cursor:pointer}
+.readerPageControls button:disabled{opacity:.45;cursor:not-allowed}
+.readerPageControls span{font-size:.85rem;font-weight:750;font-variant-numeric:tabular-nums;min-width:95px;text-align:center}
+.readerExperience.readerPagedMode .readerChapterStream{display:block;max-width:980px;margin:0 auto;overflow:hidden;min-width:0}
+.readerExperience.readerPagedMode .readerChapterStream .readerPaper{
+ box-sizing:border-box;display:block;height:clamp(390px,66dvh,720px)!important;
+ max-width:100%;width:100%;column-count:1;column-width:var(--reader-page-width,700px);
+ column-gap:36px;column-fill:auto;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;
+ padding:20px clamp(12px,3vw,30px)!important;overscroll-behavior-x:contain;
+ scroll-behavior:auto;contain:layout;scroll-margin-top:0;
+}
+.readerExperience.readerPagedMode .readerPaper::-webkit-scrollbar{display:none}
+.readerExperience.readerPagedMode .readerPaper .readerAnchorBlock{break-inside:auto}
+.readerExperience.readerPagedMode .readerPaper h1{break-after:avoid;break-inside:avoid}
+.readerExperience.readerPagedMode .readerPaper figure{break-inside:avoid}
+.readerExperience.readerPagedMode .readerPaper figure img{max-height:calc(60dvh - 45px);object-fit:contain}
+.readerExperience.readerPagedMode .readerPaper .readerMeta{break-after:avoid}
+.readerExperience.readerPagedMode .readerPageControls :focus-visible{outline:3px solid var(--reader-action);outline-offset:2px}
+@media(max-width:750px){
+ .readingModeOptions{grid-template-columns:1fr}
+ .readerScopeFields{grid-template-columns:1fr;gap:10px}
+ .readerExperience.readerPagedMode .readerChapterStream .readerPaper{
+  height:clamp(370px,calc(100dvh - 315px),680px)!important;
+  column-gap:24px;padding:14px 12px!important
+ }
+ .readerExperience.readerPagedMode .readerPageControls{gap:7px;padding:8px;margin:8px auto}
+ .readerPageControls button{flex:1 1 98px;padding:7px}
+ .readerPageControls span{order:-1;flex-basis:100%}
+}
+@media(prefers-reduced-motion:reduce){
+ .readerExperience.readerPagedMode .readerChapterStream .readerPaper{scroll-behavior:auto}
+}
+
+/* Phase 9: the volume's primary read and offline actions must never clip on mobile. */
+.volumeReadingModeAction{gap:10px;flex-wrap:wrap;align-items:stretch}
+.volumeReadingModeAction .btn{min-width:0;max-width:100%}
+#volumeOfflineStatus{margin:8px 0 0;font-size:.82rem}
+@media(max-width:650px){.volumeReadingModeAction{flex-direction:column}.volumeReadingModeAction .btn{width:100%}}
