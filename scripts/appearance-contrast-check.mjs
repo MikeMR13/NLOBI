@@ -110,6 +110,7 @@ for (const palette of paletteNames) {
 
         // A quick theme toggle must preserve the user's chosen color palette.
         if (viewport.width === 390 && viewport.scale === 100) {
+          await page.locator('.mobileNavClose').click();
           await page.locator('#themeMobileQuick').click();
           const updated = await page.evaluate(() => ({
             theme: JSON.parse(localStorage.getItem('nlobi_site_appearance') || '{}').theme,
