@@ -39,6 +39,11 @@ for(const view of cases){
    if(!await menu.isVisible())throw Error('Menu panel invisible');
    if(!await page.locator('.mobileNavBackdrop').isVisible())throw Error('Backdrop invisible');
    if(await toggle.getAttribute('aria-expanded')!=='true')throw Error('aria-expanded is not true');
+   // Background refreshes must not dismiss an open menu on the same route.
+   await page.evaluate(()=>window.__NLOBI_QA__.setState({notes:[{id:'qa-notice',title:'Novedad',read_at:null}]}));
+   if(!await page.locator('.mobileNav').evaluate(el=>el.open)||!await page.locator('.mobileNavPanel').isVisible())throw Error('Menu was dismissed by same-view refresh');
+   if(!await page.evaluate(()=>document.body.classList.contains('mobileNavOpen')))throw Error('Scroll lock was lost during refresh');
+
    const locked=await page.evaluate(()=>({position:document.body.style.position,overflow:document.documentElement.scrollWidth-innerWidth,activeInPanel:document.querySelector('.mobileNavPanel').contains(document.activeElement)}));
    if(!await page.evaluate(()=>document.documentElement.classList.contains('mobileNavOpen'))||!locked.activeInPanel||locked.overflow>2)throw Error('Missing body lock, focus placement or horizontal overflow '+JSON.stringify(locked));
    await page.keyboard.press('Escape');
