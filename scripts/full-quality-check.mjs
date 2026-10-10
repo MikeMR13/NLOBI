@@ -543,6 +543,15 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   await page.locator('[data-volume-gallery]').click();
   await page.locator('[data-open-volume="'+vb+'"]').click();
   const selectedB=await page.evaluate(()=>document.querySelector('.volumeReadingMode [data-reading-mode="chapter"]')?.getAttribute('aria-pressed'));
+  await page.evaluate(profile=>window.__NLOBI_QA__.setState({view:'auth:edit',user:{id:'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',email:'qa@example.test'},profile,preferenceTab:'reading'}),profile);
+  await page.locator('[data-preference-tab="reading"]').click();
+  await page.locator('[data-reading-scope="global"][data-reading-mode="continuous"]').click();
+  await page.evaluate(work=>window.__NLOBI_QA__.setState({view:'detail:project-1',currentDetail:work,detailVolumeId:null,detailVolumeTranslationId:'project-1'}),work);
+  await page.locator('[data-open-volume="'+vb+'"]').click();
+  const inheritedB=await page.evaluate(()=>document.querySelector('.volumeReadingMode [data-reading-mode="continuous"]')?.getAttribute('aria-pressed'));
+  await page.locator('[data-volume-gallery]').click();
+  await page.locator('[data-open-volume="'+va+'"]').click();
+  const retainedA=await page.evaluate(()=>document.querySelector('.volumeReadingMode [data-reading-mode="paged"]')?.getAttribute('aria-pressed'));
   await page.evaluate(({ca,va,cb,vb,chapterA,chapterB})=>window.__NLOBI_QA__.setState({
    view:'reader:'+ca,readerSection:{...chapterA,translation_id:'project-1',novel_title:'Obra de prueba',volume_number:1,navigation:[{id:ca,volume_id:va,volume_number:1,title:'Capítulo de libro'}, {id:cb,volume_id:vb,volume_number:2,title:'Segundo volumen'}]}}),{ca,va,cb,vb,chapterA,chapterB});
   await page.waitForTimeout(100);
@@ -554,8 +563,8 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   }));
   await page.locator('#readerPageNext').click();await page.waitForTimeout(180);
   const moved=await page.locator('.readerPaper').evaluate(x=>x.scrollLeft);
-  if(runtime.length||selectedA.mode!=='true'||selectedA.theme!=='sepia'||selectedB!=='true'||!paged.mode||!paged.theme||!paged.widths[0]||paged.widths[0]<=paged.widths[1]||moved<10)
-   failures.push({scenario:'reader-phase9-volume-presets-and-paged-mobile',runtime,selectedA,selectedB,paged,moved});
+  if(runtime.length||selectedA.mode!=='true'||selectedA.theme!=='sepia'||selectedB!=='true'||inheritedB!=='true'||retainedA!=='true'||!paged.mode||!paged.theme||!paged.widths[0]||paged.widths[0]<=paged.widths[1]||moved<10)
+   failures.push({scenario:'reader-phase9-volume-presets-and-paged-mobile',runtime,selectedA,selectedB,inheritedB,retainedA,paged,moved});
   await context.close();
  }
 
