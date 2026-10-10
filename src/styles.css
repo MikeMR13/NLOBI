@@ -2683,3 +2683,139 @@ body:has(.readerExperience.readerFocused) .top{display:none!important}
 @media(prefers-reduced-motion:reduce){
  .mobileNavBackdrop,.mobileNavPanel{animation:none!important;transition:none!important}
 }
+
+/* Visual audit · phase 3: unified surfaces and interaction rhythm */
+:root{
+ --ui-surface-radius:18px;
+ --ui-control-radius:11px;
+ --ui-surface-shadow:0 5px 22px rgba(0,0,0,.055);
+ --ui-focus-color:var(--accent);
+}
+body.dark{--ui-surface-shadow:0 8px 28px rgba(0,0,0,.18)}
+/* Editorial content shares one surface language; the reader's paper/font themes are intentionally excluded. */
+:is(.homeEditorial .homeBookCard,.homeEditorial .homeFeatured,.exploreEditorial .catalogEditorialCard,
+ .libraryEditorial .libraryShelfCard,.libraryEditorial .libraryContinueCard,
+ .studioWrap .studioBookCard,.studioWrap .studioVolumeCard,
+ .adminWorkspace .adminDashboardKpi,.adminWorkspace .adminDashboardPanel,.adminWorkspace .adminEditorialCard,
+ .readerVolumeOptions,.readerEditCard,.siteAppearancePanel,.betaDiagnosticPanel){
+ border:1px solid var(--line);
+ border-radius:var(--ui-surface-radius);
+ background:var(--panel);
+ box-shadow:var(--ui-surface-shadow);
+ min-width:0;
+}
+:is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+ .libraryEditorial .libraryShelfCard,.studioWrap .studioBookCard,
+ .adminWorkspace .adminDashboardKpi){
+ transition:border-color .18s ease,box-shadow .18s ease,transform .18s ease;
+}
+:is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+ .libraryEditorial .libraryShelfCard,.studioWrap .studioBookCard,
+ .adminWorkspace .adminDashboardKpi):hover{
+ border-color:color-mix(in srgb,var(--accent) 62%,var(--line));
+ box-shadow:var(--shadow2);
+ transform:translateY(-2px);
+}
+/* The same control height, shape and contrast throughout the creator and reader hubs. */
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace,.readerVolumeOptions,.siteAppearancePanel,.readerSettingsPanel)
+ :is(.btn,.catalogCardActions .btn,.studioBookActions .btn,.studioVolumeContent .btn,.libraryContinueButton){
+ display:inline-flex;align-items:center;justify-content:center;gap:7px;
+ min-height:44px;
+ padding:10px 14px;
+ line-height:1.35;
+ border-radius:var(--ui-control-radius);
+ font-weight:700;
+ text-wrap:balance;
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace,.readerVolumeOptions,.siteAppearancePanel,.readerSettingsPanel)
+ :is(input:not([type="checkbox"]):not([type="radio"]),select,textarea){
+ min-width:0;max-width:100%;min-height:44px;
+ border-radius:var(--ui-control-radius);
+ color:var(--text);
+ background:var(--panel);
+ border:1px solid var(--line);
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace,.readerVolumeOptions,.siteAppearancePanel,.readerSettingsPanel)
+ :is(.btn,button,a,input,select,textarea,summary):focus-visible{
+ outline:3px solid var(--ui-focus-color);
+ outline-offset:3px;
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace,.readerVolumeOptions,.siteAppearancePanel,.readerSettingsPanel)
+ :is(input,select,textarea):focus-visible{
+ border-color:var(--accent);
+ box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 17%,transparent);
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace,.readerVolumeOptions,.siteAppearancePanel)
+ :is(.btn.primary,button.primary){color:#111;background:var(--accent);border-color:color-mix(in srgb,var(--accent) 74%,#111)}
+/* Display headings must remain readable at the largest user-selected font scale. */
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace)
+ :is(h1,h2,h3){overflow-wrap:break-word;text-wrap:balance}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace)
+ :is(.sectionHead,.homeSectionHead,.studioSectionHead){min-width:0;gap:clamp(10px,2vw,20px)}
+:is(.homeEditorial .homeSectionHead,.exploreEditorial .exploreResultsBar,
+ .libraryEditorial .libraryShelfTools,.studioWrap .studioCatalogToolbar,
+ .adminWorkspace .adminCurrentHead){min-width:0}
+/* Harmonize editorial panels without flattening the black/yellow signature. */
+:is(.homeEditorial .homeShowcase,.exploreEditorial .exploreShowcase,
+ .libraryEditorial .libraryShowcase,.studioWrap .studioHero,
+ .adminWorkspace .adminWorkspaceHeader){
+ border-radius:clamp(16px,2.3vw,24px);
+}
+:is(.homeEditorial .homeSectionKicker,.libraryEditorial .librarySectionKicker,
+ .studioWrap .eyebrow,.adminWorkspace .adminWorkspaceEyebrow){
+ font-size:clamp(.69rem,.85vw,.8rem);
+ line-height:1.4;
+ font-weight:800;
+ letter-spacing:.095em;
+ text-transform:uppercase;
+}
+:is(.homeEditorial .homeBookDetails,.exploreEditorial .catalogCardContent,
+ .libraryEditorial .libraryShelfInfo,.studioWrap .studioBookDetails){min-width:0}
+:is(.homeEditorial .homeBookDetails h3,.exploreEditorial .catalogEditorialCard h3,
+ .libraryEditorial .libraryShelfTitle,.studioWrap .studioBookDetails h3){
+ line-height:1.4;overflow-wrap:anywhere;
+}
+:is(.exploreEditorial .exploreFilters,.libraryEditorial .libraryTabs,
+ .studioWrap .studioCatalogToolbar,.adminWorkspace .adminCurrentHead){
+ scroll-margin-top:calc(76px + env(safe-area-inset-top,0px));
+}
+/* User customization applies equally to the newly harmonized cards. */
+html[data-site-corners="square"] :is(.homeBookCard,.homeFeatured,.catalogEditorialCard,.libraryShelfCard,.libraryContinueCard,
+ .studioBookCard,.studioVolumeCard,.adminDashboardKpi,.adminDashboardPanel,.adminEditorialCard,.readerVolumeOptions,.betaDiagnosticPanel){border-radius:3px}
+html[data-site-corners="soft"] :is(.homeBookCard,.homeFeatured,.catalogEditorialCard,.libraryShelfCard,.libraryContinueCard,
+ .studioBookCard,.studioVolumeCard,.adminDashboardKpi,.adminDashboardPanel,.adminEditorialCard,.readerVolumeOptions,.betaDiagnosticPanel){border-radius:25px}
+html[data-site-density="compact"] :is(.homeBookGrid,.exploreNovelGrid,.libraryShelf,.studioCatalogGrid,.adminDashboard){gap:10px}
+html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libraryShelf,.studioCatalogGrid,.adminDashboard){gap:clamp(18px,2vw,26px)}
+@media(max-width:720px){
+ :is(.homeEditorial,.exploreEditorial,.libraryEditorial,.studioWrap,.adminWorkspace) :is(.btn,button){overflow-wrap:anywhere}
+ :is(.homeEditorial .homeSectionHead,.exploreEditorial .exploreResultsBar,
+  .studioWrap .studioSectionHead,.adminWorkspace .adminDashboardIntro){flex-wrap:wrap;gap:10px}
+ :is(.homeEditorial .homeBookGrid,.exploreEditorial .exploreNovelGrid,.libraryEditorial .libraryShelf,
+  .studioWrap .studioCatalogGrid){gap:clamp(10px,2.5vw,15px)}
+ .libraryEditorial .libraryTabs{scroll-padding-inline:16px;overscroll-behavior-x:contain}
+ .libraryEditorial .libraryTabs::after{content:"";display:block;flex:0 0 6px}
+ .studioWrap .studioHeroActions,.libraryEditorial .libraryHeroActions{gap:8px}
+ .readerVolumeOptions{padding:clamp(14px,4vw,21px)}
+}
+@media(max-width:640px){
+ .homeEditorial .homeShowcase{min-height:0;grid-template-columns:minmax(0,1fr);padding:clamp(16px,4vw,22px);gap:13px;margin-top:10px}
+ .homeEditorial .homeShowcase:before{inset:8px;border-radius:12px}
+ .homeEditorial .homeShowcaseCopy h1{font-size:clamp(1.9rem,8vw,2.75rem);line-height:1.1;margin:11px 0}
+ .homeEditorial .homeShowcaseCopy p{font-size:.95rem;line-height:1.5}
+ .homeEditorial .homeShowcaseActions{gap:8px;margin:13px 0 7px}
+ .homeEditorial .homeFeaturedVisual{min-height:150px;padding:10px}
+ .homeEditorial .homeFeaturedBook{width:min(30vw,116px)}
+ .homeEditorial .homeFeaturedInfo{padding:11px 15px 14px}
+ .homeEditorial .homeFeaturedInfo h2{font-size:1rem;margin:4px 0}
+ .homeEditorial .homeFeaturedInfo p{line-height:1.4}
+ .homeEditorial .homeQuickLinks{margin-bottom:18px}
+ :is(.exploreEditorial .exploreShowcase,.libraryEditorial .libraryShowcase,.studioWrap .studioHero){padding:clamp(18px,5vw,26px)}
+ .studioWrap .studioHeroCopy h1{font-size:clamp(2rem,8vw,2.8rem);line-height:1.08}
+ .libraryEditorial .libraryShowcase h1,.exploreEditorial .exploreShowcase h1{font-size:clamp(2rem,8vw,2.8rem)}
+}
+@media(prefers-reduced-motion:reduce){
+ :is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,.libraryEditorial .libraryShelfCard,
+  .studioWrap .studioBookCard,.adminWorkspace .adminDashboardKpi){transition:none;transform:none}
+ :is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,.libraryEditorial .libraryShelfCard,
+  .studioWrap .studioBookCard,.adminWorkspace .adminDashboardKpi):hover{transform:none}
+}
