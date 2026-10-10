@@ -53,13 +53,16 @@ for (const palette of paletteNames) {
       page.on('pageerror', error => errors.push(error.message));
       try {
         await page.goto(base + '#home', { waitUntil: 'domcontentloaded' });
-        await page.waitForFunction(() => !!window.__NLOBI_QA__, null, { timeout: 10000 });
+        await page.waitForFunction(() => !!window.__NLOBI_QA__ && !window.__NLOBI_QA__.getState().catalogLoading, null, { timeout: 12000 });
         await page.evaluate(() => window.__NLOBI_QA__.setState({
           user: { id: 'qa-theme-user', email: 'visual-qa@example.test' },
           profile: { id: 'qa-theme-user', display_name: 'QA' },
           notes: [],
         }));
-        if (viewport.width <= 1100) await page.locator('.mobileNav > summary').click();
+        if (viewport.width <= 1100) {
+          await page.locator('.mobileNav > summary').click();
+          await page.waitForFunction(() => document.querySelector('.mobileNav')?.open && document.body.classList.contains('mobileNavOpen'), null, { timeout: 3000 });
+        }
         const state = await page.evaluate(() => {
           const selectors = innerWidth <= 1100
             ? {
