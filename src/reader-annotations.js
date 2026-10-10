@@ -204,6 +204,13 @@ export function createReaderAnnotations({state,request,requestAll,escape,flow,op
   const target=paper.querySelector('[data-block-index="'+x.start_block+'"]');
   if(!target){pendingJump=null;return}
   cancelAutoResume();
+  if(S().readerPrefs?.flow==='paged'){
+   const rect=target.getBoundingClientRect(),frame=paper.getBoundingClientRect(),gap=parseFloat(getComputedStyle(paper).columnGap)||36;
+   const stride=Math.max(100,paper.clientWidth-(parseFloat(getComputedStyle(paper).paddingLeft)||0)-(parseFloat(getComputedStyle(paper).paddingRight)||0)+gap);
+   const left=paper.scrollLeft+rect.left-frame.left,step=Math.max(0,Math.round(left/stride));
+   paper.scrollTo({left:Math.min(Math.max(0,paper.scrollWidth-paper.clientWidth),step*stride),behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
+   pendingJump=null;return
+  }
   const pos=x.anchor_mode==='block'?Number(x.start_offset||0)/1000:0;
   const rect=target.getBoundingClientRect(),top=Math.max(0,window.scrollY+rect.top+rect.height*pos-window.innerHeight*.32);
   window.scrollTo({top,behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});
