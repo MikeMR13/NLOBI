@@ -2975,3 +2975,12 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .teamReaderLogoPreview img{display:block;max-width:100%;max-height:110px;height:auto;object-fit:contain}
 #teamReaderLogoSize{display:inline-block;margin-left:10px;font-weight:700;font-variant-numeric:tabular-nums}
 @media(max-width:680px){.readerTeamLink:has(.teamReaderBrandImage){max-width:min(35vw,170px);padding:2px}.readerTeamLink .teamReaderBrandImage{width:min(var(--reader-team-logo-width,128px),100%);max-height:58px}}
+
+/* Imagen de marca del lector dentro de la pestaña Identidad. */
+.teamIdentityReaderBrand{margin:20px 0;border-left:3px solid var(--accent);box-shadow:none;background:var(--panel2)}
+.teamIdentityReaderBrand h3{margin:0 0 8px}
+.teamIdentityReaderBrand .field{min-width:0}
+.teamIdentityReaderBrand input[type="url"]{width:100%;min-width:0}
+.teamIdentityReaderBrand input[type="range"]{width:min(100%,300px);vertical-align:middle;accent-color:var(--accent)}
+.teamIdentityReaderBrand .teamReaderLogoPreview{background:var(--panel)}
+@media(max-width:620px){.teamIdentityReaderBrand{padding:15px;margin:16px 0}}
