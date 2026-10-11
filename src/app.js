@@ -1815,12 +1815,32 @@ function selectImportFile(file){if(!file)return;const ext=(file.name.split('.').
 async function inspectZipSafety(file){await loadScriptOnce('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',()=>!!window.JSZip);const zip=await window.JSZip.loadAsync(await file.arrayBuffer()),entries=Object.values(zip.files||{});if(entries.length>MAX_ARCHIVE_ENTRIES)throw new Error('El archivo contiene demasiadas entradas internas.');let total=0;for(const e of entries){const n=Number(e?._data?.uncompressedSize||0);if(Number.isFinite(n)&&n>0){total+=n;if(total>MAX_ARCHIVE_UNCOMPRESSED)throw new Error('El archivo comprimido se expande a más de 300 MB y fue rechazado por seguridad.')}}return zip}
 function loadScriptOnce(src,test){return new Promise((resolve,reject)=>{if(test())return resolve();const sc=document.createElement('script');sc.src=src;sc.async=true;sc.onload=resolve;sc.onerror=()=>reject(new Error('No se pudo cargar la librería requerida.'));document.head.appendChild(sc)})}
 async function analyzeImportFile(){const I=S.importState;if(!I.file)return;I.busy=true;I.message='Analizando…';render();try{let parsed;if(I.type==='docx')parsed=await parseDocxRich(I.file);else if(I.type==='epub')parsed=await parseEpubRich(I.file);else parsed=await parsePdfRich(I.file);I.text=normalizeImportedText(parsed.text);I.parsedBlocks=(parsed.blocks||[]).map(normalizeImportBlock);I.detectedSections=(parsed.sections||[]).map((x,i)=>({...x,section_number:i+1,blocks:(x.blocks||[]).map(normalizeImportBlock),body:x.body||blocksToPlainText(x.blocks||[])}));I.warnings=parsed.warnings||[];I.detectedCover=parsed.cover||'';I.coverSource=parsed.coverSource||'';I.epubFonts=parsed.epubFonts||[];if(!I.text.trim()&&!I.parsedBlocks.length)throw new Error('No se pudo extraer contenido del archivo.');I.step='analysis';I.message='';I.sections=(I.detectedSections?.length?I.detectedSections:detectSectionsRich(I.parsedBlocks,I.text)).map((x,i)=>({...x,section_number:i+1,blocks:(x.blocks||[]).map(normalizeImportBlock),body:x.body||blocksToPlainText(x.blocks||[])}));restoreImportCheckpoint()}catch(e){I.message=friendlyError(e,'No se pudo analizar el archivo.')}finally{I.busy=false;render()}}
-function normalizeImportBlock(b){if(!b||typeof b!=='object')return{type:'paragraph',text:String(b||'')};if(b.type==='image')return{type:'image',url:b.url||'',alt:b.alt||'',caption:b.caption||''};if(b.type==='ruby')return{type:'ruby',base:b.base||'',reading:b.reading||''};if(b.type==='separator')return{type:'separator'};return{type:['heading','quote','translator_note','paragraph'].includes(b.type)?b.type:'paragraph',text:String(b.text||'')}}
+function normalizeImportBlock(b){if(!b||typeof b!=='object')return{type:'paragraph',text:String(b||'')};if(b.type==='image')return{type:'image',url:b.url||'',alt:b.alt||'',caption:b.caption||''};if(b.type==='ruby')return{type:'ruby',base:b.base||'',reading:b.reading||'',...(Number.isInteger(b.epubFamily)&&b.epubFamily>=0&&b.epubFamily<32?{epubFamily:b.epubFamily}:{})};if(b.type==='separator')return{type:'separator'};return{type:['heading','quote','translator_note','paragraph'].includes(b.type)?b.type:'paragraph',text:String(b.text||''),...(b.html?{html:editorialSafeHtml(b.html)}:{})}}
 function importTextBlock(text,type='paragraph'){text=String(text||'').trim();if(!text)return null;if(/^(?:nota del traductor|translator(?:'s)? note|t\/?n)\s*[:：-]\s*/i.test(text))return{type:'translator_note',text:text.replace(/^(?:nota del traductor|translator(?:'s)? note|t\/?n)\s*[:：-]\s*/i,'').trim()};if(/^(\*{3,}|-{3,}|—{3,}|※{3,}|◆{3,}|◇{3,})$/.test(text))return{type:'separator'};return{type,text}}
 function textWithoutRubyAnnotations(node){const clone=node.cloneNode(true);clone.querySelectorAll('rt,rp').forEach(x=>x.remove());return clone.textContent||''}
 function rubyBlock(node){const rt=node.querySelector('rt')?.textContent?.trim()||'';const clone=node.cloneNode(true);clone.querySelectorAll('rt,rp').forEach(x=>x.remove());const base=clone.textContent.trim();return base?{type:'ruby',base,reading:rt}:null}
-function inlineContainerBlocks(node,type='paragraph'){const out=[];let buf='';const flush=()=>{const b=importTextBlock(buf,type);if(b)out.push(b);buf=''};const walk=child=>{if(child.nodeType===Node.TEXT_NODE){buf+=child.textContent||'';return}if(child.nodeType!==Node.ELEMENT_NODE)return;const tag=child.tagName.toLowerCase();if(tag==='ruby'){flush();const b=rubyBlock(child);if(b)out.push(b);return}if(tag==='img'){flush();const src=child.getAttribute('src')||'';if(src)out.push({type:'image',url:src,alt:child.getAttribute('alt')||'',caption:child.getAttribute('title')||''});return}if(tag==='br'){buf+='\n';return}for(const nested of child.childNodes)walk(nested)};for(const child of node.childNodes)walk(child);flush();return out}
-function htmlNodesToBlocks(root){const out=[],selector='h1,h2,h3,h4,h5,h6,p,blockquote,li,pre,div,img,hr,ruby';for(const n of root.querySelectorAll(selector)){const tag=n.tagName.toLowerCase(),parentBlock=n.parentElement?.closest('h1,h2,h3,h4,h5,h6,p,blockquote,li,pre');if(parentBlock&&parentBlock!==n)continue;if(/^h[1-6]$/.test(tag)){const b=importTextBlock(textWithoutRubyAnnotations(n),'heading');if(b)out.push(b)}else if(tag==='p'||tag==='li'||tag==='pre')out.push(...inlineContainerBlocks(n,'paragraph'));else if(tag==='blockquote')out.push(...inlineContainerBlocks(n,'quote'));else if(tag==='div'){if(n.querySelector('h1,h2,h3,h4,h5,h6,p,blockquote,li,pre,div,img,hr,ruby'))continue;const b=importTextBlock(textWithoutRubyAnnotations(n),'paragraph');if(b)out.push(b)}else if(tag==='img'){const src=n.getAttribute('src')||'';if(src)out.push({type:'image',url:src,alt:n.getAttribute('alt')||'',caption:n.getAttribute('title')||''})}else if(tag==='hr')out.push({type:'separator'});else if(tag==='ruby'){const b=rubyBlock(n);if(b)out.push(b)}}return out}
+function inlineContainerBlocks(node,type='paragraph',resolveFont=null){
+ const out=[];let buf='',pieces=[];
+ const flush=()=>{const b=importTextBlock(buf,type);if(b){if(pieces.some(x=>x.includes('data-epub-family')))b.html=editorialSafeHtml(pieces.join(''));out.push(b)}buf='';pieces=[]};
+ const append=(value,element)=>{buf+=value;const index=resolveFont?resolveFont(element):null;pieces.push(Number.isInteger(index)&&index>=0&&index<32?'<span data-epub-family="'+index+'">'+esc(value)+'</span>':esc(value))};
+ const walk=(child,parent)=>{if(child.nodeType===Node.TEXT_NODE){append(child.textContent||'',parent);return}if(child.nodeType!==Node.ELEMENT_NODE)return;const tag=child.tagName.toLowerCase();if(tag==='ruby'){flush();const b=rubyBlock(child);if(b){const font=resolveFont?.(child);if(Number.isInteger(font)&&font>=0&&font<32)b.epubFamily=font;out.push(b)}return}if(tag==='img'){flush();const src=child.getAttribute('src')||'';if(src)out.push({type:'image',url:src,alt:child.getAttribute('alt')||'',caption:child.getAttribute('title')||''});return}if(tag==='br'){buf+='\n';pieces.push('<br>');return}for(const nested of child.childNodes)walk(nested,child)};
+ for(const child of node.childNodes)walk(child,node);flush();return out
+}
+function htmlNodesToBlocks(root,resolveFont=null){
+ const out=[],selector='h1,h2,h3,h4,h5,h6,p,blockquote,li,pre,div,img,hr,ruby';
+ for(const n of root.querySelectorAll(selector)){
+  const tag=n.tagName.toLowerCase(),parentBlock=n.parentElement?.closest('h1,h2,h3,h4,h5,h6,p,blockquote,li,pre');
+  if(parentBlock&&parentBlock!==n)continue;
+  if(/^h[1-6]$/.test(tag))out.push(...inlineContainerBlocks(n,'heading',resolveFont));
+  else if(tag==='p'||tag==='li'||tag==='pre')out.push(...inlineContainerBlocks(n,'paragraph',resolveFont));
+  else if(tag==='blockquote')out.push(...inlineContainerBlocks(n,'quote',resolveFont));
+  else if(tag==='div'){if(n.querySelector('h1,h2,h3,h4,h5,h6,p,blockquote,li,pre,div,img,hr,ruby'))continue;out.push(...inlineContainerBlocks(n,'paragraph',resolveFont))}
+  else if(tag==='img'){const src=n.getAttribute('src')||'';if(src)out.push({type:'image',url:src,alt:n.getAttribute('alt')||'',caption:n.getAttribute('title')||''})}
+  else if(tag==='hr')out.push({type:'separator'});
+  else if(tag==='ruby'){const b=rubyBlock(n);if(b){const font=resolveFont?.(n);if(Number.isInteger(font)&&font>=0&&font<32)b.epubFamily=font;out.push(b)}}
+ }
+ return out
+}
 function blocksToPlainText(blocks){return (blocks||[]).map(b=>{if(b.type==='image')return b.caption?`[Ilustración: ${b.caption}]`:'[Ilustración]';if(b.type==='separator')return'***';if(b.type==='ruby')return b.reading?`${b.base}（${b.reading}）`:b.base;return b.text||''}).filter(Boolean).join('\n\n')}
 async function parseDocxRich(file){await inspectZipSafety(file);await loadScriptOnce('https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js',()=>!!window.mammoth);const warnings=[];const r=await window.mammoth.convertToHtml({arrayBuffer:await file.arrayBuffer()},{convertImage:window.mammoth.images.imgElement(async image=>{const base64=await image.read('base64');if(base64.length>2000000){warnings.push('Se omitió una imagen DOCX de más de ~1.5 MB para evitar inflar el capítulo.');return{src:''}}return{src:`data:${image.contentType||'image/png'};base64,${base64}`}})});const doc=new DOMParser().parseFromString(`<body>${r.value||''}</body>`,'text/html');doc.querySelectorAll('script,style').forEach(n=>n.remove());const blocks=htmlNodesToBlocks(doc.body);warnings.push(...(r.messages||[]).filter(x=>x.type==='warning').map(x=>x.message).slice(0,8));const firstImage=blocks.findIndex(b=>b.type==='image'&&/^data:image\/(jpeg|png|webp|gif);base64,/.test(b.url||''));const before=firstImage<0?'':blocks.slice(0,firstImage).map(b=>b.text||'').join('').trim();const cover=firstImage>=0&&before.length<120?blocks[firstImage].url:'';return{text:blocksToPlainText(blocks),blocks,warnings,cover,coverSource:cover?'Primera imagen del DOCX':''}}
 function normalizeZipPath(base,rel){rel=String(rel||'').replace(/\\/g,'/');if(/^(?:https?:|data:)/i.test(rel))return rel;const joined=rel.startsWith('/')?rel.slice(1):base+rel,parts=joined.split('/'),out=[];for(const p of parts){if(!p||p==='.')continue;if(p==='..')out.pop();else out.push(p)}return out.join('/')}
@@ -1846,31 +1866,71 @@ function epubTitleMap(zip,opf,base,manifest){
 }
 function isEpubBookTitleSection(title,bookTitle,fileName=''){const clean=v=>importCanonicalText(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\u3040-\u30ff\u4e00-\u9fff]+/gi,'');const t=clean(title),book=clean(bookTitle),name=clean(fileName);return Boolean(t&&((book&&t===book)||(name&&t===name)))}
 function epubUtilityKind(path,title,blocks){const t=normalizeSectionHeadingText(title||''),p=String(path||'').toLowerCase(),chars=blocksToPlainText(blocks||[]).replace(/\[Ilustración(?::[^\]]+)?\]/g,'').trim().length,images=(blocks||[]).filter(b=>b.type==='image').length;if((/(?:^|\/)(?:nav|toc|contents?)(?:\.|\/|$)/i.test(p)||/^(?:目次|table of contents|contents|índice)$/i.test(t))&&chars<1200)return'skip';if((/(?:^|\/)(?:cover|titlepage)(?:\.|\/|$)/i.test(p)||/^(?:表紙|cover|portada)$/i.test(t))&&chars<300&&images<=2)return'skip';if(/(?:口絵|挿絵|illustrations?|ilustraciones?|gallery)/i.test(t)||/(?:^|\/)(?:illustrations?|gallery)(?:\.|\/|$)/i.test(p))return'illustrations';return'content'}
+function epubFontIndex(family,names){
+ const candidates=[...String(family||'').replace(/!important\s*$/i,'').matchAll(/"([^"]+)"|'([^']+)'|([^,]+)/g)].map(m=>(m[1]||m[2]||m[3]||'').trim());
+ return candidates.map(name=>names.findIndex(x=>x.toLowerCase()===name.toLowerCase())).find(index=>index>=0)??-1
+}
+function epubFontCssResolver(fonts,styles){
+ const names=epubFontFamilyNames(fonts),rules=[];
+ for(const css of styles||[]){
+  const plain=String(css||'').replace(/\/\*[\s\S]*?\*\//g,'').replace(/@font-face\s*\{[^}]*\}/gi,'');
+  for(const m of plain.matchAll(/([^{}]+)\{([^{}]*)\}/g)){
+   const fam=m[2].match(/(?:^|;)\s*font-family\s*:\s*([^;}]*)/i);
+   if(!fam)continue;
+   const index=epubFontIndex(fam[1],names);if(index<0)continue;
+   for(const selector of m[1].split(',')){
+    const clean=selector.trim();if(clean&&!clean.startsWith('@')&&clean.length<=160&&rules.length<400)rules.push({selector:clean,index});
+   }
+  }
+ }
+ const cache=new WeakMap();
+ return element=>{
+  if(!element||element.nodeType!==Node.ELEMENT_NODE)return null;
+  if(cache.has(element))return cache.get(element);
+  let current=element,result=null;
+  while(current&&current.nodeType===Node.ELEMENT_NODE&&result===null){
+   const inline=current.getAttribute('style')?.match(/(?:^|;)\s*font-family\s*:\s*([^;}]*)/i);
+   if(inline){const idx=epubFontIndex(inline[1],names);if(idx>=0){result=idx;break}}
+   for(let i=rules.length-1;i>=0;i--)try{if(current.matches(rules[i].selector)){result=rules[i].index;break}}catch{}
+   current=current.parentElement;
+  }
+  cache.set(element,result);return result
+ }
+}
 async function epubEmbeddedFonts(zip,manifest,opfBase,warnings){
- const cssFiles=Object.values(manifest).filter(x=>/\.css(?:$|[?#])/i.test(x.href||'')||x.mediaType==='text/css');
- const found=[],seen=new Set();
- for(const entry of cssFiles.slice(0,50)){
-  const cssPath=epubHrefKey(opfBase,entry.href),file=zip.file(cssPath);
-  if(!file||Number(file?._data?.uncompressedSize||0)>400000)continue;
-  const css=await file.async('text'),base=cssPath.includes('/')?cssPath.slice(0,cssPath.lastIndexOf('/')+1):'';
-  for(const m of css.matchAll(/@font-face\s*\{([^}]{0,3500})\}/gi)){
-   const body=m[1],family=(body.match(/font-family\s*:\s*["']?([^;"'}]+)["']?\s*(?:;|$)/i)||[])[1]?.trim();
-   const src=(body.match(/src\s*:[^;]*url\(\s*["']?([^"')\s]+)["']?\s*\)/i)||[])[1];
-   if(!src||!family||/^(?:https?:|data:|\/)/i.test(src))continue;
-   const path=epubHrefKey(base,src);
-   if(!/\.(woff2?|ttf|otf)$/i.test(path)||!zip.file(path))continue;
-   if(Number(zip.file(path)?._data?.uncompressedSize||0)>2097152)continue;
+ const declared=Object.values(manifest).filter(x=>/\.css(?:$|[?#])/i.test(x.href||'')||x.mediaType==='text/css').map(x=>epubHrefKey(opfBase,x.href));
+ const candidates=[...new Set([...declared,...Object.keys(zip.files).filter(p=>/\.css$/i.test(p))])];
+ const found=[],seen=new Set(),styles=[];
+ for(const cssPath of candidates.slice(0,80)){
+  const file=zip.file(cssPath);if(!file||Number(file?._data?.uncompressedSize||0)>400000)continue;
+  const css=(await file.async('text')).replace(/\/\*[\s\S]*?\*\//g,'');
+  styles.push(css);
+  const base=cssPath.includes('/')?cssPath.slice(0,cssPath.lastIndexOf('/')+1):'';
+  for(const m of css.matchAll(/@font-face\s*\{([^}]{0,5000})\}/gi)){
+   const body=m[1],familyMatch=body.match(/font-family\s*:\s*(?:"([^"]+)"|'([^']+)'|([^;}]+))/i);
+   const family=(familyMatch?.[1]||familyMatch?.[2]||familyMatch?.[3]||'').trim();
+   if(!family||family.length>100)continue;
+   const urls=[...body.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^)\s]+))\s*\)/gi)].map(x=>x[1]||x[2]||x[3]);
+   let path='';
+   for(const url of urls){if(/^(?:https?:|data:|\/)/i.test(url))continue;const candidate=epubHrefKey(base,url);if(/\.(woff2?|ttf|otf)$/i.test(candidate)&&zip.file(candidate)){path=candidate;break}}
+   if(!path||Number(zip.file(path)?._data?.uncompressedSize||0)>2097152)continue;
    const style=(body.match(/font-style\s*:\s*(normal|italic|oblique)/i)||[])[1]?.toLowerCase()||'normal';
    const weight=(body.match(/font-weight\s*:\s*(normal|bold|[1-9]00)/i)||[])[1]?.toLowerCase()||'normal';
    const key=path+'|'+family+'|'+style+'|'+weight;
    if(seen.has(key))continue;seen.add(key);
-   found.push({path,family:family.slice(0,100),style,weight});
+   found.push({path,family,style,weight});
    if(found.length>=32)break;
   }
   if(found.length>=32)break;
  }
- if(found.length)warnings.push('Se detectaron '+found.length+' archivos de fuente de '+new Set(found.map(x=>x.family)).size+' familias en el EPUB.');
- return found
+ const names=epubFontFamilyNames(found),bodyRules=styles.join('\n').replace(/@font-face\s*\{[^}]*\}/gi,'');
+ const preferred=[...bodyRules.matchAll(/(?:^|[{}])\s*((?:html|body|p)(?:\s*,\s*(?:html|body|p))*)\s*\{([^{}]*)\}/gi)]
+  .map(m=>m[2].match(/font-family\s*:\s*([^;}]*)/i)?.[1]).filter(Boolean);
+ const defaultIndex=preferred.map(value=>epubFontIndex(value,names)).find(i=>i>=0);
+ if(defaultIndex!==undefined){const chosen=names[defaultIndex];for(const f of found)if(f.family===chosen)f.primary=true}
+ if(found.length)warnings.push('Se detectaron '+found.length+' archivos de fuente de '+names.length+' familias en el EPUB.');
+ else warnings.push('No se encontraron fuentes incrustadas admitidas (WOFF, WOFF2, TTF u OTF) en las hojas de estilo del EPUB.');
+ return {fonts:found,styles}
 }
 async function uploadEmbeddedEpubFonts(file,descriptors,groupId,volumeId,uploadedPaths){
  if(!descriptors?.length||!file)return[];
@@ -1889,7 +1949,7 @@ async function uploadEmbeddedEpubFonts(file,descriptors,groupId,volumeId,uploade
    if(!response.ok)throw new Error('No se pudo guardar una fuente EPUB ('+response.status+').');
    uploadedPaths.push(path);url=storagePublicUrl(path);paths.set(descriptor.path,url);
   }
-  out.push({family:descriptor.family,style:descriptor.style,weight:descriptor.weight,url});
+  out.push({family:descriptor.family,style:descriptor.style,weight:descriptor.weight,url,...(descriptor.primary?{primary:true}:{})});
  }
  return out
 }
@@ -1936,15 +1996,17 @@ async function parseEpubRich(file){
  let detectedCover='',coverSource='';
  const coverItem=Object.values(manifest).find(x=>String(x.properties).split(/\s+/).includes('cover-image'))||Object.entries(manifest).find(([id,x])=>/cover|portada/i.test(id)&&String(x.mediaType).startsWith('image/'))?.[1];
  if(coverItem?.href){const p=epubHrefKey(opfBase,coverItem.href);const z=zip.file(p);if(z){const mime=coverItem.mediaType||'image/jpeg',buf=await z.async('base64');if(/^image\/(?:jpeg|png|webp|gif)$/.test(mime)&&buf.length<2800000){detectedCover=`data:${mime};base64,${buf}`;coverSource='Metadatos del EPUB'}}}
- const fonts=await epubEmbeddedFonts(zip,manifest,opfBase,warnings);
+ const fontInfo=await epubEmbeddedFonts(zip,manifest,opfBase,warnings),fonts=fontInfo.fonts;
  const pages=[];
  for(const p of paths){
   const f=zip.file(p);if(!f)continue;
   const doc=new DOMParser().parseFromString(await f.async('text'),'text/html');
-  doc.querySelectorAll('script,style,nav').forEach(n=>n.remove());
+  const inlineStyles=[...doc.querySelectorAll('style')].map(n=>n.textContent||'');
+   const resolveFont=epubFontCssResolver(fonts,[...fontInfo.styles,...inlineStyles]);
+   doc.querySelectorAll('script,style,nav').forEach(n=>n.remove());
   const pageBase=p.includes('/')?p.slice(0,p.lastIndexOf('/')+1):'';
   await hydrateEpubImages(doc,zip,pageBase,warnings);
-  const blocks=htmlNodesToBlocks(doc.body);
+  const blocks=htmlNodesToBlocks(doc.body,resolveFont);
   const tocTitle=normalizeImportedText(titles.get(p)||''),docTitle=normalizeImportedText(doc.querySelector('h1,h2,title')?.textContent||'');
   const usefulTitle=tocTitle||(docTitle&&importCanonicalText(docTitle)!==importCanonicalText(bookTitle)?docTitle:'');
   if(!detectedCover){const first=blocks.find(b=>b.type==='image'&&/^data:image\/(jpeg|png|webp|gif);base64,/.test(b.url||''));if(first){detectedCover=first.url;coverSource='Primera imagen del EPUB'}}
