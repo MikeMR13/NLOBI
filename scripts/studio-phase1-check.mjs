@@ -15,7 +15,7 @@ function definition(name){
  return app.slice(start,start+1+next);
 }
 const readOnly=definition('studioProjectReadOnlyView');
-const makeView=new Function('nav','status','esc','teamCan','studioSectionReview',readOnly+';return studioProjectReadOnlyView;');
+const makeView=new Function('nav','status','esc','teamCan','studioSectionReview','novelTypeLabel','translationStatusLabel',readOnly+';return studioProjectReadOnlyView;');
 const project={
  id:'example', group_id:'team',novels:{title:'Prueba de novela'},
  translator_groups:{name:'Equipo de prueba'},status:'active',
@@ -23,8 +23,8 @@ const project={
   {id:'chapter',title:'Capítulo 1',status:'review',section_type:'chapter'}]}]
 };
 const escapeHtml=s=>String(s);
-const reviewerView=makeView(()=>'',()=>'',escapeHtml,(_id,action)=>action==='review',sec=>'<aside data-review-id="'+sec.id+'">Revisar</aside>');
-const collaboratorView=makeView(()=>'',()=>'',escapeHtml,()=>false,()=>{throw new Error('Collaborator must not render review controls')});
+const reviewerView=makeView(()=>'',()=>'',escapeHtml,(_id,action)=>action==='review',sec=>'<aside data-review-id="'+sec.id+'">Revisar</aside>',()=> 'Novela ligera',()=> 'Activa');
+const collaboratorView=makeView(()=>'',()=>'',escapeHtml,()=>false,()=>{throw new Error('Collaborator must not render review controls')},()=> 'Novela ligera',()=> 'Activa');
 assert.match(reviewerView(project),/data-review-id="chapter"/,'Corrector should see review actions');
 assert.doesNotMatch(collaboratorView(project),/data-review-id/,'Collaborator cannot review');
 assert.doesNotMatch(reviewerView(project),/data-edit-section/,'Read-only review must not enable content editing');

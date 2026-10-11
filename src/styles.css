@@ -2827,3 +2827,12 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  :is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,.libraryEditorial .libraryShelfCard,
   .studioWrap .studioBookCard,.adminWorkspace .adminDashboardKpi):hover{transform:none}
 }
+
+/* Studio · fase 2: metadatos y volumen final */
+.studioFinalVolumeSettings{padding:14px 16px;border:1px solid var(--line);background:var(--panel2);border-radius:14px;margin:12px 0;gap:9px}
+.studioFinalVolumeSettings .radio{display:flex;align-items:flex-start;gap:10px;font-weight:650}
+.studioFinalVolumeSettings .radio input{margin-top:3px;flex:none}
+.studioFinalVolumeSettings select:disabled{opacity:.6;cursor:not-allowed}
+.studioFinalVolumeSettings p{line-height:1.45;margin:4px 0 0}
+.studioFinalVolumeSettings:focus-within{border-color:var(--accent2)}
+@media(max-width:640px){.studioFinalVolumeSettings{padding:12px}.studioFinalVolumeSettings select{max-width:100%;width:100%}}
