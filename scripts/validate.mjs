@@ -451,12 +451,14 @@ for(const marker of [
  for(const needle of [
   "add column if not exists sequel_status",
   "security invoker",
-  "private.is_group_editor(v_group_id)",
+  "private.team_action_allowed(v_group_id,\'edit\')",
   "private.is_site_admin()",
   "auth.uid() is null",
   "update public.novels",
   "update public.translations",
-  "grant execute on function public.update_editorial_states"
+  "grant execute on function public.update_editorial_states",
+  "private.translation_editorial_content_guard()",
+  "drop trigger if exists team_guard_translations"
  ])if(!migration.includes(needle))throw new Error('Estados editoriales: falta restricción o guardado seguro: '+needle);
  for(const needle of [
   "id=\"projectNovelStatus\"",
