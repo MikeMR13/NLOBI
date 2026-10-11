@@ -459,7 +459,7 @@ for(const marker of [
 // Feedback de carga: persiste fuera de #app y se cierra incluso ante errores.
 {
  const html=fs.readFileSync('src/index.html','utf8'),css=fs.readFileSync('src/styles.css','utf8');
- for(const marker of ['id="pageBusyIndicator"','data-busy-label'])if(!html.includes(marker))throw new Error('Carga: falta indicador '+marker);
+ for(const marker of ['id="pageBusyIndicator"','data-busy-label','pageBusyBook'])if(!html.includes(marker))throw new Error('Carga: falta indicador '+marker);
  for(const marker of ['function startPageBusy(','pageBusyCount','finally{done();if(S.view===route)render()}','finally{done?.()}'])if(!app.includes(marker))throw new Error('Carga: falta control de estado '+marker);
- for(const marker of ['.pageBusyIndicator[hidden]','@keyframes pageBusySpin','prefers-reduced-motion:reduce'])if(!css.includes(marker))throw new Error('Carga: estilos incompletos '+marker);
+ for(const marker of ['.pageBusyIndicator[hidden]','@keyframes obiBookLeft','@keyframes obiBookRight','prefers-reduced-motion:reduce'])if(!css.includes(marker))throw new Error('Carga: estilos incompletos '+marker);
 }
