@@ -2827,3 +2827,20 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  :is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,.libraryEditorial .libraryShelfCard,
   .studioWrap .studioBookCard,.adminWorkspace .adminDashboardKpi):hover{transform:none}
 }
+
+
+/* Perfil personalizable del equipo */
+.teamCustomLayout{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(240px,1fr);gap:22px;align-items:start}
+.teamCustomSection{min-width:0;border:1px solid var(--line);border-radius:16px;margin:0 0 20px;padding:20px;background:var(--panel)}
+.teamCustomSection legend{padding:0 10px;font-weight:800;letter-spacing:.02em}
+.teamCustomSection .field{display:flex;flex-direction:column;gap:8px;margin:0 0 14px}
+.teamCustomSection textarea{width:100%;min-height:60px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);padding:10px 12px}
+.teamCustomToggle{display:flex;align-items:center;gap:10px;margin:8px 0;padding:7px;border-radius:8px}
+.teamCustomToggle input{accent-color:var(--accent)}
+.teamLivePreview{border:1px solid var(--line);border-top:5px solid var(--accent);border-radius:16px;background:var(--panel);padding:24px;position:sticky;top:86px;box-shadow:var(--shadow2)}
+.teamLivePreview strong{display:block;font-size:1.4rem;margin-bottom:12px}
+.teamLivePreview span{display:inline-block;margin-top:12px;padding:6px 10px;border-radius:30px;background:var(--panel2);font-size:.82rem}
+.teamPublicExtras{margin:16px 0;padding:20px;border-radius:16px;background:var(--panel);border:1px solid var(--line)}
+.teamPublicExtras>strong{display:block;font-size:1.2rem;margin-bottom:8px}
+.teamPublicExtras p{white-space:pre-line;overflow-wrap:anywhere}
+@media(max-width:850px){.teamCustomLayout{grid-template-columns:1fr}.teamLivePreview{position:static;grid-row:1}.teamCustomSection{padding:14px}}
