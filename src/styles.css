@@ -2944,10 +2944,17 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .readerExperience.teamSeparator-japones .readerSceneSeparator::after{content:"※"}
 .readerExperience.teamSeparator-invisible .readerSceneSeparator::after{content:"";display:none}
 
-/* Indicador global de navegación y acciones: no bloquea la interfaz. */
+/* Carga editorial El Obi del Lector: libro amarillo y negro. */
 .pageBusyIndicator[hidden]{display:none!important}
-.pageBusyIndicator{position:fixed;z-index:110;top:78px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:11px;max-width:calc(100vw - 28px);padding:12px 17px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--text);box-shadow:0 8px 28px rgba(0,0,0,.2);font-size:.88rem;font-weight:700;pointer-events:none}
-.pageBusySpinner{display:block;width:19px;height:19px;flex:0 0 19px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:pageBusySpin .8s linear infinite}
-@keyframes pageBusySpin{to{transform:rotate(360deg)}}
-@media(max-width:767px){.pageBusyIndicator{top:68px;padding:11px 15px;font-size:.82rem}}
-@media(prefers-reduced-motion:reduce){.pageBusySpinner{animation:none;border-color:var(--accent);border-right-color:transparent}}
+.pageBusyIndicator{position:fixed;z-index:110;top:76px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:13px;min-width:220px;max-width:calc(100vw - 24px);padding:10px 17px 10px 12px;border-radius:14px;border:1px solid var(--line);border-left:4px solid var(--accent);background:var(--panel);color:var(--text);box-shadow:0 12px 36px rgba(0,0,0,.18);pointer-events:none}
+.pageBusyCopy{display:flex;flex-direction:column;gap:2px;line-height:1.28;font-size:.82rem}
+.pageBusyBrand{font-size:.62rem;font-weight:900;letter-spacing:.105em;color:var(--muted)}
+.pageBusyBook{position:relative;display:block;flex:none;width:42px;height:38px;perspective:110px}
+.pageBusyBookPage{position:absolute;top:7px;width:17px;height:25px;border:2px solid #151515;background:#ffd400;box-shadow:inset 0 -3px 0 rgba(0,0,0,.12)}
+.pageBusyBookPageLeft{left:4px;border-radius:3px 1px 1px 3px;transform-origin:right center;animation:obiBookLeft 1.45s ease-in-out infinite}
+.pageBusyBookPageRight{right:4px;border-radius:1px 3px 3px 1px;transform-origin:left center;animation:obiBookRight 1.45s ease-in-out infinite}
+.pageBusyBookSpine{position:absolute;left:19px;top:6px;height:28px;width:4px;background:#151515;border-radius:2px;z-index:2}
+@keyframes obiBookLeft{0%,100%{transform:rotateY(0)}50%{transform:rotateY(-28deg)}}
+@keyframes obiBookRight{0%,100%{transform:rotateY(0)}50%{transform:rotateY(32deg)}}
+@media(max-width:767px){.pageBusyIndicator{top:66px;padding:9px 14px 9px 10px;gap:10px}.pageBusyCopy{font-size:.78rem}}
+@media(prefers-reduced-motion:reduce){.pageBusyBookPage{animation:none!important}}
