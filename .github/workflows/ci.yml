@@ -56,6 +56,8 @@ jobs:
         run: node scripts/mobile-interactions-check.mjs
       - name: Explore visual and interaction audit
         run: node scripts/explore-quality-check.mjs
+      - name: Phase 5 real-file EPUB DOCX PDF import and retry audit
+        run: node scripts/phase5-import-check.mjs
       - name: Full platform quality pass
         id: full_quality
         continue-on-error: true
