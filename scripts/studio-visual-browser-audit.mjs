@@ -21,16 +21,16 @@ try{
    const esc=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
    const groups=[{translator_groups:{id:'t1',name:'Equipo 1'},role:'owner'},{translator_groups:{id:'t2',name:'Equipo 2'},role:'editor'}];
    const books=[
-    {id:'active',group_id:'t1',title:'Obra activa',updated_at:'2026-10-11',status:'active',novels:{title:'Obra activa',genres:['Romance','Fantasía'],novel_type:'light_novel'},volumes:[{status:'published',sections:[{status:'published'}]},{status:'draft',sections:[{status:'draft'}]}]},
-    {id:'complete',group_id:'t1',title:'Obra completada',updated_at:'2026-10-10',status:'complete',novels:{title:'Obra completada',genres:['Fantasía'],novel_type:'original'},volumes:[{status:'published',sections:[{status:'published'}]}]},
-    {id:'paused',group_id:'t2',title:'Obra en pausa',updated_at:'2026-10-09',status:'paused',novels:{title:'Obra en pausa',genres:['Misterio'],novel_type:'web_novel'},volumes:[{status:'draft',sections:[{status:'draft'}]}]}
+    {id:'active',group_id:'t1',title:'Obra activa',updated_at:'2026-10-11',status:'active',novels:{title:'Obra activa',genres:['Romance','Fantasía'],novel_type:'light_novel',status:'ongoing'},volumes:[{status:'published',sections:[{status:'published'}]},{status:'draft',sections:[{status:'draft'}]}]},
+    {id:'complete',group_id:'t1',title:'Obra completada',updated_at:'2026-10-10',status:'complete',novels:{title:'Obra completada',genres:['Fantasía'],novel_type:'original',status:'completed'},volumes:[{status:'published',sections:[{status:'published'}]}]},
+    {id:'paused',group_id:'t2',title:'Obra en pausa',updated_at:'2026-10-09',status:'paused',novels:{title:'Obra en pausa',genres:['Misterio'],novel_type:'web_novel',status:'hiatus'},volumes:[{status:'draft',sections:[{status:'draft'}]}]}
    ];
    const S={groups,studioTranslations:books,catalog:[]};
-   const factory=new Function('S','nav','status','teamCan','isCurrentGroupManager','isCurrentGroupEditor','safeMediaUrl','esc','novelTypeLabel','translationStatusLabel','TRANSLATION_STATUS_OPTIONS','NOVEL_TYPE_OPTIONS','localStorage',studioSource+';return studio;');
+   const factory=new Function('S','nav','status','teamCan','isCurrentGroupManager','isCurrentGroupEditor','safeMediaUrl','esc','novelTypeLabel','translationStatusLabel','novelPublicationStatusLabel','NOVEL_PUBLICATION_STATUS_OPTIONS','TRANSLATION_STATUS_OPTIONS','NOVEL_TYPE_OPTIONS','localStorage',studioSource+';return studio;');
    const studio=factory(S,()=>'',()=>'',()=>true,()=>true,()=>true,()=>'',esc,
-    x=>Object.fromEntries(types)[x]||x,x=>Object.fromEntries(statusOptions)[x]||x,statusOptions,types,{getItem:()=>null});
+    x=>Object.fromEntries(types)[x]||x,x=>Object.fromEntries(statusOptions)[x]||x,t=>({ongoing:'En publicación',completed:'Completada',hiatus:'En pausa',cancelled:'Cancelada'}[t]||'Sin definir'),[['ongoing','En publicación'],['completed','Completada'],['hiatus','En pausa'],['cancelled','Cancelada']],statusOptions,types,{getItem:()=>null});
    const studioMount=()=>{document.querySelector('#studioRoot').innerHTML=studio();bindStudioFilters()};
-   const binder=[['studioProjectFilter','studioProjectFilter'],['studioGenreFilter','studioGenreFilter'],['studioPublicationFilter','studioPublicationFilter'],['studioNovelTypeFilter','studioNovelTypeFilter'],['studioTeamFilter','studioTeamFilter'],['studioWorkflowFilter','studioWorkflowFilter'],['studioProjectSort','studioProjectSort']];
+   const binder=[['studioProjectFilter','studioProjectFilter'],['studioNovelPublicationFilter','studioNovelPublicationFilter'],['studioGenreFilter','studioGenreFilter'],['studioPublicationFilter','studioPublicationFilter'],['studioNovelTypeFilter','studioNovelTypeFilter'],['studioTeamFilter','studioTeamFilter'],['studioWorkflowFilter','studioWorkflowFilter'],['studioProjectSort','studioProjectSort']];
    function bindStudioFilters(){for(const [id,key] of binder){const el=document.getElementById(id);if(el)el.onchange=()=>{S[key]=el.value;studioMount()}}
     document.querySelector('#studioProjectSearch').oninput=e=>{S.studioProjectSearch=e.target.value;studioMount()};
    }
@@ -47,6 +47,8 @@ try{
   await page.locator('#studioProjectFilter').selectOption('complete');
   assert.equal(await page.locator('.studioV3BookCard').count(),1);
   assert.ok(await page.locator('.studioV3BookCard').innerText().then(t=>t.includes('Obra completada')));
+  await page.locator('#studioNovelPublicationFilter').selectOption('completed');
+  assert.equal(await page.locator('.studioV3BookCard').count(),1);
   await page.locator('#studioGenreFilter').selectOption('Fantasía');
   assert.equal(await page.locator('.studioV3BookCard').count(),1);
   await page.locator('#studioPublicationFilter').selectOption('full');

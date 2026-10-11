@@ -3220,3 +3220,34 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  .studioV3Filters{gap:10px}
 }
 @media(prefers-reduced-motion:reduce){.genreChevron{transition:none}}
+
+
+/* Studio — editable translation status and editorial workflow */
+#studioProjectStatusPanel,#studioProjectWorkflow{scroll-margin-top:105px}
+.studioProjectStatusPanel{display:flex;flex-direction:column;gap:9px;min-width:0}
+.studioProjectStatusPanel h3{margin:0}
+.studioProjectStatusPanel label,.studioWorkflowEditor .field label{font-weight:800;font-size:.86rem}
+.studioProjectStatusPanel select,.studioWorkflowEditorControls select{width:100%;min-height:44px;min-width:0;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);padding:9px 12px;font:inherit}
+.studioProjectStatusPanel .btn{align-self:flex-start;min-height:42px}
+.studioProjectStatusPanel [role=status]{line-height:1.5;margin:2px 0}
+.studioWorkflowEditor{display:grid;gap:12px}
+.studioWorkflowEditor h3{margin:0}
+.studioWorkflowEditor p{margin:0;line-height:1.55}
+.studioWorkflowEditorControls{display:flex;align-items:end;gap:12px;flex-wrap:wrap}
+.studioWorkflowEditorControls .field{flex:1 1 260px;min-width:0}
+.studioWorkflowEditorControls .btn{min-height:44px}
+.studioWorkflowModeStatus{padding:10px 12px;border-left:3px solid var(--accent);background:var(--panel2);border-radius:0 9px 9px 0}
+.studioFilterExplanation{border-left:3px solid var(--accent);background:var(--panel);padding:8px 12px;margin:5px 0 12px;color:var(--muted);font-size:.82rem;line-height:1.5}
+.studioStageAction{min-height:39px}
+.studioProjectStatusPanel :is(select,button):focus-visible,.studioWorkflowEditor :is(select,button):focus-visible,.studioStageAction:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+@media(max-width:560px){.studioWorkflowEditorControls{display:grid;grid-template-columns:1fr}.studioWorkflowEditorControls .field{width:100%}.studioWorkflowEditorControls .btn,.studioProjectStatusPanel .btn{width:100%}.studioStageAction{width:100%}}
+
+
+/* Distinct original-novel and translation state labels in search results */
+.catalogStatusRow{flex-wrap:wrap;row-gap:6px;column-gap:8px;min-width:0}
+.catalogOriginalStatus{display:inline-flex;align-items:center;max-width:100%;min-width:0;font-size:.72rem;font-weight:700;line-height:1.3;color:var(--text);border:1px solid var(--line);background:var(--panel2);border-radius:999px;padding:3px 9px;overflow-wrap:anywhere}
+.exploreFilterGrid .field:has(#catalogStatus),.exploreFilterGrid .field:has(#catalogNovelStatus){min-width:0}
+.exploreFilterGrid :is(#catalogStatus,#catalogNovelStatus){width:100%;min-width:0;min-height:43px}
+.exploreFilterGrid :is(#catalogStatus,#catalogNovelStatus):focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.studioV3CoverRibbon{max-width:calc(100% - 12px);white-space:normal;overflow-wrap:anywhere;line-height:1.3}
+@media(max-width:560px){.catalogStatusRow{gap:6px}.catalogOriginalStatus{font-size:.68rem}}

@@ -25,8 +25,8 @@ const base={
 function show(overrides={}){
  const S={...base,...overrides};
  const can=(gid,action)=>gid==='alpha'?['create','edit','import','publish'].includes(action):action==='review';
- const factory=new Function('S','nav','status','teamCan','isCurrentGroupManager','isCurrentGroupEditor','safeMediaUrl','esc','novelTypeLabel','translationStatusLabel','TRANSLATION_STATUS_OPTIONS','NOVEL_TYPE_OPTIONS','localStorage',source+';return {studio,studioContextNav};');
- const views=factory(S,()=>'<nav id="globalNav"></nav>',()=>'',can,()=>false,gid=>gid==='alpha',v=>v||'#',escapeText,v=>Object.fromEntries(types)[v]||'Otro',v=>Object.fromEntries(statuses)[v]||v,statuses,types,{getItem:()=>null});
+ const factory=new Function('S','nav','status','teamCan','isCurrentGroupManager','isCurrentGroupEditor','safeMediaUrl','esc','novelTypeLabel','translationStatusLabel','novelPublicationStatusLabel','NOVEL_PUBLICATION_STATUS_OPTIONS','TRANSLATION_STATUS_OPTIONS','NOVEL_TYPE_OPTIONS','localStorage',source+';return {studio,studioContextNav};');
+ const views=factory(S,()=>'<nav id="globalNav"></nav>',()=>'',can,()=>false,gid=>gid==='alpha',v=>v||'#',escapeText,v=>Object.fromEntries(types)[v]||'Otro',v=>Object.fromEntries(statuses)[v]||v,t=>({ongoing:'En publicación',completed:'Completada',hiatus:'En pausa',cancelled:'Cancelada'}[t]||'Sin definir'),[['ongoing','En publicación'],['completed','Completada'],['hiatus','En pausa'],['cancelled','Cancelada']],statuses,types,{getItem:()=>null});
  return {html:views.studio(),context:views.studioContextNav()};
 }
 const {html,context}=show();
