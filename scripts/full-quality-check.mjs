@@ -68,6 +68,7 @@ const collectionFixture={id:'collection-qa',title:'Colección QA',description:'D
 const scenarios=[
  ['public-home','home',{catalog:[translation]}],
  ['public-explore','explore',{catalog:[translation]}],
+ ['public-explore-editorial-states','explore',{catalog:[{...translation,novels:{...translation.novels,status:'completed',sequel_status:'announced'}},{...translation,id:'project-2',title:'Otra novela de prueba',novels:{...translation.novels,id:'novel-2',title:'Otra novela de prueba',status:'ongoing',sequel_status:'unconfirmed'}}]}],
  ['public-detail','detail:project-1',{catalog:[translation],currentDetail:translation}],
  ['public-group','group:group-1',{catalog:[translation],publicGroup}],
  ['public-profile','profile:user-2',{catalog:[translation],publicProfile}],
@@ -82,8 +83,10 @@ const scenarios=[
  ['user-library-collections-form','library',{...authBase,libraryTab:'collections',readerCollections:[],savedCollections:[],discoverCollections:[],collectionFormOpen:true,collectionEditingId:null}],
  ['user-library-collections-edit','library',{...authBase,catalog:[collectionTranslation],libraryTab:'collections',readerCollections:[collectionFixture],savedCollections:[],discoverCollections:[],collectionFormOpen:true,collectionEditingId:'collection-qa'}],
  ['user-profile','auth',authBase],['user-notifications','notifications',authBase],['user-beta','beta',authBase],
- ['creator-studio','studio',authBase],['creator-new','studio:new',authBase],
+ ['creator-studio','studio',authBase],
+ ['creator-studio-editorial-states','studio',{...authBase,studioTranslations:[{...studioTranslations[0],novels:{...studioTranslations[0].novels,status:'completed',sequel_status:'announced'}},{...studioTranslations[0],id:'project-2',title:'Otra novela de prueba',novels:{id:'novel-2',title:'Otra novela de prueba',status:'ongoing',sequel_status:'unconfirmed'},status:'abandoned'}]}],['creator-new','studio:new',authBase],
  ['creator-project','studio:project:project-1',{...authBase,studioProject:translation,teamMembers}],
+ ['creator-project-editorial-states','studio:project:project-1',{...authBase,studioProject:{...translation,novels:{...translation.novels,status:'completed',sequel_status:'awaiting'}},teamMembers}],
  ['creator-team','studio:team:group-1',{...authBase,studioTeam:group,teamMembers}],
  ['creator-media','studio:media:group-1',{...authBase,mediaGroupId:'group-1',mediaLoading:false,mediaFiles:[{name:'cover.jpg',path:'teams/group-1/cover.jpg',size:2048,mimetype:'image/jpeg',updated_at:now}],mediaUsage:{'teams/group-1/cover.jpg':1}}],
  ['import-file','studio:import',{...authBase,importState:importState('file')}],
@@ -133,7 +136,7 @@ const report=[],failures=[];
 for(const [vpName,width,height] of viewports){
  for(const [name,view,state] of scenarios){
   const full=vpName==='mobile-390'||vpName==='desktop-1280';
-  const edge=['public-home','public-explore','public-detail','public-reader','user-library','creator-studio','creator-project','creator-team','import-edit','admin','error-state'];
+  const edge=['public-home','public-explore','public-explore-editorial-states','public-detail','public-reader','user-library','creator-studio','creator-studio-editorial-states','creator-project','creator-project-editorial-states','creator-team','import-edit','admin','error-state'];
   if(!full&&!edge.includes(name))continue;
   const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block',colorScheme:'light'});await prepare(context);
   const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!/favicon|Failed to load resource/i.test(m.text()))runtime.push(m.text())});
@@ -142,6 +145,33 @@ for(const [vpName,width,height] of viewports){
   const check=await inspect(page),axe=await new AxeBuilder({page}).analyze(),seriousViolations=axe.violations.filter(v=>['serious','critical'].includes(v.impact||'')),serious=seriousViolations.map(v=>v.id),axeDetails=seriousViolations.flatMap(v=>v.nodes.slice(0,7).map(n=>({id:v.id,selector:n.target,reason:n.failureSummary?.slice(0,220),html:n.html?.slice(0,130)})));
   const row={viewport:vpName,scenario:name,...check,runtime,axeSerious:serious,axeDetails};report.push(row);
   if(check.overflow>2)failures.push({...row,error:'horizontal-overflow'});if(check.clipped.length)failures.push({...row,error:'clipped-controls'});if(check.tiny.length)failures.push({...row,error:'small-targets'});if(check.badText.length)failures.push({...row,error:'bad-visible-text'});if(!check.main||check.content<2)failures.push({...row,error:'empty-main'});if(runtime.length)failures.push({...row,error:'runtime-error'});if(serious.length)failures.push({...row,error:'axe-serious'});
+  if(name==='public-explore-editorial-states'){
+   for(const selector of ['#catalogStatus','#catalogNovelStatus','#catalogSequelStatus'])if(!(await page.locator(selector).count()))failures.push({...row,error:'explore-state-filter-missing',selector});
+   await page.locator('#exploreFilters > summary').click();await page.waitForTimeout(50);
+   await page.locator('#catalogNovelStatus').selectOption('completed');
+   await page.locator('#catalogSequelStatus').selectOption('announced');
+   if((await page.locator('.catalogEditorialCard').count())!==1)failures.push({...row,error:'explore-state-filter-not-combined'});
+  }
+  if(name==='creator-studio-editorial-states'){
+   for(const selector of ['#studioProjectFilter','#studioNovelStatusFilter','#studioSequelStatusFilter'])if(!(await page.locator(selector).count()))failures.push({...row,error:'studio-state-filter-missing',selector});
+   await page.locator('#studioNovelStatusFilter').selectOption('completed');
+   await page.locator('#studioSequelStatusFilter').selectOption('announced');
+   if((await page.locator('.studioBookCard').count())!==1)failures.push({...row,error:'studio-state-filter-not-combined'});
+  }
+  if(name==='creator-project-editorial-states'){
+   const ids=['projectNovelStatus','projectTranslationStatus','projectSequelStatus'];
+   const values=await page.evaluate(ids=>Object.fromEntries(ids.map(id=>[id,document.getElementById(id)?.value])),ids);
+   if(values.projectNovelStatus!=='completed'||values.projectTranslationStatus!=='active'||values.projectSequelStatus!=='awaiting'||!(await page.locator('#saveEditorialStates').count()))failures.push({...row,error:'studio-state-editor-values',values});
+   const requestPromise=page.waitForRequest(req=>req.url().includes('/rest/v1/rpc/update_editorial_states')&&req.method()==='POST',{timeout:10000});
+   await page.locator('#projectNovelStatus').selectOption('hiatus');
+   await page.locator('#projectTranslationStatus').selectOption('paused');
+   await page.locator('#projectSequelStatus').selectOption('unconfirmed');
+   await page.locator('#saveEditorialStates').click();
+   const request=await requestPromise;
+   const payload=JSON.parse(request.postData()||'{}');
+   if(payload.p_translation_id!=='project-1'||payload.p_novel_status!=='hiatus'||payload.p_translation_status!=='paused'||payload.p_sequel_status!=='unconfirmed')failures.push({...row,error:'studio-state-save-rpc-payload',payload});
+  }
+  if(name==='readonly-project'&&(await page.locator('#saveEditorialStates').count()))failures.push({...row,error:'readonly-state-editor-visible'});
   if(name==='creator-project'){const edit=page.locator('[data-edit-section="section-1"]');if(await edit.count()){await edit.click();await page.waitForTimeout(15);if(!(await page.locator('#editSectionTitle').count()))failures.push({...row,error:'editor-open-failed'})}}
   if(name==='user-library'){const b=page.locator('[data-library-filter="favorites"]');if(await b.count())await b.click()}
   if(name==='user-library-collections-form'){

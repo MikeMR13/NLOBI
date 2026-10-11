@@ -2827,3 +2827,36 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  :is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,.libraryEditorial .libraryShelfCard,
   .studioWrap .studioBookCard,.adminWorkspace .adminDashboardKpi):hover{transform:none}
 }
+
+
+/* Studio Fase 8: tres estados editoriales independientes */
+.studioEditorialStates{min-width:0;margin:22px 0}
+.studioEditorialStatesHead{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.studioEditorialStatesHead h3,.studioEditorialStatesNew h3{margin:0 0 7px}
+.studioEditorialStatesHead p,.studioEditorialStatesNew>p{margin:0;max-width:72ch}
+.studioEditorialStatesGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(11px,1.8vw,20px)}
+.studioEditorialStatesGrid .field{margin:0;min-width:0}
+.studioEditorialStatesGrid select{display:block;width:100%;min-width:0;max-width:100%;min-height:48px}
+.studioEditorialStatesGrid small{display:block;margin:7px 0 0;line-height:1.5;color:var(--muted)}
+.studioEditorialStatesFooter{display:flex;align-items:center;flex-wrap:wrap;gap:14px;margin-top:18px}
+.studioEditorialStatesFooter .btn{min-height:44px}
+.studioEditorialStatesNew{padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--panel2)}
+.studioEditorialStatesNew .studioEditorialStatesGrid{margin-top:16px}
+.studioCatalogToolbar{display:flex;align-items:center;flex-wrap:wrap;gap:10px}
+.studioCatalogToolbar input[type="search"]{flex:2 1 240px;min-width:0}
+.studioCatalogToolbar select{flex:1 1 170px;min-width:0;max-width:100%;min-height:44px}
+.studioStateChips{display:flex;flex-wrap:wrap;gap:6px;margin:7px 0}
+.studioStateChips span{display:inline-flex;align-items:center;max-width:100%;border:1px solid var(--line);background:var(--panel2);border-radius:8px;padding:5px 8px;font-size:.7rem;font-weight:700;line-height:1.4;overflow-wrap:anywhere}
+.exploreFilterGrid select{max-width:100%;min-width:0}
+@media(max-width:900px){.studioEditorialStatesGrid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){
+ .studioEditorialStatesGrid{grid-template-columns:minmax(0,1fr)}
+ .studioCatalogToolbar{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}
+ .studioCatalogToolbar input[type="search"]{grid-column:1/-1}
+ .studioCatalogToolbar select{width:100%;font-size:16px}
+}
+@media(max-width:360px){.studioCatalogToolbar{grid-template-columns:minmax(0,1fr)}}
+
+/* A11y: empty featured gallery must remain legible on light and dark themes. */
+.homeEditorial .homeFeaturedEmpty{color:var(--text)}
+.homeEditorial .homeFeaturedEmpty span,.homeEditorial .homeFeaturedEmpty strong{color:inherit}
