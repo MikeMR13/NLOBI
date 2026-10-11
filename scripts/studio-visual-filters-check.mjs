@@ -8,6 +8,7 @@ const studioStart=app.indexOf('function studioWorkspaceSidebar(');
 const studioEnd=app.indexOf('\nfunction mediaFolderOf(',studioStart);
 assert.ok(studioStart>=0&&studioEnd>studioStart);
 const source=app.slice(studioStart,studioEnd);
+assert.ok(app.includes('novels(id,title,title_original,author_name,cover_url,novel_type,genres),volumes(id,status,sections(id,status))'),'Studio must fetch genres and authors, not only filter fixture data');
 const typeOptions=[['light_novel','Novela ligera'],['web_novel','Novela web'],['original','Novela original']];
 const statusOptions=[['active','Activa'],['paused','En pausa'],['abandoned','Abandonada'],['awaiting_sequel','En espera de secuela'],['no_sequel_confirmed','Sin secuela confirmada'],['complete','Completada']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[x]));
