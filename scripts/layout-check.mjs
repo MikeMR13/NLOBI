@@ -30,7 +30,14 @@ for(const vp of viewports){
           const r=el.getBoundingClientRect(),cs=getComputedStyle(el);
           return cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>0&&r.height>0;
         });
-      const clipped=visible.map(el=>{
+      // A horizontally scrollable shelf intentionally contains offscreen links.
+      // Only exclude such links from viewport clipping, never from size checks.
+      const isScrollRailItem=el=>{
+        const rail=el.closest('[data-shelf-track],.exploreQuickGenres');
+        return !!rail&&rail.scrollWidth>rail.clientWidth+2&&
+          ['auto','scroll'].includes(getComputedStyle(rail).overflowX);
+      };
+      const clipped=visible.filter(el=>!isScrollRailItem(el)).map(el=>{
         const r=el.getBoundingClientRect();
         return {tag:el.tagName,text:(el.textContent||el.getAttribute('aria-label')||'').trim().slice(0,80),left:r.left,right:r.right,width:r.width};
       }).filter(x=>x.left<-2||x.right>root.clientWidth+2);
