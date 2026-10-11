@@ -64,4 +64,30 @@ await stage('c1','review');assert.equal(stageCalls.length,1);
 assert.equal(JSON.parse(stageCalls[0].o.body).status,'review');
 assert.equal(JSON.parse(stageCalls[0].o.body).published_at,null);
 await stage('c1','published');assert.equal(stageCalls.length,1,'Publishing must use separate protected flow');
+assert.ok(app.includes('id="studioNovelPublicationStatusPanel"'));
+assert.ok(app.includes('id="studioNovelPublicationFilter"'));
+assert.ok(app.includes('id="saveNovelPublicationStatus"'));
+assert.ok(app.includes("novels(id,title,title_original,author_name,cover_url,novel_type,genres,status)"),'Real Studio catalog must load original novel status');
+assert.ok(app.includes("novelPublicationStatusLabel(novel.status)"),'Search needs the original novel state');
+
+P.novels={id:'novel1',status:'ongoing'};
+const novelElement={value:'completed',isConnected:true};
+element['#projectNovelPublicationStatus']=novelElement;
+element['#saveNovelPublicationStatus']={disabled:false,isConnected:true};
+const novelStatusFactory=new Function('S',': editable controls, legacy migration guard, verified PATCH, rollback and draft/review stage.');
+,'jreq','toast','friendlyError','teamCan','NOVEL_PUBLICATION_STATUS_OPTIONS','novelPublicationStatusLabel','loadStudioData','loadCatalog','refreshStudioProject',
+ extract('async function saveNovelPublicationStatus(){','\nasync function saveDiscoveryMeta(')+';return saveNovelPublicationStatus;');
+let savedNovel=[{id:'novel1',status:'completed'}],novelCalls=[];
+const novelJreq=async(url,opts)=>{novelCalls.push({url,opts});return savedNovel};
+const statusesNovel=[['ongoing','En publicación'],['completed','Completada'],['hiatus','En pausa'],['cancelled','Cancelada']];
+const saveNovel=novelStatusFactory(S,$,novelJreq,toast,friendlyError,()=>true,statusesNovel,
+ v=>Object.fromEntries(statusesNovel)[v],async()=>{},async()=>{},async()=>{});
+await saveNovel();
+assert.equal(novelCalls.length,1);
+assert.ok(novelCalls[0].url.includes('/rest/v1/novels?id=eq.novel1'));
+assert.equal(JSON.parse(novelCalls[0].opts.body).status,'completed');
+savedNovel=[];novelCalls=[];novelElement.value='hiatus';toasts=[];
+await saveNovel();
+assert.equal(novelElement.value,'ongoing','Original novel status must roll back on unconfirmed update');
+assert.ok(toasts.some(t=>t.type==='bad'),'Refuse silent RLS zero-row response');
 console.log('Studio status/workflow regression OK: editable controls, legacy migration guard, verified PATCH, rollback and draft/review stage.');
