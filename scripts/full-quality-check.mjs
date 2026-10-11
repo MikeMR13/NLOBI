@@ -164,13 +164,13 @@ for(const [vpName,width,height] of viewports){
       stableRoot:window.__QA_FEATURED_ROOT__===gallery,
       galleryHeight:gallery?.getBoundingClientRect().height||0,
       belowY:document.querySelector('.homeQuickLinks')?.getBoundingClientRect().top||0,
-      activeDots:[...gallery.querySelectorAll('[data-featured-index][aria-pressed="true"]')].map(x=>x.dataset.featuredIndex)};
+      activeDots:[...gallery.querySelectorAll('[data-featured-index].active')].map(x=>x.dataset.featuredIndex)};
    });
    if(after.title===initial.title||!after.stableCopy||!after.stableRoot||after.activeDots.join(',')!=='1'||Math.abs(after.galleryHeight-initial.galleryHeight)>2||Math.abs(after.belowY-initial.belowY)>2)
       failures.push({...row,error:'carousel-replaced-page-or-shifted-layout',initial,after});
-   await page.locator('[data-featured-index="0"]').click();
+   await page.locator('[data-featured-step="-1"]').click();
    const restored=await page.locator('.homeFeaturedSlideInfo h2').textContent();
-   if(restored!==initial.title)failures.push({...row,error:'carousel-dot-navigation-did-not-restore-book'});
+   if(restored!==initial.title)failures.push({...row,error:'carousel-previous-navigation-did-not-restore-book'});
   }
   if(name==='user-notifications-volume'){
    const volumeButton=page.locator('[data-note-open-volume="volume-1"][data-translation="project-1"]');
