@@ -959,7 +959,7 @@ function studioProjectNavigation(P,readOnly=false){
  const total=(P.volumes||[]).length,sections=(P.volumes||[]).reduce((n,v)=>n+(v.sections||[]).length,0);
  return `<nav class="studioV4ProjectNav" aria-label="Secciones del proyecto">
   <button type="button" data-studio-project-jump="studioProjectVolumes">▤ Volúmenes <span>${total}</span></button><button type="button" data-studio-project-jump="studioProjectQuality">✓ Auditoría editorial</button>
-  ${readOnly?'':`<button type="button" data-studio-project-jump="studioProjectOverview">▦ Resumen</button><button type="button" data-studio-project-jump="studioProjectMetadata">✎ Ficha editorial</button>`}
+  ${readOnly?'':`<button type="button" data-studio-project-jump="studioProjectOverview">▦ Resumen</button><button type="button" data-studio-project-jump="studioProjectStatusPanel">◷ Estado</button><button type="button" data-studio-project-jump="studioProjectWorkflow">⚙ Flujo editorial</button><button type="button" data-studio-project-jump="studioProjectMetadata">✎ Ficha editorial</button>`}
   ${P.editingSection?'<button type="button" data-studio-project-jump="studioProjectEditor">✐ Editor abierto</button>':''}
   <span class="studioV4ProjectNavCount">${sections} secciones</span>
  </nav>`;
