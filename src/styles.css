@@ -2885,3 +2885,14 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .teamWorkCard .novelCard{height:100%}
 .teamWorkBadge{position:absolute;right:9px;top:9px;max-width:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:7px;padding:5px 9px;color:#141414;background:var(--accent);font-size:.68rem;font-weight:800;box-shadow:0 3px 12px rgba(0,0,0,.14);pointer-events:none}
 .teamWorkLogo{position:absolute;right:11px;bottom:11px;width:30px;height:30px;border-radius:50%;object-fit:cover;background:var(--panel);border:2px solid var(--line);pointer-events:none}
+
+
+.teamPublicPage.teamCustomOrder{display:flex;flex-direction:column}
+.teamPublicPage.teamCustomOrder .teamPublicExtras,
+.teamPublicPage.teamCustomOrder .teamPublicMeta{order:var(--team-order-presentacion,31)}
+.teamPublicPage.teamCustomOrder #teamPublicFeatured{order:var(--team-order-destacados,32)}
+.teamPublicPage.teamCustomOrder #teamPublicPinned{order:var(--team-order-fijadas,33)}
+.teamPublicPage.teamCustomOrder .teamPublicOverview{order:var(--team-order-estadisticas,34)}
+.teamPublicPage.teamCustomOrder #teamPublicWorks{order:var(--team-order-traducciones,35)}
+.teamPublicPage.teamCustomOrder #teamPublicLatest{order:var(--team-order-novedades,36)}
+.teamPublicPage.teamCustomOrder #teamPublicSupport{order:var(--team-order-apoyo,37)}
