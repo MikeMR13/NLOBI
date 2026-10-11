@@ -2905,6 +2905,6 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  .homeEditorial .homeFeaturedSlideInfo{min-height:0}
  .homeEditorial .homeFeaturedSlideInfo h2{margin:4px 0;min-height:2.8em;max-height:2.8em}
  .homeEditorial .homeFeaturedSlideInfo p{margin:3px 0;min-height:2.8em;max-height:2.8em}
- .homeEditorial .homeFeaturedSlideInfo .homeFeaturedLink{min-height:36px;padding-block:4px}
+ .homeEditorial .homeFeaturedSlideInfo .homeFeaturedLink{min-height:44px;padding-block:6px}
  .homeEditorial .featuredCarouselControls{min-height:44px}
 }
