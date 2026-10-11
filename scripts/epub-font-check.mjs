@@ -61,13 +61,14 @@ const inlineContext={
 vm.createContext(inlineContext);
 vm.runInContext(section('function inlineContainerBlocks','function blocksToPlainText'),inlineContext);
 const leading={nodeType:3,textContent:'Hola '};
-const special={nodeType:1,tagName:'SPAN',childNodes:[{nodeType:3,textContent:'¡Quantico!'}]};
+const special={nodeType:1,tagName:'SPAN',getAttribute:name=>name==='style'?'font-weight: bold':null,childNodes:[{nodeType:3,textContent:'¡Quantico!'}]};
 const group={childNodes:[leading,special]};
 const blocks=inlineContext.inlineContainerBlocks(group,'paragraph',node=>node===special?2:1);
 assert.equal(blocks.length,1,'Inline font changes must not split a paragraph');
 assert.equal(blocks[0].text,'Hola ¡Quantico!');
 assert.match(blocks[0].html,/data-epub-family="1"/);
 assert.match(blocks[0].html,/data-epub-family="2"/);
+assert.match(blocks[0].html,/<strong>/,'Inline bold variants must survive import');
 assert.match(source,/face=new FontFace\('NLOBI-EPUB-'\+index/,'Use a stable unique family index per weight/style variant');
 assert.match(source,/reader-font-original \[data-epub-family/,'Original mode must apply preserved inline styles');
 console.log('EPUB font preservation regression: OK');
