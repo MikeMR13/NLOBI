@@ -2837,6 +2837,21 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .teamCustomSection textarea{width:100%;min-height:60px;resize:vertical;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);padding:10px 12px}
 .teamCustomToggle{display:flex;align-items:center;gap:10px;margin:8px 0;padding:7px;border-radius:8px}
 .teamCustomToggle input{accent-color:var(--accent)}
+.teamVisibilityOption{align-items:flex-start;gap:14px;padding:14px 16px;margin:9px 0;border:1px solid var(--line);border-radius:12px;background:var(--panel2);cursor:pointer;transition:border-color .16s ease}
+.teamVisibilityOption:hover,.teamVisibilityOption:focus-within{border-color:var(--accent)}
+.teamVisibilityOption input{flex:0 0 auto;width:19px;height:19px;margin-top:3px}
+.teamVisibilityOption span{display:flex;flex-direction:column;gap:4px;min-width:0}
+.teamVisibilityOption strong{font-size:.96rem;line-height:1.3}
+.teamVisibilityOption small{font-size:.83rem;color:var(--muted);line-height:1.45}
+.teamCustomSection h3{font-size:1rem;margin:22px 0 5px}
+.teamCustomSection > p.muted{margin:4px 0 18px;line-height:1.55}
+.teamCustomSection details{padding:12px 14px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);margin:16px 0}
+.teamCustomSection details summary{cursor:pointer;font-weight:700}
+.teamCustomSection details[open] summary{margin-bottom:12px}
+.teamCustomSection details p{font-size:.87rem;color:var(--muted);line-height:1.5}
+.teamCustomSection .field input[type="text"]{width:100%;border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;padding:11px 12px}
+@media(max-width:600px){.teamVisibilityOption{padding:12px}.teamCustomSection{padding:15px}}
+
 .teamLivePreview{border:1px solid var(--line);border-top:5px solid var(--accent);border-radius:16px;background:var(--panel);padding:24px;position:sticky;top:86px;box-shadow:var(--shadow2)}
 .teamLivePreview strong{display:block;font-size:1.4rem;margin-bottom:12px}
 .teamLivePreview span{display:inline-block;margin-top:12px;padding:6px 10px;border-radius:30px;background:var(--panel2);font-size:.82rem}
