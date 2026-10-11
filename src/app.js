@@ -1285,7 +1285,7 @@ function clearReaderVolumeSettings(volumeId){
 
 function readerSettingsFields(scope,volume=null,selectedKeys=null){
  const id=volume?.id||'',settings=readReaderSettings(),overrides=settings.volumes[id]||{};
- const prefs=scope==='global'?{...settings.global,mode:settings.mode}:{...settings.global,...overrides,mode:getReaderMode(id)};
+ const prefs=scope==='global'?{...settings.global,mode:settings.mode}:{...getReaderPreferencesForVolume(id),mode:getReaderMode(id)};
  const definitions=[
   ['mode','Modo de lectura',[['chapter','Por capítulos'],['continuous','Lectura continua']]],
   ['theme','Tema',[['light','Claro'],['sepia','Sepia'],['dark','Oscuro']]],
@@ -1302,14 +1302,14 @@ function readerSettingsFields(scope,volume=null,selectedKeys=null){
  if(volume?.epub_fonts?.length){for(let i=0;i<volume.epub_fonts.length&&i<40;i++)definitions[3][2].push(['epub:'+i,'EPUB · '+String(volume.epub_fonts[i].family||'Fuente '+(i+1))])}
  return `<div class="readerScopedFields" aria-label="${scope==='global'?'Opciones globales de lectura':'Opciones individuales del volumen'}">${definitions.filter(([key])=>!selectedKeys||selectedKeys.includes(key)).map(([key,label,options])=>{
   const own=scope==='volume'&&Object.hasOwn(overrides,key),current=scope==='global'?prefs[key]:(own?overrides[key]:'inherit');
-  const choices=scope==='volume'?[['inherit','Usar global ('+String(key==='mode'?(settings.mode==='continuous'?'Continua':'Por capítulos'):settings.global[key])+')'],...options]:options;
+  const choices=scope==='volume'?[['inherit','Usar predeterminado ('+String(key==='mode'?(getReaderMode(id)==='continuous'?'Continua':'Por capítulos'):prefs[key])+')'],...options]:options;
   return `<label class="readerScopedField"><span>${esc(label)}</span><select data-reader-setting="${key}" data-reader-scope="${scope}" data-reader-volume="${esc(id)}">${choices.map(([v,t])=>`<option value="${esc(v)}" ${String(current)===String(v)?'selected':''}>${esc(t)}</option>`).join('')}</select></label>`;
  }).join('')}</div>`;
 }
 
 function readerVolumePreferencesPanel(volume){
  const inherited=!Object.keys(getReaderVolumeOverride(volume.id)).length;
- return `<section class="readerVolumeOptions" aria-label="Preferencias de lectura de este volumen"><div class="readerVolumeOptionsHeader"><div><strong>Modo y preferencias de lectura</strong><p class="muted">Estos ajustes se aplican solo a este volumen.</p></div><span class="badge">${inherited?'Usando ajustes globales':'Personalizado'}</span></div><div class="readerVolumePrimary">${readerSettingsFields('volume',volume,['mode','theme','fontSize'])}</div><details class="readerVolumeAdvanced" id="readerVolumeAdvanced" ${S.readerVolumeExpanded===volume.id?'open':''}><summary>Más preferencias: tipografía, ancho, espaciado y accesibilidad</summary>${readerSettingsFields('volume',volume,['fontFamily','width','lineHeight','paragraphSpace','indent','align','contrast','images'])}</details><button type="button" class="btn" data-reader-reset-volume="${esc(volume.id)}" ${inherited?'disabled':''}>Restaurar valores globales de este volumen</button></section>`;
+ return `<section class="readerVolumeOptions" aria-label="Preferencias de lectura de este volumen"><div class="readerVolumeOptionsHeader"><div><strong>Modo y preferencias de lectura</strong><p class="muted">Los valores predeterminados proceden del equipo traductor; puedes sustituirlos solo para este volumen.</p></div><span class="badge">${inherited?'Predeterminado del equipo':'Personalizado'}</span></div><div class="readerVolumePrimary">${readerSettingsFields('volume',volume,['mode','theme','fontSize'])}</div><details class="readerVolumeAdvanced" id="readerVolumeAdvanced" ${S.readerVolumeExpanded===volume.id?'open':''}><summary>Más preferencias: tipografía, ancho, espaciado y accesibilidad</summary>${readerSettingsFields('volume',volume,['fontFamily','width','lineHeight','paragraphSpace','indent','align','contrast','images'])}</details><button type="button" class="btn" data-reader-reset-volume="${esc(volume.id)}" ${inherited?'disabled':''}>Usar valores predeterminados de este volumen</button></section>`;
 }
 let readerScrollFrame=0,readerLastPersist=0,readerLastCloudPosition=0;
 function readerPositionKey(id){return 'nlobi_reader_position_'+(S.user?.id||'guest')+'_'+String(id||'')}
