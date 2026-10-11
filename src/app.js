@@ -2314,7 +2314,7 @@ function novelGenresPicker(id,selected=[]){
 }
 function selectedNovelGenres(id){return [...document.querySelectorAll('input[name="'+id+'-choice"]:checked')].map(o=>o.value)}
 function bindNovelGenrePickers(){
- $('[data-genre-picker]').forEach(root=>{
+ document.querySelectorAll('[data-genre-picker]').forEach(root=>{
   const details=root.querySelector('details'),search=root.querySelector('[data-genre-query]'),labels=[...root.querySelectorAll('[data-genre-option]')],inputs=[...root.querySelectorAll('input[type="checkbox"]')];
   const fold=v=>String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('es');
   const update=()=>{
