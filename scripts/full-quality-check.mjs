@@ -67,6 +67,10 @@ const collectionFixture={id:'collection-qa',title:'Colección QA',description:'D
 
 const scenarios=[
  ['public-home','home',{catalog:[translation]}],
+ ['public-home-carousel','home',{catalog:[
+  {...translation,novels:{...translation.novels,cover_url:'https://example.test/cover-novel-a.jpg'}},
+  {...translation,id:'project-carousel-2',title:'Un segundo título para comprobar el cambio de portada',novels:{...translation.novels,id:'novel-carousel-2',title:'Una segunda novela más larga con varios detalles',cover_url:'https://example.test/cover-novel-b.jpg'}}
+ ]}],
  ['public-explore','explore',{catalog:[translation]}],
  ['public-detail','detail:project-1',{catalog:[translation],currentDetail:translation}],
  ['public-group','group:group-1',{catalog:[translation],publicGroup}],
@@ -81,7 +85,8 @@ const scenarios=[
  ['user-library-collections','library',{...authBase,libraryTab:'collections',readerCollections:[],savedCollections:[],discoverCollections:[],collectionFormOpen:false}],
  ['user-library-collections-form','library',{...authBase,libraryTab:'collections',readerCollections:[],savedCollections:[],discoverCollections:[],collectionFormOpen:true,collectionEditingId:null}],
  ['user-library-collections-edit','library',{...authBase,catalog:[collectionTranslation],libraryTab:'collections',readerCollections:[collectionFixture],savedCollections:[],discoverCollections:[],collectionFormOpen:true,collectionEditingId:'collection-qa'}],
- ['user-profile','auth',authBase],['user-notifications','notifications',authBase],['user-beta','beta',authBase],
+ ['user-profile','auth',authBase],['user-notifications','notifications',authBase],
+ ['user-notifications-volume','notifications',{...authBase,notes:[{id:'notice-volume',notification_type:'new_publication',title:'Nuevo volumen · Historia QA',body:'Vol. 1',translation_id:'project-1',volume_id:'volume-1',section_id:null,created_at:now,read_at:null}]}],['user-beta','beta',authBase],
  ['creator-studio','studio',authBase],['creator-new','studio:new',authBase],
  ['creator-project','studio:project:project-1',{...authBase,studioProject:translation,teamMembers}],
  ['creator-team','studio:team:group-1',{...authBase,studioTeam:group,teamMembers}],
@@ -133,7 +138,7 @@ const report=[],failures=[];
 for(const [vpName,width,height] of viewports){
  for(const [name,view,state] of scenarios){
   const full=vpName==='mobile-390'||vpName==='desktop-1280';
-  const edge=['public-home','public-explore','public-detail','public-reader','user-library','creator-studio','creator-project','creator-team','import-edit','admin','error-state'];
+  const edge=['public-home','public-home-carousel','public-explore','public-detail','public-reader','user-library','creator-studio','creator-project','creator-team','import-edit','admin','error-state'];
   if(!full&&!edge.includes(name))continue;
   const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block',colorScheme:'light'});await prepare(context);
   const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!/favicon|Failed to load resource/i.test(m.text()))runtime.push(m.text())});
@@ -142,6 +147,35 @@ for(const [vpName,width,height] of viewports){
   const check=await inspect(page),axe=await new AxeBuilder({page}).analyze(),seriousViolations=axe.violations.filter(v=>['serious','critical'].includes(v.impact||'')),serious=seriousViolations.map(v=>v.id),axeDetails=seriousViolations.flatMap(v=>v.nodes.slice(0,7).map(n=>({id:v.id,selector:n.target,reason:n.failureSummary?.slice(0,220),html:n.html?.slice(0,130)})));
   const row={viewport:vpName,scenario:name,...check,runtime,axeSerious:serious,axeDetails};report.push(row);
   if(check.overflow>2)failures.push({...row,error:'horizontal-overflow'});if(check.clipped.length)failures.push({...row,error:'clipped-controls'});if(check.tiny.length)failures.push({...row,error:'small-targets'});if(check.badText.length)failures.push({...row,error:'bad-visible-text'});if(!check.main||check.content<2)failures.push({...row,error:'empty-main'});if(runtime.length)failures.push({...row,error:'runtime-error'});if(serious.length)failures.push({...row,error:'axe-serious'});
+  if(name==='public-home-carousel'){
+   const initial=await page.evaluate(()=>{
+    const hero=document.querySelector('.homeShowcaseCopy'),gallery=document.querySelector('[data-home-featured]'),below=document.querySelector('.homeQuickLinks');
+    window.__QA_FEATURED_COPY__=hero;window.__QA_FEATURED_ROOT__=gallery;
+    return {title:gallery?.querySelector('.homeFeaturedSlideInfo h2')?.textContent,
+      galleryHeight:gallery?.getBoundingClientRect().height||0,
+      belowY:below?.getBoundingClientRect().top||0,controls:gallery?.querySelectorAll('[data-featured-index]').length||0};
+   });
+   if(initial.controls!==2)failures.push({...row,error:'carousel-controls-missing',initial});
+   await page.locator('[data-featured-step="1"]').click();
+   const after=await page.evaluate(()=>{
+    const gallery=document.querySelector('[data-home-featured]');
+    return {title:gallery?.querySelector('.homeFeaturedSlideInfo h2')?.textContent,
+      stableCopy:window.__QA_FEATURED_COPY__===document.querySelector('.homeShowcaseCopy'),
+      stableRoot:window.__QA_FEATURED_ROOT__===gallery,
+      galleryHeight:gallery?.getBoundingClientRect().height||0,
+      belowY:document.querySelector('.homeQuickLinks')?.getBoundingClientRect().top||0,
+      activeDots:[...gallery.querySelectorAll('[data-featured-index].active')].map(x=>x.dataset.featuredIndex)};
+   });
+   if(after.title===initial.title||!after.stableCopy||!after.stableRoot||after.activeDots.join(',')!=='1'||Math.abs(after.galleryHeight-initial.galleryHeight)>2||Math.abs(after.belowY-initial.belowY)>6)
+      failures.push({...row,error:'carousel-replaced-page-or-shifted-layout',initial,after});
+   await page.locator('[data-featured-step="-1"]').click();
+   const restored=await page.locator('.homeFeaturedSlideInfo h2').textContent();
+   if(restored!==initial.title)failures.push({...row,error:'carousel-previous-navigation-did-not-restore-book'});
+  }
+  if(name==='user-notifications-volume'){
+   const volumeButton=page.locator('[data-note-open-volume="volume-1"][data-translation="project-1"]');
+   if((await volumeButton.count())!==1||(await volumeButton.textContent())?.trim()!=='Abrir volumen')failures.push({...row,error:'volume-notification-does-not-link-to-volume'});
+  }
   if(name==='creator-project'){const edit=page.locator('[data-edit-section="section-1"]');if(await edit.count()){await edit.click();await page.waitForTimeout(15);if(!(await page.locator('#editSectionTitle').count()))failures.push({...row,error:'editor-open-failed'})}}
   if(name==='user-library'){const b=page.locator('[data-library-filter="favorites"]');if(await b.count())await b.click()}
   if(name==='user-library-collections-form'){
