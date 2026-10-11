@@ -92,7 +92,7 @@ async function req(path,opt={}){
  }
  return r
 }
-async function jreq(path,opt={}){const method=String(opt.method||'GET').toUpperCase(),done=method==='GET'?null:startPageBusy('Guardando cambios…');try{const r=await req(path,opt);if(!r.ok){const error=new Error((await r.text()).slice(0,220)||r.statusText);error.status=r.status;throw error}const tx=await r.text();return tx?JSON.parse(tx):null}finally{done?.()}}
+async function jreq(path,opt={}){const method=String(opt.method||'GET').toUpperCase(),done=startPageBusy(method==='GET'?'Cargando datos…':'Guardando cambios…');try{const r=await req(path,opt);if(!r.ok){const error=new Error((await r.text()).slice(0,220)||r.statusText);error.status=r.status;throw error}const tx=await r.text();return tx?JSON.parse(tx):null}finally{done?.()}}
 async function jreqAllRows(path,opt={},pageSize=500,maxPages=40){
  const method=String(opt.method||'GET').toUpperCase();
  if(method!=='GET')throw new Error('jreqAllRows solo admite consultas GET.');
