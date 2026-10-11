@@ -39,6 +39,8 @@ jobs:
         run: node scripts/studio-visual-filters-check.mjs
       - name: Studio editable status and editorial workflow regression
         run: node scripts/studio-status-workflow-check.mjs
+      - name: Original novel and translation status search and permissions
+        run: node scripts/studio-dual-status-check.mjs
       - run: npm run build
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs
