@@ -232,10 +232,11 @@ for (const fragment of [
   "jreqAllRows(\`/rest/v1/library_entries?user_id=eq.\${uid}",
   "jreqAllRows(\`/rest/v1/reading_progress?user_id=eq.\${uid}",
   "jreqAllRows('/rest/v1/read_sections?user_id=eq.'+uid",
-  "S.studioTranslations=await jreqAllRows("
 ]) {
   if (!app.includes(fragment)) throw new Error("Data pagination: falta " + fragment);
 }
+
+if (!(app.includes("S.studioTranslations=await jreqAllRows(") || (app.includes("const ownedRequest=jreqAllRows(") && app.includes("S.studioTranslations=[...(owned||[]),...shared")))) throw new Error("Data pagination: Studio no pagina ni integra colaboraciones.");
 
 // Storage refresh invariants
 for (const required of [
