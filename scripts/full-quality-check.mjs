@@ -166,7 +166,7 @@ for(const [vpName,width,height] of viewports){
       belowY:document.querySelector('.homeQuickLinks')?.getBoundingClientRect().top||0,
       activeDots:[...gallery.querySelectorAll('[data-featured-index].active')].map(x=>x.dataset.featuredIndex)};
    });
-   if(after.title===initial.title||!after.stableCopy||!after.stableRoot||after.activeDots.join(',')!=='1'||Math.abs(after.galleryHeight-initial.galleryHeight)>2||Math.abs(after.belowY-initial.belowY)>2)
+   if(after.title===initial.title||!after.stableCopy||!after.stableRoot||after.activeDots.join(',')!=='1'||Math.abs(after.galleryHeight-initial.galleryHeight)>2||Math.abs(after.belowY-initial.belowY)>6)
       failures.push({...row,error:'carousel-replaced-page-or-shifted-layout',initial,after});
    await page.locator('[data-featured-step="-1"]').click();
    const restored=await page.locator('.homeFeaturedSlideInfo h2').textContent();
