@@ -200,7 +200,7 @@ for(const [vpName,width,height] of viewports){
   if(name==='readonly-studio' && ((await page.locator('[data-v="studio:new"]:visible').count())||(await page.locator('[data-v="studio:import"]:visible').count())))failures.push({...row,error:'readonly-studio-exposes-editor-actions'});
   if(name==='readonly-project' && ((await page.locator('#createVolume:visible').count())||(await page.locator('#saveDiscoveryMeta:visible').count())||(await page.locator('[data-new-section]:visible').count())))failures.push({...row,error:'readonly-project-exposes-editor-actions'});
   if(name==='readonly-team' && ((await page.locator('#saveTeamProfile:visible').count())||(await page.locator('#addSupportLink:visible').count())||(await page.locator('[data-media-open]:visible').count())))failures.push({...row,error:'readonly-team-exposes-editor-actions'});
-  if((vpName==='mobile-390'||vpName==='desktop-1280')&&['public-home','public-detail','public-reader','user-library','user-library-collections-form','user-library-collections-edit','creator-project','creator-team','import-edit','admin'].includes(name))await page.screenshot({path:'quality-results/'+vpName+'-'+name+'.png',fullPage:true});
+  if((vpName==='mobile-390'||vpName==='desktop-1280')&&['public-home','public-detail','public-reader','user-library','user-library-collections-form','user-library-collections-edit','creator-project','creator-project-collaborative','creator-studio-invitations','public-detail-collaborative','public-team-collaborative','creator-team','import-edit','admin'].includes(name))await page.screenshot({path:'quality-results/'+vpName+'-'+name+'.png',fullPage:true});
   await context.close();
  }
 }
