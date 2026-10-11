@@ -472,3 +472,10 @@ for(const marker of [
  for(const marker of ['function startPageBusy(','pageBusyCount','finally{done();if(S.view===route)render()}','finally{done?.()}'])if(!app.includes(marker))throw new Error('Carga: falta control de estado '+marker);
  for(const marker of ['.pageBusyIndicator[hidden]','@keyframes obiBookLeft','@keyframes obiBookRight','prefers-reduced-motion:reduce'])if(!css.includes(marker))throw new Error('Carga: estilos incompletos '+marker);
 }
+
+// Branding del lector: PNG propio, prioridad y tamaño ajustable.
+{
+ const css=fs.readFileSync('src/styles.css','utf8');
+ for(const marker of ['id="teamReaderLogoFile"','data-team-setting="reader_logo_url"','data-team-setting="reader_logo_width"','async function uploadTeamReaderLogo(','cfg.reader_logo_url||group.avatar_url','teamReaderBrandImage'])if(!app.includes(marker))throw new Error('Logo lector: falta '+marker);
+ for(const marker of ['.readerTeamLink .teamReaderBrandImage','object-fit:contain','.teamReaderLogoPreview'])if(!css.includes(marker))throw new Error('Logo lector: falta CSS '+marker);
+}
