@@ -118,3 +118,36 @@ jobs:
       - name: Enforce full-platform quality result
         if: steps.full_quality.outcome == 'failure'
         run: exit 1
+
+  editorial_status_db_qa:
+    name: Three-status migration and permissions (PostgreSQL 17)
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: nlobi-qa-only
+          POSTGRES_DB: nlobi_qa
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d nlobi_qa"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      PGHOST: localhost
+      PGPORT: "5432"
+      PGUSER: postgres
+      PGPASSWORD: nlobi-qa-only
+      PGDATABASE: nlobi_qa
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - name: Prepare isolated Supabase-style roles, policies and test data
+        run: psql -v ON_ERROR_STOP=1 -f scripts/qa/editorial-status-fixture.sql
+      - name: Apply the exact unmodified NLOBI migration
+        run: psql -v ON_ERROR_STOP=1 -f supabase/migrations/20261011130000_editorial_three_statuses.sql
+      - name: Validate synthetic JWT sessions, RLS, authorization and atomicity
+        run: psql -v ON_ERROR_STOP=1 -f scripts/qa/editorial-status-assertions.sql
