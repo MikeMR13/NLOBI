@@ -101,8 +101,11 @@ as $$
 begin
   if new.status <> 'published' then return new; end if;
   -- Un borrador editado o un cambio técnico en updated_at NO generan avisos.
-  if tg_op = 'INSERT'
-    or old.status is distinct from 'published'
+  if tg_op = 'INSERT' then
+    perform private.notify_volume_activity(new.volume_id,'updated');
+    return new;
+  end if;
+  if old.status is distinct from 'published'
     or (new.title, new.content, new.section_type, new.section_number, new.sort_order)
        is distinct from (old.title, old.content, old.section_type, old.section_number, old.sort_order) then
     perform private.notify_volume_activity(new.volume_id,'updated');
