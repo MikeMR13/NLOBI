@@ -35,6 +35,8 @@ jobs:
         run: node scripts/studio-phase6-check.mjs
       - name: Studio phase 7 publication and launch checks
         run: node scripts/studio-phase7-check.mjs
+      - name: Studio status, genre and publication filter regression
+        run: node scripts/studio-visual-filters-check.mjs
       - run: npm run build
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs
@@ -56,6 +58,8 @@ jobs:
         run: node scripts/studio-phase6-browser-check.mjs
       - name: Studio phase 7 browser preflight and preview audit
         run: node scripts/studio-phase7-browser-check.mjs
+      - name: Studio responsive filters and genres visual audit
+        run: node scripts/studio-visual-browser-audit.mjs
       - name: axe accessibility audit
         id: axe
         continue-on-error: true

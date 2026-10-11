@@ -3178,3 +3178,45 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 @media(max-width:860px){.studioV7Cols{grid-template-columns:1fr}}
 @media(max-width:560px){.studioV7Metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.studioV7Actions select{width:100%}.studioV7Dialog{width:96vw;max-height:95dvh}.studioV7PreviewToolbar{padding:12px}.studioV7PreviewToolbar select{width:100%}.studioV7ReaderSimulation{padding:10px}}
 @media(prefers-reduced-motion:reduce){.studioV7Hub *,.studioV7Dialog *{scroll-behavior:auto!important;transition:none!important}}
+
+
+/* Studio: genre picker and status/genre/publication filter visual audit */
+.studioFieldLabel{display:block;font-size:.87rem;font-weight:800;margin-bottom:7px;color:var(--text)}
+.genrePicker{width:100%;min-width:0}
+.genrePicker .genreDropdown{width:100%;min-width:0;overflow:visible;border-radius:12px;background:var(--panel);color:var(--text);border:1px solid var(--line);box-shadow:none}
+.genrePicker .genreDropdown[open]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accentSoft)}
+.genrePicker .genreDropdown>summary{min-height:49px;padding:10px 13px;display:flex;align-items:center;gap:12px;list-style:none;cursor:pointer}
+.genrePicker .genreDropdown>summary::-webkit-details-marker{display:none}
+.genreDropdownSummary{flex:1;min-width:0;display:grid;gap:2px}
+.genreDropdownSummary strong{font-size:.88rem;overflow-wrap:anywhere}
+.genreDropdownSummary small{font-size:.74rem;color:var(--muted);font-weight:500}
+.genreCount{border-radius:7px;min-width:28px;text-align:center;background:var(--accent);color:#171717;border:1px solid rgba(20,20,20,.15);font-weight:900;font-size:.76rem;padding:4px 6px}
+.genreChevron{font-size:1.15rem;font-weight:800;color:var(--text);transition:transform .16s}
+.genreDropdown[open] .genreChevron{transform:rotate(180deg)}
+.genreDropdownPanel{padding:13px;border-top:1px solid var(--line);min-width:0}
+.genreDropdownPanel .genreSearchLabel{display:block;font-weight:700;font-size:.8rem;color:var(--text);margin:0 0 6px}
+.genreDropdownPanel [data-genre-query]{display:block;width:100%;max-width:100%;min-width:0;min-height:44px;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--text);font:inherit;font-size:.9rem;padding:9px 12px;margin:0 0 10px}
+.genrePicker .genreDropdownOptions{padding:2px 0;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;overflow-y:auto;overscroll-behavior:contain;max-height:min(310px,42vh)}
+.genrePicker .genreDropdownOptions label{display:flex;align-items:center;gap:10px;min-width:0;padding:9px 8px;border:1px solid transparent;border-radius:9px;font-size:.83rem;line-height:1.35;cursor:pointer;overflow-wrap:anywhere}
+.genrePicker .genreDropdownOptions label:hover{background:var(--panel2);border-color:var(--line)}
+.genrePicker .genreDropdownOptions label:has(input:checked){background:var(--accentSoft);border-color:var(--accent)}
+.genrePicker .genreDropdownOptions label[hidden],.genrePicker [data-genre-empty][hidden]{display:none!important}
+.genrePicker .genreDropdownOptions input{flex:none;accent-color:var(--accent);width:17px;height:17px;margin:0}
+.genreNoResults{padding:12px;color:var(--muted);font-size:.86rem}
+.genreDropdownFooter{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;padding-top:11px;border-top:1px solid var(--line);font-size:.8rem}
+.genreDropdownFooter output{color:var(--muted);font-weight:700}
+.genreDropdownFooter button{font-size:.8rem}
+.genrePicker :is(summary,input,button):focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.studioV3Filters{align-items:end}
+.studioV3Filters .studioV3Search,.studioV3Filters .studioV3Filter{align-self:stretch;min-width:0}
+.studioV3Filters :is(input,select){min-width:0}
+.studioV3Filter select:focus-visible,.studioV3Search input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.studioV3Results{line-height:1.5}
+.studioV3BookTags span{overflow-wrap:anywhere}
+@media(max-width:600px){
+ .genrePicker .genreDropdownOptions{grid-template-columns:1fr;max-height:min(250px,42vh)}
+ .genreDropdownPanel{padding:11px}
+ .genrePicker .genreDropdownOptions label{min-height:41px}
+ .studioV3Filters{gap:10px}
+}
+@media(prefers-reduced-motion:reduce){.genreChevron{transition:none}}
