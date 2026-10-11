@@ -3066,3 +3066,8 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  .homeEditorial .homeFeaturedSlideInfo .homeFeaturedLink{min-height:44px;padding-block:6px}
  .homeEditorial .featuredCarouselControls{min-height:44px}
 }
+
+/* Uploaded EPUB fonts: original styling and explicit family selection remain distinct. */
+.readerPaper.reader-font-epub p,.readerPaper.reader-font-epub blockquote,.readerPaper.reader-font-epub ruby,.readerPaper.reader-font-epub .readerHeading{font-family:var(--epub-reader-font,Georgia,serif)}
+.readerPaper.reader-font-original .readerHeading{font-family:var(--epub-reader-font,Georgia,serif)}
+.readerPaper.reader-font-original p,.readerPaper.reader-font-original blockquote,.readerPaper.reader-font-original ruby{font-family:var(--epub-reader-font,Georgia,serif)}
