@@ -33,6 +33,8 @@ jobs:
         run: node scripts/studio-phase5-check.mjs
       - name: Studio phase 6 editorial quality inspector regression
         run: node scripts/studio-phase6-check.mjs
+      - name: Studio phase 7 publication and launch checks
+        run: node scripts/studio-phase7-check.mjs
       - run: npm run build
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs
@@ -52,6 +54,8 @@ jobs:
           npx playwright install --with-deps chromium firefox webkit
       - name: Studio phase 6 browser and mobile interaction audit
         run: node scripts/studio-phase6-browser-check.mjs
+      - name: Studio phase 7 browser preflight and preview audit
+        run: node scripts/studio-phase7-browser-check.mjs
       - name: axe accessibility audit
         id: axe
         continue-on-error: true
