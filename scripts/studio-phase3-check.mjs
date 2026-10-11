@@ -41,7 +41,7 @@ assert.match(html,/studioTeamFilter/);
 assert.match(html,/studioWorkflowFilter/);
 assert.match(html,/studioProjectSort/);
 assert.match(html,/2 obras encontradas/);
-assert.match(html,/1 capítulos en revisión/);
+assert.match(html,/1 capítulo en revisión/);
 assert.match(html,/data-studio-project="second"/);
 assert.match(html,/Abrir revisiones/);
 assert.match(html,/data-v="studio:new"/);
