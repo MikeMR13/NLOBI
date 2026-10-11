@@ -21,6 +21,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Studio phase 1 regression checks
+        run: node scripts/studio-phase1-check.mjs
       - run: npm run build
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs
