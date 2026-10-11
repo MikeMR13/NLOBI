@@ -1645,6 +1645,8 @@ function render(){
    }
   }
   enhanceAccessibility();
+  const metaDescription=document.querySelector('meta[name="description"]');
+  if(metaDescription)metaDescription.content=S.view.startsWith('group:')&&S.publicGroup?String(teamSettings(S.publicGroup).seo_description||S.publicGroup.description||'Equipo traductor de El Obi del Lector').slice(0,300):'Biblioteca digital de novelas ligeras para lectores y equipos de traducción: catálogo, progreso de lectura, Studio e importación de proyectos.';
   bind();
   if(preserveMobileNav)app.querySelector('.mobileNavClose')?.focus({preventScroll:true});
   applyStudioActionAccess();
