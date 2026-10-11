@@ -23,6 +23,8 @@ jobs:
       - run: npm run check
       - name: Studio phase 1 regression checks
         run: node scripts/studio-phase1-check.mjs
+      - name: Studio phase 2 metadata and publication checks
+        run: node scripts/studio-phase2-check.mjs
       - run: npm run build
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs
