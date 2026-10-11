@@ -482,7 +482,7 @@ for(const marker of [
 // Release gate: DB migration must protect PNGs before production.
 {
  const migration=fs.readFileSync('supabase/migrations/20261010213000_protect_team_reader_logos.sql','utf8');
- if((migration.match(/reader_logo_url/g)||[]).length<2||!migration.includes('private.storage_object_reference_count')||!migration.includes('public.media_usage_for_paths'))
+ if((migration.match(/reader_logo_url/g)||[]).length<2||!migration.includes('private.storage_object_reference_count')||!migration.includes('public.media_usage_for_paths')||!migration.includes('private.is_group_manager(id)')||!migration.includes('drop policy if exists "groups_update_editors"'))
   throw new Error('Release gate: falta protección de PNG en retención multimedia.');
  for(const marker of ['async function saveTeamReaderCustom(','panel.querySelectorAll(\'[data-team-setting]\')','saveReaderCustom.onclick=saveTeamReaderCustom','data-team-fallback','function getReaderDefaultPreferencesForVolume(']){
   if(!app.includes(marker))throw new Error('Preproducción del lector: falta '+marker);
