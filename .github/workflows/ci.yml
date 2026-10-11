@@ -43,24 +43,40 @@ jobs:
         continue-on-error: true
         run: node scripts/axe-check.mjs
       - name: Visual layout audit
+        id: layout
+        continue-on-error: true
         run: node scripts/layout-check.mjs
       - name: Site appearance contrast audit (six palettes)
+        id: contrast
+        continue-on-error: true
         run: node scripts/appearance-contrast-check.mjs
       - name: Visual cohesion phase 3 audit
+        id: cohesion
+        continue-on-error: true
         run: node scripts/visual-unification-phase3-check.mjs
       - name: Appearance visual regression phase 4 matrix
+        id: visual_regression
+        continue-on-error: true
         run: node scripts/visual-regression-phase4-check.mjs
       - name: Mobile navigation phase 2 interaction audit
+        id: mobile_nav
+        continue-on-error: true
         run: node scripts/mobile-navigation-phase2-check.mjs
       - name: Mobile interaction audit (Chromium + WebKit)
+        id: mobile_interactions
+        continue-on-error: true
         run: node scripts/mobile-interactions-check.mjs
       - name: Explore visual and interaction audit
+        id: explore_visual
+        continue-on-error: true
         run: node scripts/explore-quality-check.mjs
       - name: Full platform quality pass
         id: full_quality
         continue-on-error: true
         run: node scripts/full-quality-check.mjs
       - name: Cross-browser smoke
+        id: cross_browser
+        continue-on-error: true
         run: node scripts/cross-browser-check.mjs
       - name: Mobile Lighthouse performance report
         id: lighthouse
@@ -118,3 +134,12 @@ jobs:
       - name: Enforce full-platform quality result
         if: steps.full_quality.outcome == 'failure'
         run: exit 1
+
+      - name: Enforce all visual and cross-browser results
+        if: always()
+        run: |
+          failed=0
+          for result in "${{ steps.layout.outcome }}" "${{ steps.contrast.outcome }}" "${{ steps.cohesion.outcome }}" "${{ steps.visual_regression.outcome }}" "${{ steps.mobile_nav.outcome }}" "${{ steps.mobile_interactions.outcome }}" "${{ steps.explore_visual.outcome }}" "${{ steps.cross_browser.outcome }}"; do
+            if [ "$result" = "failure" ]; then failed=1; fi
+          done
+          if [ "$failed" -ne 0 ]; then echo "Se encontraron errores visuales o de navegadores (revisa los pasos y artefactos anteriores)."; exit 1; fi

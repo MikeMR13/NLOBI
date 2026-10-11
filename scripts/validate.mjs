@@ -35,6 +35,39 @@ for (const marker of [
 }
 
 const app = fs.readFileSync("src/app.js", "utf8");
+const collabMigration = fs.readFileSync("supabase/migrations/20261011120000_translation_collaborations.sql", "utf8");
+for (const required of [
+ "create table if not exists public.translation_collaborations",
+ "alter table public.translation_collaborations enable row level security",
+ "translation_collaborations_team_read",
+ "translation_collaborations_public_read",
+ "status='accepted'",
+ "gm.role in ('owner','admin')",
+ "function public.invite_translation_collaboration",
+ "function public.respond_translation_collaboration",
+ "function public.revoke_translation_collaboration",
+ "revoke all on public.translation_collaborations from public,anon,authenticated"
+]) {
+ if (!collabMigration.includes(required)) throw new Error("Collaboration security QA: falta " + required);
+}
+for (const required of [
+ "function studioCollaborationInbox()",
+ "function studioCollaborationPanel(P)",
+ "function renderCollaborationCredits(book)",
+ "async function sendCollaborationInvite()",
+ "async function decideCollaboration(id,accept)",
+ "async function revokeCollaboration(id)",
+ "collaboration_groups:",
+ "/rest/v1/rpc/invite_translation_collaboration",
+ "/rest/v1/rpc/respond_translation_collaboration",
+ "/rest/v1/rpc/revoke_translation_collaboration"
+]) {
+ if (!app.includes(required)) throw new Error("Collaboration UI QA: falta " + required);
+}
+if (/jreq\(['"`]\/rest\/v1\/translation_collaborations['"`],\{method:\s*['"`](?:POST|PATCH|DELETE)/.test(app)) {
+ throw new Error("Collaboration security QA: escritura directa a la tabla en lugar de RPC autorizada.");
+}
+
 for (const requiredFn of ["function render(){","function detailView(){","function publicGroupView(){","function readerView(){","function htmlNodesToBlocks(","function pdfTextLines(","function revisionHistoryPanel(){","function revisionPreviewPanel(){","async function cleanupOrphanMedia(){","async function storageSelfTest(){"]) { if (!app.includes(requiredFn)) throw new Error(`Falta función crítica: ${requiredFn}`); }
 
 if (app.includes("const KEY='") || app.includes("const URL='https://")) {
@@ -232,7 +265,7 @@ for (const fragment of [
   "jreqAllRows(\`/rest/v1/library_entries?user_id=eq.\${uid}",
   "jreqAllRows(\`/rest/v1/reading_progress?user_id=eq.\${uid}",
   "jreqAllRows('/rest/v1/read_sections?user_id=eq.'+uid",
-  "S.studioTranslations=await jreqAllRows("
+  "const ownedRequest=jreqAllRows("
 ]) {
   if (!app.includes(fragment)) throw new Error("Data pagination: falta " + fragment);
 }

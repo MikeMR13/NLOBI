@@ -30,7 +30,16 @@ for(const vp of viewports){
           const r=el.getBoundingClientRect(),cs=getComputedStyle(el);
           return cs.display!=='none'&&cs.visibility!=='hidden'&&r.width>0&&r.height>0;
         });
-      const clipped=visible.map(el=>{
+      // A carousel or horizontal chip rail deliberately contains offscreen children.
+      // They must remain scrollable, but are not page-level clipping errors.
+      const inHorizontalScroller=el=>{
+        for(let parent=el.parentElement;parent&&parent!==document.body;parent=parent.parentElement){
+          const style=getComputedStyle(parent);
+          if(/auto|scroll/.test(style.overflowX)&&parent.scrollWidth>parent.clientWidth+2)return true;
+        }
+        return false;
+      };
+      const clipped=visible.filter(el=>!inHorizontalScroller(el)).map(el=>{
         const r=el.getBoundingClientRect();
         return {tag:el.tagName,text:(el.textContent||el.getAttribute('aria-label')||'').trim().slice(0,80),left:r.left,right:r.right,width:r.width};
       }).filter(x=>x.left<-2||x.right>root.clientWidth+2);
