@@ -2930,3 +2930,16 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .readerExperience.teamSeparator-flor .readerSceneSeparator::after{content:"✿"}
 .readerExperience.teamSeparator-asteriscos .readerSceneSeparator::after{content:"*  *  *"}
 .readerExperience .readerSceneSeparator::after{position:absolute;left:0;right:0;top:-.7em;font-size:1.15rem;line-height:1.4;color:inherit}
+
+/* Nuevos separadores editoriales: visibles tanto en lectura continua como por capítulo. */
+.readerExperience:is(.teamSeparator-rombos,.teamSeparator-estrellas,.teamSeparator-luna,.teamSeparator-hojas,.teamSeparator-ondas,.teamSeparator-guiones,.teamSeparator-circulos,.teamSeparator-libro,.teamSeparator-japones,.teamSeparator-invisible) .readerSceneSeparator{border:0;opacity:.7}
+.readerExperience.teamSeparator-rombos .readerSceneSeparator::after{content:"◆  ◆  ◆"}
+.readerExperience.teamSeparator-estrellas .readerSceneSeparator::after{content:"✦  ✦  ✦"}
+.readerExperience.teamSeparator-luna .readerSceneSeparator::after{content:"☾"}
+.readerExperience.teamSeparator-hojas .readerSceneSeparator::after{content:"❧"}
+.readerExperience.teamSeparator-ondas .readerSceneSeparator::after{content:"〰"}
+.readerExperience.teamSeparator-guiones .readerSceneSeparator::after{content:"—  —  —"}
+.readerExperience.teamSeparator-circulos .readerSceneSeparator::after{content:"◦  ◦  ◦"}
+.readerExperience.teamSeparator-libro .readerSceneSeparator::after{content:"❦"}
+.readerExperience.teamSeparator-japones .readerSceneSeparator::after{content:"※"}
+.readerExperience.teamSeparator-invisible .readerSceneSeparator::after{content:"";display:none}
