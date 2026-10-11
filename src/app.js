@@ -2505,15 +2505,24 @@ async function boot(isRetry=false){
 }
 // Mantener lanzamientos sincronizados sin reordenar la interfaz durante la lectura.
 let releasesRefreshPending=false,lastReleasesRefresh=0;
+function publicationSnapshot(){
+ return JSON.stringify({
+  catalog:(S.catalog||[]).map(x=>[x.id,x.status,x.updated_at,x.novels?.cover_url,x.novels?.title]),
+  volumes:(S.publishedVolumes||[]).map(v=>[v.id,v.published_at,v.status,v.title,v.cover_url]),
+  sections:(S.publishedSections||[]).map(x=>[x.id,x.published_at,x.status])
+ });
+}
 async function refreshPublicReleases(force=false){
  if(releasesRefreshPending||!navigator.onLine||document.hidden||S.catalogLoading)return;
  if(!['home','releases'].includes(S.view)&&!S.view.startsWith('collection:'))return;
  if(!force&&Date.now()-lastReleasesRefresh<60000)return;
  releasesRefreshPending=true;
  try{
+  const before=publicationSnapshot();
   await loadCatalog();
   lastReleasesRefresh=Date.now();
-  if(['home','releases'].includes(S.view)||S.view.startsWith('collection:'))render();
+  // No reconstruir el inicio si la consulta periódica no detectó cambios reales.
+  if(before!==publicationSnapshot()&&(['home','releases'].includes(S.view)||S.view.startsWith('collection:')))render();
  }catch(error){console.warn('No se pudieron actualizar los lanzamientos',error)}
  finally{releasesRefreshPending=false}
 }
