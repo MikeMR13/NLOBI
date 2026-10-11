@@ -33,6 +33,8 @@ jobs:
         run: node scripts/studio-phase5-check.mjs
       - name: Studio phase 6 editorial quality inspector regression
         run: node scripts/studio-phase6-check.mjs
+      - name: Studio phase 7 publication and launch checks
+        run: node scripts/studio-phase7-check.mjs
       - run: npm run build
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs
