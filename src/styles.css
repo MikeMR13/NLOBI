@@ -3107,3 +3107,61 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 /* A11y: empty featured gallery must remain legible on light and dark themes. */
 .homeEditorial .homeFeaturedEmpty{color:var(--text)}
 .homeEditorial .homeFeaturedEmpty span,.homeEditorial .homeFeaturedEmpty strong{color:inherit}
+
+/* Studio · Invitaciones y créditos entre equipos de traducción */
+.studioCollaborationInbox{margin:24px 0;padding:clamp(17px,3vw,24px);background:var(--surface,#fff);border:1px solid color-mix(in srgb,var(--accent,#e4af14) 35%,var(--line,#d8d8d8));border-radius:18px}
+.studioCollaborationInbox .sectionHead{margin-top:0}
+.studioCollaborationPanel{margin:22px 0}
+.studioCollaborationPanel .studioCollaborationInvite{padding:14px 0}
+.studioCollaborationInvite label{display:block;font-weight:700;margin-bottom:7px}
+.studioCollaborationInvite .row{display:flex;flex-wrap:wrap;align-items:stretch;gap:10px}
+.studioCollaborationInvite select{flex:1 1 230px;min-width:0;padding:10px 13px;border:1px solid var(--line,#aaa);border-radius:10px;background:var(--surface,#fff);color:var(--text,#111)}
+.studioCollaborationList{display:grid;gap:10px;margin-top:13px}
+.studioCollaborationItem{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;padding:14px;border-radius:12px;border:1px solid var(--line,#ddd);background:color-mix(in srgb,var(--surface,#fff) 95%,var(--accent,#ffcd00) 5%)}
+.studioCollaborationItem strong{display:block;overflow-wrap:anywhere}
+.studioCollaborationItem p{font-size:.9rem;color:var(--muted,#666);margin:5px 0 0}
+.studioCollaborationItem .row{display:flex;flex-wrap:wrap;gap:7px}
+.collaborationCredits{margin-top:15px;padding:12px 0;border-top:1px solid var(--line,#ddd);border-bottom:1px solid var(--line,#ddd)}
+.collaborationCredits>.badge{display:inline-flex;margin-bottom:9px}
+.collaborationCredits .row{display:flex;flex-wrap:wrap;gap:8px}
+.collaborationCredit{max-width:100%;white-space:normal;text-align:left}
+@media(max-width:560px){.studioCollaborationItem{align-items:flex-start;flex-direction:column}.studioCollaborationItem>.row{width:100%}.studioCollaborationItem>.row>.btn{flex:1 1 125px}.studioCollaborationInvite .row>.btn{width:100%}}
+
+/* Auditoría visual: navegación destacada, zonas táctiles y carruseles */
+.featuredCarouselControls{gap:4px;flex-wrap:wrap}
+.featuredCarouselArrow{min-width:44px;min-height:44px;flex:0 0 44px}
+.featuredCarouselDots{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:0}
+.featuredCarouselDot,.featuredCarouselDot.active{
+ position:relative;display:inline-flex;align-items:center;justify-content:center;
+ width:44px;min-width:44px;height:44px;min-height:44px;padding:0;
+ border:0;border-radius:12px;background:transparent;opacity:1;flex:0 0 44px;
+}
+.featuredCarouselDot::after{
+ content:"";width:11px;height:11px;border-radius:999px;
+ background:var(--muted);opacity:.75;transition:width .2s ease,background .2s ease;
+}
+.featuredCarouselDot.active::after{width:23px;background:var(--accent);opacity:1}
+.featuredCarouselDot:hover::after,.featuredCarouselDot:focus-visible::after{opacity:1}
+.featuredCarouselDot:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.discoverShelfTrack{scroll-padding-inline:10px;overscroll-behavior-x:contain}
+.exploreQuickGenres{min-width:0;scroll-padding-inline:12px}
+@media(max-width:720px){
+ .exploreQuickGenres{max-width:100%;margin-right:0;padding-right:4px;scrollbar-width:thin}
+ .homeEditorial .featuredCarouselControls{justify-content:center}
+ .studioCollaborationPanel,.studioCollaborationInbox{min-width:0}
+ .studioCollaborationPanel select{max-width:100%}
+}
+@media(prefers-reduced-motion:reduce){.featuredCarouselDot::after{transition:none}}
+
+/* Logos de colaboradores: legibles, sin iconos diminutos ni botones duplicados */
+.collaborationCredit,.teamSingleCredit{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:8px 14px;max-width:100%;overflow-wrap:anywhere}
+.collaborationCredit img,.teamSingleCredit img{display:block;max-width:min(200px,55vw);height:auto;max-height:70px;object-fit:contain;object-position:center}
+.collaborationCredits .row{align-items:center;gap:12px}
+@media(max-width:480px){.collaborationCredits .row{align-items:stretch}.collaborationCredit{flex:1 1 100%;min-width:0}.collaborationCredit img{max-width:100%;max-height:64px}}
+
+/* En estantes horizontales, content-visibility:auto colapsaba portadas parcialmente visibles. */
+.discoverShelfTrack>.novelCard{
+ content-visibility:visible;
+ contain-intrinsic-size:auto;
+}
+.discoverShelfTrack .catalogCoverButton{min-height:0;aspect-ratio:2/3}
