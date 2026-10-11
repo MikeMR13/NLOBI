@@ -58,3 +58,12 @@ begin
     );
 end;
 $function$;
+
+-- Team identity and reader presentation can only be changed by owner/admin.
+-- Content editor permissions remain unchanged in their own tables.
+drop policy if exists "groups_update_editors" on public.translator_groups;
+drop policy if exists "groups_update_managers" on public.translator_groups;
+create policy "groups_update_managers"
+  on public.translator_groups for update to authenticated
+  using (private.is_group_manager(id))
+  with check (private.is_group_manager(id));
