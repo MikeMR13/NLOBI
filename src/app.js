@@ -1118,7 +1118,13 @@ function renderPaginatedBlock(block,i){
  return `<div class="pagedEmbedded pagedEditableEmbedded">${renderEditorBlock(block,i)}</div>`;
 }
 function studioEditorSnapshot(title,sectionType,blocks){
- return JSON.stringify({title:String(title||''),section_type:sectionType||'chapter',blocks:(blocks||[]).map(normalizeBlock)});
+ const comparable=(blocks||[]).map(normalizeBlock).map(block=>{
+  const copy={...block};
+  const plainHtml=esc(String(copy.text||'')).replace(/\\n/g,'<br>');
+  if(typeof copy.html==='string'&&copy.html===plainHtml)delete copy.html;
+  return copy;
+ });
+ return JSON.stringify({title:String(title||''),section_type:sectionType||'chapter',blocks:comparable});
 }
 function studioEditorHasUnsavedChanges(){
  const sec=S.studioProject?.editingSection;
