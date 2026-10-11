@@ -3062,3 +3062,47 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 @media(max-width:850px){.studioV5Grid{grid-template-columns:minmax(0,1fr)}.studioV5Stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:480px){.studioV5Stats{gap:9px}.studioV5Stats>div{padding:14px}.studioV5Filters{padding:12px}.studioV5Filters label{width:100%}.studioV5Form{grid-template-columns:minmax(0,1fr)}.studioV5Panel{padding:15px}}
 @media(prefers-reduced-motion:reduce){.studioV5 *{scroll-behavior:auto!important;transition:none!important}}
+
+/* Studio Fase 6 — diagnóstico editorial */
+.studioV6Audit{border:1px solid var(--line);border-radius:18px;background:var(--panel);margin:20px 0 24px;box-shadow:var(--shadow2);overflow:hidden}
+.studioV6Summary{padding:20px 24px;cursor:pointer;display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap;list-style:none}
+.studioV6Summary::-webkit-details-marker{display:none}
+.studioV6Summary>span:first-child{display:grid;gap:3px;min-width:0}
+.studioV6Summary strong{font-size:clamp(1.1rem,2vw,1.42rem)}
+.studioV6Summary small{font-size:.86rem;color:var(--muted)}
+.studioV6Indicators{display:flex;flex-wrap:wrap;gap:6px}
+.studioV6Count{font-size:.78rem;font-weight:800;border:1px solid var(--line);border-radius:8px;padding:5px 9px;background:var(--panel2)}
+.studioV6Count.isError{border-color:var(--danger);color:var(--danger)}
+.studioV6Body{border-top:1px solid var(--line);padding:20px 24px 24px}
+.studioV6Intro{display:flex;align-items:center;justify-content:space-between;gap:15px;flex-wrap:wrap;margin-bottom:16px}
+.studioV6Intro p{color:var(--muted);max-width:780px;font-size:.89rem;margin:0}
+.studioV6Stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.studioV6Stats>div{padding:16px;border:1px solid var(--line);background:var(--panel2);border-radius:12px;display:grid;gap:3px}
+.studioV6Stats strong{font-size:1.55rem;font-variant-numeric:tabular-nums}
+.studioV6Stats span{font-size:.82rem;color:var(--muted)}
+.studioV6VolumeSection{margin-top:25px}
+.studioV6VolumeSection h3,.studioV6FindingsHead h3{font-size:1.04rem;margin:0 0 12px}
+.studioV6Volumes{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:10px}
+.studioV6Volume{padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel2);display:flex;flex-direction:column;align-items:flex-start;gap:7px;min-width:0}
+.studioV6VolumeNumber{font-size:.8rem;font-weight:800;color:var(--accentText)}
+.studioV6Volume strong{overflow-wrap:anywhere;font-size:.93rem}
+.studioV6Volume small{font-size:.79rem;color:var(--muted)}
+.studioV6Volume .btn{margin-top:auto}
+.studioV6FindingsHead{display:flex;align-items:end;justify-content:space-between;flex-wrap:wrap;gap:15px;margin-top:24px;margin-bottom:12px}
+.studioV6FindingsHead p{margin:0}
+.studioV6Filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.studioV6Filters label{font-size:.8rem;font-weight:700}
+.studioV6Filters input{max-width:200px}
+.studioV6FindingList{display:grid;gap:9px}
+.studioV6Finding{padding:13px 16px;border:1px solid var(--line);border-radius:12px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+.studioV6Finding>div:first-child{min-width:0;flex:1}
+.studioV6Finding small{display:inline-block;margin-left:9px;color:var(--muted);font-size:.8rem}
+.studioV6Finding p{margin:7px 0 0;overflow-wrap:anywhere;font-size:.91rem}
+.studioV6Tag{display:inline-block;font-size:.75rem;font-weight:800;border-radius:6px;padding:4px 7px;border:1px solid var(--line)}
+.studioV6Tag-error{color:var(--danger);border-color:var(--danger)}
+.studioV6Tag-warning{color:var(--accentText);background:var(--accentSoft)}
+.studioV6FindingActions{display:flex;gap:8px;flex-wrap:wrap}
+.studioV6Audit :is(summary,button,input,select):focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+[data-qa-severity][hidden]{display:none!important}
+@media(max-width:600px){.studioV6Summary{padding:16px}.studioV6Body{padding:14px}.studioV6Stats{grid-template-columns:repeat(2,minmax(0,1fr))}.studioV6Stats>div{padding:12px}.studioV6Filters{width:100%}.studioV6Filters input{max-width:none;flex:1}.studioV6FindingActions{width:100%}}
+@media(prefers-reduced-motion:reduce){.studioV6Audit *{scroll-behavior:auto!important}}
