@@ -8,18 +8,18 @@ const studioStart=app.indexOf('function studioWorkspaceSidebar(');
 const studioEnd=app.indexOf('\nfunction mediaFolderOf(',studioStart);
 assert.ok(studioStart>=0&&studioEnd>studioStart);
 const source=app.slice(studioStart,studioEnd);
-assert.ok(app.includes('novels(id,title,title_original,author_name,cover_url,novel_type,genres),volumes(id,status,sections(id,status))'),'Studio must fetch genres and authors, not only filter fixture data');
+assert.ok(app.includes('novels(id,title,title_original,author_name,cover_url,novel_type,genres,status),volumes(id,status,sections(id,status))'),'Studio must fetch genres and authors, not only filter fixture data');
 const typeOptions=[['light_novel','Novela ligera'],['web_novel','Novela web'],['original','Novela original']];
 const statusOptions=[['active','Activa'],['paused','En pausa'],['abandoned','Abandonada'],['awaiting_sequel','En espera de secuela'],['no_sequel_confirmed','Sin secuela confirmada'],['complete','Completada']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[x]));
 const group=id=>({translator_groups:{id,name:id==='team1'?'Equipo inicial':'Equipo secundario'},role:'owner'});
 const base=[
- {id:'active',status:'active',title:'La rosa',group_id:'team1',updated_at:'2026-10-10T13:00:00Z',novels:{title:'La rosa',title_original:'薔薇',author_name:'A',novel_type:'light_novel',genres:['Romance','Fantasía']},volumes:[{status:'published',sections:[{status:'published'}]},{status:'draft',sections:[{status:'draft'}]}]},
- {id:'complete',status:'complete',title:'Libro completo',group_id:'team1',updated_at:'2026-10-11T13:00:00Z',novels:{title:'Libro completo',author_name:'B',novel_type:'original',genres:['Fantasía']},volumes:[{status:'published',sections:[{status:'published'}]}]},
- {id:'paused',status:'paused',title:'Historias',group_id:'team2',updated_at:'2026-10-08T13:00:00Z',novels:{title:'Historias',author_name:'C',novel_type:'web_novel',genres:['Romance']},volumes:[{status:'draft',sections:[{status:'draft'}]}]},
- {id:'abandoned',status:'abandoned',title:'Sin tiempo',group_id:'team2',updated_at:'2026-10-07T13:00:00Z',novels:{title:'Sin tiempo',novel_type:'web_novel',genres:['Drama']},volumes:[]},
- {id:'sequel',status:'awaiting_sequel',title:'Próxima obra',group_id:'team1',updated_at:'2026-10-05T13:00:00Z',novels:{title:'Próxima obra',novel_type:'light_novel',genres:['Aventura']},volumes:[{status:'published',sections:[]}]},
- {id:'unconfirmed',status:'no_sequel_confirmed',title:'Sin secuela',group_id:'team2',updated_at:'2026-10-04T13:00:00Z',novels:{title:'Sin secuela',novel_type:'original',genres:['Misterio']},volumes:[]}
+ {id:'active',status:'active',title:'La rosa',group_id:'team1',updated_at:'2026-10-10T13:00:00Z',novels:{title:'La rosa',title_original:'薔薇',author_name:'A',novel_type:'light_novel',status:'ongoing',genres:['Romance','Fantasía']},volumes:[{status:'published',sections:[{status:'published'}]},{status:'draft',sections:[{status:'draft'}]}]},
+ {id:'complete',status:'complete',title:'Libro completo',group_id:'team1',updated_at:'2026-10-11T13:00:00Z',novels:{title:'Libro completo',author_name:'B',novel_type:'original',status:'completed',genres:['Fantasía']},volumes:[{status:'published',sections:[{status:'published'}]}]},
+ {id:'paused',status:'paused',title:'Historias',group_id:'team2',updated_at:'2026-10-08T13:00:00Z',novels:{title:'Historias',author_name:'C',novel_type:'web_novel',status:'hiatus',genres:['Romance']},volumes:[{status:'draft',sections:[{status:'draft'}]}]},
+ {id:'abandoned',status:'abandoned',title:'Sin tiempo',group_id:'team2',updated_at:'2026-10-07T13:00:00Z',novels:{title:'Sin tiempo',novel_type:'web_novel',status:'cancelled',genres:['Drama']},volumes:[]},
+ {id:'sequel',status:'awaiting_sequel',title:'Próxima obra',group_id:'team1',updated_at:'2026-10-05T13:00:00Z',novels:{title:'Próxima obra',novel_type:'light_novel',status:'ongoing',genres:['Aventura']},volumes:[{status:'published',sections:[]}]},
+ {id:'unconfirmed',status:'no_sequel_confirmed',title:'Sin secuela',group_id:'team2',updated_at:'2026-10-04T13:00:00Z',novels:{title:'Sin secuela',novel_type:'original',status:'ongoing',genres:['Misterio']},volumes:[]}
 ];
 const functionFactory=new Function('S','nav','status','teamCan','isCurrentGroupManager','isCurrentGroupEditor','safeMediaUrl','esc','novelTypeLabel','translationStatusLabel','novelPublicationStatusLabel','NOVEL_PUBLICATION_STATUS_OPTIONS','TRANSLATION_STATUS_OPTIONS','NOVEL_TYPE_OPTIONS','localStorage',source+';return studio;');
 function show(filters={}){
@@ -34,6 +34,13 @@ assert.ok(full.includes('Estado de traducción'));
 assert.ok(full.includes('Completada'));
 assert.ok(full.includes('6 obras encontradas'));
 assert.ok(full.includes('Todos los géneros'));
+assert.ok(full.includes('studioNovelPublicationFilter'));
+assert.match(show({studioNovelPublicationFilter:'completed'}),/1 obra encontrada/);
+assert.ok(show({studioNovelPublicationFilter:'completed'}).includes('data-studio-project="complete"'));
+assert.ok(show({studioNovelPublicationFilter:'hiatus'}).includes('data-studio-project="paused"'));
+assert.ok(show({studioNovelPublicationFilter:'cancelled'}).includes('data-studio-project="abandoned"'));
+assert.ok(show({studioProjectFilter:'complete',studioNovelPublicationFilter:'cancelled'}).includes('No encontramos obras con esos filtros'));
+
 assert.ok(full.includes('Fantasía'));
 for(const [status,id] of [['active','active'],['paused','paused'],['abandoned','abandoned'],['complete','complete'],['awaiting_sequel','sequel'],['no_sequel_confirmed','unconfirmed']]){
  const html=show({studioProjectFilter:status});
@@ -49,7 +56,7 @@ const noMatch=show({studioProjectFilter:'complete',studioGenreFilter:'Romance'})
 assert.match(noMatch,/No encontramos obras con esos filtros/);
 assert.ok(show({studioProjectSearch:'FANTASIA'}).includes('2 obras encontradas'),'Accent-insensitive search must match actual metadata');
 assert.ok(show({studioProjectSearch:'historias'}).includes('data-studio-project="paused"'));
-assert.ok(app.includes("S.studioGenreFilter='all'")&&app.includes("S.studioPublicationFilter='all'"),'Clear all resets all filters');
+assert.ok(app.includes("S.studioNovelPublicationFilter='all';S.studioGenreFilter='all'")&&app.includes("S.studioPublicationFilter='all'"),'Clear all resets all filters');
 for(const m of ["['studioGenreFilter','studioGenreFilter']","['studioPublicationFilter','studioPublicationFilter']",'id="studioPublicationFilter"'])assert.ok(app.includes(m));
 
 const start=app.indexOf('function novelGenresPicker(');
