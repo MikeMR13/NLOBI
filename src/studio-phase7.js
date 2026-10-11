@@ -88,8 +88,8 @@ window.createStudioPhase7=function({
   <p class="studioV7ConfirmNote">Se respetarán las validaciones de permisos y revisiones del servidor. Los seguidores recibirán avisos solamente cuando la publicación se complete.</p>
   <div class="studioV7ConfirmButtons"><button type="button" class="btn" data-studio-v7-close>Volver</button><button type="button" class="btn primary" id="studioV7ConfirmProceed" ${check.errors.length?'disabled':''}>${isScheduled?'Confirmar programación':'Confirmar publicación'}</button></div></div>`;
  }
- function review(mode,id,when=null){
-  const P=S.studioProject;
+ function review(mode,id,when=null,projectOverride=null){
+  const P=projectOverride||S.studioProject;
   if(!P||!isMember(P))return Promise.resolve(false);
   const action=mode==='schedule'?'schedule':'publish';
   if(!teamCan(P.group_id,action))return Promise.resolve(false);
@@ -104,7 +104,7 @@ window.createStudioPhase7=function({
    node.querySelector('[data-studio-v7-close]')?.addEventListener('click',()=>dismiss(false));
    const proceed=node.querySelector('#studioV7ConfirmProceed');
    proceed?.addEventListener('click',()=>{
-    if(!readiness(S.studioProject,mode,id).allowed){toast('Hay errores que impiden publicar.','bad');return}
+    if(!readiness(P,mode,id).allowed){toast('Hay errores que impiden publicar.','bad');return}
     const needAck=!!node.querySelector('#studioV7WarningsAccepted');
     if(needAck&&!node.querySelector('#studioV7WarningsAccepted').checked){toast('Confirma que revisaste las advertencias.','bad');return}
     dismiss(true);
