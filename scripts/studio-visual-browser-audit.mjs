@@ -28,7 +28,7 @@ try{
    const S={groups,studioTranslations:books,catalog:[]};
    const factory=new Function('S','nav','status','teamCan','isCurrentGroupManager','isCurrentGroupEditor','safeMediaUrl','esc','novelTypeLabel','translationStatusLabel','TRANSLATION_STATUS_OPTIONS','NOVEL_TYPE_OPTIONS','localStorage',studioSource+';return studio;');
    const studio=factory(S,()=>'',()=>'',()=>true,()=>true,()=>true,()=>'',esc,
-    x=>Object.fromEntries(types)[x]||x,x=>Object.fromEntries(statusOptions)[x]||x,statusOptions,types,window.localStorage);
+    x=>Object.fromEntries(types)[x]||x,x=>Object.fromEntries(statusOptions)[x]||x,statusOptions,types,{getItem:()=>null});
    const studioMount=()=>{document.querySelector('#studioRoot').innerHTML=studio();bindStudioFilters()};
    const binder=[['studioProjectFilter','studioProjectFilter'],['studioGenreFilter','studioGenreFilter'],['studioPublicationFilter','studioPublicationFilter'],['studioNovelTypeFilter','studioNovelTypeFilter'],['studioTeamFilter','studioTeamFilter'],['studioWorkflowFilter','studioWorkflowFilter'],['studioProjectSort','studioProjectSort']];
    function bindStudioFilters(){for(const [id,key] of binder){const el=document.getElementById(id);if(el)el.onchange=()=>{S[key]=el.value;studioMount()}}
