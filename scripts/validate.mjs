@@ -451,6 +451,12 @@ for(const marker of [
  S.user=null;api.hydrateReaderSettings();check(api.getReaderMode(B)==='continuous','preferencias de invitado perdidas');
  storage.set('nlobi_reader_settings_guest','{invalid');check(api.getReaderMode(A)==='continuous','JSON inválido bloquea el lector');
  check(api.readerSettingsFields('global').includes('Lectura continua'),'selector de modo ausente');
+ storage.set('nlobi_reader_settings_guest',JSON.stringify({global:{theme:'light'},explicitGlobal:{theme:true},mode:'chapter',explicitMode:true,volumes:{[A]:{theme:'dark'}},positions:{}}));
+ check(api.getReaderPreferencesForVolume(A).theme==='dark','volumen no prevalece sobre ajuste global');
+ check(api.getReaderPreferencesForVolume(B).theme==='light','preferencia global explícita no prevalece sobre el equipo');
+ check(api.getReaderMode(A)==='chapter','modo global explícito no prevalece sobre el equipo');
+ check(api.readerSettingsFields('volume',{id:A}).includes('Usar predeterminado (Claro)'),'etiqueta de herencia confunde el valor personalizado');
+ 
 })();
 
 // Team public profile and account navigation regressions.
@@ -471,6 +477,16 @@ for(const marker of [
  for(const marker of ['id="pageBusyIndicator"','data-busy-label','pageBusyBook'])if(!html.includes(marker))throw new Error('Carga: falta indicador '+marker);
  for(const marker of ['function startPageBusy(','pageBusyCount','finally{done();if(S.view===route)render()}','finally{done?.()}'])if(!app.includes(marker))throw new Error('Carga: falta control de estado '+marker);
  for(const marker of ['.pageBusyIndicator[hidden]','@keyframes obiBookLeft','@keyframes obiBookRight','prefers-reduced-motion:reduce'])if(!css.includes(marker))throw new Error('Carga: estilos incompletos '+marker);
+}
+
+// Release gate: DB migration must protect PNGs before production.
+{
+ const migration=fs.readFileSync('supabase/migrations/20261010213000_protect_team_reader_logos.sql','utf8');
+ if((migration.match(/reader_logo_url/g)||[]).length<2||!migration.includes('private.storage_object_reference_count')||!migration.includes('public.media_usage_for_paths'))
+  throw new Error('Release gate: falta protección de PNG en retención multimedia.');
+ for(const marker of ['async function saveTeamReaderCustom(','panel.querySelectorAll(\'[data-team-setting]\')','saveReaderCustom.onclick=saveTeamReaderCustom','data-team-fallback','function getReaderDefaultPreferencesForVolume(']){
+  if(!app.includes(marker))throw new Error('Preproducción del lector: falta '+marker);
+ }
 }
 
 // Branding del lector: PNG propio, prioridad y tamaño ajustable.
