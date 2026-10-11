@@ -11,6 +11,7 @@ fs.copyFileSync(path.join(root, "src", "index.html"), path.join(dist, "index.htm
 fs.copyFileSync(path.join(root, "src", "styles.css"), path.join(dist, "assets", "styles.css"));
 fs.copyFileSync(path.join(root, "src", "app.js"), path.join(dist, "assets", "app.js"));
 fs.copyFileSync(path.join(root, "src", "studio-phase5.js"), path.join(dist, "assets", "studio-phase5.js"));
+fs.copyFileSync(path.join(root, "src", "studio-phase6.js"), path.join(dist, "assets", "studio-phase6.js"));
 fs.copyFileSync(path.join(root, "src", "activate-styles.js"), path.join(dist, "assets", "activate-styles.js"));
 
 for (const file of ["manifest.webmanifest", "sw.js", "icon.svg",
@@ -32,6 +33,7 @@ const requiredBuiltFiles = [
   "assets/styles.css",
   "assets/app.js",
   "assets/studio-phase5.js",
+  "assets/studio-phase6.js",
   "runtime-config.js",
   "sw.js",
   "manifest.webmanifest",
@@ -43,7 +45,7 @@ for (const rel of requiredBuiltFiles) {
   if (!fs.existsSync(full)) throw new Error(`Build incompleto: falta dist/${rel}`);
 }
 const builtSw = fs.readFileSync(path.join(dist, "sw.js"), "utf8");
-for (const route of ["/assets/styles.css","/assets/app.js","/assets/studio-phase5.js","/runtime-config.js"]) {
+for (const route of ["/assets/styles.css","/assets/app.js","/assets/studio-phase5.js","/assets/studio-phase6.js","/runtime-config.js"]) {
   if (!builtSw.includes(route)) throw new Error(`Service Worker no referencia el asset construido: ${route}`);
 }
 for (const wrong of ["'/styles.css'","'/app.js'"]) {
