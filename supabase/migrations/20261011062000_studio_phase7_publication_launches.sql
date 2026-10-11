@@ -92,6 +92,7 @@ declare
  v_kind text;
  v_label text;
  v_details jsonb := '{}'::jsonb;
+ v_previous_schedule timestamptz;
 begin
  if tg_table_name='volumes' then
   if tg_op<>'UPDATE' then return new; end if;
@@ -126,15 +127,19 @@ begin
   select t.id into v_translation from public.volumes v
    join public.translations t on t.id=v.translation_id where v.id=new.volume_id;
   if tg_op='INSERT' then v_kind:='schedule_created';
-  elsif new.status is distinct from old.status then
+  else v_previous_schedule:=old.scheduled_at; end if;
+  if tg_op='UPDATE' then
+   if new.status is distinct from old.status then
     v_kind:=case new.status when 'cancelled' then 'schedule_cancelled'
       when 'failed' then 'schedule_failed' when 'completed' then 'schedule_completed' else null end;
-  elsif new.scheduled_at is distinct from old.scheduled_at then v_kind:='schedule_rescheduled';
-  else return new; end if;
+   elsif new.scheduled_at is distinct from old.scheduled_at then
+    v_kind:='schedule_rescheduled';
+   else return new; end if;
+  end if;
   if v_kind is null then return new; end if;
   v_label:=left('Programación · '||v_kind,300);
   v_details:=jsonb_build_object('scheduled_at',new.scheduled_at,
-    'previous_scheduled_at',case when tg_op='UPDATE' then old.scheduled_at else null end,
+    'previous_scheduled_at',v_previous_schedule,
     'status',new.status);
  else return new; end if;
 
