@@ -2103,7 +2103,18 @@ function syncImportTarget(){const t=$('#importTranslation'),v=$('#importVolumeNu
 function syncEditedBodies(){$$('[data-sec-body]').forEach(el=>{const i=+el.dataset.secBody,sec=S.importState.sections[i];if(!sec)return;const next=el.value,previous=blocksToPlainText(sec.blocks||[]);sec.body=next;if(next!==previous)sec.blocks=textBlocksPreserveImportedMedia(next,sec.blocks||[])})}
 function syncImportFields(){syncStructureFields();syncImportTarget();syncEditedBodies();saveImportCheckpoint()}
 function textBlocks(body){return String(body||'').split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean).map(x=>importTextBlock(x,'paragraph')).filter(Boolean)}
-function textBlocksPreserveImportedMedia(body,previous=[]){const images=(previous||[]).filter(b=>b.type==='image'),parts=String(body||'').split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);let imageIndex=0;const out=parts.map(x=>{if(/^\[Ilustración(?::[^\]]+)?\]$/i.test(x)&&images[imageIndex])return normalizeImportBlock(images[imageIndex++]);return importTextBlock(x,'paragraph')}).filter(Boolean);if(imageIndex<images.length)out.push(...images.slice(imageIndex).map(normalizeImportBlock));return out}
+function textBlocksPreserveImportedMedia(body,previous=[]){
+ const original=(previous||[]).map(normalizeImportBlock),images=original.filter(b=>b.type==='image'),textual=original.filter(b=>b.type!=='image');
+ const parts=String(body||'').split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);let imageIndex=0,oldCursor=0;
+ const out=parts.map(part=>{
+  if(/^\[Ilustración(?::[^\]]+)?\]$/i.test(part)&&images[imageIndex])return images[imageIndex++];
+  const index=textual.findIndex((block,i)=>i>=oldCursor&&blocksToPlainText([block]).trim()===part);
+  if(index>=0){oldCursor=index+1;return textual[index]}
+  return importTextBlock(part,'paragraph')
+ }).filter(Boolean);
+ if(imageIndex<images.length)out.push(...images.slice(imageIndex));
+ return out
+}
 async function loadStudioData(){if(!S.groups.length){S.studioTranslations=[];return}const ids=S.groups.map(g=>g.translator_groups?.id).filter(Boolean);if(!ids.length)return;S.studioTranslations=await jreqAllRows(`/rest/v1/translations?group_id=in.(${ids.join(',')})&select=id,title,status,language_code,group_id,editorial_mode,novels(id,title,cover_url),volumes(id,status,sections(id)),translator_groups(id,name)&order=updated_at.desc`)||[]}
 function importCanonicalText(v){return normalizeImportedText(String(v||'')).normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim()}
 function importFingerprint(title,blocks){const raw=importCanonicalText(title)+'\n'+importCanonicalText(blocksToPlainText((blocks||[]).map(normalizeImportBlock)));let h=2166136261;for(let i=0;i<raw.length;i++){h^=raw.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)+':'+raw.length}
@@ -2558,7 +2569,7 @@ async function loadPublicGroupData(id){
 async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}){
  if(!navigator.onLine){
   const cached=readCachedChapter(sectionId);if(!cached)throw new Error('Este capítulo no está disponible sin conexión todavía.');
-  S.readerSection=cached;S.readerComments=[];S.readerScrollIntent=false;applyReaderPreferencesForVolume(cached.volume_id);return cached
+  S.readerSection=cached;S.readerComments=[];S.readerScrollIntent=false;applyReaderPreferencesForVolume(cached.volume_id);activateEpubFonts(cached.epub_fonts||[]);return cached
  }
  const secRows=await jreq(`/rest/v1/sections?id=eq.${sectionId}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`);
  const sec=secRows?.[0];if(!sec)throw new Error('El capítulo no está disponible.');
