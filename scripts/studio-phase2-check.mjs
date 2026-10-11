@@ -48,7 +48,7 @@ assert.match(app,/auto_status_source_volume_id:null,auto_status_previous_status:
 assert.match(migration,/auto_status_previous_status/);
 assert.match(migration,/new\.status='published' and new\.is_final_volume/);
 assert.match(migration,/auto_status_source_volume_id=new\.id/);
-assert.match(migration,/when status=old\.final_translation_status/);
+assert.match(migration,/when status=p_final_status/);
 assert.match(migration,/from pg_catalog\.pg_policies/);
 assert.ok(!migration.includes("'withdrawn'::text]"),'Withdrawn status must remain private');
 console.log('Studio Phase 2 checks OK: types, states, reader filters, import, publication trigger.');
