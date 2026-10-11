@@ -37,6 +37,8 @@ jobs:
         run: node scripts/studio-phase7-check.mjs
       - name: Studio status, genre and publication filter regression
         run: node scripts/studio-visual-filters-check.mjs
+      - name: Studio editable status and editorial workflow regression
+        run: node scripts/studio-status-workflow-check.mjs
       - run: npm run build
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs
