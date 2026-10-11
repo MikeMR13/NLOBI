@@ -29,7 +29,13 @@ function libraryButton(id,primary=false){if(!S.user)return'';const saved=S.libra
 let pendingRouteFocus=false;
 const validRoute=v=>['home','collections','readers','translators','rankings','releases','explore','library','auth','auth:edit','application','studio','studio:import','studio:new','studio:teams','notifications','beta','admin'].includes(v)||/^detail:[A-Za-z0-9_-]+$/.test(v)||/^group:[A-Za-z0-9_-]+$/.test(v)||/^profile:[A-Za-z0-9_-]+$/.test(v)||/^collection:[A-Za-z0-9_-]+$/.test(v)||/^studio:project:[A-Za-z0-9_-]+$/.test(v)||/^studio:team:[A-Za-z0-9_-]+$/.test(v)||/^studio:media:[A-Za-z0-9_-]+$/.test(v)||/^reader:[A-Za-z0-9_-]+$/.test(v);
 function routeFromHash(){let raw=(location.hash&&location.hash!=='#')?'home':(siteAppearance.startPage==='library'&&!localStorage.getItem('nlobi_token')?'home':siteAppearance.startPage);try{raw=decodeURIComponent((location.hash||('#'+raw)).slice(1))}catch{history.replaceState(null,'','#home');return'home'}return validRoute(raw)?raw:'home'}
-function go(view,replace=false){if(!validRoute(view))view='home';if(view==='admin'&&!S.admin){toast('Esta sección es exclusiva de la administración global.','bad');return}pendingRouteFocus=true;const next='#'+encodeURIComponent(view).replace(/%3A/g,':');if(location.hash===next){S.view=view;render();window.scrollTo({top:0,behavior:'smooth'});return}if(replace){history.replaceState(null,'',next);S.view=view;render()}else location.hash=next}
+function go(view,replace=false){
+ if(!validRoute(view))view='home';
+ if(S.view?.startsWith('studio:project:')&&view!==S.view&&S.studioProject?.editingSection&&studioEditorHasUnsavedChanges()){
+  if(!confirm('Tienes cambios pendientes en el capítulo. Se conservará una copia local. ¿Salir del editor?'))return;
+  backupEditorialDraft();
+ }
+if(view==='admin'&&!S.admin){toast('Esta sección es exclusiva de la administración global.','bad');return}pendingRouteFocus=true;const next='#'+encodeURIComponent(view).replace(/%3A/g,':');if(location.hash===next){S.view=view;render();window.scrollTo({top:0,behavior:'smooth'});return}if(replace){history.replaceState(null,'',next);S.view=view;render()}else location.hash=next}
 let toastTimer,lastToastMessage='',lastToastAt=0;function toast(message,type=''){const host=$('#toastHost');if(!host)return;const msg=String(message||''),now=Date.now();if(msg===lastToastMessage&&now-lastToastAt<5000)return;lastToastMessage=msg;lastToastAt=now;host.replaceChildren();const el=document.createElement('div');el.className='toast '+type;el.textContent=msg;host.appendChild(el);clearTimeout(toastTimer);toastTimer=setTimeout(()=>{host.replaceChildren();if(lastToastMessage===msg)lastToastMessage=''},4200)}
 function setNetworkBadge(){const el=$('#netBadge');if(!el)return;S.online=navigator.onLine;el.hidden=S.online;if(!S.online)el.textContent='Sin conexión · algunas funciones no estarán disponibles'}
 function friendlyError(e,fallback='Ocurrió un error inesperado.'){const m=String(e?.message||'');if(e?.name==='AbortError'||/aborted|timeout/i.test(m))return'La conexión tardó demasiado. Intenta nuevamente.';if(/Failed to fetch|NetworkError/i.test(m))return'No se pudo conectar con el servidor.';return m||fallback}
@@ -1120,6 +1126,12 @@ function studioEditorHasUnsavedChanges(){
  syncEditorInputs();
  return studioEditorSnapshot($('#editSectionTitle')?.value??sec.title,$('#editSectionType')?.value||sec.section_type,S.blockEditor.blocks)!==S.editorSavedSnapshot;
 }
+window.addEventListener('beforeunload',event=>{
+ if(!S.studioProject?.editingSection||!studioEditorHasUnsavedChanges())return;
+ backupEditorialDraft();
+ event.preventDefault();
+ event.returnValue='';
+});
 function studioEditorStatistics(blocks){
  const text=blocksToPlainText((blocks||[]).map(normalizeBlock));
  return {words:(text.match(/\S+/gu)||[]).length,characters:[...text].length,images:(blocks||[]).filter(b=>b.type==='image'&&b.url).length,blocks:(blocks||[]).length};
