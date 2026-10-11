@@ -1120,7 +1120,7 @@ function renderPaginatedBlock(block,i){
 function studioEditorSnapshot(title,sectionType,blocks){
  const comparable=(blocks||[]).map(normalizeBlock).map(block=>{
   const copy={...block};
-  const plainHtml=esc(String(copy.text||'')).replace(/\\n/g,'<br>');
+  const plainHtml=esc(String(copy.text||'')).replace(/\n/g,'<br>');
   if(typeof copy.html==='string'&&copy.html===plainHtml)delete copy.html;
   return copy;
  });
