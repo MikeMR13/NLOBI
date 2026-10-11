@@ -455,3 +455,11 @@ for(const marker of [
  const start=app.indexOf('async function loadPublicGroupData(id)'),end=app.indexOf('async function loadReaderRouteData(',start),loader=app.slice(start,end);
  if(!loader.includes('latestChapter=new Map()')||!loader.includes("'/rest/v1/volumes?translation_id=in.('")||loader.includes('S.publishedVolumes'))throw new Error('Equipo QA: novedades dependen del catálogo global o se duplican');
 }
+
+// Feedback de carga: persiste fuera de #app y se cierra incluso ante errores.
+{
+ const html=fs.readFileSync('src/index.html','utf8'),css=fs.readFileSync('src/styles.css','utf8');
+ for(const marker of ['id="pageBusyIndicator"','data-busy-label'])if(!html.includes(marker))throw new Error('Carga: falta indicador '+marker);
+ for(const marker of ['function startPageBusy(','pageBusyCount','finally{done();if(S.view===route)render()}','finally{done?.()}'])if(!app.includes(marker))throw new Error('Carga: falta control de estado '+marker);
+ for(const marker of ['.pageBusyIndicator[hidden]','@keyframes pageBusySpin','prefers-reduced-motion:reduce'])if(!css.includes(marker))throw new Error('Carga: estilos incompletos '+marker);
+}
