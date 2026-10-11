@@ -2864,3 +2864,12 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .teamCustomSection select,.teamCustomSection input{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);padding:11px 12px;min-height:44px}
 .teamCustomSection input[type="checkbox"]{width:auto;min-height:initial}
 .teamCustomToggle{min-height:40px}
+
+
+.teamPublicPage{background-color:var(--team-profile-bg,transparent);border-radius:20px}
+.teamPublicPage.teamTheme-claro{--panel:#fff;--panel2:#f4f4ee;--line:#d9d9d2;--text:#111;--muted:#626262;color:var(--text)}
+.teamPublicPage.teamTheme-oscuro{--panel:#171717;--panel2:#242424;--line:#414141;--text:#f7f7f2;--muted:#b2b2aa;color:var(--text)}
+.teamPublicPage.teamTheme-oscuro .teamIdentityCopy,.teamPublicPage.teamTheme-claro .teamIdentityCopy{color:var(--text)}
+.teamRecruitAction{margin-top:14px}
+.teamIdentitySlug{text-decoration:none}
+.teamIdentitySlug:hover{text-decoration:underline}
