@@ -427,19 +427,142 @@ for(const marker of [
   if(!css.includes(marker))throw new Error('Lector 7–9: falta estilo '+marker);
  }
  const storage=new Map(),localStorage={getItem:k=>storage.has(k)?storage.get(k):null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)},S={user:null,readerPrefs:{},readerSection:null,token:''},esc=s=>String(s).replace(/[&<>"']/g,'');
- const sandbox={localStorage,S,window:{},navigator:{onLine:false},render:()=>{},toast:()=>{},jreq:async()=>{},esc};
+ const sandbox={localStorage,S,window:{},navigator:{onLine:false},render:()=>{},toast:()=>{},jreq:async()=>{},esc,teamSettings:g=>g?.profile_settings||{}};
  vm.runInNewContext(app.slice(start,stop)+';globalThis.testReader={readReaderSettings,setReaderSetting,getReaderMode,getReaderPreferencesForVolume,clearReaderVolumeSettings,readerSettingsFields,hydrateReaderSettings}',sandbox);
  const api=sandbox.testReader,A='volume-test-1',B='volume-test-2';
+ S.currentDetail={translator_groups:{profile_settings:{reader_default_theme:'sepia',reader_default_fontSize:22,reader_default_mode:'continuous'}},volumes:[{id:A}]};
+ 
  const check=(condition,msg)=>{if(!condition)throw new Error('Lector 7–9: '+msg)};
- check(api.getReaderMode(A)==='chapter','modo inicial inválido');
+ check(api.getReaderMode(A)==='continuous','el modo del equipo no se hereda');
+ check(api.getReaderPreferencesForVolume(A).theme==='sepia','el tema del equipo no se hereda');
+ check(api.getReaderPreferencesForVolume(A).fontSize===22,'el tamaño de letra del equipo no se hereda');
+ check(api.getReaderMode(B)==='chapter','el equipo altera novelas de otro traductor');
+ api.setReaderSetting('volume',A,'theme','dark');
+ check(api.getReaderPreferencesForVolume(A).theme==='dark','el ajuste de volumen no prevalece');
+ api.setReaderSetting('volume',A,'theme','inherit');
+ check(api.getReaderPreferencesForVolume(A).theme==='sepia','no se restablece el formato del equipo');
  api.setReaderSetting('global','','mode','continuous');check(api.getReaderMode(B)==='continuous','modo global no heredado');
  api.setReaderSetting('volume',A,'mode','chapter');check(api.getReaderMode(A)==='chapter'&&api.getReaderMode(B)==='continuous','configuración por volumen no aislada');
  api.setReaderSetting('volume',A,'fontSize',29);check(api.getReaderPreferencesForVolume(A).fontSize===29&&api.getReaderPreferencesForVolume(B).fontSize===18,'fuentes mezcladas entre volúmenes');
  api.setReaderSetting('volume',A,'theme','dark');check(api.getReaderPreferencesForVolume(A).theme==='dark','tema de volumen perdido');
- api.clearReaderVolumeSettings(A);check(api.getReaderMode(A)==='continuous'&&api.getReaderPreferencesForVolume(A).theme==='light','restauración de herencia inválida');
+ api.clearReaderVolumeSettings(A);check(api.getReaderMode(A)==='continuous'&&api.getReaderPreferencesForVolume(A).theme==='sepia','restauración del predeterminado del equipo inválida');
  api.setReaderSetting('volume',A,'mode','chapter');
- S.user={id:'user-qa',user_metadata:{}};api.hydrateReaderSettings();check(api.getReaderMode(A)==='chapter'&&api.getReaderMode(B)==='chapter','preferencias cruzadas entre usuarios');
+ S.user={id:'user-qa',user_metadata:{}};api.hydrateReaderSettings();check(api.getReaderMode(A)==='continuous'&&api.getReaderMode(B)==='chapter','preferencias cruzadas entre usuarios');
  S.user=null;api.hydrateReaderSettings();check(api.getReaderMode(B)==='continuous','preferencias de invitado perdidas');
- storage.set('nlobi_reader_settings_guest','{invalid');check(api.getReaderMode(A)==='chapter','JSON inválido bloquea el lector');
+ storage.set('nlobi_reader_settings_guest','{invalid');check(api.getReaderMode(A)==='continuous','JSON inválido bloquea el lector');
  check(api.readerSettingsFields('global').includes('Lectura continua'),'selector de modo ausente');
+ storage.set('nlobi_reader_settings_guest',JSON.stringify({global:{theme:'light'},explicitGlobal:{theme:true},mode:'chapter',explicitMode:true,volumes:{[A]:{theme:'dark'}},positions:{}}));
+ check(api.getReaderPreferencesForVolume(A).theme==='dark','volumen no prevalece sobre ajuste global');
+ check(api.getReaderPreferencesForVolume(B).theme==='light','preferencia global explícita no prevalece sobre el equipo');
+ check(api.getReaderMode(A)==='chapter','modo global explícito no prevalece sobre el equipo');
+ check(api.readerSettingsFields('volume',{id:A}).includes('Usar predeterminado (Claro)'),'etiqueta de herencia confunde el valor personalizado');
+ 
 })();
+
+// Team public profile and account navigation regressions.
+{
+ const css=fs.readFileSync("src/styles.css","utf8");
+ for(const marker of ['Perfil público del equipo','href="#group:','function loadPublicGroupData(id)','id="teamPanel-identity"','data-team-settings-tab="','data-team-settings-panel="reader"','id="saveTeamReaderCustom"']){
+  if(!app.includes(marker))throw new Error('Equipo QA: falta '+marker);
+ }
+ if(app.includes('id="teamPanel-identity" aria-labelledby="teamTab-identity" data-team-settings-panel="identity" ${tab!==\'identity\'?\'hidden\':\'\'} id="teamProfileSettings"'))throw new Error('Equipo QA: identificador duplicado en identidad');
+ if(!css.includes('.accountDropdownPanel button,.accountDropdownPanel a{'))throw new Error('Equipo QA: el enlace público no comparte estilo con el menú');
+ const start=app.indexOf('async function loadPublicGroupData(id)'),end=app.indexOf('async function loadReaderRouteData(',start),loader=app.slice(start,end);
+ if(!loader.includes('latestChapter=new Map()')||!loader.includes("'/rest/v1/volumes?translation_id=in.('")||loader.includes('S.publishedVolumes'))throw new Error('Equipo QA: novedades dependen del catálogo global o se duplican');
+}
+
+// Feedback de carga: persiste fuera de #app y se cierra incluso ante errores.
+{
+ const html=fs.readFileSync('src/index.html','utf8'),css=fs.readFileSync('src/styles.css','utf8');
+ for(const marker of ['id="pageBusyIndicator"','data-busy-label','pageBusyBook'])if(!html.includes(marker))throw new Error('Carga: falta indicador '+marker);
+ for(const marker of ['function startPageBusy(','pageBusyCount','finally{done();if(S.view===route)render()}','finally{done?.()}'])if(!app.includes(marker))throw new Error('Carga: falta control de estado '+marker);
+ for(const marker of ['.pageBusyIndicator[hidden]','@keyframes obiBookLeft','@keyframes obiBookRight','prefers-reduced-motion:reduce'])if(!css.includes(marker))throw new Error('Carga: estilos incompletos '+marker);
+}
+
+// Release gate: DB migration must protect PNGs before production.
+{
+ const migration=fs.readFileSync('supabase/migrations/20261010213000_protect_team_reader_logos.sql','utf8');
+ if((migration.match(/reader_logo_url/g)||[]).length<2||!migration.includes('private.storage_object_reference_count')||!migration.includes('public.media_usage_for_paths')||!migration.includes('private.is_group_manager(id)')||!migration.includes('drop policy if exists "groups_update_editors"'))
+  throw new Error('Release gate: falta protección de PNG en retención multimedia.');
+ for(const marker of ['async function saveTeamReaderCustom(','panel.querySelectorAll(\'[data-team-setting]\')','saveReaderCustom.onclick=saveTeamReaderCustom','data-team-fallback','function getReaderDefaultPreferencesForVolume(']){
+  if(!app.includes(marker))throw new Error('Preproducción del lector: falta '+marker);
+ }
+}
+
+// Branding del lector: PNG propio, prioridad y tamaño ajustable.
+{
+ const css=fs.readFileSync('src/styles.css','utf8');
+ for(const marker of ['id="teamReaderLogoFile"','data-team-setting="reader_logo_url"','data-team-setting="reader_logo_width"','async function uploadTeamReaderLogo(','cfg.reader_logo_url||group.avatar_url','teamReaderBrandImage'])if(!app.includes(marker))throw new Error('Logo lector: falta '+marker);
+ for(const marker of ['.readerTeamLink .teamReaderBrandImage','object-fit:contain','.teamReaderLogoPreview'])if(!css.includes(marker))throw new Error('Logo lector: falta CSS '+marker);
+}
+
+// Identity and reader are separate save scopes; PNG belongs only to Identity.
+{
+ const identity=app.slice(app.indexOf('<section id="teamPanel-identity"'),app.indexOf('<section id="teamPanel-custom"'));
+ const reader=app.slice(app.indexOf('<section id="teamPanel-reader"'),app.indexOf('<section id="teamPanel-requests"'));
+ for(const marker of ['id="teamReaderLogoFile"','id="teamReaderLogoUrl"','id="teamReaderLogoWidth"','id="teamReaderLogoPreview"','data-team-setting="show_reader_logo"']){
+  if(!identity.includes(marker)||reader.includes(marker))throw new Error('Identidad QA: control de PNG en la pestaña incorrecta: '+marker);
+ }
+ if(!reader.includes('id="saveTeamReaderCustom"')||!identity.includes('id="saveTeamProfile"'))throw new Error('Identidad QA: faltan acciones de guardado.');
+ if(!app.includes("document.querySelectorAll('#teamPanel-custom [data-team-setting]')"))throw new Error('Identidad QA: guardar personalización puede sobrescribir identidad.');
+}
+// Behavioral tests: reader options are saved without changing team identity.
+{
+ const from=app.indexOf('async function saveTeamReaderCustom(){'),to=app.indexOf('async function sendTeamJoinRequest(){',from);
+ if(from<0||to<from)throw new Error('Lector QA: no se puede aislar guardar equipo.');
+ const inputs=[
+  {dataset:{teamSetting:'reader_default_theme'},type:'select-one',value:'sepia'},
+  {dataset:{teamSetting:'reader_separator_style'},type:'select-one',value:'flor'}
+ ];
+ const saveBtn={disabled:false,isConnected:true},panel={querySelectorAll:()=>inputs};
+ const saved=[],toasts=[],team={id:'group-test',profile_settings:{unrelated:'kept',reader_default_mode:'chapter',reader_logo_url:'https://example.com/logo.png',reader_logo_width:144,show_reader_logo:true}},S={studioTeam:team,currentDetail:null,publicGroup:null};
+ const sandbox={
+  S,$:selector=>selector==='#saveTeamReaderCustom'?saveBtn:selector==='#teamPanel-reader'?panel:null,
+  isCurrentGroupManager:()=>true,teamSettings:g=>g.profile_settings,
+  READER_DEFAULTS:{theme:'light'},
+  readerSanitizeSetting:(key,v)=>key==='fontSize'?Number(v):String(v),
+  safeUrl:url=>url,refreshStudioTeam:async()=>{},
+  jreq:async(path,options)=>saved.push({path,options}),
+  toast:(message,type)=>toasts.push({message,type}),friendlyError:e=>e.message,console
+ };
+ vm.runInNewContext(app.slice(from,to)+';globalThis.qaSave=saveTeamReaderCustom',sandbox);
+ await sandbox.qaSave();
+ if(saved.length!==1)throw new Error('Lector QA: guardar no hizo exactamente un PATCH.');
+ const payload=JSON.parse(saved[0].options.body).profile_settings;
+ if(saved[0].options.method!=='PATCH'||payload.unrelated!=='kept'||payload.reader_logo_width!==144||payload.reader_logo_url!=='https://example.com/logo.png'||payload.reader_default_theme!=='sepia'||payload.reader_separator_style!=='flor'||payload.show_reader_logo!==true||!toasts.some(t=>t.type==='ok'))throw new Error('Lector QA: guardar alteró identidad o falló la persistencia.');
+}
+// Behavioral tests: profile Save persists reader PNG from Identity without touching reader format.
+{
+ const from=app.indexOf('async function saveStudioTeamProfile(){'),to=app.indexOf('async function addSupportLink(){',from);
+ if(from<0||to<from)throw new Error('Identidad QA: no se puede aislar guardado de perfil.');
+ const fields={
+  '#teamEditPrimary':{value:'#FFD400'},'#teamEditSecondary':{value:'#101010'},
+  '#teamEditSlug':{value:'mi-equipo'},'#teamEditName':{value:'Mi equipo'},
+  '#teamEditDescription':{value:'Descripci\u00f3n'},'#teamEditAvatar':{value:'https://example.com/avatar.png'},
+  '#teamEditBanner':{value:''},'#teamReaderLogoUrl':{value:'https://example.com/reader.png'},
+  '#teamReaderLogoWidth':{value:'184'},
+  '#teamPanel-identity [data-team-setting="show_reader_logo"]':{checked:true}
+ };
+ const saved=[],toasts=[],team={id:'group-test',slug:'mi-equipo',name:'Mi equipo',avatar_url:'https://example.com/avatar.png',profile_settings:{reader_default_theme:'sepia',reader_separator_style:'flor',custom:'preserved'}},S={studioTeam:team,publicGroup:null};
+ const sandbox={
+  S,$:key=>fields[key]||null,teamSettings:g=>g.profile_settings,safeUrl:u=>u,
+  jreq:async(path,opt)=>saved.push({path,opt}),refreshStudioTeam:async()=>{},
+  loadPublicGroupData:async()=>null,deleteOldMediaIfUnused:async()=>{},
+  toast:(message,type)=>toasts.push({message,type}),friendlyError:e=>e.message,console
+ };
+ vm.runInNewContext(app.slice(from,to)+';globalThis.qaIdentity=saveStudioTeamProfile',sandbox);
+ await sandbox.qaIdentity();
+ if(saved.length!==1)throw new Error('Identidad QA: guardar no hizo exactamente un PATCH.');
+ const body=JSON.parse(saved[0].opt.body),settings=body.profile_settings;
+ if(saved[0].opt.method!=='PATCH'||settings.reader_logo_url!=='https://example.com/reader.png'||settings.reader_logo_width!==184||settings.show_reader_logo!==true||settings.reader_default_theme!=='sepia'||settings.reader_separator_style!=='flor'||settings.custom!=='preserved'||!toasts.some(t=>t.type==='ok'))throw new Error('Identidad QA: guardar no persistió PNG o alteró el formato.');
+}
+{
+ const from=app.indexOf('function teamLinkedLogo(group,context){'),to=app.indexOf('function detailView(){',from);
+ const sandbox={teamSettings:g=>g.profile_settings||{},safeMediaUrl:x=>x,esc:x=>String(x)};
+ vm.runInNewContext(app.slice(from,to)+';globalThis.qaLogo=teamLinkedLogo;globalThis.qaBrand=teamBrandLinkContent',sandbox);
+ const team={id:'g',name:'Ejemplo',avatar_url:'https://example.com/avatar.jpg',profile_settings:{reader_logo_url:'https://example.com/reader.png',reader_logo_width:200}};
+ const brand=sandbox.qaLogo(team,'reader');
+ if(!brand.includes('reader.png')||brand.includes('avatar.jpg')||!brand.includes('200px')||!brand.includes('teamReaderBrandImage'))throw new Error('Logo QA: PNG propio no tiene prioridad o tamaño.');
+ if(sandbox.qaLogo({...team,profile_settings:{show_reader_logo:false}},'reader')!=='')throw new Error('Logo QA: fallo al ocultar imagen.');
+ if(!sandbox.qaBrand({...team,avatar_url:null,profile_settings:{}},'reader').includes('Equipo: Ejemplo'))throw new Error('Logo QA: falta alternativa sin imagen.');
+}
