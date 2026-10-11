@@ -2992,3 +2992,35 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  .studioV3BookCard,.studioV3NavItem{transition:none}
  .studioV3BookCard:hover{transform:none}
 }
+
+/* Studio phase 4: work and editor usability */
+#studioProjectOverview,#studioProjectMetadata,#studioProjectVolumes,#studioProjectEditor{scroll-margin-top:95px}
+.studioV4ProjectNav{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:12px 0 20px;padding:11px;border:1px solid var(--line);border-radius:15px;background:var(--panel);box-shadow:var(--shadow2)}
+.studioV4ProjectNav button{border:1px solid var(--line);background:var(--panel2);color:var(--text);min-height:43px;border-radius:9px;padding:9px 14px;display:inline-flex;align-items:center;gap:8px;font-size:.84rem;font-weight:800;cursor:pointer}
+.studioV4ProjectNav button:hover{border-color:var(--accent2);background:color-mix(in srgb,var(--accent) 21%,var(--panel))}
+.studioV4ProjectNav button:focus-visible{outline:3px solid var(--accent2);outline-offset:2px}
+.studioV4ProjectNav button span{background:var(--accent);color:#181818;border-radius:5px;padding:2px 6px;font-variant-numeric:tabular-nums;font-size:.75rem}
+.studioV4ProjectNavCount{margin-left:auto;color:var(--muted);font-size:.78rem;font-weight:700;padding:5px}
+.studioV4SectionTools{display:grid;grid-template-columns:minmax(230px,1.6fr) repeat(2,minmax(120px,1fr));gap:13px;align-items:end;padding:16px;margin:12px 0 19px;background:var(--panel2);border:1px solid var(--line);border-radius:14px}
+.studioV4SectionTools>div{display:grid;gap:6px;min-width:0}
+.studioV4SectionTools label{font-size:.75rem;font-weight:850}
+.studioV4SectionTools :is(input,select){width:100%;min-width:0;min-height:43px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);padding:9px 12px;font:inherit;font-size:.85rem}
+.studioV4SectionTools :is(input,select):focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.studioV4SectionTools p{grid-column:1/-1;margin:0;font-size:.78rem;color:var(--muted)}
+.studioV4MetaGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;align-items:start}
+.studioV4MetaGrid>.field{min-width:0}
+#projectSynopsis{width:100%;min-height:120px;resize:vertical;line-height:1.6}
+.studioV4Dirty{font-size:.75rem;font-weight:800;color:var(--muted)}
+.studioV4Dirty[data-dirty="true"]{color:var(--text);background:color-mix(in srgb,var(--accent) 36%,var(--panel));padding:6px 10px;border-radius:8px}
+.studioV4EditorMetrics{font-size:.79rem;font-variant-numeric:tabular-nums;color:var(--muted);background:var(--panel2);padding:10px 14px;border:1px solid var(--line);border-radius:9px;margin:11px 0 15px}
+.studioV4ImportPreview{background:var(--panel);border:1px solid var(--line);border-radius:15px;margin:15px 0;padding:15px}
+.studioV4ImportPreview>summary{display:flex;justify-content:space-between;align-items:center;gap:12px;cursor:pointer;flex-wrap:wrap;font-weight:800}
+.studioV4ImportPreview>summary span{font-size:.82rem;color:var(--muted);font-weight:650}
+.studioV4ImportPreview>p{color:var(--muted);line-height:1.5;font-size:.84rem}
+.studioV4ImportChapter{margin:9px 0;border:1px solid var(--line);border-radius:10px;background:var(--panel2);padding:12px}
+.studioV4ImportChapter>summary{display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;cursor:pointer;font-weight:750;font-size:.88rem}
+.studioV4ImportedText{white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow-y:auto;line-height:1.6;background:var(--panel);color:var(--text);padding:13px;border:1px solid var(--line);border-radius:9px;font-size:.87rem}
+.studioVolumeGrid [data-studio-section-id][hidden]{display:none!important}
+@media(max-width:760px){.studioV4SectionTools{grid-template-columns:repeat(2,minmax(0,1fr))}.studioV4SectionTools>div:first-child{grid-column:1/-1}.studioV4MetaGrid{grid-template-columns:1fr}.studioV4ProjectNavCount{margin-left:0}}
+@media(max-width:480px){.studioV4ProjectNav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.studioV4ProjectNav button{min-width:0;justify-content:center;padding:9px 8px;font-size:.78rem}.studioV4ProjectNavCount{grid-column:1/-1}.studioV4SectionTools{grid-template-columns:1fr}.studioV4SectionTools>div:first-child{grid-column:1}.studioV4ImportPreview{padding:12px}}
+@media(prefers-reduced-motion:reduce){.studioV4ProjectNav button{transition:none}}
