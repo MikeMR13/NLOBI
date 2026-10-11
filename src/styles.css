@@ -2911,3 +2911,11 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .teamPublicPage.teamCustomOrder #teamPublicWorks{order:var(--team-order-traducciones,35)}
 .teamPublicPage.teamCustomOrder #teamPublicLatest{order:var(--team-order-novedades,36)}
 .teamPublicPage.teamCustomOrder #teamPublicSupport{order:var(--team-order-apoyo,37)}
+
+/* Identidad enlazada del equipo en la obra y el lector */
+.teamProfileLink,.readerTeamLink{display:inline-flex;align-items:center;gap:9px;text-decoration:none;min-width:0}
+.teamContextLogo{width:27px;height:27px;object-fit:cover;border-radius:7px;flex-shrink:0;border:1px solid var(--line)}
+.readerTeamLink{color:var(--text);font-size:.82rem;font-weight:650;border:1px solid var(--line);border-radius:10px;padding:5px 8px;max-width:190px}
+.readerTeamLink:hover,.teamProfileLink:hover{border-color:var(--accent)}
+.readerTeamLink span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:680px){.readerTeamLink{max-width:110px;padding:5px}.readerTeamLink span{display:none}.readerTeamLink .teamContextLogo{width:25px;height:25px}}
