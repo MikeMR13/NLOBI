@@ -38,7 +38,7 @@ assert.deepEqual(filtered({searchNovelStatus:'completed',searchGenre:'Fantasía'
 
 for(const term of [
  'id="catalogStatus"','id="catalogNovelStatus"','Estado de la traducción',
- 'Estado de la novela original','searchNovelStatus:e.target.value',
+ 'Estado de la novela original','S.searchNovelStatus=e.target.value',
  "S.searchNovelStatus='all'",
  "['searchNovelStatus','Obra original'",
  "['searchStatus','Traducción'",
