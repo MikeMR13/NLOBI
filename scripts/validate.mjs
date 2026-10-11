@@ -427,11 +427,20 @@ for(const marker of [
   if(!css.includes(marker))throw new Error('Lector 7–9: falta estilo '+marker);
  }
  const storage=new Map(),localStorage={getItem:k=>storage.has(k)?storage.get(k):null,setItem:(k,v)=>storage.set(k,String(v)),removeItem:k=>storage.delete(k)},S={user:null,readerPrefs:{},readerSection:null,token:''},esc=s=>String(s).replace(/[&<>"']/g,'');
- const sandbox={localStorage,S,window:{},navigator:{onLine:false},render:()=>{},toast:()=>{},jreq:async()=>{},esc};
+ const sandbox={localStorage,S,window:{},navigator:{onLine:false},render:()=>{},toast:()=>{},jreq:async()=>{},esc,teamSettings:g=>g?.profile_settings||{}};
  vm.runInNewContext(app.slice(start,stop)+';globalThis.testReader={readReaderSettings,setReaderSetting,getReaderMode,getReaderPreferencesForVolume,clearReaderVolumeSettings,readerSettingsFields,hydrateReaderSettings}',sandbox);
  const api=sandbox.testReader,A='volume-test-1',B='volume-test-2';
+ S.currentDetail={translator_groups:{profile_settings:{reader_default_theme:'sepia',reader_default_fontSize:22,reader_default_mode:'continuous'}},volumes:[{id:A}]};
+ 
  const check=(condition,msg)=>{if(!condition)throw new Error('Lector 7–9: '+msg)};
- check(api.getReaderMode(A)==='chapter','modo inicial inválido');
+ check(api.getReaderMode(A)==='continuous','el modo del equipo no se hereda');
+ check(api.getReaderPreferencesForVolume(A).theme==='sepia','el tema del equipo no se hereda');
+ check(api.getReaderPreferencesForVolume(A).fontSize===22,'el tamaño de letra del equipo no se hereda');
+ check(api.getReaderMode(B)==='chapter','el equipo altera novelas de otro traductor');
+ api.setReaderSetting('volume',A,'theme','dark');
+ check(api.getReaderPreferencesForVolume(A).theme==='dark','el ajuste de volumen no prevalece');
+ api.setReaderSetting('volume',A,'theme','inherit');
+ check(api.getReaderPreferencesForVolume(A).theme==='sepia','no se restablece el formato del equipo');
  api.setReaderSetting('global','','mode','continuous');check(api.getReaderMode(B)==='continuous','modo global no heredado');
  api.setReaderSetting('volume',A,'mode','chapter');check(api.getReaderMode(A)==='chapter'&&api.getReaderMode(B)==='continuous','configuración por volumen no aislada');
  api.setReaderSetting('volume',A,'fontSize',29);check(api.getReaderPreferencesForVolume(A).fontSize===29&&api.getReaderPreferencesForVolume(B).fontSize===18,'fuentes mezcladas entre volúmenes');
