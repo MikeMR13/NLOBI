@@ -19,6 +19,14 @@ let pendingRouteFocus=false;
 const validRoute=v=>['home','collections','readers','translators','rankings','releases','explore','library','auth','auth:edit','application','studio','studio:import','studio:new','studio:teams','notifications','beta','admin'].includes(v)||/^detail:[A-Za-z0-9_-]+$/.test(v)||/^group:[A-Za-z0-9_-]+$/.test(v)||/^profile:[A-Za-z0-9_-]+$/.test(v)||/^collection:[A-Za-z0-9_-]+$/.test(v)||/^studio:project:[A-Za-z0-9_-]+$/.test(v)||/^studio:team:[A-Za-z0-9_-]+$/.test(v)||/^studio:media:[A-Za-z0-9_-]+$/.test(v)||/^reader:[A-Za-z0-9_-]+$/.test(v);
 function routeFromHash(){let raw=(location.hash&&location.hash!=='#')?'home':(siteAppearance.startPage==='library'&&!localStorage.getItem('nlobi_token')?'home':siteAppearance.startPage);try{raw=decodeURIComponent((location.hash||('#'+raw)).slice(1))}catch{history.replaceState(null,'','#home');return'home'}return validRoute(raw)?raw:'home'}
 function go(view,replace=false){if(!validRoute(view))view='home';if(view==='admin'&&!S.admin){toast('Esta sección es exclusiva de la administración global.','bad');return}pendingRouteFocus=true;const next='#'+encodeURIComponent(view).replace(/%3A/g,':');if(location.hash===next){S.view=view;render();window.scrollTo({top:0,behavior:'smooth'});return}if(replace){history.replaceState(null,'',next);S.view=view;render()}else location.hash=next}
+// Feedback de navegación y guardado: retraso breve para evitar parpadeos.
+let pageBusyCount=0,pageBusyTimer=null,pageBusyShownAt=0,pageBusyHideTimer=null;
+function syncPageBusy(){const indicator=document.getElementById('pageBusyIndicator');if(!indicator)return;indicator.hidden=pageBusyCount===0;document.documentElement.classList.toggle('pageIsBusy',pageBusyCount>0)}
+function startPageBusy(message='Cargando contenido…'){
+ const el=document.getElementById('pageBusyIndicator');if(el){const label=el.querySelector('[data-busy-label]');if(label)label.textContent=message}
+ clearTimeout(pageBusyHideTimer);pageBusyCount++;if(pageBusyCount===1){clearTimeout(pageBusyTimer);pageBusyTimer=setTimeout(()=>{pageBusyShownAt=Date.now();syncPageBusy()},220)}
+ let completed=false;return ()=>{if(completed)return;completed=true;pageBusyCount=Math.max(0,pageBusyCount-1);if(pageBusyCount)return;clearTimeout(pageBusyTimer);pageBusyHideTimer=setTimeout(syncPageBusy,Math.max(0,360-(Date.now()-pageBusyShownAt)))}
+}
 let toastTimer,lastToastMessage='',lastToastAt=0;function toast(message,type=''){const host=$('#toastHost');if(!host)return;const msg=String(message||''),now=Date.now();if(msg===lastToastMessage&&now-lastToastAt<5000)return;lastToastMessage=msg;lastToastAt=now;host.replaceChildren();const el=document.createElement('div');el.className='toast '+type;el.textContent=msg;host.appendChild(el);clearTimeout(toastTimer);toastTimer=setTimeout(()=>{host.replaceChildren();if(lastToastMessage===msg)lastToastMessage=''},4200)}
 function setNetworkBadge(){const el=$('#netBadge');if(!el)return;S.online=navigator.onLine;el.hidden=S.online;if(!S.online)el.textContent='Sin conexión · algunas funciones no estarán disponibles'}
 function friendlyError(e,fallback='Ocurrió un error inesperado.'){const m=String(e?.message||'');if(e?.name==='AbortError'||/aborted|timeout/i.test(m))return'La conexión tardó demasiado. Intenta nuevamente.';if(/Failed to fetch|NetworkError/i.test(m))return'No se pudo conectar con el servidor.';return m||fallback}
@@ -84,7 +92,7 @@ async function req(path,opt={}){
  }
  return r
 }
-async function jreq(path,opt={}){const r=await req(path,opt);if(!r.ok){const error=new Error((await r.text()).slice(0,220)||r.statusText);error.status=r.status;throw error}const tx=await r.text();return tx?JSON.parse(tx):null}
+async function jreq(path,opt={}){const method=String(opt.method||'GET').toUpperCase(),done=method==='GET'?null:startPageBusy('Guardando cambios…');try{const r=await req(path,opt);if(!r.ok){const error=new Error((await r.text()).slice(0,220)||r.statusText);error.status=r.status;throw error}const tx=await r.text();return tx?JSON.parse(tx):null}finally{done?.()}}
 async function jreqAllRows(path,opt={},pageSize=500,maxPages=40){
  const method=String(opt.method||'GET').toUpperCase();
  if(method!=='GET')throw new Error('jreqAllRows solo admite consultas GET.');
@@ -2505,7 +2513,7 @@ window.addEventListener('focus',()=>refreshPublicReleases());
 window.setInterval(()=>refreshPublicReleases(),60000);
 let featuredPauseUntil=0;
 window.setInterval(()=>{if(S.view!=='home'||document.hidden||Date.now()<featuredPauseUntil||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;const n=S.catalog.filter(x=>x.novels?.cover_url&&!x.demo).slice(0,8).length;if(n<2)return;S.featuredIndex=((S.featuredIndex||0)+1)%n;render()},6500);
-window.addEventListener('hashchange',async()=>{pendingRouteFocus=true;S.view=routeFromHash();render();window.scrollTo({top:0,behavior:'smooth'});try{await resolveDynamicRoute(S.view);S.err=''}catch(e){S.err=friendlyError(e,'No se pudo abrir esta vista.');console.error(e)}render()});
+window.addEventListener('hashchange',async()=>{const route=routeFromHash(),done=startPageBusy('Abriendo página…');pendingRouteFocus=true;S.view=route;render();window.scrollTo({top:0,behavior:'smooth'});try{await resolveDynamicRoute(route);if(S.view===route)S.err=''}catch(e){if(S.view===route)S.err=friendlyError(e,'No se pudo abrir esta vista.');console.error(e)}finally{done();if(S.view===route)render()}});
 window.addEventListener('online',async()=>{S.online=true;setNetworkBadge();toast('Conexión restablecida.','ok');await flushProgressQueue();boot(true)});
 window.addEventListener('offline',()=>{S.online=false;setNetworkBadge();render();toast('Sin conexión. Los capítulos guardados siguen disponibles.','bad')});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='hidden'||!S.view.startsWith('reader:')||!S.readerSection)return;const pos=readerActiveChapter();persistReaderPosition(pos.id,S.readerSection.volume_id,pos.percent,true)});
