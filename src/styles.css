@@ -2855,3 +2855,12 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .teamIdentityHero.teamHero-centrado .teamIdentityCopy{align-items:center}
 .teamIdentityHero.teamHero-degradado .teamIdentityBanner{background-image:linear-gradient(125deg,var(--team-accent),#121212)!important}
 .teamPublicExtras .teamPublicLinks{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}
+
+
+.teamPublicMeta{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin:12px 0}
+.teamPublicMeta>span{display:inline-flex;padding:6px 11px;border:1px solid var(--line);border-radius:999px;background:var(--panel);font-size:.82rem}
+.teamPinnedGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.teamPinnedGrid .panelCard{min-width:0;white-space:pre-line;overflow-wrap:anywhere}
+.teamCustomSection select,.teamCustomSection input{width:100%;border:1px solid var(--line);border-radius:10px;background:var(--panel2);color:var(--text);padding:11px 12px;min-height:44px}
+.teamCustomSection input[type="checkbox"]{width:auto;min-height:initial}
+.teamCustomToggle{min-height:40px}
