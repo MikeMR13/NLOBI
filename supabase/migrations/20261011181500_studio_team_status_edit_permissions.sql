@@ -157,6 +157,5 @@ create policy novels_editor_update
     )
   );
 
--- Ensure the public API grant remains role-based, with RLS enforcing team
--- membership and the before-update trigger protecting shared metadata.
-grant select, update on public.translations, public.novels to authenticated;
+-- Authenticated already has SELECT/UPDATE table grants in the deployed schema.
+-- Do not expand grants here; RLS and protected triggers govern changes.
