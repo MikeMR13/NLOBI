@@ -2895,3 +2895,16 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 /* Accessible linked covers and titles even inside horizontal shelves. */
 .homeEditorial .discoverShelfTrack .catalogCoverButton{display:block;min-height:150px;aspect-ratio:2/3}
 .homeEditorial .discoverShelfTrack .catalogTitleLink{display:flex;align-items:center;min-height:44px!important;padding:7px 0!important;overflow-wrap:anywhere}
+
+/* El escaparate móvil muestra el siguiente contenido sin ocupar toda la pantalla. */
+@media(max-width:640px){
+ .homeEditorial .homeFeatured{min-height:350px}
+ .homeEditorial .homeFeaturedVisual{flex:0 0 142px;min-height:142px;padding:6px}
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{width:86px}
+ .homeEditorial .homeFeaturedInfo{min-height:205px;padding:10px 14px}
+ .homeEditorial .homeFeaturedSlideInfo{min-height:0}
+ .homeEditorial .homeFeaturedSlideInfo h2{margin:4px 0;min-height:2.8em;max-height:2.8em}
+ .homeEditorial .homeFeaturedSlideInfo p{margin:3px 0;min-height:2.8em;max-height:2.8em}
+ .homeEditorial .homeFeaturedSlideInfo .homeFeaturedLink{min-height:36px;padding-block:4px}
+ .homeEditorial .featuredCarouselControls{min-height:44px}
+}
