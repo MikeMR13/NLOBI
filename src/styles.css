@@ -2856,3 +2856,7 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  .studioCatalogToolbar select{width:100%;font-size:16px}
 }
 @media(max-width:360px){.studioCatalogToolbar{grid-template-columns:minmax(0,1fr)}}
+
+/* A11y: empty featured gallery must remain legible on light and dark themes. */
+.homeEditorial .homeFeaturedEmpty{color:var(--text)}
+.homeEditorial .homeFeaturedEmpty span,.homeEditorial .homeFeaturedEmpty strong{color:inherit}
