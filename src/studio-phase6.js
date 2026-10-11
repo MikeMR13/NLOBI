@@ -42,11 +42,11 @@ window.createStudioPhase6=function({S,esc,$,$$,teamCan,editSection,toast,blocksT
     if(num&&numberSeen.has(num))add('warning','chapter-duplicate-number','El número de esta sección está repetido.',volume,sec);
     if(num)numberSeen.add(num);
     const blocks=Array.isArray(sec.content)?sec.content:[];
-    const plain=blocksToPlainText(blocks).trim();
+    const readable=blocks.some(b=>['paragraph','heading','quote','translator_note','ruby'].includes(b?.type)&&String(b.text||b.base||'').trim());
     const images=blocks.filter(b=>b?.type==='image');
     imagesCount+=images.length;
     const validImage=images.some(b=>String(b.url||'').trim());
-    if(!plain&&!validImage)add('error','chapter-empty',display+': no hay contenido de lectura.',volume,sec);
+    if(!readable&&!validImage)add('error','chapter-empty',display+': no hay contenido de lectura.',volume,sec);
     if(images.some(b=>!String(b.url||'').trim()))add('warning','image-url','Hay ilustraciones sin archivo o enlace.',volume,sec);
     if(images.some(b=>String(b.url||'').trim()&&!String(b.alt||'').trim()))add('warning','image-alt','Añade una descripción accesible a las ilustraciones.',volume,sec);
     if(blocks.some(b=>b?.type==='ruby'&&(!String(b.base||'').trim()||!String(b.reading||'').trim())))
