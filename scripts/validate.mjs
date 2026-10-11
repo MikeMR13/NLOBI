@@ -443,3 +443,15 @@ for(const marker of [
  storage.set('nlobi_reader_settings_guest','{invalid');check(api.getReaderMode(A)==='chapter','JSON inválido bloquea el lector');
  check(api.readerSettingsFields('global').includes('Lectura continua'),'selector de modo ausente');
 })();
+
+// Team public profile and account navigation regressions.
+{
+ const css=fs.readFileSync("src/styles.css","utf8");
+ for(const marker of ['Perfil público del equipo','href="#group:','function loadPublicGroupData(id)','id="teamPanel-identity"','data-team-settings-tab="','data-team-settings-panel="reader"','id="saveTeamReaderCustom"']){
+  if(!app.includes(marker))throw new Error('Equipo QA: falta '+marker);
+ }
+ if(app.includes('id="teamPanel-identity" aria-labelledby="teamTab-identity" data-team-settings-panel="identity" ${tab!==\'identity\'?\'hidden\':\'\'} id="teamProfileSettings"'))throw new Error('Equipo QA: identificador duplicado en identidad');
+ if(!css.includes('.accountDropdownPanel button,.accountDropdownPanel a{'))throw new Error('Equipo QA: el enlace público no comparte estilo con el menú');
+ const start=app.indexOf('async function loadPublicGroupData(id)'),end=app.indexOf('async function loadReaderRouteData(',start),loader=app.slice(start,end);
+ if(!loader.includes('latestChapter=new Map()')||!loader.includes("'/rest/v1/volumes?translation_id=in.('")||loader.includes('S.publishedVolumes'))throw new Error('Equipo QA: novedades dependen del catálogo global o se duplican');
+}
