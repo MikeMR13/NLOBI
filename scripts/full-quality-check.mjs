@@ -84,6 +84,14 @@ const scenarios=[
  ['user-profile','auth',authBase],['user-notifications','notifications',authBase],['user-beta','beta',authBase],
  ['creator-studio','studio',authBase],['creator-new','studio:new',authBase],
  ['creator-project','studio:project:project-1',{...authBase,studioProject:translation,teamMembers}],
+ ['creator-project-collaborative','studio:project:project-1',{...authBase,studioProject:translation,teamMembers,
+  studioCollaborationInvites:[{id:'collab-1',translation_id:'project-1',inviter_group_id:'group-1',invited_group_id:'group-2',status:'accepted',created_at:now}],
+  translatorDirectory:[{id:'group-1',name:group.name},{id:'group-2',name:'Equipo traductor colaborador con un nombre especialmente largo para probar móviles'},{id:'group-3',name:'Equipo disponible para invitar'}]}],
+ ['creator-studio-invitations','studio',{...authBase,admin:false,groups:[{role:'admin',translator_groups:{id:'group-2',name:'Equipo invitado de traducción'}}],studioTranslations:[],
+  studioCollaborationInvites:[{id:'collab-1',translation_id:'project-1',inviter_group_id:'group-1',invited_group_id:'group-2',status:'pending',created_at:now}],
+  translatorDirectory:[{id:'group-1',name:group.name},{id:'group-2',name:'Equipo invitado de traducción'}]}],
+ ['public-detail-collaborative','detail:project-1',{catalog:[translation],currentDetail:{...translation,collaboration_groups:[{id:'group-2',name:'Equipo traductor colaborador con un nombre largo para móvil'}]}}],
+ ['public-team-collaborative','group:group-1',{catalog:[translation],publicGroup:{...publicGroup,translations:[{...translation,is_collaborative:true,collaboration_groups:[{id:'group-2',name:'Equipo invitado'}]}]}}],
  ['creator-team','studio:team:group-1',{...authBase,studioTeam:group,teamMembers}],
  ['creator-media','studio:media:group-1',{...authBase,mediaGroupId:'group-1',mediaLoading:false,mediaFiles:[{name:'cover.jpg',path:'teams/group-1/cover.jpg',size:2048,mimetype:'image/jpeg',updated_at:now}],mediaUsage:{'teams/group-1/cover.jpg':1}}],
  ['import-file','studio:import',{...authBase,importState:importState('file')}],
@@ -133,7 +141,7 @@ const report=[],failures=[];
 for(const [vpName,width,height] of viewports){
  for(const [name,view,state] of scenarios){
   const full=vpName==='mobile-390'||vpName==='desktop-1280';
-  const edge=['public-home','public-explore','public-detail','public-reader','user-library','creator-studio','creator-project','creator-team','import-edit','admin','error-state'];
+  const edge=['public-home','public-explore','public-detail','public-detail-collaborative','public-reader','user-library','creator-studio','creator-studio-invitations','creator-project','creator-project-collaborative','creator-team','import-edit','admin','error-state'];
   if(!full&&!edge.includes(name))continue;
   const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block',colorScheme:'light'});await prepare(context);
   const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!/favicon|Failed to load resource/i.test(m.text()))runtime.push(m.text())});
@@ -142,6 +150,15 @@ for(const [vpName,width,height] of viewports){
   const check=await inspect(page),axe=await new AxeBuilder({page}).analyze(),seriousViolations=axe.violations.filter(v=>['serious','critical'].includes(v.impact||'')),serious=seriousViolations.map(v=>v.id),axeDetails=seriousViolations.flatMap(v=>v.nodes.slice(0,7).map(n=>({id:v.id,selector:n.target,reason:n.failureSummary?.slice(0,220),html:n.html?.slice(0,130)})));
   const row={viewport:vpName,scenario:name,...check,runtime,axeSerious:serious,axeDetails};report.push(row);
   if(check.overflow>2)failures.push({...row,error:'horizontal-overflow'});if(check.clipped.length)failures.push({...row,error:'clipped-controls'});if(check.tiny.length)failures.push({...row,error:'small-targets'});if(check.badText.length)failures.push({...row,error:'bad-visible-text'});if(!check.main||check.content<2)failures.push({...row,error:'empty-main'});if(runtime.length)failures.push({...row,error:'runtime-error'});if(serious.length)failures.push({...row,error:'axe-serious'});
+  if(name==='creator-studio-invitations'){
+   if(!(await page.locator('.studioCollaborationInbox').count())||(await page.locator('[data-collab-accept="true"]').count())!==1||(await page.locator('[data-collab-accept="false"]').count())!==1)failures.push({...row,error:'collaboration-invitation-ui-missing'});
+  }
+  if(name==='creator-project-collaborative'){
+   if(!(await page.locator('.studioCollaborationPanel').count())||!(await page.getByText('Colaboración aceptada').count())||!(await page.locator('#sendCollaborationInvite').count()))failures.push({...row,error:'collaboration-project-panel-missing'});
+  }
+  if(name==='public-detail-collaborative'){
+   if(!(await page.locator('.collaborationCredits').count())||(await page.locator('.collaborationCredit').count())!==2)failures.push({...row,error:'collaboration-public-credits-missing'});
+  }
   if(name==='creator-project'){const edit=page.locator('[data-edit-section="section-1"]');if(await edit.count()){await edit.click();await page.waitForTimeout(15);if(!(await page.locator('#editSectionTitle').count()))failures.push({...row,error:'editor-open-failed'})}}
   if(name==='user-library'){const b=page.locator('[data-library-filter="favorites"]');if(await b.count())await b.click()}
   if(name==='user-library-collections-form'){
