@@ -26,9 +26,9 @@ try{
     {id:'paused',group_id:'t2',title:'Obra en pausa',updated_at:'2026-10-09',status:'paused',novels:{title:'Obra en pausa',genres:['Misterio'],novel_type:'web_novel'},volumes:[{status:'draft',sections:[{status:'draft'}]}]}
    ];
    const S={groups,studioTranslations:books,catalog:[]};
-   const factory=new Function('S','nav','status','teamCan','isCurrentGroupManager','isCurrentGroupEditor','safeMediaUrl','esc','novelTypeLabel','translationStatusLabel','TRANSLATION_STATUS_OPTIONS','NOVEL_TYPE_OPTIONS','localStorage',studioSource+';return studio;');
+   const factory=new Function('S','nav','status','teamCan','isCurrentGroupManager','isCurrentGroupEditor','safeMediaUrl','esc','novelTypeLabel','translationStatusLabel','novelPublicationStatusLabel','NOVEL_PUBLICATION_STATUS_OPTIONS','TRANSLATION_STATUS_OPTIONS','NOVEL_TYPE_OPTIONS','localStorage',studioSource+';return studio;');
    const studio=factory(S,()=>'',()=>'',()=>true,()=>true,()=>true,()=>'',esc,
-    x=>Object.fromEntries(types)[x]||x,x=>Object.fromEntries(statusOptions)[x]||x,statusOptions,types,{getItem:()=>null});
+    x=>Object.fromEntries(types)[x]||x,x=>Object.fromEntries(statusOptions)[x]||x,t=>({ongoing:'En publicación',completed:'Completada',hiatus:'En pausa',cancelled:'Cancelada'}[t]||'Sin definir'),[['ongoing','En publicación'],['completed','Completada'],['hiatus','En pausa'],['cancelled','Cancelada']],statusOptions,types,{getItem:()=>null});
    const studioMount=()=>{document.querySelector('#studioRoot').innerHTML=studio();bindStudioFilters()};
    const binder=[['studioProjectFilter','studioProjectFilter'],['studioGenreFilter','studioGenreFilter'],['studioPublicationFilter','studioPublicationFilter'],['studioNovelTypeFilter','studioNovelTypeFilter'],['studioTeamFilter','studioTeamFilter'],['studioWorkflowFilter','studioWorkflowFilter'],['studioProjectSort','studioProjectSort']];
    function bindStudioFilters(){for(const [id,key] of binder){const el=document.getElementById(id);if(el)el.onchange=()=>{S[key]=el.value;studioMount()}}
