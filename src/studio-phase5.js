@@ -11,6 +11,8 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
  const date=v=>v?new Date(v).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'}):'—';
  const work={data:null,loading:false,team:'all',status:'open',warning:'',scope:''};
  async function load(){
+  const incomingScope=(S.user?.id||'')+':'+groups().map(g=>g.id).sort().join(',');
+  if(work.scope!==incomingScope){work.scope=incomingScope;work.data=null;work.loading=false;work.warning='';work.team='all';work.status='open'}
   if(work.loading)return;
   const ids=groups().map(g=>g.id),scope=work.scope;
   work.loading=true;work.warning='';
