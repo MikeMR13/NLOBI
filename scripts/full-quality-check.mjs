@@ -147,6 +147,7 @@ for(const [vpName,width,height] of viewports){
   if(check.overflow>2)failures.push({...row,error:'horizontal-overflow'});if(check.clipped.length)failures.push({...row,error:'clipped-controls'});if(check.tiny.length)failures.push({...row,error:'small-targets'});if(check.badText.length)failures.push({...row,error:'bad-visible-text'});if(!check.main||check.content<2)failures.push({...row,error:'empty-main'});if(runtime.length)failures.push({...row,error:'runtime-error'});if(serious.length)failures.push({...row,error:'axe-serious'});
   if(name==='public-explore-editorial-states'){
    for(const selector of ['#catalogStatus','#catalogNovelStatus','#catalogSequelStatus'])if(!(await page.locator(selector).count()))failures.push({...row,error:'explore-state-filter-missing',selector});
+   await page.locator('#exploreFilters > summary').click();await page.waitForTimeout(50);
    await page.locator('#catalogNovelStatus').selectOption('completed');
    await page.locator('#catalogSequelStatus').selectOption('announced');
    if((await page.locator('.catalogEditorialCard').count())!==1)failures.push({...row,error:'explore-state-filter-not-combined'});
