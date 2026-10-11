@@ -2891,3 +2891,7 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  .homeEditorial .featuredCarouselDots{gap:2px}
  .homeEditorial .featuredCarouselCount{font-size:.67rem;margin-left:3px}
 }
+
+/* Accessible linked covers and titles even inside horizontal shelves. */
+.homeEditorial .discoverShelfTrack .catalogCoverButton{display:block;min-height:150px;aspect-ratio:2/3}
+.homeEditorial .discoverShelfTrack .catalogTitleLink{display:flex;align-items:center;min-height:44px!important;padding:7px 0!important;overflow-wrap:anywhere}
