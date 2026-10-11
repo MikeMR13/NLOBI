@@ -161,6 +161,14 @@ for(const [vpName,width,height] of viewports){
    const ids=['projectNovelStatus','projectTranslationStatus','projectSequelStatus'];
    const values=await page.evaluate(ids=>Object.fromEntries(ids.map(id=>[id,document.getElementById(id)?.value])),ids);
    if(values.projectNovelStatus!=='completed'||values.projectTranslationStatus!=='active'||values.projectSequelStatus!=='awaiting'||!(await page.locator('#saveEditorialStates').count()))failures.push({...row,error:'studio-state-editor-values',values});
+   const requestPromise=page.waitForRequest(req=>req.url().includes('/rest/v1/rpc/update_editorial_states')&&req.method()==='POST',{timeout:10000});
+   await page.locator('#projectNovelStatus').selectOption('hiatus');
+   await page.locator('#projectTranslationStatus').selectOption('paused');
+   await page.locator('#projectSequelStatus').selectOption('unconfirmed');
+   await page.locator('#saveEditorialStates').click();
+   const request=await requestPromise;
+   const payload=JSON.parse(request.postData()||'{}');
+   if(payload.p_translation_id!=='project-1'||payload.p_novel_status!=='hiatus'||payload.p_translation_status!=='paused'||payload.p_sequel_status!=='unconfirmed')failures.push({...row,error:'studio-state-save-rpc-payload',payload});
   }
   if(name==='readonly-project'&&(await page.locator('#saveEditorialStates').count()))failures.push({...row,error:'readonly-state-editor-visible'});
   if(name==='creator-project'){const edit=page.locator('[data-edit-section="section-1"]');if(await edit.count()){await edit.click();await page.waitForTimeout(15);if(!(await page.locator('#editSectionTitle').count()))failures.push({...row,error:'editor-open-failed'})}}
