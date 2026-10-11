@@ -43,7 +43,7 @@ const partial=show({studioPublicationFilter:'partial'});assert.ok(partial.includ
 const complete=show({studioPublicationFilter:'full'});assert.ok(complete.includes('data-studio-project="complete"'));assert.ok(complete.includes('data-studio-project="sequel"'));
 const none=show({studioPublicationFilter:'none'});assert.ok(none.includes('data-studio-project="paused"'));assert.ok(none.includes('data-studio-project="abandoned"'));
 const combined=show({studioProjectFilter:'complete',studioGenreFilter:'Fantasía',studioNovelTypeFilter:'original',studioTeamFilter:'team1',studioPublicationFilter:'full'});
-assert.match(combined,/1 obra encontrada/);assert.ok(combined.includes('data-studio-project="complete"'));assert.ok(combined.includes('1 capítulos en resultados'),'Chapter count should follow results');
+assert.match(combined,/1 obra encontrada/);assert.ok(combined.includes('data-studio-project="complete"'));assert.ok(combined.includes('1 capítulo en resultados'),'Chapter count should follow results');
 const noMatch=show({studioProjectFilter:'complete',studioGenreFilter:'Romance'});
 assert.match(noMatch,/No encontramos obras con esos filtros/);
 assert.ok(show({studioProjectSearch:'FANTASIA'}).includes('2 obras encontradas'),'Accent-insensitive search must match actual metadata');
