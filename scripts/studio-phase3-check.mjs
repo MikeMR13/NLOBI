@@ -50,7 +50,7 @@ assert.ok(!html.includes('data-v="studio:media:beta"'),'Reviewers must not recei
 assert.match(context,/data-v="studio:teams"/);
 const filtered=show({studioProjectFilter:'paused',studioNovelTypeFilter:'original',studioTeamFilter:'beta',studioWorkflowFilter:'review',studioDisplay:'list'}).html;
 assert.match(filtered,/1 obra encontrada/);
-assert.ok(!filtered.includes('data-studio-project="first"'));
+assert.ok(!filtered.split('studioV3BookGridList')[1]?.includes('data-studio-project="first"'),'Filters apply to the catalog, not the overview');
 assert.match(filtered,/studioV3BookGridList/);
 const empty=show({studioNovelTypeFilter:'web_novel'}).html;
 assert.match(empty,/No encontramos obras con esos filtros/);
