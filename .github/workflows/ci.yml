@@ -27,6 +27,8 @@ jobs:
         run: node scripts/studio-phase2-check.mjs
       - name: Studio phase 3 editorial dashboard regression
         run: node scripts/studio-phase3-check.mjs
+      - name: Studio phase 4 work and editor regression
+        run: node scripts/studio-phase4-check.mjs
       - run: npm run build
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs
