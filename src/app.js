@@ -966,7 +966,7 @@ function studioProjectView(){const P=S.studioProject;if(!P)return `${nav()}<main
   <div class="linkPanel"><h3>⬇ Descargas</h3><p class="muted">Archivos alojados externamente por el equipo.</p><div class="field"><label>Volumen</label><select id="downloadVolume">${(P.volumes||[]).map(v=>`<option value="${v.id}" ${S.studioEditVolumeId===v.id?'selected':''}>Vol. ${esc(v.volume_number)}${v.title?` · ${esc(v.title)}`:''}</option>`).join('')}</select></div><div class="field"><label>Formato</label><input id="downloadFormat" placeholder="EPUB, PDF, DOCX"></div><div class="field"><label>Proveedor</label><input id="downloadProvider" placeholder="Drive, MEGA..."></div><div class="field"><label>URL</label><input id="downloadUrl" placeholder="https://..."></div><button class="btn primary" id="addDownloadLink">Agregar descarga</button>${P.download_links?.length?P.download_links.map(l=>`<div class="sectionRow"><a class="link" href="${esc(safeUrl(l.url))}" target="_blank" rel="noopener">${esc((l.format||'Archivo').toUpperCase())}${l.provider?` · ${esc(l.provider)}`:''}</a><button class="btn danger" data-delete-download="${l.id}">Eliminar</button></div>`).join(''):'<div class="muted" style="margin-top:12px">Sin descargas.</div>'}</div>
   <div class="linkPanel"><h3>Vista pública</h3><p class="muted">Los lectores verán estos enlaces separados de la lectura integrada.</p><button class="btn" data-open="${P.id}">Ver ficha pública</button></div>
  </div></main>`}
-function normalizeBlock(b){if(!b||typeof b!=='object')return{type:'paragraph',text:String(b||'')};const type=b.type||'paragraph';if(type==='image')return{type,url:b.url||'',alt:b.alt||'',caption:b.caption||''};if(type==='ruby')return{type,base:b.base||'',reading:b.reading||''};if(type==='separator')return{type};return{type,text:b.text||'',...(b.html?{html:editorialSafeHtml(b.html)}:{})}}
+function normalizeBlock(b){if(!b||typeof b!=='object')return{type:'paragraph',text:String(b||'')};const type=b.type||'paragraph';if(type==='image')return{type,url:b.url||'',alt:b.alt||'',caption:b.caption||''};if(type==='ruby')return{type,base:b.base||'',reading:b.reading||'',...(Number.isInteger(b.epubFamily)&&b.epubFamily>=0&&b.epubFamily<32?{epubFamily:b.epubFamily}:{})};if(type==='separator')return{type};return{type,text:b.text||'',...(b.html?{html:editorialSafeHtml(b.html)}:{})}}
 function blockLabel(type){return({paragraph:'Párrafo',heading:'Título',quote:'Cita',image:'Ilustración',separator:'Separador',translator_note:'Nota traductor',ruby:'Ruby/Furigana'}[type]||type)}
 function blockDiffKey(b){b=normalizeBlock(b);return b.type+'|'+(b.type==='image'?(b.url||'')+'|'+(b.caption||''):b.type==='ruby'?(b.base||'')+'|'+(b.reading||''):(b.text||''))}
 function blockDiff(oldBlocks,currentBlocks){const a=(oldBlocks||[]).map(normalizeBlock),b=(currentBlocks||[]).map(normalizeBlock),m=a.length,n=b.length,dp=Array.from({length:m+1},()=>Array(n+1).fill(0));for(let x=m-1;x>=0;x--)for(let y=n-1;y>=0;y--)dp[x][y]=blockDiffKey(a[x])===blockDiffKey(b[y])?dp[x+1][y+1]+1:Math.max(dp[x+1][y],dp[x][y+1]);const out=[];let x=0,y=0;while(x<m||y<n){if(x<m&&y<n&&blockDiffKey(a[x])===blockDiffKey(b[y])){out.push({kind:'same',old:a[x],current:b[y]});x++;y++}else if(y<n&&(x>=m||dp[x][y+1]>=dp[x+1]?.[y]))out.push({kind:'added',current:b[y++]});else if(x<m)out.push({kind:'removed',old:a[x++]})}for(let k=0;k<out.length-1;k++){if(out[k].kind==='removed'&&out[k+1].kind==='added'&&out[k].old?.type===out[k+1].current?.type){out.splice(k,2,{kind:'changed',old:out[k].old,current:out[k+1].current})}}return out}
@@ -1008,7 +1008,7 @@ function setStudioEditorMode(mode){if(!['paged','blocks'].includes(mode))return;
 function editorialSafeHtml(html){
  const root=document.createElement('div');root.innerHTML=String(html||'');
  const allowed=new Set(['B','STRONG','I','EM','U','S','BR','SPAN']);
- function clean(node){for(const child of [...node.childNodes]){if(child.nodeType===Node.COMMENT_NODE){child.remove();continue}if(child.nodeType!==Node.ELEMENT_NODE)continue;if(!allowed.has(child.tagName)){child.replaceWith(document.createTextNode(child.textContent||''));continue}for(const attr of [...child.attributes])child.removeAttribute(attr.name);clean(child)}}
+ function clean(node){for(const child of [...node.childNodes]){if(child.nodeType===Node.COMMENT_NODE){child.remove();continue}if(child.nodeType!==Node.ELEMENT_NODE)continue;if(!allowed.has(child.tagName)){child.replaceWith(document.createTextNode(child.textContent||''));continue}const font=child.tagName==='SPAN'?child.getAttribute('data-epub-family'):null;for(const attr of [...child.attributes])child.removeAttribute(attr.name);if(font!==null&&/^(?:[0-9]|[12][0-9]|3[01])$/.test(font))child.setAttribute('data-epub-family',font);clean(child)}}
  clean(root);return root.innerHTML
 }
 function pagedChapterHtml(blocks){
@@ -1089,7 +1089,18 @@ function addEditorBlock(type){if(!S.blockEditor)return;const map={paragraph:{typ
 function moveEditorBlock(i,dir){if(!S.blockEditor)return;const j=i+dir;if(j<0||j>=S.blockEditor.blocks.length)return;[S.blockEditor.blocks[i],S.blockEditor.blocks[j]]=[S.blockEditor.blocks[j],S.blockEditor.blocks[i]];render()}
 function deleteEditorBlock(i){if(!S.blockEditor)return;S.blockEditor.blocks.splice(i,1);render()}
 function syncEditorInputs(){if(!S.blockEditor)return;if($('#studioPagedEditable')){serializePagedChapter();return}S.blockEditor.blocks.forEach((b,i)=>{const paged=document.querySelector(`[data-paged-text="${i}"]`);if(paged&&['paragraph','heading','quote','translator_note'].includes(b.type)){b.text=paged.value;return}if(['paragraph','heading','quote','translator_note'].includes(b.type)){const el=document.querySelector(`[data-block-text="${i}"]`);if(el){if(b.text!==el.value)delete b.html;b.text=el.value}}else if(b.type==='image'){const u=document.querySelector(`[data-block-url="${i}"]`),a=document.querySelector(`[data-block-alt="${i}"]`),c=document.querySelector(`[data-block-caption="${i}"]`);if(u)b.url=u.value;if(a)b.alt=a.value;if(c)b.caption=c.value}else if(b.type==='ruby'){const ba=document.querySelector(`[data-block-base="${i}"]`),r=document.querySelector(`[data-block-reading="${i}"]`);if(ba)b.base=ba.value;if(r)b.reading=r.value}})}
-function renderReaderBlock(b){b=normalizeBlock(b);if(b.type==='heading')return `<h2 class="readerHeading">${b.html?editorialSafeHtml(b.html):esc(b.text||'')}</h2>`;if(b.type==='quote')return `<blockquote>${b.html?editorialSafeHtml(b.html):esc(b.text||'')}</blockquote>`;if(b.type==='separator')return '<hr class="readerSceneSeparator" aria-hidden="true">';if(b.type==='translator_note')return `<aside class="translatorNote" aria-label="Nota del traductor"><strong>Nota del traductor</strong><div>${b.html?editorialSafeHtml(b.html):esc(b.text||'')}</div></aside>`;if(b.type==='ruby')return `<p><ruby>${esc(b.base||'')}<rp>(</rp><rt>${esc(b.reading||'')}</rt><rp>)</rp></ruby></p>`;if(b.type==='image'&&b.url){const alt=String(b.alt??'').trim();return `<figure class="readerIllustration"><img src="${esc(safeMediaUrl(b.url))}" data-original-src="${esc(safeUrl(b.url))}" alt="${esc(alt||'Ilustración del capítulo')}" loading="eager" decoding="async">${b.caption?`<figcaption>${esc(b.caption)}</figcaption>`:''}<figcaption class="readerImageFallback" hidden>Esta ilustración no se pudo cargar. <a href="${esc(safeUrl(b.url))}" target="_blank" rel="noopener noreferrer">Abrir imagen original</a></figcaption></figure>`}return `<p>${b.html?editorialSafeHtml(b.html):esc(b.text||'')}</p>`}
+function renderReaderBlock(b){
+ b=normalizeBlock(b);
+ const font=Number.isInteger(b.epubFamily)&&b.epubFamily>=0&&b.epubFamily<32?' data-epub-family="'+b.epubFamily+'"':'';
+ const content=b.html?editorialSafeHtml(b.html):esc(b.text||'');
+ if(b.type==='heading')return '<h2 class="readerHeading"'+font+'>'+content+'</h2>';
+ if(b.type==='quote')return '<blockquote'+font+'>'+content+'</blockquote>';
+ if(b.type==='separator')return '<hr class="readerSceneSeparator" aria-hidden="true">';
+ if(b.type==='translator_note')return '<aside class="translatorNote" aria-label="Nota del traductor"><strong>Nota del traductor</strong><div>'+content+'</div></aside>';
+ if(b.type==='ruby')return '<p'+font+'><ruby>'+esc(b.base||'')+'<rp>(</rp><rt>'+esc(b.reading||'')+'</rt><rp>)</rp></ruby></p>';
+ if(b.type==='image'&&b.url){const alt=String(b.alt??'').trim();return '<figure class="readerIllustration"><img src="'+esc(safeMediaUrl(b.url))+'" data-original-src="'+esc(safeUrl(b.url))+'" alt="'+esc(alt||'Ilustración del capítulo')+'" loading="eager" decoding="async">'+(b.caption?'<figcaption>'+esc(b.caption)+'</figcaption>':'')+'<figcaption class="readerImageFallback" hidden>Esta ilustración no se pudo cargar. <a href="'+esc(safeUrl(b.url))+'" target="_blank" rel="noopener noreferrer">Abrir imagen original</a></figcaption></figure>'}
+ return '<p'+font+'>'+content+'</p>'
+}
 function importSteps(){const order=[['file','Archivo'],['analysis','Análisis'],['structure','Estructura'],['review','Revisión'],['edit','Edición'],['publish','Guardar']],current=order.findIndex(([k])=>k===S.importState.step);return `<aside class="importSteps" aria-label="Progreso de importación">${order.map(([k,label],i)=>`<div class="importStep ${i===current?'active':i<current?'done':''}"${i===current?' aria-current="step"':''}><span class="stepDot" aria-hidden="true">${i<current?'✓':i+1}</span><span>${label}</span></div>`).join('')}</aside>`}
 function studioImport(){if(!S.groups.some(g=>teamCan(g.translator_groups?.id,'import')))return `${nav()}<main class="wrap"><div class="empty"><div class="emptyArt">🔒</div><strong>No tienes permisos para importar</strong><div>La importación requiere rol Owner, Admin, Traductor o Editor.</div><div style="margin-top:12px"><button class="btn" data-v="studio">← Studio</button></div></div></main>`;return `${nav()}<main class="wrap">${status()}<div class="sectionHead"><div><span class="eyebrow" style="color:var(--accent)">Studio · Importador</span><h2>Importar volumen o capítulo</h2><p>Sube tu archivo, verifica los capítulos detectados y decide cuándo publicar.</p></div><button class="btn" data-v="studio">← Studio</button></div><div class="importShell">${importSteps()}<section class="importPanel">${importStepView()}</section></div></main>`}
 function importBlockStats(blocks){const c={paragraph:0,heading:0,quote:0,image:0,separator:0,translator_note:0,ruby:0};(blocks||[]).forEach(b=>{if(c[b.type]!==undefined)c[b.type]++});return c}
@@ -1375,7 +1386,7 @@ function readerSettingsFields(scope,volume=null,selectedKeys=null){
   ['contrast','Contraste',[['standard','Normal'],['high','Alto']]],
   ['images','Ilustraciones',[['show','Mostrar'],['hide','Ocultar']]]
  ];
- if(volume?.epub_fonts?.length){for(let i=0;i<volume.epub_fonts.length&&i<40;i++)definitions[3][2].push(['epub:'+i,'EPUB · '+String(volume.epub_fonts[i].family||'Fuente '+(i+1))])}
+ if(volume?.epub_fonts?.length){for(const [i,family] of epubFontFamilyNames(volume.epub_fonts).entries())definitions[3][2].push(['epub:'+i,'EPUB · '+family])}
  return `<div class="readerScopedFields" aria-label="${scope==='global'?'Opciones globales de lectura':'Opciones individuales del volumen'}">${definitions.filter(([key])=>!selectedKeys||selectedKeys.includes(key)).map(([key,label,options])=>{
   const own=scope==='volume'&&Object.hasOwn(overrides,key),current=scope==='global'?prefs[key]:(own?overrides[key]:'inherit');
   const inherited=key==='mode'?getReaderDefaultMode(id):getReaderDefaultPreferencesForVolume(id)[key];const inheritedLabel=options.find(([value])=>String(value)===String(inherited))?.[1]||String(inherited);const choices=scope==='volume'?[['inherit','Usar predeterminado ('+inheritedLabel+')'],...options]:options;
@@ -1615,7 +1626,7 @@ function readerView(){
  if(!R)return `${nav()}<main class="wrap"><div class="empty"><div class="emptyArt" aria-hidden="true">📖</div><strong>Capítulo no disponible</strong><div style="margin-top:12px"><button class="btn" data-v="library">← Biblioteca</button></div></div></main>`;
  const ns=R.navigation||[],i=ns.findIndex(x=>x.id===R.id),prev=i>0?ns[i-1]:null,next=i>=0&&i<ns.length-1?ns[i+1]:null;
  const theme=S.readerPrefs.theme||'light',width=S.readerPrefs.width||'normal',lineHeight=S.readerPrefs.lineHeight||'comfortable',fontFamily=S.readerPrefs.fontFamily||'original',paragraphSpace=S.readerPrefs.paragraphSpace||'normal';
- const embedded=[...new Set((R.epub_fonts||[]).map(x=>x.family).filter(Boolean))],selectedEpubIndex=fontFamily.startsWith('epub:')?Number(fontFamily.slice(5)):0,activeEpubIndex=fontFamily==='original'?0:selectedEpubIndex,validEpub=Number.isInteger(activeEpubIndex)&&activeEpubIndex>=0&&activeEpubIndex<embedded.length,epubFontCss=validEpub?'\"NLOBI-EPUB-'+activeEpubIndex+'\", Georgia, serif':'Georgia, serif',epubFingerprint=JSON.stringify(R.epub_fonts||[]),embeddedReady=S.epubFontLoaded===epubFingerprint;
+  const embedded=epubFontFamilyNames(R.epub_fonts),preferredFamily=(R.epub_fonts||[]).find(x=>x.primary)?.family||embedded.find(x=>/^(?:Times New Roman|Georgia|Cambria)$/i.test(x))||embedded[0],selectedEpubIndex=fontFamily.startsWith('epub:')?Number(fontFamily.slice(5)):0,activeEpubIndex=fontFamily==='original'?Math.max(0,embedded.indexOf(preferredFamily)):selectedEpubIndex,validEpub=Number.isInteger(activeEpubIndex)&&activeEpubIndex>=0&&activeEpubIndex<embedded.length,epubFontCss=validEpub?'"NLOBI-EPUB-'+activeEpubIndex+'", Georgia, serif':'Georgia, serif',epubFingerprint=JSON.stringify(R.epub_fonts||[]),embeddedReady=S.epubFontLoaded===epubFingerprint&&S.epubFontCount>0;
 
  const continuous=ensureReaderContinuous(),savedVolumePos=readReaderVolumePosition(R.volume_id),nextVolume=ns.slice(i+1).find(ch=>ch.volume_id!==R.volume_id)||null;
  const readingPosition=savedVolumePos&&ns.some(x=>x.id===savedVolumePos.sectionId)?savedVolumePos:readReaderPosition(R.id);
@@ -1643,7 +1654,7 @@ function readerView(){
  </section></details></div></details></div>\n ${fontFamily==='original'&&embedded.length?`<p class="muted readerFontNotice">Fuentes del EPUB: ${embedded.map(esc).join(', ')}</p>`:''}
  <div class="readerReadingTools"><span class="readerChapterIndex">${i>=0&&ns.length?`CAPÍTULO ${i+1} DE ${ns.length}`:'TU LECTURA'}</span><div class="readerReadingActions"><span id="readerProgressLabel" role="status" aria-live="off">0% leído</span><button type="button" class="btn readerBookmarkButton" id="readerBookmark" title="Guardar la posición actual">♧ Guardar punto</button>${readingPosition&&(readingPosition.percent>5&&readingPosition.percent<98||readingPosition.sectionId&&readingPosition.sectionId!==R.id)?`<button type="button" class="btn readerResumeButton" id="readerResume">↳ Retomar lectura · ${Math.round(readingPosition.percent)}%</button>`:''}</div></div>
  <p class="readerKeyboardHint">${continuous?'Lectura continua · los capítulos siguientes se cargarán conforme avances.':'Atajos: Mayús + ← anterior · Mayús + → siguiente.'} · Esc para salir del modo enfoque</p><button type="button" class="readerFocusExit" id="readerFocusExit" aria-label="Salir del modo de concentración">Salir del modo enfoque ✕</button>
- <article class="readerPaper reader-${esc(theme)} reader-${esc(width)} reader-line-${esc(lineHeight)} reader-font-${esc((fontFamily==='original'||fontFamily.startsWith('epub:'))&&validEpub&&embeddedReady?'original':fontFamily.startsWith('epub:')?'serif':fontFamily==='original'?'serif':fontFamily)} reader-space-${esc(paragraphSpace)} reader-indent-${esc(S.readerPrefs.indent||"none")} reader-align-${esc(S.readerPrefs.align||"left")} reader-contrast-${esc(S.readerPrefs.contrast||"standard")} reader-images-${esc(S.readerPrefs.images||"show")}" style="font-size:${Number(S.readerPrefs.fontSize||18)}px;--epub-reader-font:${esc(epubFontCss)}" aria-labelledby="chapterTitle"><div class="readerMeta">${esc(R.novel_title||'El Obi del Lector')}${R.volume_number!=null?` · Vol. ${esc(R.volume_number)}`:''}</div><h1 id="chapterTitle">${esc(R.title||'Capítulo')}</h1><div class="readerChapterDivider" aria-hidden="true"></div>${continuous?`<div id="readerContinuousChapters">${continuous.entries.map((entry,j)=>readerContinuousChapterMarkup(entry,j===0)).join('')}</div><div id="readerContinuousMore" role="status" aria-live="polite" ${continuous.ended?'hidden':''}>Desplázate para continuar al siguiente capítulo.</div>`:(R.content||[]).map(renderReaderBlock).join('')}</article>
+ <article class="readerPaper reader-${esc(theme)} reader-${esc(width)} reader-line-${esc(lineHeight)} reader-font-${esc((fontFamily==='original'||fontFamily.startsWith('epub:'))&&validEpub&&embeddedReady?(fontFamily==='original'?'original':'epub'):fontFamily.startsWith('epub:')?'serif':fontFamily==='original'?'serif':fontFamily)} reader-space-${esc(paragraphSpace)} reader-indent-${esc(S.readerPrefs.indent||"none")} reader-align-${esc(S.readerPrefs.align||"left")} reader-contrast-${esc(S.readerPrefs.contrast||"standard")} reader-images-${esc(S.readerPrefs.images||"show")}" style="font-size:${Number(S.readerPrefs.fontSize||18)}px;--epub-reader-font:${esc(epubFontCss)}" aria-labelledby="chapterTitle"><div class="readerMeta">${esc(R.novel_title||'El Obi del Lector')}${R.volume_number!=null?` · Vol. ${esc(R.volume_number)}`:''}</div><h1 id="chapterTitle">${esc(R.title||'Capítulo')}</h1><div class="readerChapterDivider" aria-hidden="true"></div>${continuous?`<div id="readerContinuousChapters">${continuous.entries.map((entry,j)=>readerContinuousChapterMarkup(entry,j===0)).join('')}</div><div id="readerContinuousMore" role="status" aria-live="polite" ${continuous.ended?'hidden':''}>Desplázate para continuar al siguiente capítulo.</div>`:(R.content||[]).map(renderReaderBlock).join('')}</article>
  <nav class="readerBottom" aria-label="Continuar lectura"><button class="btn" id="markReaderDone" type="button">✓ Marcar como leído</button>${continuous?(nextVolume?`<button class="btn primary" id="finishAndNext" data-next-section="${nextVolume.id}" data-translation="${R.translation_id}" ${continuous.ended?'':'disabled'}>Finalizar volumen y leer el siguiente →</button>`:`<button class="btn primary" id="finishAndReturn" data-translation="${R.translation_id}" ${continuous.ended?'':'disabled'}>✓ Terminar volumen y volver a la obra</button>`):(next?`<button class="btn primary" id="finishAndNext" data-next-section="${next.id}" data-translation="${R.translation_id}">Finalizar y leer siguiente →</button>`:`<button class="btn primary" id="finishAndReturn" data-translation="${R.translation_id}">✓ Finalizar capítulo y volver a la obra</button>`)}</nav>
  </div></main>`;
 }
@@ -1804,12 +1815,32 @@ function selectImportFile(file){if(!file)return;const ext=(file.name.split('.').
 async function inspectZipSafety(file){await loadScriptOnce('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',()=>!!window.JSZip);const zip=await window.JSZip.loadAsync(await file.arrayBuffer()),entries=Object.values(zip.files||{});if(entries.length>MAX_ARCHIVE_ENTRIES)throw new Error('El archivo contiene demasiadas entradas internas.');let total=0;for(const e of entries){const n=Number(e?._data?.uncompressedSize||0);if(Number.isFinite(n)&&n>0){total+=n;if(total>MAX_ARCHIVE_UNCOMPRESSED)throw new Error('El archivo comprimido se expande a más de 300 MB y fue rechazado por seguridad.')}}return zip}
 function loadScriptOnce(src,test){return new Promise((resolve,reject)=>{if(test())return resolve();const sc=document.createElement('script');sc.src=src;sc.async=true;sc.onload=resolve;sc.onerror=()=>reject(new Error('No se pudo cargar la librería requerida.'));document.head.appendChild(sc)})}
 async function analyzeImportFile(){const I=S.importState;if(!I.file)return;I.busy=true;I.message='Analizando…';render();try{let parsed;if(I.type==='docx')parsed=await parseDocxRich(I.file);else if(I.type==='epub')parsed=await parseEpubRich(I.file);else parsed=await parsePdfRich(I.file);I.text=normalizeImportedText(parsed.text);I.parsedBlocks=(parsed.blocks||[]).map(normalizeImportBlock);I.detectedSections=(parsed.sections||[]).map((x,i)=>({...x,section_number:i+1,blocks:(x.blocks||[]).map(normalizeImportBlock),body:x.body||blocksToPlainText(x.blocks||[])}));I.warnings=parsed.warnings||[];I.detectedCover=parsed.cover||'';I.coverSource=parsed.coverSource||'';I.epubFonts=parsed.epubFonts||[];if(!I.text.trim()&&!I.parsedBlocks.length)throw new Error('No se pudo extraer contenido del archivo.');I.step='analysis';I.message='';I.sections=(I.detectedSections?.length?I.detectedSections:detectSectionsRich(I.parsedBlocks,I.text)).map((x,i)=>({...x,section_number:i+1,blocks:(x.blocks||[]).map(normalizeImportBlock),body:x.body||blocksToPlainText(x.blocks||[])}));restoreImportCheckpoint()}catch(e){I.message=friendlyError(e,'No se pudo analizar el archivo.')}finally{I.busy=false;render()}}
-function normalizeImportBlock(b){if(!b||typeof b!=='object')return{type:'paragraph',text:String(b||'')};if(b.type==='image')return{type:'image',url:b.url||'',alt:b.alt||'',caption:b.caption||''};if(b.type==='ruby')return{type:'ruby',base:b.base||'',reading:b.reading||''};if(b.type==='separator')return{type:'separator'};return{type:['heading','quote','translator_note','paragraph'].includes(b.type)?b.type:'paragraph',text:String(b.text||'')}}
+function normalizeImportBlock(b){if(!b||typeof b!=='object')return{type:'paragraph',text:String(b||'')};if(b.type==='image')return{type:'image',url:b.url||'',alt:b.alt||'',caption:b.caption||''};if(b.type==='ruby')return{type:'ruby',base:b.base||'',reading:b.reading||'',...(Number.isInteger(b.epubFamily)&&b.epubFamily>=0&&b.epubFamily<32?{epubFamily:b.epubFamily}:{})};if(b.type==='separator')return{type:'separator'};return{type:['heading','quote','translator_note','paragraph'].includes(b.type)?b.type:'paragraph',text:String(b.text||''),...(b.html?{html:editorialSafeHtml(b.html)}:{})}}
 function importTextBlock(text,type='paragraph'){text=String(text||'').trim();if(!text)return null;if(/^(?:nota del traductor|translator(?:'s)? note|t\/?n)\s*[:：-]\s*/i.test(text))return{type:'translator_note',text:text.replace(/^(?:nota del traductor|translator(?:'s)? note|t\/?n)\s*[:：-]\s*/i,'').trim()};if(/^(\*{3,}|-{3,}|—{3,}|※{3,}|◆{3,}|◇{3,})$/.test(text))return{type:'separator'};return{type,text}}
 function textWithoutRubyAnnotations(node){const clone=node.cloneNode(true);clone.querySelectorAll('rt,rp').forEach(x=>x.remove());return clone.textContent||''}
 function rubyBlock(node){const rt=node.querySelector('rt')?.textContent?.trim()||'';const clone=node.cloneNode(true);clone.querySelectorAll('rt,rp').forEach(x=>x.remove());const base=clone.textContent.trim();return base?{type:'ruby',base,reading:rt}:null}
-function inlineContainerBlocks(node,type='paragraph'){const out=[];let buf='';const flush=()=>{const b=importTextBlock(buf,type);if(b)out.push(b);buf=''};const walk=child=>{if(child.nodeType===Node.TEXT_NODE){buf+=child.textContent||'';return}if(child.nodeType!==Node.ELEMENT_NODE)return;const tag=child.tagName.toLowerCase();if(tag==='ruby'){flush();const b=rubyBlock(child);if(b)out.push(b);return}if(tag==='img'){flush();const src=child.getAttribute('src')||'';if(src)out.push({type:'image',url:src,alt:child.getAttribute('alt')||'',caption:child.getAttribute('title')||''});return}if(tag==='br'){buf+='\n';return}for(const nested of child.childNodes)walk(nested)};for(const child of node.childNodes)walk(child);flush();return out}
-function htmlNodesToBlocks(root){const out=[],selector='h1,h2,h3,h4,h5,h6,p,blockquote,li,pre,div,img,hr,ruby';for(const n of root.querySelectorAll(selector)){const tag=n.tagName.toLowerCase(),parentBlock=n.parentElement?.closest('h1,h2,h3,h4,h5,h6,p,blockquote,li,pre');if(parentBlock&&parentBlock!==n)continue;if(/^h[1-6]$/.test(tag)){const b=importTextBlock(textWithoutRubyAnnotations(n),'heading');if(b)out.push(b)}else if(tag==='p'||tag==='li'||tag==='pre')out.push(...inlineContainerBlocks(n,'paragraph'));else if(tag==='blockquote')out.push(...inlineContainerBlocks(n,'quote'));else if(tag==='div'){if(n.querySelector('h1,h2,h3,h4,h5,h6,p,blockquote,li,pre,div,img,hr,ruby'))continue;const b=importTextBlock(textWithoutRubyAnnotations(n),'paragraph');if(b)out.push(b)}else if(tag==='img'){const src=n.getAttribute('src')||'';if(src)out.push({type:'image',url:src,alt:n.getAttribute('alt')||'',caption:n.getAttribute('title')||''})}else if(tag==='hr')out.push({type:'separator'});else if(tag==='ruby'){const b=rubyBlock(n);if(b)out.push(b)}}return out}
+function inlineContainerBlocks(node,type='paragraph',resolveFont=null){
+ const out=[];let buf='',pieces=[];
+ const flush=()=>{const b=importTextBlock(buf,type);if(b){if(pieces.some(x=>x.includes('data-epub-family')))b.html=editorialSafeHtml(pieces.join(''));out.push(b)}buf='';pieces=[]};
+ const append=(value,element)=>{buf+=value;const index=resolveFont?resolveFont(element):null;pieces.push(Number.isInteger(index)&&index>=0&&index<32?'<span data-epub-family="'+index+'">'+esc(value)+'</span>':esc(value))};
+ const walk=(child,parent)=>{if(child.nodeType===Node.TEXT_NODE){append(child.textContent||'',parent);return}if(child.nodeType!==Node.ELEMENT_NODE)return;const tag=child.tagName.toLowerCase();if(tag==='ruby'){flush();const b=rubyBlock(child);if(b){const font=resolveFont?.(child);if(Number.isInteger(font)&&font>=0&&font<32)b.epubFamily=font;out.push(b)}return}if(tag==='img'){flush();const src=child.getAttribute('src')||'';if(src)out.push({type:'image',url:src,alt:child.getAttribute('alt')||'',caption:child.getAttribute('title')||''});return}if(tag==='br'){buf+='\n';pieces.push('<br>');return}const wrapper={b:'strong',strong:'strong',i:'em',em:'em',u:'u',s:'s'}[tag];const style=child.getAttribute('style')||'';const bold=!wrapper&&/(?:^|;)\s*font-weight\s*:\s*(?:bold|[6-9]00)(?:\s*!important)?\s*(?:;|$)/i.test(style);const italic=!wrapper&&/(?:^|;)\s*font-style\s*:\s*(?:italic|oblique)(?:\s*!important)?\s*(?:;|$)/i.test(style);if(wrapper)pieces.push('<'+wrapper+'>');if(bold)pieces.push('<strong>');if(italic)pieces.push('<em>');for(const nested of child.childNodes)walk(nested,child);if(italic)pieces.push('</em>');if(bold)pieces.push('</strong>');if(wrapper)pieces.push('</'+wrapper+'>')};
+ for(const child of node.childNodes)walk(child,node);flush();return out
+}
+function htmlNodesToBlocks(root,resolveFont=null){
+ const out=[],selector='h1,h2,h3,h4,h5,h6,p,blockquote,li,pre,div,img,hr,ruby';
+ for(const n of root.querySelectorAll(selector)){
+  const tag=n.tagName.toLowerCase(),parentBlock=n.parentElement?.closest('h1,h2,h3,h4,h5,h6,p,blockquote,li,pre');
+  if(parentBlock&&parentBlock!==n)continue;
+  if(/^h[1-6]$/.test(tag))out.push(...inlineContainerBlocks(n,'heading',resolveFont));
+  else if(tag==='p'||tag==='li'||tag==='pre')out.push(...inlineContainerBlocks(n,'paragraph',resolveFont));
+  else if(tag==='blockquote')out.push(...inlineContainerBlocks(n,'quote',resolveFont));
+  else if(tag==='div'){if(n.querySelector('h1,h2,h3,h4,h5,h6,p,blockquote,li,pre,div,img,hr,ruby'))continue;out.push(...inlineContainerBlocks(n,'paragraph',resolveFont))}
+  else if(tag==='img'){const src=n.getAttribute('src')||'';if(src)out.push({type:'image',url:src,alt:n.getAttribute('alt')||'',caption:n.getAttribute('title')||''})}
+  else if(tag==='hr')out.push({type:'separator'});
+  else if(tag==='ruby'){const b=rubyBlock(n);if(b){const font=resolveFont?.(n);if(Number.isInteger(font)&&font>=0&&font<32)b.epubFamily=font;out.push(b)}}
+ }
+ return out
+}
 function blocksToPlainText(blocks){return (blocks||[]).map(b=>{if(b.type==='image')return b.caption?`[Ilustración: ${b.caption}]`:'[Ilustración]';if(b.type==='separator')return'***';if(b.type==='ruby')return b.reading?`${b.base}（${b.reading}）`:b.base;return b.text||''}).filter(Boolean).join('\n\n')}
 async function parseDocxRich(file){await inspectZipSafety(file);await loadScriptOnce('https://cdn.jsdelivr.net/npm/mammoth@1.8.0/mammoth.browser.min.js',()=>!!window.mammoth);const warnings=[];const r=await window.mammoth.convertToHtml({arrayBuffer:await file.arrayBuffer()},{convertImage:window.mammoth.images.imgElement(async image=>{const base64=await image.read('base64');if(base64.length>2000000){warnings.push('Se omitió una imagen DOCX de más de ~1.5 MB para evitar inflar el capítulo.');return{src:''}}return{src:`data:${image.contentType||'image/png'};base64,${base64}`}})});const doc=new DOMParser().parseFromString(`<body>${r.value||''}</body>`,'text/html');doc.querySelectorAll('script,style').forEach(n=>n.remove());const blocks=htmlNodesToBlocks(doc.body);warnings.push(...(r.messages||[]).filter(x=>x.type==='warning').map(x=>x.message).slice(0,8));const firstImage=blocks.findIndex(b=>b.type==='image'&&/^data:image\/(jpeg|png|webp|gif);base64,/.test(b.url||''));const before=firstImage<0?'':blocks.slice(0,firstImage).map(b=>b.text||'').join('').trim();const cover=firstImage>=0&&before.length<120?blocks[firstImage].url:'';return{text:blocksToPlainText(blocks),blocks,warnings,cover,coverSource:cover?'Primera imagen del DOCX':''}}
 function normalizeZipPath(base,rel){rel=String(rel||'').replace(/\\/g,'/');if(/^(?:https?:|data:)/i.test(rel))return rel;const joined=rel.startsWith('/')?rel.slice(1):base+rel,parts=joined.split('/'),out=[];for(const p of parts){if(!p||p==='.')continue;if(p==='..')out.pop();else out.push(p)}return out.join('/')}
@@ -1835,31 +1866,71 @@ function epubTitleMap(zip,opf,base,manifest){
 }
 function isEpubBookTitleSection(title,bookTitle,fileName=''){const clean=v=>importCanonicalText(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9\u3040-\u30ff\u4e00-\u9fff]+/gi,'');const t=clean(title),book=clean(bookTitle),name=clean(fileName);return Boolean(t&&((book&&t===book)||(name&&t===name)))}
 function epubUtilityKind(path,title,blocks){const t=normalizeSectionHeadingText(title||''),p=String(path||'').toLowerCase(),chars=blocksToPlainText(blocks||[]).replace(/\[Ilustración(?::[^\]]+)?\]/g,'').trim().length,images=(blocks||[]).filter(b=>b.type==='image').length;if((/(?:^|\/)(?:nav|toc|contents?)(?:\.|\/|$)/i.test(p)||/^(?:目次|table of contents|contents|índice)$/i.test(t))&&chars<1200)return'skip';if((/(?:^|\/)(?:cover|titlepage)(?:\.|\/|$)/i.test(p)||/^(?:表紙|cover|portada)$/i.test(t))&&chars<300&&images<=2)return'skip';if(/(?:口絵|挿絵|illustrations?|ilustraciones?|gallery)/i.test(t)||/(?:^|\/)(?:illustrations?|gallery)(?:\.|\/|$)/i.test(p))return'illustrations';return'content'}
+function epubFontIndex(family,names){
+ const candidates=[...String(family||'').replace(/!important\s*$/i,'').matchAll(/"([^"]+)"|'([^']+)'|([^,]+)/g)].map(m=>(m[1]||m[2]||m[3]||'').trim());
+ return candidates.map(name=>names.findIndex(x=>x.toLowerCase()===name.toLowerCase())).find(index=>index>=0)??-1
+}
+function epubFontCssResolver(fonts,styles){
+ const names=epubFontFamilyNames(fonts),rules=[];
+ for(const css of styles||[]){
+  const plain=String(css||'').replace(/\/\*[\s\S]*?\*\//g,'').replace(/@font-face\s*\{[^}]*\}/gi,'');
+  for(const m of plain.matchAll(/([^{}]+)\{([^{}]*)\}/g)){
+   const fam=m[2].match(/(?:^|;)\s*font-family\s*:\s*([^;}]*)/i);
+   if(!fam)continue;
+   const index=epubFontIndex(fam[1],names);if(index<0)continue;
+   for(const selector of m[1].split(',')){
+    const clean=selector.trim();if(clean&&!clean.startsWith('@')&&clean.length<=160&&rules.length<400)rules.push({selector:clean,index});
+   }
+  }
+ }
+ const cache=new WeakMap();
+ return element=>{
+  if(!element||element.nodeType!==Node.ELEMENT_NODE)return null;
+  if(cache.has(element))return cache.get(element);
+  let current=element,result=null;
+  while(current&&current.nodeType===Node.ELEMENT_NODE&&result===null){
+   const inline=current.getAttribute('style')?.match(/(?:^|;)\s*font-family\s*:\s*([^;}]*)/i);
+   if(inline){const idx=epubFontIndex(inline[1],names);if(idx>=0){result=idx;break}}
+   for(let i=rules.length-1;i>=0;i--)try{if(current.matches(rules[i].selector)){result=rules[i].index;break}}catch{}
+   current=current.parentElement;
+  }
+  cache.set(element,result);return result
+ }
+}
 async function epubEmbeddedFonts(zip,manifest,opfBase,warnings){
- const cssFiles=Object.values(manifest).filter(x=>/\.css(?:$|[?#])/i.test(x.href||'')||x.mediaType==='text/css');
- const found=[],seen=new Set();
- for(const entry of cssFiles.slice(0,50)){
-  const cssPath=epubHrefKey(opfBase,entry.href),file=zip.file(cssPath);
-  if(!file||Number(file?._data?.uncompressedSize||0)>400000)continue;
-  const css=await file.async('text'),base=cssPath.includes('/')?cssPath.slice(0,cssPath.lastIndexOf('/')+1):'';
-  for(const m of css.matchAll(/@font-face\s*\{([^}]{0,3500})\}/gi)){
-   const body=m[1],family=(body.match(/font-family\s*:\s*["']?([^;"'}]+)["']?\s*(?:;|$)/i)||[])[1]?.trim();
-   const src=(body.match(/src\s*:[^;]*url\(\s*["']?([^"')\s]+)["']?\s*\)/i)||[])[1];
-   if(!src||!family||/^(?:https?:|data:|\/)/i.test(src))continue;
-   const path=epubHrefKey(base,src);
-   if(!/\.(woff2?|ttf|otf)$/i.test(path)||!zip.file(path))continue;
-   if(Number(zip.file(path)?._data?.uncompressedSize||0)>2097152)continue;
+ const declared=Object.values(manifest).filter(x=>/\.css(?:$|[?#])/i.test(x.href||'')||x.mediaType==='text/css').map(x=>epubHrefKey(opfBase,x.href));
+ const candidates=[...new Set([...declared,...Object.keys(zip.files).filter(p=>/\.css$/i.test(p))])];
+ const found=[],seen=new Set(),styles=[];
+ for(const cssPath of candidates.slice(0,80)){
+  const file=zip.file(cssPath);if(!file||Number(file?._data?.uncompressedSize||0)>400000)continue;
+  const css=(await file.async('text')).replace(/\/\*[\s\S]*?\*\//g,'');
+  styles.push(css);
+  const base=cssPath.includes('/')?cssPath.slice(0,cssPath.lastIndexOf('/')+1):'';
+  for(const m of css.matchAll(/@font-face\s*\{([^}]{0,5000})\}/gi)){
+   const body=m[1],familyMatch=body.match(/font-family\s*:\s*(?:"([^"]+)"|'([^']+)'|([^;}]+))/i);
+   const family=(familyMatch?.[1]||familyMatch?.[2]||familyMatch?.[3]||'').trim();
+   if(!family||family.length>100)continue;
+   const urls=[...body.matchAll(/url\(\s*(?:"([^"]+)"|'([^']+)'|([^)\s]+))\s*\)/gi)].map(x=>x[1]||x[2]||x[3]);
+   let path='';
+   for(const url of urls){if(/^(?:https?:|data:|\/)/i.test(url))continue;const candidate=epubHrefKey(base,url);if(/\.(woff2?|ttf|otf)$/i.test(candidate)&&zip.file(candidate)){path=candidate;break}}
+   if(!path||Number(zip.file(path)?._data?.uncompressedSize||0)>2097152)continue;
    const style=(body.match(/font-style\s*:\s*(normal|italic|oblique)/i)||[])[1]?.toLowerCase()||'normal';
    const weight=(body.match(/font-weight\s*:\s*(normal|bold|[1-9]00)/i)||[])[1]?.toLowerCase()||'normal';
    const key=path+'|'+family+'|'+style+'|'+weight;
    if(seen.has(key))continue;seen.add(key);
-   found.push({path,family:family.slice(0,100),style,weight});
+   found.push({path,family,style,weight});
    if(found.length>=32)break;
   }
   if(found.length>=32)break;
  }
- if(found.length)warnings.push('Se detectaron '+found.length+' archivos de fuente de '+new Set(found.map(x=>x.family)).size+' familias en el EPUB.');
- return found
+ const names=epubFontFamilyNames(found),bodyRules=styles.join('\n').replace(/@font-face\s*\{[^}]*\}/gi,'');
+ const preferred=[...bodyRules.matchAll(/(?:^|[{}])\s*((?:html|body|p)(?:\s*,\s*(?:html|body|p))*)\s*\{([^{}]*)\}/gi)]
+  .map(m=>m[2].match(/font-family\s*:\s*([^;}]*)/i)?.[1]).filter(Boolean);
+ const defaultIndex=preferred.map(value=>epubFontIndex(value,names)).find(i=>i>=0);
+ if(defaultIndex!==undefined){const chosen=names[defaultIndex];for(const f of found)if(f.family===chosen)f.primary=true}
+ if(found.length)warnings.push('Se detectaron '+found.length+' archivos de fuente de '+names.length+' familias en el EPUB.');
+ else warnings.push('No se encontraron fuentes incrustadas admitidas (WOFF, WOFF2, TTF u OTF) en las hojas de estilo del EPUB.');
+ return {fonts:found,styles}
 }
 async function uploadEmbeddedEpubFonts(file,descriptors,groupId,volumeId,uploadedPaths){
  if(!descriptors?.length||!file)return[];
@@ -1878,30 +1949,35 @@ async function uploadEmbeddedEpubFonts(file,descriptors,groupId,volumeId,uploade
    if(!response.ok)throw new Error('No se pudo guardar una fuente EPUB ('+response.status+').');
    uploadedPaths.push(path);url=storagePublicUrl(path);paths.set(descriptor.path,url);
   }
-  out.push({family:descriptor.family,style:descriptor.style,weight:descriptor.weight,url});
+  out.push({family:descriptor.family,style:descriptor.style,weight:descriptor.weight,url,...(descriptor.primary?{primary:true}:{})});
  }
  return out
 }
+function epubFontFamilyNames(fonts){return [...new Set((fonts||[]).map(x=>x?.family).filter(Boolean))]}
 async function activateEpubFonts(fonts){
- if(!Array.isArray(fonts)||!('FontFace' in window))return;
- const entries=fonts.filter(x=>x&&typeof x.family==='string'&&typeof x.url==='string');
+ if(!('FontFace' in window))return;
+ const entries=Array.isArray(fonts)?fonts.filter(x=>x&&typeof x.family==='string'&&typeof x.url==='string'):[];
  const fingerprint=JSON.stringify(entries);
  if(S.epubFontLoaded===fingerprint||S.epubFontLoading===fingerprint)return;
  S.epubFontLoading=fingerprint;
  try{
-  const faces=[];
+  const names=epubFontFamilyNames(entries),faces=[],prefix=URL+'/storage/v1/object/public/nlobi-media/';
   for(const item of entries){
-   const clean=safeUrl(item.url),prefix=URL+'/storage/v1/object/public/nlobi-media/';
-   if(!clean.startsWith(prefix))continue;
-   const face=new FontFace('NLOBI-EPUB-'+entries.findIndex(x=>x.family===item.family),'url("'+safeMediaUrl(clean).replace(/["\\]/g,'')+'")',{style:['normal','italic','oblique'].includes(item.style)?item.style:'normal',weight:/^(normal|bold|[1-9]00)$/.test(item.weight||'')?item.weight:'normal'});
+   const clean=safeUrl(item.url),index=names.indexOf(item.family);
+   if(!clean.startsWith(prefix)||index<0)continue;
+   const face=new FontFace('NLOBI-EPUB-'+index,'url("'+safeMediaUrl(clean).replace(/["\\]/g,'')+'")',{style:['normal','italic','oblique'].includes(item.style)?item.style:'normal',weight:/^(normal|bold|[1-9]00)$/.test(item.weight||'')?item.weight:'normal'});
    try{await face.load();faces.push(face)}catch(e){console.warn('No se pudo cargar una variante de fuente EPUB',e)}
   }
   if(S.epubFontFaces)for(const old of S.epubFontFaces)document.fonts.delete(old);
   for(const face of faces)document.fonts.add(face);
-  S.epubFontFaces=faces;S.epubFontLoaded=fingerprint;
-  if(S.readerPrefs.fontFamily==='original'||S.readerPrefs.fontFamily.startsWith('epub:'))render();
+  let style=document.getElementById('nlobiEpubFontStyles');
+  if(!style){style=document.createElement('style');style.id='nlobiEpubFontStyles';document.head.appendChild(style)}
+  style.textContent=names.slice(0,32).map((_,i)=>'.readerPaper.reader-font-original [data-epub-family="'+i+'"]{font-family:"NLOBI-EPUB-'+i+'",Georgia,serif}').join('\n');
+  S.epubFontFaces=faces;S.epubFontCount=faces.length;S.epubFontLoaded=fingerprint;
+  if(S.view.startsWith('reader:'))render();
  }finally{S.epubFontLoading=null}
 }
+
 async function parseEpubRich(file){
  const zip=await inspectZipSafety(file),warnings=[];let paths=[],titles=new Map(),manifest={},bookTitle='',opfBase='';
  const container=zip.file('META-INF/container.xml');
@@ -1920,15 +1996,17 @@ async function parseEpubRich(file){
  let detectedCover='',coverSource='';
  const coverItem=Object.values(manifest).find(x=>String(x.properties).split(/\s+/).includes('cover-image'))||Object.entries(manifest).find(([id,x])=>/cover|portada/i.test(id)&&String(x.mediaType).startsWith('image/'))?.[1];
  if(coverItem?.href){const p=epubHrefKey(opfBase,coverItem.href);const z=zip.file(p);if(z){const mime=coverItem.mediaType||'image/jpeg',buf=await z.async('base64');if(/^image\/(?:jpeg|png|webp|gif)$/.test(mime)&&buf.length<2800000){detectedCover=`data:${mime};base64,${buf}`;coverSource='Metadatos del EPUB'}}}
- const fonts=await epubEmbeddedFonts(zip,manifest,opfBase,warnings);
+ const fontInfo=await epubEmbeddedFonts(zip,manifest,opfBase,warnings),fonts=fontInfo.fonts;
  const pages=[];
  for(const p of paths){
   const f=zip.file(p);if(!f)continue;
   const doc=new DOMParser().parseFromString(await f.async('text'),'text/html');
-  doc.querySelectorAll('script,style,nav').forEach(n=>n.remove());
+  const inlineStyles=[...doc.querySelectorAll('style')].map(n=>n.textContent||'');
+   const resolveFont=epubFontCssResolver(fonts,[...fontInfo.styles,...inlineStyles]);
+   doc.querySelectorAll('script,style,nav').forEach(n=>n.remove());
   const pageBase=p.includes('/')?p.slice(0,p.lastIndexOf('/')+1):'';
   await hydrateEpubImages(doc,zip,pageBase,warnings);
-  const blocks=htmlNodesToBlocks(doc.body);
+  const blocks=htmlNodesToBlocks(doc.body,resolveFont);
   const tocTitle=normalizeImportedText(titles.get(p)||''),docTitle=normalizeImportedText(doc.querySelector('h1,h2,title')?.textContent||'');
   const usefulTitle=tocTitle||(docTitle&&importCanonicalText(docTitle)!==importCanonicalText(bookTitle)?docTitle:'');
   if(!detectedCover){const first=blocks.find(b=>b.type==='image'&&/^data:image\/(jpeg|png|webp|gif);base64,/.test(b.url||''));if(first){detectedCover=first.url;coverSource='Primera imagen del EPUB'}}
@@ -2025,7 +2103,18 @@ function syncImportTarget(){const t=$('#importTranslation'),v=$('#importVolumeNu
 function syncEditedBodies(){$$('[data-sec-body]').forEach(el=>{const i=+el.dataset.secBody,sec=S.importState.sections[i];if(!sec)return;const next=el.value,previous=blocksToPlainText(sec.blocks||[]);sec.body=next;if(next!==previous)sec.blocks=textBlocksPreserveImportedMedia(next,sec.blocks||[])})}
 function syncImportFields(){syncStructureFields();syncImportTarget();syncEditedBodies();saveImportCheckpoint()}
 function textBlocks(body){return String(body||'').split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean).map(x=>importTextBlock(x,'paragraph')).filter(Boolean)}
-function textBlocksPreserveImportedMedia(body,previous=[]){const images=(previous||[]).filter(b=>b.type==='image'),parts=String(body||'').split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);let imageIndex=0;const out=parts.map(x=>{if(/^\[Ilustración(?::[^\]]+)?\]$/i.test(x)&&images[imageIndex])return normalizeImportBlock(images[imageIndex++]);return importTextBlock(x,'paragraph')}).filter(Boolean);if(imageIndex<images.length)out.push(...images.slice(imageIndex).map(normalizeImportBlock));return out}
+function textBlocksPreserveImportedMedia(body,previous=[]){
+ const original=(previous||[]).map(normalizeImportBlock),images=original.filter(b=>b.type==='image'),textual=original.filter(b=>b.type!=='image');
+ const parts=String(body||'').split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);let imageIndex=0,oldCursor=0;
+ const out=parts.map(part=>{
+  if(/^\[Ilustración(?::[^\]]+)?\]$/i.test(part)&&images[imageIndex])return images[imageIndex++];
+  const index=textual.findIndex((block,i)=>i>=oldCursor&&blocksToPlainText([block]).trim()===part);
+  if(index>=0){oldCursor=index+1;return textual[index]}
+  return importTextBlock(part,'paragraph')
+ }).filter(Boolean);
+ if(imageIndex<images.length)out.push(...images.slice(imageIndex));
+ return out
+}
 async function loadStudioData(){if(!S.groups.length){S.studioTranslations=[];return}const ids=S.groups.map(g=>g.translator_groups?.id).filter(Boolean);if(!ids.length)return;S.studioTranslations=await jreqAllRows(`/rest/v1/translations?group_id=in.(${ids.join(',')})&select=id,title,status,language_code,group_id,editorial_mode,novels(id,title,cover_url),volumes(id,status,sections(id)),translator_groups(id,name)&order=updated_at.desc`)||[]}
 function importCanonicalText(v){return normalizeImportedText(String(v||'')).normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim()}
 function importFingerprint(title,blocks){const raw=importCanonicalText(title)+'\n'+importCanonicalText(blocksToPlainText((blocks||[]).map(normalizeImportBlock)));let h=2166136261;for(let i=0;i<raw.length;i++){h^=raw.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)+':'+raw.length}
@@ -2064,7 +2153,7 @@ async function reportComment(id){if(!S.user){go('auth');return}const reason=prom
 function detailFallbackRoute(){const r=S.detailBackRoute;return r&&validRoute(r)&&!r.startsWith('detail:')&&!r.startsWith('reader:')?r:'explore'}
 function goBackFromDetail(){go(detailFallbackRoute())}
 async function openDetail(id){if(S.detailVolumeTranslationId!==id){S.detailVolumeId=null;S.volumeCommentsId=null}S.detailVolumeTranslationId=id;if(!S.view.startsWith('detail:')&&!S.view.startsWith('reader:'))S.detailBackRoute=S.view;try{S.currentDetail=await loadTranslationDetail(id);go('detail:'+id)}catch(e){toast(friendlyError(e),'bad')}}
-async function loadTranslationDetail(id){const rows=await jreq(`/rest/v1/translations?id=eq.${id}&select=id,title,status,language_code,popularity_score,updated_at,novels(id,title,synopsis,cover_url,author_name,genres,tags,demography),translator_groups(id,name,avatar_url,slug,profile_settings,review_required),volumes(id,volume_number,title,status,cover_url,sections(id,title,section_type,section_number,status,sort_order),download_links(id,format,provider,url))&limit=1`);const x=rows?.[0]||null;if(!x||!['active','complete','paused'].includes(x.status))return null;const publicVolumeIds=new Set((x.volumes||[]).filter(v=>v.status==='published').map(v=>v.id));const [purchase,support,downloads]=await Promise.all([jreq(`/rest/v1/purchase_links?novel_id=eq.${x.novels?.id}&is_verified=eq.true&select=id,volume_number,store_name,region,language_code,format,url&order=volume_number.asc`),x.translator_groups?.id?jreq(`/rest/v1/support_links?group_id=eq.${x.translator_groups.id}&select=id,label,url&order=created_at.asc`):Promise.resolve([]),publicVolumeIds.size?jreq(`/rest/v1/download_links?volume_id=in.(${[...publicVolumeIds].join(',')})&select=id,volume_id,format,provider,url&order=created_at.asc`):Promise.resolve([])]);x.links={purchase:purchase||[],support:support||[],downloads:(downloads||[]).filter(l=>publicVolumeIds.has(l.volume_id))};return x}
+async function loadTranslationDetail(id){const rows=await jreq(`/rest/v1/translations?id=eq.${id}&select=id,title,status,language_code,popularity_score,updated_at,novels(id,title,synopsis,cover_url,author_name,genres,tags,demography),translator_groups(id,name,avatar_url,slug,profile_settings,review_required),volumes(id,volume_number,title,status,cover_url,epub_fonts,sections(id,title,section_type,section_number,status,sort_order),download_links(id,format,provider,url))&limit=1`);const x=rows?.[0]||null;if(!x||!['active','complete','paused'].includes(x.status))return null;const publicVolumeIds=new Set((x.volumes||[]).filter(v=>v.status==='published').map(v=>v.id));const [purchase,support,downloads]=await Promise.all([jreq(`/rest/v1/purchase_links?novel_id=eq.${x.novels?.id}&is_verified=eq.true&select=id,volume_number,store_name,region,language_code,format,url&order=volume_number.asc`),x.translator_groups?.id?jreq(`/rest/v1/support_links?group_id=eq.${x.translator_groups.id}&select=id,label,url&order=created_at.asc`):Promise.resolve([]),publicVolumeIds.size?jreq(`/rest/v1/download_links?volume_id=in.(${[...publicVolumeIds].join(',')})&select=id,volume_id,format,provider,url&order=created_at.asc`):Promise.resolve([])]);x.links={purchase:purchase||[],support:support||[],downloads:(downloads||[]).filter(l=>publicVolumeIds.has(l.volume_id))};return x}
 
 async function uploadPersonalBanner(e){try{const file=e.target.files?.[0];if(!file||!S.user)return;const url=await storageUpload(file,`users/${S.user.id}/banner/${mediaStableName('banner',file)}`,true);const input=$('#profileBannerUrl');if(input)input.value=url;const preview=$('#readerBannerPreview');if(preview)preview.style.backgroundImage='url("'+safeCssUrl(url)+'")';toast('Banner subido. Guarda el perfil para aplicarlo.','ok')}catch(error){toast(friendlyError(error),'bad')}}
 async function uploadPersonalAvatar(e){try{const file=e.target.files?.[0];if(!file||!S.user)return;const url=await storageUpload(file,`users/${S.user.id}/avatar/${mediaStableName('avatar',file)}`,true);const input=$('#profileAvatarUrl');if(input)input.value=url;toast('Avatar subido. Guarda el perfil para aplicarlo.','ok')}catch(err){toast(friendlyError(err),'bad')}}
@@ -2480,7 +2569,7 @@ async function loadPublicGroupData(id){
 async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}){
  if(!navigator.onLine){
   const cached=readCachedChapter(sectionId);if(!cached)throw new Error('Este capítulo no está disponible sin conexión todavía.');
-  S.readerSection=cached;S.readerComments=[];S.readerScrollIntent=false;applyReaderPreferencesForVolume(cached.volume_id);return cached
+  S.readerSection=cached;S.readerComments=[];S.readerScrollIntent=false;applyReaderPreferencesForVolume(cached.volume_id);activateEpubFonts(cached.epub_fonts||[]);return cached
  }
  const secRows=await jreq(`/rest/v1/sections?id=eq.${sectionId}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`);
  const sec=secRows?.[0];if(!sec)throw new Error('El capítulo no está disponible.');
@@ -2488,7 +2577,7 @@ async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}
  const vol=volRows?.[0];if(!vol)throw new Error('El volumen no está disponible.');
  const trId=vol.translation_id,tr=await loadTranslationDetail(trId);if(!tr)throw new Error('La obra no está disponible.');
  const navigation=(tr.volumes||[]).filter(v=>v.status==='published').sort((a,b)=>Number(a.volume_number)-Number(b.volume_number)).flatMap(v=>(v.sections||[]).filter(x=>x.status==='published').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(x=>({...x,volume_id:v.id,volume_number:v.volume_number})));
- S.readerSection={...sec,translation_id:trId,volume_number:vol.volume_number,novel_title:tr.novels?.title,translator_groups:tr.translator_groups,navigation,epub_font_url:vol.epub_font_url,epub_font_family:vol.epub_font_family,epub_fonts:vol.epub_fonts?.length?vol.epub_fonts:(vol.epub_font_url?[{url:vol.epub_font_url,family:vol.epub_font_family||'Original',style:'normal',weight:'normal'}]:[])};if(S.readerSection.epub_fonts.length)activateEpubFonts(S.readerSection.epub_fonts);
+ S.readerSection={...sec,translation_id:trId,volume_number:vol.volume_number,novel_title:tr.novels?.title,translator_groups:tr.translator_groups,navigation,epub_font_url:vol.epub_font_url,epub_font_family:vol.epub_font_family,epub_fonts:vol.epub_fonts?.length?vol.epub_fonts:(vol.epub_font_url?[{url:vol.epub_font_url,family:vol.epub_font_family||'Original',style:'normal',weight:'normal'}]:[])};activateEpubFonts(S.readerSection.epub_fonts);
  cacheReaderChapter(S.readerSection);S.readerContinuous=null;S.readerScrollIntent=false;applyReaderPreferencesForVolume(vol.id);
  if(record&&S.user){await recordReadingHistory(sectionId,trId);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(false)),false)}
  return S.readerSection
