@@ -445,11 +445,11 @@ for(const marker of [
  api.setReaderSetting('volume',A,'mode','chapter');check(api.getReaderMode(A)==='chapter'&&api.getReaderMode(B)==='continuous','configuración por volumen no aislada');
  api.setReaderSetting('volume',A,'fontSize',29);check(api.getReaderPreferencesForVolume(A).fontSize===29&&api.getReaderPreferencesForVolume(B).fontSize===18,'fuentes mezcladas entre volúmenes');
  api.setReaderSetting('volume',A,'theme','dark');check(api.getReaderPreferencesForVolume(A).theme==='dark','tema de volumen perdido');
- api.clearReaderVolumeSettings(A);check(api.getReaderMode(A)==='continuous'&&api.getReaderPreferencesForVolume(A).theme==='light','restauración de herencia inválida');
+ api.clearReaderVolumeSettings(A);check(api.getReaderMode(A)==='continuous'&&api.getReaderPreferencesForVolume(A).theme==='sepia','restauración del predeterminado del equipo inválida');
  api.setReaderSetting('volume',A,'mode','chapter');
- S.user={id:'user-qa',user_metadata:{}};api.hydrateReaderSettings();check(api.getReaderMode(A)==='chapter'&&api.getReaderMode(B)==='chapter','preferencias cruzadas entre usuarios');
+ S.user={id:'user-qa',user_metadata:{}};api.hydrateReaderSettings();check(api.getReaderMode(A)==='continuous'&&api.getReaderMode(B)==='chapter','preferencias cruzadas entre usuarios');
  S.user=null;api.hydrateReaderSettings();check(api.getReaderMode(B)==='continuous','preferencias de invitado perdidas');
- storage.set('nlobi_reader_settings_guest','{invalid');check(api.getReaderMode(A)==='chapter','JSON inválido bloquea el lector');
+ storage.set('nlobi_reader_settings_guest','{invalid');check(api.getReaderMode(A)==='continuous','JSON inválido bloquea el lector');
  check(api.readerSettingsFields('global').includes('Lectura continua'),'selector de modo ausente');
 })();
 
