@@ -443,3 +443,43 @@ for(const marker of [
  storage.set('nlobi_reader_settings_guest','{invalid');check(api.getReaderMode(A)==='chapter','JSON inválido bloquea el lector');
  check(api.readerSettingsFields('global').includes('Lectura continua'),'selector de modo ausente');
 })();
+
+
+// Studio: three editorial concepts stay independent and use an RLS-respecting, atomic RPC.
+(function validateEditorialStates(){
+ const migration=fs.readFileSync('supabase/migrations/20261011130000_editorial_three_statuses.sql','utf8');
+ for(const needle of [
+  "add column if not exists sequel_status",
+  "security invoker",
+  "private.is_group_editor(v_group_id)",
+  "private.is_site_admin()",
+  "auth.uid() is null",
+  "update public.novels",
+  "update public.translations",
+  "grant execute on function public.update_editorial_states"
+ ])if(!migration.includes(needle))throw new Error('Estados editoriales: falta restricción o guardado seguro: '+needle);
+ for(const needle of [
+  "id=\"projectNovelStatus\"",
+  "id=\"projectTranslationStatus\"",
+  "id=\"projectSequelStatus\"",
+  "id=\"newNovelStatus\"",
+  "id=\"newTranslationStatus\"",
+  "id=\"newSequelStatus\"",
+  "id=\"studioNovelStatusFilter\"",
+  "id=\"studioSequelStatusFilter\"",
+  "id=\"catalogNovelStatus\"",
+  "id=\"catalogSequelStatus\"",
+  "async function saveEditorialStates(){",
+  "/rest/v1/rpc/update_editorial_states",
+  "novels(id,title,cover_url,status,sequel_status)",
+  "sequelStatus=x.novels?.sequel_status||'unspecified'"
+ ])if(!app.includes(needle))throw new Error('Estados editoriales: falta la interfaz o el contrato: '+needle);
+ const start=app.indexOf('const NOVEL_PUBLICATION_STATES='),end=app.indexOf('function libraryButton(',start);
+ if(start<0||end<=start)throw new Error('Estados editoriales: no se encontraron catálogos');
+ const sandbox={esc:x=>String(x).replace(/[&<>"]/g,'')};
+ vm.runInNewContext(app.slice(start,end)+';globalThis.qaStates={NOVEL_PUBLICATION_STATES,TRANSLATION_EDITORIAL_STATES,SEQUEL_EDITORIAL_STATES,translationStatusLabel,novelStatusLabel,sequelStatusLabel,editorialOptions}',sandbox);
+ const z=sandbox.qaStates;
+ if(z.NOVEL_PUBLICATION_STATES.length!==4||z.TRANSLATION_EDITORIAL_STATES.length!==5||z.SEQUEL_EDITORIAL_STATES.length!==6)throw new Error('Estados editoriales: opciones incompletas');
+ if(z.translationStatusLabel('abandoned')!=='Abandonada'||z.novelStatusLabel('completed')!=='Completada'||z.sequelStatusLabel('unconfirmed')!=='Sin secuela confirmada')throw new Error('Estados editoriales: etiquetas incorrectas');
+ if(!z.editorialOptions(z.SEQUEL_EDITORIAL_STATES,'announced').includes('value="announced" selected'))throw new Error('Estados editoriales: el selector no respeta la opción elegida');
+})();
