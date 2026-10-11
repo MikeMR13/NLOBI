@@ -2919,3 +2919,14 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .readerTeamLink:hover,.teamProfileLink:hover{border-color:var(--accent)}
 .readerTeamLink span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @media(max-width:680px){.readerTeamLink{max-width:110px;padding:5px}.readerTeamLink span{display:none}.readerTeamLink .teamContextLogo{width:25px;height:25px}}
+
+/* Separadores decorativos por equipo: nunca afectan al contenido ni a otras líneas. */
+.readerExperience .readerSceneSeparator{display:block;width:150px;max-width:65%;height:0;margin:2.5em auto;border:0;border-top:1px solid currentColor;opacity:.5;position:relative;overflow:visible;text-align:center}
+.readerExperience.teamSeparator-doble .readerSceneSeparator{border-top:3px double currentColor}
+.readerExperience.teamSeparator-puntos .readerSceneSeparator,
+.readerExperience.teamSeparator-flor .readerSceneSeparator,
+.readerExperience.teamSeparator-asteriscos .readerSceneSeparator{border:0;opacity:.68}
+.readerExperience.teamSeparator-puntos .readerSceneSeparator::after{content:"•  •  •"}
+.readerExperience.teamSeparator-flor .readerSceneSeparator::after{content:"✿"}
+.readerExperience.teamSeparator-asteriscos .readerSceneSeparator::after{content:"*  *  *"}
+.readerExperience .readerSceneSeparator::after{position:absolute;left:0;right:0;top:-.7em;font-size:1.15rem;line-height:1.4;color:inherit}
