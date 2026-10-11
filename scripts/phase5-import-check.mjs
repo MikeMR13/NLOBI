@@ -12,6 +12,16 @@ const p=await c.newPage();
 p.on('pageerror',e=>{failures.push('runtime: '+e.message);console.error('ERROR_PAGE',e.message)});
 await p.goto('http://127.0.0.1:4173/#home',{waitUntil:'domcontentloaded'});
 await p.waitForFunction(()=>!!window.__NLOBI_QA__,null,{timeout:15000});
+const scriptGlob='**/*jszip.min.js';
+await p.route(scriptGlob,route=>route.abort('failed'));
+const probe=fs.readFileSync('/tmp/nlobi-phase5-import/filename-not-chapter.epub');
+const failure=await p.evaluate(async bytes=>{
+ try{await window.__NLOBI_QA__.parseEpub(new File([new Uint8Array(bytes)],'retry.epub'));return null}
+ catch(error){return String(error.message||error)}
+},[...probe]);
+await p.unroute(scriptGlob);
+if(!failure||!/(librer|conexi[oó]n|cargar|timeout)/i.test(failure))failures.push('Failed script did not report a recoverable library error: '+failure);
+
 for(const ext of ['epub','docx','pdf']){
  const filename='filename-not-chapter.'+ext,bytes=fs.readFileSync('/tmp/nlobi-phase5-import/'+filename);
  try{
