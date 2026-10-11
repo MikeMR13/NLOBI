@@ -1694,7 +1694,27 @@ function resetImport(){S.importState={step:'file',file:null,type:'',name:'',text
 const MAX_IMPORT_BYTES=80*1024*1024,MAX_ARCHIVE_ENTRIES=15000,MAX_ARCHIVE_UNCOMPRESSED=300*1024*1024;
 function selectImportFile(file){if(!file)return;const ext=(file.name.split('.').pop()||'').toLowerCase();if(!['docx','epub','pdf'].includes(ext)){toast('Formato no admitido. Usa DOCX, EPUB o PDF.','bad');return}if(file.size>MAX_IMPORT_BYTES){toast('El archivo supera el límite de 80 MB.','bad');return}resetImport();S.importState.file=file;S.importState.name=file.name;S.importState.type=ext;render();analyzeImportFile()}
 async function inspectZipSafety(file){await loadScriptOnce('https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js',()=>!!window.JSZip);const zip=await window.JSZip.loadAsync(await file.arrayBuffer()),entries=Object.values(zip.files||{});if(entries.length>MAX_ARCHIVE_ENTRIES)throw new Error('El archivo contiene demasiadas entradas internas.');let total=0;for(const e of entries){const n=Number(e?._data?.uncompressedSize||0);if(Number.isFinite(n)&&n>0){total+=n;if(total>MAX_ARCHIVE_UNCOMPRESSED)throw new Error('El archivo comprimido se expande a más de 300 MB y fue rechazado por seguridad.')}}return zip}
-function loadScriptOnce(src,test){return new Promise((resolve,reject)=>{if(test())return resolve();const sc=document.createElement('script');sc.src=src;sc.async=true;sc.onload=resolve;sc.onerror=()=>reject(new Error('No se pudo cargar la librería requerida.'));document.head.appendChild(sc)})}
+const importLibraryLoads=new Map();
+function loadScriptOnce(src,test){
+ if(test())return Promise.resolve();
+ if(importLibraryLoads.has(src))return importLibraryLoads.get(src);
+ const load=new Promise((resolve,reject)=>{
+  const sc=document.createElement('script');let settled=false;
+  sc.src=src;sc.async=true;
+  const done=(error)=>{
+   if(settled)return;settled=true;clearTimeout(timer);
+   sc.onload=null;sc.onerror=null;
+   if(error){sc.remove();reject(error)}else resolve();
+  };
+  const timer=setTimeout(()=>done(new Error('La librería de importación tardó demasiado en cargar. Revisa tu conexión y vuelve a intentarlo.')),20000);
+  sc.onload=()=>done(test()?null:new Error('La librería de importación no se inicializó correctamente. Vuelve a intentarlo.'));
+  sc.onerror=()=>done(new Error('No se pudo cargar la librería requerida. Comprueba tu conexión y vuelve a intentarlo.'));
+  document.head.appendChild(sc);
+ });
+ importLibraryLoads.set(src,load);
+ void load.finally(()=>{if(importLibraryLoads.get(src)===load)importLibraryLoads.delete(src)}).catch(()=>{});
+ return load;
+}
 async function analyzeImportFile(){const I=S.importState;if(!I.file)return;I.busy=true;I.message='Analizando…';render();try{let parsed;if(I.type==='docx')parsed=await parseDocxRich(I.file);else if(I.type==='epub')parsed=await parseEpubRich(I.file);else parsed=await parsePdfRich(I.file);I.text=normalizeImportedText(parsed.text);I.parsedBlocks=(parsed.blocks||[]).map(normalizeImportBlock);I.detectedSections=(parsed.sections||[]).map((x,i)=>({...x,section_number:i+1,blocks:(x.blocks||[]).map(normalizeImportBlock),body:x.body||blocksToPlainText(x.blocks||[])}));I.warnings=parsed.warnings||[];I.detectedCover=parsed.cover||'';I.coverSource=parsed.coverSource||'';I.epubFonts=parsed.epubFonts||[];if(!I.text.trim()&&!I.parsedBlocks.length)throw new Error('No se pudo extraer contenido del archivo.');I.step='analysis';I.message='';I.sections=(I.detectedSections?.length?I.detectedSections:detectSectionsRich(I.parsedBlocks,I.text)).map((x,i)=>({...x,section_number:i+1,blocks:(x.blocks||[]).map(normalizeImportBlock),body:x.body||blocksToPlainText(x.blocks||[])}));restoreImportCheckpoint()}catch(e){I.message=friendlyError(e,'No se pudo analizar el archivo.')}finally{I.busy=false;render()}}
 function normalizeImportBlock(b){if(!b||typeof b!=='object')return{type:'paragraph',text:String(b||'')};if(b.type==='image')return{type:'image',url:b.url||'',alt:b.alt||'',caption:b.caption||''};if(b.type==='ruby')return{type:'ruby',base:b.base||'',reading:b.reading||''};if(b.type==='separator')return{type:'separator'};return{type:['heading','quote','translator_note','paragraph'].includes(b.type)?b.type:'paragraph',text:String(b.text||'')}}
 function importTextBlock(text,type='paragraph'){text=String(text||'').trim();if(!text)return null;if(/^(?:nota del traductor|translator(?:'s)? note|t\/?n)\s*[:：-]\s*/i.test(text))return{type:'translator_note',text:text.replace(/^(?:nota del traductor|translator(?:'s)? note|t\/?n)\s*[:：-]\s*/i,'').trim()};if(/^(\*{3,}|-{3,}|—{3,}|※{3,}|◆{3,}|◇{3,})$/.test(text))return{type:'separator'};return{type,text}}
