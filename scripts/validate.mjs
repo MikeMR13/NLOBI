@@ -443,3 +443,34 @@ for(const marker of [
  storage.set('nlobi_reader_settings_guest','{invalid');check(api.getReaderMode(A)==='chapter','JSON inválido bloquea el lector');
  check(api.readerSettingsFields('global').includes('Lectura continua'),'selector de modo ausente');
 })();
+
+
+// Publicar/actualizar un volumen produce un único aviso por operación.
+(function validateVolumeNotificationsAndFeaturedCarousel(){
+ const sql=fs.readFileSync('supabase/migrations/20261011140000_volume_publication_notifications.sql','utf8');
+ for(const needle of [
+  "add column if not exists volume_id",
+  "create or replace function private.notify_volume_activity(",
+  "pg_catalog.txid_current()",
+  "'volume-activity:'",
+  "private.notification_enabled(f.user_id,'new_publications')",
+  "drop trigger if exists trg_notify_section_published",
+  "create trigger trg_notify_volume_activity",
+  "create trigger trg_notify_volume_content_activity",
+  "on conflict do nothing",
+  "and t.status in ('active','complete','paused')"
+ ]) if(!sql.includes(needle))throw new Error('Avisos de volumen: falta regla de emisión segura: '+needle);
+ for(const needle of [
+  "volume_id,section_id,actor_user_id",
+  'data-note-open-volume=',
+  "async function openNotificationVolume(volumeId,translationId)",
+  "function rotateFeaturedBook(nextIndex,manual=false)",
+  "info.innerHTML=featuredInfoMarkup(books[index],true)",
+  "root.querySelectorAll('[data-featured-index]')",
+  "rotateFeaturedBook((S.featuredIndex||0)+1)"
+ ]) if(!app.includes(needle))throw new Error('Avisos o carrusel: falta integración: '+needle);
+ const carousel=app.slice(app.indexOf('function rotateFeaturedBook('),app.indexOf('function home(){'));
+ if(carousel.includes('render()'))throw new Error('Carrusel: vuelve a reconstruir toda la página');
+ if(!css.includes('.homeEditorial .homeFeaturedSlideInfo')||!css.includes('@media(prefers-reduced-motion:reduce)'))
+  throw new Error('Carrusel: faltan los estilos de altura estable y accesibilidad');
+})();
