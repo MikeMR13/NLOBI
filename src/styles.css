@@ -3024,3 +3024,41 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 @media(max-width:760px){.studioV4SectionTools{grid-template-columns:repeat(2,minmax(0,1fr))}.studioV4SectionTools>div:first-child{grid-column:1/-1}.studioV4MetaGrid{grid-template-columns:1fr}.studioV4ProjectNavCount{margin-left:0}}
 @media(max-width:480px){.studioV4ProjectNav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.studioV4ProjectNav button{min-width:0;justify-content:center;padding:9px 8px;font-size:.78rem}.studioV4ProjectNavCount{grid-column:1/-1}.studioV4SectionTools{grid-template-columns:1fr}.studioV4SectionTools>div:first-child{grid-column:1}.studioV4ImportPreview{padding:12px}}
 @media(prefers-reduced-motion:reduce){.studioV4ProjectNav button{transition:none}}
+
+/* Studio phase 5: team-based editorial workspace */
+.studioV5{max-width:1260px}
+.studioV5Header{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;margin:24px 0}
+.studioV5Header h1{font-size:clamp(2rem,4vw,3.4rem);letter-spacing:-.05em;margin:4px 0;font-weight:900}
+.studioV5Header p{max-width:650px;color:var(--muted);margin:0}
+.studioV5Stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}
+.studioV5Stats>div{border:1px solid var(--line);background:var(--panel);border-radius:16px;padding:20px;min-width:0;box-shadow:var(--shadow2)}
+.studioV5Stats strong{display:block;font-weight:900;font-size:clamp(1.6rem,3vw,2.4rem);font-variant-numeric:tabular-nums;line-height:1.1}
+.studioV5Stats span{display:block;color:var(--muted);font-size:.88rem;margin-top:7px}
+.studioV5Filters{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 22px;padding:13px 16px;border:1px solid var(--line);background:var(--panel2);border-radius:15px}
+.studioV5Filters label{display:grid;gap:5px;font-size:.84rem;font-weight:700;min-width:min(100%,200px)}
+.studioV5Filters select{width:100%}
+.studioV5Grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(290px,1fr);align-items:start;gap:20px}
+.studioV5Grid>div{min-width:0}
+.studioV5Panel{min-width:0;background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:clamp(16px,2.4vw,26px);margin-bottom:20px;box-shadow:var(--shadow2)}
+.studioV5Panel>h2{font-size:1.25rem;margin:0 0 16px;letter-spacing:-.03em}
+.studioV5Panel>p.muted{font-size:.9rem}
+.studioV5Item{border:1px solid var(--line);background:var(--panel2);border-radius:13px;padding:17px;margin-top:12px;display:grid;grid-template-columns:minmax(0,1fr);gap:12px;overflow-wrap:anywhere}
+.studioV5Item h3{font-size:1.03rem;margin:10px 0 6px}
+.studioV5Item p{margin:7px 0;font-size:.91rem}
+.studioV5Actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.studioV5Actions select{max-width:100%;min-width:145px}
+.studioV5Actions textarea{flex:1 1 100%;min-width:0}
+.studioV5Timeline{padding:0;list-style:none;display:grid;gap:0}
+.studioV5Timeline li{position:relative;display:flex;flex-direction:column;gap:5px;padding:12px 0 12px 18px;border-left:2px solid var(--accent);margin-left:5px;min-width:0;overflow-wrap:anywhere}
+.studioV5Timeline li:before{content:'';position:absolute;top:17px;left:-6px;background:var(--accent);border:2px solid var(--panel);width:10px;height:10px;border-radius:50%}
+.studioV5Timeline time{font-size:.78rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.studioV5Timeline strong{font-size:.9rem}
+.studioV5Timeline .btn{align-self:start;margin-top:4px}
+.studioV5Form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:16px 0}
+.studioV5Form label{min-width:0;display:grid;gap:7px;font-size:.88rem;font-weight:700}
+.studioV5Form input,.studioV5Form select,.studioV5Form textarea{width:100%;min-width:0}
+.studioV5Wide{grid-column:1/-1}
+.studioV5 :is(button,input,select,textarea):focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media(max-width:850px){.studioV5Grid{grid-template-columns:minmax(0,1fr)}.studioV5Stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:480px){.studioV5Stats{gap:9px}.studioV5Stats>div{padding:14px}.studioV5Filters{padding:12px}.studioV5Filters label{width:100%}.studioV5Form{grid-template-columns:minmax(0,1fr)}.studioV5Panel{padding:15px}}
+@media(prefers-reduced-motion:reduce){.studioV5 *{scroll-behavior:auto!important;transition:none!important}}
