@@ -2292,7 +2292,20 @@ async function deletePurchaseLink(id){try{await jreq(`/rest/v1/purchase_links?id
 async function addDownloadLink(){try{const P=S.studioProject,volume_id=$('#downloadVolume')?.value,format=$('#downloadFormat')?.value.trim(),url=$('#downloadUrl')?.value.trim();if(!P||!volume_id||!format||!url){toast('Completa volumen, formato y URL.','bad');return}if(safeUrl(url)==='#'){toast('La URL no es válida.','bad');return}await jreq('/rest/v1/download_links',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({volume_id,format,provider:$('#downloadProvider')?.value.trim()||null,url:safeUrl(url)})});await refreshStudioProject();toast('Descarga agregada.','ok')}catch(e){toast(friendlyError(e),'bad')}}
 async function deleteDownloadLink(id){try{await jreq(`/rest/v1/download_links?id=eq.${id}`,{method:'DELETE',headers:{Prefer:'return=minimal'}});await refreshStudioProject();toast('Descarga eliminada.','ok')}catch(e){toast(friendlyError(e),'bad')}}
 async function openStudioProject(id){try{S.studioProject=await loadStudioProject(id);go('studio:project:'+id)}catch(e){toast(friendlyError(e),'bad')}}
-async function loadStudioProject(id){const rows=await jreq(`/rest/v1/translations?id=eq.${id}&select=id,title,status,language_code,group_id,editorial_mode,auto_status_source_volume_id,novels(id,title,title_original,synopsis,cover_url,author_name,genres,tags,demography,novel_type),translator_groups(id,name,avatar_url,review_required),volumes(id,volume_number,title,status,cover_url,is_final_volume,final_translation_status,sections(id,title,section_type,section_number,status,sort_order,content,updated_at))&limit=1`);const p=rows?.[0]||null;if(!p)return null;const volumeIds=(p.volumes||[]).map(v=>v.id);const sectionIds=(p.volumes||[]).flatMap(v=>(v.sections||[]).map(sec=>sec.id));const [purchase,downloads,schedules,reviews,reviewMembers]=await Promise.all([jreq(`/rest/v1/purchase_links?novel_id=eq.${p.novels?.id}&group_id=eq.${p.group_id}&select=id,volume_number,store_name,region,language_code,format,url,is_verified&order=created_at.asc`),volumeIds.length?jreq(`/rest/v1/download_links?volume_id=in.(${volumeIds.join(',')})&select=id,volume_id,format,provider,url&order=created_at.asc`):Promise.resolve([]),volumeIds.length?jreq(`/rest/v1/volume_publication_schedule?volume_id=in.(${volumeIds.join(',')})&status=in.(pending,failed)&select=id,volume_id,scheduled_at,status,error_message&order=scheduled_at.asc`):Promise.resolve([]),sectionIds.length?jreq(`/rest/v1/editorial_review_requests?section_id=in.(${sectionIds.join(',')})&select=id,section_id,group_id,requested_by,assigned_to,status,request_note,review_note,reviewed_by,created_at,reviewed_at&order=created_at.desc&limit=500`):Promise.resolve([]),jreq(`/rest/v1/group_members?group_id=eq.${p.group_id}&select=user_id,role,permissions,profiles(id,username,display_name)`)]);p.purchase_links=purchase||[];p.download_links=downloads||[];p.publication_schedules=schedules||[];p.review_requests=reviews||[];p.review_members=reviewMembers||[];try{p.publication_events=await jreq(`/rest/v1/editorial_publication_events?translation_id=eq.${encodeURIComponent(p.id)}&select=id,actor_user_id,event_type,summary,created_at,volume_id,section_id,schedule_id&order=created_at.desc&limit=100`)||[]}catch(e){p.publication_events=[];p.publication_events_unavailable=true;console.warn('[Studio] Historial editorial no disponible',e)}return p}
+async function loadStudioProject(id){
+ const base='/rest/v1/translations?id=eq.'+encodeURIComponent(id);
+ const required=',novels(id,title,title_original,synopsis,cover_url,author_name,genres,tags,demography,novel_type),translator_groups(id,name,avatar_url,review_required)';
+ const sections='sections(id,title,section_type,section_number,status,sort_order,content,updated_at)';
+ const full=base+'&select=id,title,status,language_code,group_id,editorial_mode,auto_status_source_volume_id'+required+',volumes(id,volume_number,title,status,cover_url,is_final_volume,final_translation_status,'+sections+')&limit=1';
+ const legacy=base+'&select=id,title,status,language_code,group_id,editorial_mode'+required+',volumes(id,volume_number,title,status,cover_url,'+sections+')&limit=1';
+ let rows,phase2Ready=true;
+ try{rows=await jreq(full)}
+ catch(error){
+  if(!/auto_status_source_volume_id|is_final_volume|final_translation_status|42703|PGRST204|schema cache|column .*does not exist/i.test(String(error?.message||error)))throw error;
+  rows=await jreq(legacy);phase2Ready=false;
+ }
+ const p=rows?.[0]||null;if(!p)return null;
+ p.studioPhase2Ready=phase2Ready;const volumeIds=(p.volumes||[]).map(v=>v.id);const sectionIds=(p.volumes||[]).flatMap(v=>(v.sections||[]).map(sec=>sec.id));const [purchase,downloads,schedules,reviews,reviewMembers]=await Promise.all([jreq(`/rest/v1/purchase_links?novel_id=eq.${p.novels?.id}&group_id=eq.${p.group_id}&select=id,volume_number,store_name,region,language_code,format,url,is_verified&order=created_at.asc`),volumeIds.length?jreq(`/rest/v1/download_links?volume_id=in.(${volumeIds.join(',')})&select=id,volume_id,format,provider,url&order=created_at.asc`):Promise.resolve([]),volumeIds.length?jreq(`/rest/v1/volume_publication_schedule?volume_id=in.(${volumeIds.join(',')})&status=in.(pending,failed)&select=id,volume_id,scheduled_at,status,error_message&order=scheduled_at.asc`):Promise.resolve([]),sectionIds.length?jreq(`/rest/v1/editorial_review_requests?section_id=in.(${sectionIds.join(',')})&select=id,section_id,group_id,requested_by,assigned_to,status,request_note,review_note,reviewed_by,created_at,reviewed_at&order=created_at.desc&limit=500`):Promise.resolve([]),jreq(`/rest/v1/group_members?group_id=eq.${p.group_id}&select=user_id,role,permissions,profiles(id,username,display_name)`)]);p.purchase_links=purchase||[];p.download_links=downloads||[];p.publication_schedules=schedules||[];p.review_requests=reviews||[];p.review_members=reviewMembers||[];try{p.publication_events=await jreq(`/rest/v1/editorial_publication_events?translation_id=eq.${encodeURIComponent(p.id)}&select=id,actor_user_id,event_type,summary,created_at,volume_id,section_id,schedule_id&order=created_at.desc&limit=100`)||[]}catch(e){p.publication_events=[];p.publication_events_unavailable=true;console.warn('[Studio] Historial editorial no disponible',e)}return p}
 async function refreshStudioProject(){if(!S.studioProject?.id)return;S.studioProject=await loadStudioProject(S.studioProject.id);render()}
 
 const NOVEL_GENRES=["Acción","Aventura","Artes marciales","Ciencia ficción","Comedia","Crimen","Deportes","Drama","Ecchi","Escolar","Fantasía","Fantasía oscura","Harem","Histórico","Horror","Isekai","Josei","Maduro","Mecha","Misterio","Música","Psicológico","Recuentos de la vida","Reencarnación","Romance","Seinen","Shōjo","Shōnen","Sobrenatural","Supervivencia","Suspenso","Terror","Tragedia","Videojuegos","Villana","Yuri","Yaoi"];
@@ -2344,7 +2357,33 @@ function bindNovelGenrePickers(){
 }
 function novelDemographyPicker(id,current=''){return `<select id="${id}" required><option value="">Seleccionar demografía</option>${NOVEL_DEMOGRAPHICS.map(d=>`<option value="${esc(d)}" ${d===current?'selected':''}>${esc(d)}</option>`).join('')}</select>`}
 function splitMetaList(v){return [...new Set(String(v||'').split(',').map(x=>x.trim()).filter(Boolean).slice(0,30))]}
-async function saveTranslationStatus(){const P=S.studioProject;if(!P||!teamCan(P.group_id,'edit')){toast('No tienes permiso para cambiar el estado.','bad');return}const status=$('#projectTranslationStatus')?.value;if(!TRANSLATION_STATUS_OPTIONS.some(([k])=>k===status)){toast('Estado inválido.','bad');return}try{await jreq('/rest/v1/translations?id=eq.'+P.id,{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({status,auto_status_source_volume_id:null,auto_status_previous_status:null,updated_at:new Date().toISOString()})});await refreshStudioProject();await loadStudioData();await loadCatalog();toast('Estado de traducción actualizado.','ok')}catch(e){toast(friendlyError(e,'No se pudo actualizar el estado.'),'bad')}}
+async function saveTranslationStatus(){
+ const P=S.studioProject,select=$('#projectTranslationStatus'),button=$('#saveTranslationStatus');
+ if(!P||!teamCan(P.group_id,'edit')){toast('No tienes permiso para editar el estado de esta obra.','bad');return}
+ const next=select?.value;
+ if(!TRANSLATION_STATUS_OPTIONS.some(([key])=>key===next)){toast('Selecciona un estado válido.','bad');return}
+ if(next===P.status){toast('La novela ya tiene este estado.','ok');return}
+ if(P.studioPhase2Ready===false&&['awaiting_sequel','no_sequel_confirmed'].includes(next)){
+  toast('Este estado requiere la migración de Studio Fase 2 en Supabase.','bad');return;
+ }
+ if(button)button.disabled=true;
+ try{
+  const body={status:next,updated_at:new Date().toISOString()};
+  if(P.studioPhase2Ready!==false){body.auto_status_source_volume_id=null;body.auto_status_previous_status=null}
+  const saved=await jreq('/rest/v1/translations?id=eq.'+encodeURIComponent(P.id)+'&select=id,status',{
+   method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify(body)
+  });
+  if(!Array.isArray(saved)||saved.length!==1||saved[0].id!==P.id||saved[0].status!==next){
+   throw new Error('El servidor no confirmó el cambio. Comprueba los permisos de edición del equipo.');
+  }
+  await Promise.all([loadStudioData(),loadCatalog()]);
+  await refreshStudioProject();
+  toast('Estado actualizado a «'+translationStatusLabel(next)+'».','ok');
+ }catch(error){
+  if(select?.isConnected)select.value=P.status;
+  toast(friendlyError(error,'No se pudo guardar el estado. Comprueba permisos y migraciones de Supabase.'),'bad');
+ }finally{if(button?.isConnected)button.disabled=!teamCan(P.group_id,'edit')}
+}
 async function saveDiscoveryMeta(){try{const P=S.studioProject;if(!P?.novels?.id)return;const title=$('#projectTitle')?.value.trim(),genres=selectedNovelGenres('projectGenres'),demography=$('#projectDemography')?.value,novel_type=$('#projectNovelType')?.value,title_original=$('#projectOriginalTitle')?.value.trim()||null,author_name=$('#projectAuthor')?.value.trim()||null,synopsis=$('#projectSynopsis')?.value.trim()||null,tags=splitMetaList($('#projectTags')?.value);if(!title||!genres.length||!demography||!NOVEL_TYPE_OPTIONS.some(([k])=>k===novel_type)){toast('Completa título, tipo de obra, géneros y demografía.','bad');return}if(title!==(P.novels?.title||P.title||''))await jreq('/rest/v1/rpc/update_translation_project_title',{method:'POST',body:JSON.stringify({p_translation_id:P.id,p_title:title})});await jreq(`/rest/v1/novels?id=eq.${P.novels.id}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({genres,tags,demography,novel_type,title_original,author_name,synopsis,updated_at:new Date().toISOString()})});await refreshStudioProject();await loadStudioData();await loadCatalog();toast('Información de la obra actualizada.','ok')}catch(e){toast(friendlyError(e),'bad')}}
 function slugify(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,90)||'obra'}
 async function createStudioProject(){let uploadedCoverPath=null;try{const group_id=$('#newGroup')?.value,title=$('#newNovelTitle')?.value.trim(),novel_type=$('#newNovelType')?.value,translation_status=$('#newTranslationStatus')?.value,title_original=$('#newNovelOriginal')?.value.trim()||null,author_name=$('#newNovelAuthor')?.value.trim()||null,synopsis=$('#newNovelSynopsis')?.value.trim()||null,genres=selectedNovelGenres('newNovelGenres'),demography=$('#newNovelDemography')?.value,tags=splitMetaList($('#newNovelTags')?.value),language_code=$('#newTranslationLanguage')?.value.trim()||'es';let cover_url=$('#newNovelCover')?.value.trim()||null;const coverFile=$('#newNovelCoverFile')?.files?.[0];if(!group_id||!title||!genres.length||!demography||!NOVEL_TYPE_OPTIONS.some(([k])=>k===novel_type)||!TRANSLATION_STATUS_OPTIONS.some(([k])=>k===translation_status)){toast('Completa el equipo, título, tipo de obra, estado, géneros y demografía.','bad');return}if(!isCurrentGroupEditor(group_id)){toast('Tu rol no puede crear proyectos en ese equipo.','bad');return}if(coverFile){uploadedCoverPath=`teams/${group_id}/covers/${storageName('cover',coverFile)}`;cover_url=await uploadOptimizedCover(coverFile,uploadedCoverPath,false)}const rows=await jreq('/rest/v1/rpc/create_translation_project_with_metadata',{method:'POST',body:JSON.stringify({p_group_id:group_id,p_title:title,p_title_original:title_original,p_author_name:author_name,p_synopsis:synopsis,p_cover_url:cover_url,p_genres:genres,p_tags:tags,p_language_code:language_code,p_novel_type:novel_type,p_translation_status:translation_status})});const t=rows?.[0];if(!t?.translation_id)throw new Error('No se pudo crear el proyecto.');await jreq('/rest/v1/novels?id=eq.'+t.novel_id,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({demography})});await loadStudioData();S.studioProject=await loadStudioProject(t.translation_id);go('studio:project:'+t.translation_id);toast('Proyecto creado.','ok')}catch(e){if(uploadedCoverPath)try{await storageDelete(uploadedCoverPath)}catch{}toast(friendlyError(e),'bad')}}
@@ -2455,7 +2494,28 @@ async function saveStudioSection(){
 }
 async function moveStudioSection(id,dir){try{const P=S.studioProject;if(!P)return;for(const v of P.volumes||[]){const arr=(v.sections||[]).slice().sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));const i=arr.findIndex(x=>x.id===id);if(i<0)continue;const j=i+dir;if(j<0||j>=arr.length)return;const a=arr[i],b=arr[j],ao=a.sort_order??i+1,bo=b.sort_order??j+1;await Promise.all([jreq(`/rest/v1/sections?id=eq.${a.id}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({sort_order:bo})}),jreq(`/rest/v1/sections?id=eq.${b.id}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({sort_order:ao})})]);await refreshStudioProject();toast('Orden actualizado.','ok');return}}catch(e){toast(friendlyError(e),'bad')}}
 
-async function setEditorialMode(enabled){try{const P=S.studioProject;if(!P)return;await jreq(`/rest/v1/translations?id=eq.${P.id}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({editorial_mode:!!enabled,updated_at:new Date().toISOString()})});S.revisionHistory=[];S.revisionPreview=null;await refreshStudioProject();toast(enabled?'Flujo editorial activado.':'Flujo editorial desactivado.','ok')}catch(e){toast(friendlyError(e),'bad')}}
+async function setEditorialMode(enabled){
+ const P=S.studioProject,select=$('#projectEditorialMode'),button=$('#saveEditorialMode');
+ if(!P||!teamCan(P.group_id,'edit')){toast('No tienes permiso para configurar el flujo editorial de esta obra.','bad');return}
+ const previous=!!P.editorial_mode;
+ if(enabled===previous){toast('El flujo editorial ya utiliza este modo.','ok');return}
+ if(button)button.disabled=true;
+ try{
+  const saved=await jreq('/rest/v1/translations?id=eq.'+encodeURIComponent(P.id)+'&select=id,editorial_mode',{
+   method:'PATCH',headers:{Prefer:'return=representation'},
+   body:JSON.stringify({editorial_mode:!!enabled,updated_at:new Date().toISOString()})
+  });
+  if(!Array.isArray(saved)||saved.length!==1||saved[0].id!==P.id||saved[0].editorial_mode!==!!enabled){
+   throw new Error('El servidor no confirmó el flujo editorial. Revisa los permisos del equipo.');
+  }
+  S.revisionHistory=[];S.revisionPreview=null;
+  await refreshStudioProject();await loadStudioData();
+  toast(enabled?'Modo editorial avanzado activado.':'Modo editorial básico activado.','ok');
+ }catch(error){
+  if(select?.isConnected)select.value=previous?'advanced':'simple';
+  toast(friendlyError(error,'No se pudo ajustar el flujo editorial.'),'bad');
+ }finally{if(button?.isConnected)button.disabled=!teamCan(P.group_id,'edit')}
+}
 async function loadRevisionHistory(sectionId){try{const sec=S.studioProject?.volumes?.flatMap(v=>v.sections||[]).find(x=>x.id===sectionId);if(!sec)return;S.studioProject.editingSection=JSON.parse(JSON.stringify(sec));S.blockEditor={sectionId:sec.id,blocks:(sec.content||[]).map(normalizeBlock)};S.revisionHistory=await jreq(`/rest/v1/section_revisions?section_id=eq.${sectionId}&select=id,title,section_type,content,revision_note,created_at,profiles(id,username,display_name)&order=created_at.desc&limit=50`)||[];S.revisionPreview=null;render()}catch(e){toast(friendlyError(e),'bad')}}
 function previewEditingSection(){syncEditorInputs();S.revisionPreview={mode:'preview',title:$('#editSectionTitle')?.value||S.studioProject?.editingSection?.title||'',content:(S.blockEditor?.blocks||[]).map(normalizeBlock)};render()}
 function previewStoredSection(id){const sec=S.studioProject?.volumes?.flatMap(v=>v.sections||[]).find(x=>x.id===id);if(!sec)return;S.revisionHistory=[];S.studioProject.editingSection=JSON.parse(JSON.stringify(sec));S.blockEditor={sectionId:sec.id,blocks:(sec.content||[]).map(normalizeBlock)};S.editorSavedSnapshot=studioEditorSnapshot(sec.title,sec.section_type,sec.content);S.revisionPreview={mode:'preview',title:sec.title,content:sec.content||[]};render()}
