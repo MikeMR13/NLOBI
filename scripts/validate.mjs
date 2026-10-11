@@ -265,7 +265,7 @@ for (const fragment of [
   "jreqAllRows(\`/rest/v1/library_entries?user_id=eq.\${uid}",
   "jreqAllRows(\`/rest/v1/reading_progress?user_id=eq.\${uid}",
   "jreqAllRows('/rest/v1/read_sections?user_id=eq.'+uid",
-  "S.studioTranslations=await jreqAllRows("
+  "const ownedRequest=jreqAllRows("
 ]) {
   if (!app.includes(fragment)) throw new Error("Data pagination: falta " + fragment);
 }
