@@ -49,7 +49,7 @@ begin
    raise exception 'Proyecto no disponible'
      using errcode = 'P0002';
  end if;
- if not (private.is_group_editor(v_group_id) or private.is_site_admin()) then
+ if not (private.team_action_allowed(v_group_id,'edit') or private.is_site_admin()) then
    raise exception 'No tienes permiso para cambiar los estados de este proyecto'
      using errcode = '42501';
  end if;
@@ -119,3 +119,5 @@ drop trigger if exists team_guard_translations on public.translations;
 create trigger team_guard_translations
 before insert or update or delete on public.translations
 for each row execute function private.translation_editorial_content_guard();
+
+revoke all on function private.translation_editorial_content_guard() from public, anon, authenticated;
