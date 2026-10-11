@@ -495,3 +495,41 @@ for(const marker of [
  for(const marker of ['id="teamReaderLogoFile"','data-team-setting="reader_logo_url"','data-team-setting="reader_logo_width"','async function uploadTeamReaderLogo(','cfg.reader_logo_url||group.avatar_url','teamReaderBrandImage'])if(!app.includes(marker))throw new Error('Logo lector: falta '+marker);
  for(const marker of ['.readerTeamLink .teamReaderBrandImage','object-fit:contain','.teamReaderLogoPreview'])if(!css.includes(marker))throw new Error('Logo lector: falta CSS '+marker);
 }
+
+// Behavioral tests: team reader save does not overwrite unrelated profile fields.
+{
+ const from=app.indexOf('async function saveTeamReaderCustom(){'),to=app.indexOf('async function sendTeamJoinRequest(){',from);
+ if(from<0||to<from)throw new Error('Lector QA: no se puede aislar guardar equipo.');
+ const inputs=[
+  {dataset:{teamSetting:'reader_logo_url'},type:'url',value:'https://example.com/reader.png'},
+  {dataset:{teamSetting:'reader_logo_width'},type:'range',value:'144'},
+  {dataset:{teamSetting:'reader_default_theme'},type:'select-one',value:'sepia'},
+  {dataset:{teamSetting:'show_reader_logo'},type:'checkbox',checked:true}
+ ];
+ const saveBtn={disabled:false,isConnected:true},panel={querySelectorAll:()=>inputs};
+ const saved=[],toasts=[],team={id:'group-test',profile_settings:{unrelated:'kept',reader_default_mode:'chapter'}},S={studioTeam:team,currentDetail:null,publicGroup:null};
+ const sandbox={
+  S,$:selector=>selector==='#saveTeamReaderCustom'?saveBtn:selector==='#teamPanel-reader'?panel:null,
+  isCurrentGroupManager:()=>true,teamSettings:g=>g.profile_settings,
+  READER_DEFAULTS:{theme:'light'},
+  readerSanitizeSetting:(key,v)=>key==='fontSize'?Number(v):String(v),
+  safeUrl:url=>url,refreshStudioTeam:async()=>{},
+  jreq:async(path,options)=>saved.push({path,options}),
+  toast:(message,type)=>toasts.push({message,type}),friendlyError:e=>e.message,console
+ };
+ vm.runInNewContext(app.slice(from,to)+';globalThis.qaSave=saveTeamReaderCustom',sandbox);
+ await sandbox.qaSave();
+ if(saved.length!==1)throw new Error('Lector QA: guardar no hizo exactamente un PATCH.');
+ const payload=JSON.parse(saved[0].options.body).profile_settings;
+ if(saved[0].options.method!=='PATCH'||payload.unrelated!=='kept'||payload.reader_logo_width!==144||payload.reader_default_theme!=='sepia'||payload.show_reader_logo!==true||!toasts.some(t=>t.type==='ok'))throw new Error('Lector QA: persistencia independiente incompleta.');
+}
+{
+ const from=app.indexOf('function teamLinkedLogo(group,context){'),to=app.indexOf('function detailView(){',from);
+ const sandbox={teamSettings:g=>g.profile_settings||{},safeMediaUrl:x=>x,esc:x=>String(x)};
+ vm.runInNewContext(app.slice(from,to)+';globalThis.qaLogo=teamLinkedLogo;globalThis.qaBrand=teamBrandLinkContent',sandbox);
+ const team={id:'g',name:'Ejemplo',avatar_url:'https://example.com/avatar.jpg',profile_settings:{reader_logo_url:'https://example.com/reader.png',reader_logo_width:200}};
+ const brand=sandbox.qaLogo(team,'reader');
+ if(!brand.includes('reader.png')||brand.includes('avatar.jpg')||!brand.includes('200px')||!brand.includes('teamReaderBrandImage'))throw new Error('Logo QA: PNG propio no tiene prioridad o tamaño.');
+ if(sandbox.qaLogo({...team,profile_settings:{show_reader_logo:false}},'reader')!=='')throw new Error('Logo QA: fallo al ocultar imagen.');
+ if(!sandbox.qaBrand({...team,avatar_url:null,profile_settings:{}},'reader').includes('Equipo: Ejemplo'))throw new Error('Logo QA: falta alternativa sin imagen.');
+}
