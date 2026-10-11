@@ -741,24 +741,103 @@ async function optimizeExistingStudioCovers(button){
  }catch(e){toast(friendlyError(e,'No se pudieron optimizar las portadas'),'bad')}
  finally{button.disabled=false;button.textContent='Optimizar portadas antiguas'}
 }
+function studioWorkspaceSidebar(){
+ const canCreate=S.groups.some(g=>teamCan(g.translator_groups?.id,'create'));
+ const canImport=S.groups.some(g=>teamCan(g.translator_groups?.id,'import'));
+ return `<aside class="studioV3Sidebar" aria-label="Navegación de Studio">
+   <div class="studioV3Brand"><span class="studioV3BrandMark" aria-hidden="true">オ</span><div><strong>STUDIO</strong><small>El Obi del Lector</small></div></div>
+   <div class="studioV3NavBlock"><span class="studioV3NavLabel">ESPACIO EDITORIAL</span>
+    <button class="studioV3NavItem active" type="button" data-studio-jump="studioOverview" aria-current="page"><span aria-hidden="true">▦</span> Resumen</button>
+    <button class="studioV3NavItem" type="button" data-studio-jump="studioCatalog"><span aria-hidden="true">▤</span> Mis obras</button>
+    <button class="studioV3NavItem" type="button" data-v="studio:teams"><span aria-hidden="true">♙</span> Equipos</button>
+   </div>
+   <div class="studioV3NavBlock"><span class="studioV3NavLabel">HERRAMIENTAS</span>
+    ${canCreate?'<button class="studioV3NavItem" type="button" data-v="studio:new"><span aria-hidden="true">＋</span> Crear obra</button>':''}
+    ${canImport?'<button class="studioV3NavItem" type="button" data-v="studio:import"><span aria-hidden="true">⇧</span> Importar contenido</button>':''}
+    ${S.groups.map(g=>{const id=g.translator_groups?.id;return id?`<button class="studioV3NavItem" type="button" data-v="studio:media:${id}"><span aria-hidden="true">▧</span> Multimedia · ${esc(g.translator_groups?.name||'Equipo')}</button>`:''}).join('')}
+   </div>
+   <div class="studioV3SidebarFoot"><span class="studioV3RoleDot" aria-hidden="true"></span>${S.groups.length} ${S.groups.length===1?'equipo conectado':'equipos conectados'}<small>Los permisos se respetan por equipo y acción.</small></div>
+ </aside>`;
+}
+function studioContextNav(){
+ const canCreate=S.groups.some(g=>teamCan(g.translator_groups?.id,'create'));
+ const canImport=S.groups.some(g=>teamCan(g.translator_groups?.id,'import'));
+ return `<nav class="studioV3ContextNav" aria-label="Navegación editorial"><button class="btn" data-v="studio" type="button">▦ Panel Studio</button><button class="btn" data-v="studio:teams" type="button">♙ Equipos</button>${canCreate?'<button class="btn" data-v="studio:new" type="button">＋ Nueva obra</button>':''}${canImport?'<button class="btn" data-v="studio:import" type="button">⇧ Importar</button>':''}</nav>`;
+}
 function studio(){
- if(!S.groups.length)return `${nav()}<main class="wrap"><div class="empty"><strong>Studio todavía no está habilitado</strong><div>Necesitas pertenecer a un equipo traductor aprobado.</div></div></main>`;
- if(S.view==='studio:import')return studioImport();
- if(S.view==='studio:new')return studioNewProject();
- if(S.view==='studio:teams')return studioTeamsManagement();
- if(S.view.startsWith('studio:media:'))return studioMediaView();
- if(S.view.startsWith('studio:team:'))return studioTeamView();
- if(S.view.startsWith('studio:project:'))return studioProjectView();
- const canEdit=editorialGroups().some(g=>teamCan(g.translator_groups?.id,'create')||teamCan(g.translator_groups?.id,'import')),projects=S.studioTranslations||[];
- const countVolumes=projects.reduce((n,p)=>n+(p.volumes||[]).length,0),countChapters=projects.reduce((n,p)=>n+(p.volumes||[]).reduce((a,v)=>a+(v.sections||[]).length,0),0),drafts=projects.filter(p=>p.status!=='active'&&p.status!=='complete').length;
- const search=(S.studioProjectSearch||'').toLowerCase().trim(),filter=S.studioProjectFilter||'all';
- const visible=projects.filter(p=>(filter==='all'||p.status===filter)&&(!search||(p.novels?.title||p.title||'').toLowerCase().includes(search)||(p.translator_groups?.name||'').toLowerCase().includes(search)));
- return `${nav()}<main class="wrap studioWrap">${status()}
- <section class="studioHero"><div class="studioHeroCopy"><span class="eyebrow">Panel editorial</span><h1>Tu biblioteca de traducciones</h1><p>Continúa tus obras, revisa los volúmenes y publica nuevos capítulos desde un mismo espacio.</p><div class="studioHeroActions">${canEdit?'<button class="btn primary" data-v="studio:new">+ Crear obra</button><button class="btn" data-v="studio:import">↑ Importar archivo</button><button class="btn" id="optimizeLegacyCovers" type="button" title="Generar WebP de portadas existentes sin borrar los JPG originales">Optimizar portadas antiguas</button>':''}</div></div><div class="studioStats"><div><b>${projects.length}</b><span>Obras</span></div><div><b>${countVolumes}</b><span>Volúmenes</span></div><div><b>${countChapters}</b><span>Capítulos</span></div><div><b>${drafts}</b><span>Por revisar</span></div></div></section>
- ${!canEdit?'<div class="notice">Acceso de consulta: puedes revisar proyectos, pero no modificarlos.</div>':''}
- <div class="studioTeamAccess"><h2>Mis equipos</h2><div class="row">${S.groups.map(g=>`<button class="btn" data-studio-team="${g.translator_groups?.id}">${esc(g.translator_groups?.name||'Equipo')} · ${isCurrentGroupManager(g.translator_groups?.id)?'Administrar roles':'Ver equipo'}</button>`).join('')}</div></div><div class="sectionHead studioSectionHead"><div><h2>Mis obras</h2><p>${visible.length} de ${projects.length} proyectos · Elige una portada para continuar.</p></div><div class="row">${canEdit?'<button class="btn" data-v="studio:import">Importar novela</button>':''}</div></div>
- <div class="studioCatalogToolbar"><label class="srOnly" for="studioProjectSearch">Buscar obras</label><input id="studioProjectSearch" type="search" placeholder="Buscar por título o equipo..." value="${esc(S.studioProjectSearch||'')}"><label class="srOnly" for="studioProjectFilter">Estado</label><select id="studioProjectFilter"><option value="all">Todos los estados</option>${[...TRANSLATION_STATUS_OPTIONS.map(([k])=>k),'withdrawn'].map(st=>`<option value="${st}" ${filter===st?'selected':''}>${esc(translationStatusLabel(st))}</option>`).join('')}</select></div>
- <div class="studioCatalogGrid">${visible.length?visible.map(t=>{const editable=isCurrentGroupEditor(t.group_id),name=t.novels?.title||t.title||'Proyecto sin título',cover=t.novels?.cover_url,safe=cover?safeMediaUrl(cover):'',vol=(t.volumes||[]).length,chap=(t.volumes||[]).reduce((n,v)=>n+(v.sections||[]).length,0);return `<article class="studioBookCard"><div class="studioBookCover">${safe&&safe!=='#'?`<img src="${esc(safe)}" alt="Portada de ${esc(name)}" loading="lazy">`:`<div class="studioBookPlaceholder" aria-hidden="true"><span>オ</span><small>${esc(name)}</small></div>`}<span class="studioCoverStatus">${esc(translationStatusLabel(t.status))}</span></div><div class="studioBookDetails"><div class="studioBookTeam">${esc(t.translator_groups?.name||'Equipo')} · ${esc((t.language_code||'es').toUpperCase())}</div><div class="studioBookMetrics"><span>${esc(novelTypeLabel(t.novels?.novel_type))}</span></div><h3 title="${esc(name)}">${esc(name)}</h3><div class="studioBookMetrics"><span>${vol} volúmenes</span><span>${chap} capítulos</span></div><div class="studioBookActions"><button class="btn primary" data-studio-project="${t.id}">${editable?'Continuar edición':'Ver obra'} →</button>${editable?`<button class="btn" data-v="studio:import" title="Abrir importador">↑ Importar</button>`:''}</div></div></article>`}).join(''):`<div class="empty studioCatalogEmpty"><strong>${projects.length?'Sin resultados':'Todavía no tienes obras'}</strong><div>${projects.length?'Prueba otra búsqueda o cambia el estado.':'Crea tu primera obra o importa capítulos para empezar.'}</div>${canEdit?'<button class="btn primary" data-v="studio:new">+ Crear obra</button>':''}</div>`}</div></main>`
+ if(!S.groups.length)return `${nav()}<main class="wrap studioV3 studioV3Empty"><section class="studioV3Start"><span class="studioV3Kicker">STUDIO / EQUIPOS</span><h1>Tu espacio editorial empieza con un equipo</h1><p>Necesitas pertenecer a un equipo traductor aprobado para consultar o gestionar sus obras.</p><button class="btn" data-v="application">Solicitar equipo</button></section></main>`;
+ const projects=(S.studioTranslations||[]).slice();
+ const canCreate=S.groups.some(g=>teamCan(g.translator_groups?.id,'create'));
+ const canImport=S.groups.some(g=>teamCan(g.translator_groups?.id,'import'));
+ const canManage=S.groups.some(g=>isCurrentGroupManager(g.translator_groups?.id));
+ const countVolumes=projects.reduce((n,p)=>n+(p.volumes||[]).length,0);
+ const publishedVolumes=projects.reduce((n,p)=>n+(p.volumes||[]).filter(v=>v.status==='published').length,0);
+ const countChapters=projects.reduce((n,p)=>n+(p.volumes||[]).reduce((a,v)=>a+(v.sections||[]).length,0),0);
+ const reviewCount=projects.reduce((n,p)=>n+(p.volumes||[]).reduce((a,v)=>a+(v.sections||[]).filter(sec=>sec.status==='review').length,0),0);
+ const drafts=projects.reduce((n,p)=>n+(p.volumes||[]).reduce((a,v)=>a+(v.sections||[]).filter(sec=>sec.status==='draft').length,0),0);
+ const search=(S.studioProjectSearch||'').toLocaleLowerCase('es').trim();
+ const statusFilter=S.studioProjectFilter||'all';
+ const typeFilter=S.studioNovelTypeFilter||'all';
+ const teamFilter=S.studioTeamFilter||'all';
+ const workflowFilter=S.studioWorkflowFilter||'all';
+ const sort=S.studioProjectSort||'recent';
+ const display=S.studioDisplay==='list'?'list':'grid';
+ const teamList=[...new Map(S.groups.filter(g=>g.translator_groups?.id).map(g=>[g.translator_groups.id,g.translator_groups])).values()];
+ const teamName=id=>teamList.find(g=>g.id===id)?.name||'Equipo';
+ const counts=p=>{const volumes=p.volumes||[];return {volumes:volumes.length,published:volumes.filter(v=>v.status==='published').length,drafts:volumes.reduce((n,v)=>n+(v.sections||[]).filter(sec=>sec.status==='draft').length,0),review:volumes.reduce((n,v)=>n+(v.sections||[]).filter(sec=>sec.status==='review').length,0),chapters:volumes.reduce((n,v)=>n+(v.sections||[]).length,0)}};
+ let visible=projects.filter(p=>{
+  const novel=p.novels||{},data=counts(p);
+  const haystack=[novel.title,p.title,teamName(p.group_id),novel.novel_type&&novelTypeLabel(novel.novel_type)].join(' ').toLocaleLowerCase('es');
+  return (!search||haystack.includes(search))
+   &&(statusFilter==='all'||p.status===statusFilter)
+   &&(typeFilter==='all'||novel.novel_type===typeFilter)
+   &&(teamFilter==='all'||p.group_id===teamFilter)
+   &&(workflowFilter==='all'||(workflowFilter==='review'?data.review>0:workflowFilter==='draft'?data.drafts>0:workflowFilter==='published'?data.published>0:data.volumes===0));
+ });
+ if(sort==='title')visible.sort((a,b)=>(a.novels?.title||a.title||'').localeCompare(b.novels?.title||b.title||'','es'));
+ else if(sort==='chapters')visible.sort((a,b)=>counts(b).chapters-counts(a).chapters||(a.novels?.title||'').localeCompare(b.novels?.title||'','es'));
+ else visible.sort((a,b)=>Date.parse(b.updated_at||0)-Date.parse(a.updated_at||0));
+ const recent=[...projects].sort((a,b)=>Date.parse(b.updated_at||0)-Date.parse(a.updated_at||0)).slice(0,3);
+ const withReviews=projects.filter(p=>counts(p).review>0).slice(0,3);
+ const filtersOn=!!(search||statusFilter!=='all'||typeFilter!=='all'||teamFilter!=='all'||workflowFilter!=='all');
+ const lastChanged=p=>p.updated_at&&Number.isFinite(Date.parse(p.updated_at))?`Actualizada ${esc(new Date(p.updated_at).toLocaleDateString('es-MX',{day:'numeric',month:'short',year:'numeric'}))}`:'Proyecto editorial';
+ const card=t=>{
+  const c=counts(t),name=t.novels?.title||t.title||'Obra sin título',cover=t.novels?.cover_url,safe=cover?safeMediaUrl(cover):'';
+  const canEdit=teamCan(t.group_id,'edit'),canReview=teamCan(t.group_id,'review'),canPublish=teamCan(t.group_id,'publish');
+  const action=canEdit?'Abrir editor':canReview?'Abrir revisiones':canPublish?'Gestionar publicación':'Consultar obra';
+  return `<article class="studioV3BookCard ${display==='list'?'studioV3BookCardList':''}">
+   <div class="studioV3BookCover">${safe&&safe!=='#'?`<img src="${esc(safe)}" alt="Portada de ${esc(name)}" loading="lazy">`:`<div class="studioV3CoverFallback" aria-hidden="true"><span>オ</span><small>EL OBI DEL LECTOR</small></div>`}<span class="studioV3CoverRibbon">${esc(translationStatusLabel(t.status))}</span></div>
+   <div class="studioV3BookBody"><div class="studioV3BookTags"><span>${esc(novelTypeLabel(t.novels?.novel_type))}</span><span>${esc((t.language_code||'es').toUpperCase())}</span></div>
+   <h3>${esc(name)}</h3><p class="studioV3BookTeam">${esc(teamName(t.group_id))}</p>
+   <div class="studioV3BookMetrics"><span><strong>${c.volumes}</strong> vol.</span><span><strong>${c.chapters}</strong> capítulos</span><span><strong>${c.published}</strong> publicados</span></div>
+   <div class="studioV3BookSignals">${c.review?`<span class="studioV3Signal attention">${c.review} en revisión</span>`:''}${c.drafts?`<span class="studioV3Signal">${c.drafts} borradores</span>`:''}${!c.volumes?'<span class="studioV3Signal">Sin volúmenes</span>':''}</div>
+   <div class="studioV3BookFoot"><small>${lastChanged(t)}</small><button class="btn primary" type="button" data-studio-project="${esc(t.id)}" aria-label="${esc(action+' de '+name)}">${esc(action)} →</button></div>
+   </div></article>`;
+ };
+ return `${nav()}<main class="wrap studioWrap studioV3" id="mainContent">${status()}
+ <div class="studioV3PageHeading"><div><span class="studioV3Kicker">EL OBI DEL LECTOR / ESPACIO DE TRABAJO</span><h1>Studio<span aria-hidden="true">.</span></h1><p>Control editorial de tus novelas y equipos, desde el borrador hasta la publicación.</p></div><div class="studioV3HeadingActions">${canCreate?'<button class="btn primary" data-v="studio:new">＋ Crear obra</button>':''}${canImport?'<button class="btn" data-v="studio:import">⇧ Importar</button>':''}</div></div>
+ <div class="studioV3Layout">${studioWorkspaceSidebar()}<div class="studioV3Content">
+  <section class="studioV3Overview" id="studioOverview" aria-labelledby="studioOverviewTitle">
+   <div class="studioV3SectionEyebrow">RESUMEN EDITORIAL</div>
+   <div class="studioV3OverviewHeader"><div><h2 id="studioOverviewTitle">Tu mesa de trabajo</h2><p>Visión general de la actividad que puedes consultar según tus equipos.</p></div><span class="studioV3Date">${esc(new Date().toLocaleDateString('es-MX',{day:'numeric',month:'long',year:'numeric'}))}</span></div>
+   <div class="studioV3StatGrid"><div class="studioV3Stat"><span class="studioV3StatSymbol" aria-hidden="true">▤</span><strong>${projects.length}</strong><span>Obras a tu alcance</span></div><div class="studioV3Stat"><span class="studioV3StatSymbol" aria-hidden="true">▥</span><strong>${publishedVolumes}<small> / ${countVolumes}</small></strong><span>Volúmenes publicados</span></div><div class="studioV3Stat"><span class="studioV3StatSymbol" aria-hidden="true">✎</span><strong>${drafts}</strong><span>Capítulos en borrador</span></div><div class="studioV3Stat"><span class="studioV3StatSymbol" aria-hidden="true">◇</span><strong>${reviewCount}</strong><span>Capítulos en revisión</span></div></div>
+   <div class="studioV3InsightGrid"><section class="studioV3Insight" aria-labelledby="studioContinueTitle"><div class="studioV3InsightHead"><div><span class="studioV3SectionEyebrow">ACCESOS RÁPIDOS</span><h3 id="studioContinueTitle">Continuar trabajando</h3></div><span aria-hidden="true">↗</span></div>${recent.length?`<div class="studioV3QuickList">${recent.map(t=>`<button class="studioV3QuickItem" data-studio-project="${esc(t.id)}" type="button"><span class="studioV3QuickInitial" aria-hidden="true">${esc((t.novels?.title||t.title||'O').slice(0,1).toUpperCase())}</span><span><strong>${esc(t.novels?.title||t.title||'Obra')}</strong><small>${esc(teamName(t.group_id))} · ${esc(translationStatusLabel(t.status))}</small></span><span aria-hidden="true">→</span></button>`).join('')}</div>`:'<p class="studioV3InsightEmpty">Tus próximas obras aparecerán aquí.</p>'}</section>
+   <section class="studioV3Insight" aria-labelledby="studioReviewsTitle"><div class="studioV3InsightHead"><div><span class="studioV3SectionEyebrow">CONTROL DE CALIDAD</span><h3 id="studioReviewsTitle">En revisión editorial</h3></div><span aria-hidden="true">◇</span></div>${withReviews.length?`<div class="studioV3QuickList">${withReviews.map(t=>`<button class="studioV3QuickItem" data-studio-project="${esc(t.id)}" type="button"><span class="studioV3QuickInitial studioV3ReviewInitial" aria-hidden="true">✓</span><span><strong>${esc(t.novels?.title||t.title||'Obra')}</strong><small>${counts(t).review} ${counts(t).review===1?'capítulo en revisión':'capítulos en revisión'}</small></span><span aria-hidden="true">→</span></button>`).join('')}</div>`:'<p class="studioV3InsightEmpty">No hay capítulos marcados como «En revisión» en tus obras.</p>'}</section></div>
+  </section>
+  <section class="studioV3TeamSection" aria-labelledby="studioTeamsTitle"><div class="studioV3SmallHead"><div><span class="studioV3SectionEyebrow">COLABORACIÓN</span><h2 id="studioTeamsTitle">Equipos de traducción</h2></div><button class="btn" data-v="studio:teams">Gestionar equipos →</button></div><div class="studioV3TeamList">${teamList.map(g=>`<button type="button" data-studio-team="${esc(g.id)}"><span aria-hidden="true" class="studioV3TeamIcon">オ</span><span><strong>${esc(g.name||'Equipo')}</strong><small>${isCurrentGroupManager(g.id)?'Administrar equipo':teamCan(g.id,'review')?'Revisión y colaboración':'Consultar equipo'}</small></span><span aria-hidden="true">↗</span></button>`).join('')}</div></section>
+  <section class="studioV3CatalogSection" id="studioCatalog" aria-labelledby="studioCatalogTitle">
+   <div class="studioV3SmallHead"><div><span class="studioV3SectionEyebrow">BIBLIOTECA EDITORIAL</span><h2 id="studioCatalogTitle">Mis obras <span class="studioV3CatalogNumber">${visible.length} / ${projects.length}</span></h2><p>Explora y administra tus proyectos. Los filtros no cambian su estado ni publicación.</p></div><div class="studioV3ViewSwitch" role="group" aria-label="Vista de las obras"><button type="button" class="${display==='grid'?'selected':''}" data-studio-display="grid" aria-pressed="${display==='grid'}" aria-label="Vista de galería">▦</button><button type="button" class="${display==='list'?'selected':''}" data-studio-display="list" aria-pressed="${display==='list'}" aria-label="Vista de lista">☰</button></div></div>
+   <div class="studioV3Filters"><div class="studioV3Search"><label for="studioProjectSearch">Buscar obra</label><input id="studioProjectSearch" type="search" placeholder="Título, equipo o tipo..." value="${esc(S.studioProjectSearch||'')}"></div>
+   <div class="studioV3Filter"><label for="studioProjectFilter">Estado</label><select id="studioProjectFilter"><option value="all">Todos</option>${[...TRANSLATION_STATUS_OPTIONS.map(([k])=>k),'withdrawn'].map(st=>`<option value="${esc(st)}" ${statusFilter===st?'selected':''}>${esc(translationStatusLabel(st))}</option>`).join('')}</select></div>
+   <div class="studioV3Filter"><label for="studioNovelTypeFilter">Tipo de novela</label><select id="studioNovelTypeFilter"><option value="all">Todos los tipos</option>${NOVEL_TYPE_OPTIONS.map(([k,v])=>`<option value="${k}" ${typeFilter===k?'selected':''}>${esc(v)}</option>`).join('')}</select></div>
+   <div class="studioV3Filter"><label for="studioTeamFilter">Equipo</label><select id="studioTeamFilter"><option value="all">Todos los equipos</option>${teamList.map(g=>`<option value="${esc(g.id)}" ${teamFilter===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select></div>
+   <div class="studioV3Filter"><label for="studioWorkflowFilter">Flujo</label><select id="studioWorkflowFilter"><option value="all">Todos</option><option value="review" ${workflowFilter==='review'?'selected':''}>En revisión</option><option value="draft" ${workflowFilter==='draft'?'selected':''}>Con borradores</option><option value="published" ${workflowFilter==='published'?'selected':''}>Con publicados</option><option value="empty" ${workflowFilter==='empty'?'selected':''}>Sin volúmenes</option></select></div>
+   <div class="studioV3Filter"><label for="studioProjectSort">Ordenar por</label><select id="studioProjectSort"><option value="recent" ${sort==='recent'?'selected':''}>Actividad reciente</option><option value="title" ${sort==='title'?'selected':''}>Título A–Z</option><option value="chapters" ${sort==='chapters'?'selected':''}>Más capítulos</option></select></div></div>
+   <div class="studioV3Results" role="status" aria-live="polite"><span>${visible.length} ${visible.length===1?'obra encontrada':'obras encontradas'} · ${countChapters} capítulos en tus equipos</span>${filtersOn?'<button class="btn" type="button" id="studioResetFilters">Limpiar filtros</button>':''}</div>
+   <div class="studioV3BookGrid ${display==='list'?'studioV3BookGridList':''}">${visible.length?visible.map(card).join(''):`<div class="studioV3NoResults"><span aria-hidden="true">⌕</span><h3>${projects.length?'No encontramos obras con esos filtros':'Tu catálogo todavía está vacío'}</h3><p>${projects.length?'Prueba otro estado, tipo, equipo o término de búsqueda.':'Crea una nueva obra para empezar a organizar tu traducción.'}</p>${filtersOn?'<button type="button" class="btn" id="studioResetFiltersEmpty">Restablecer filtros</button>':canCreate?'<button class="btn primary" data-v="studio:new">＋ Crear obra</button>':''}</div>`}</div>
+  </section>
+  ${canManage?`<details class="studioV3Advanced"><summary>Herramientas avanzadas del equipo</summary><p>Utilidades de mantenimiento. No modifican el contenido editorial ni se ejecutan automáticamente.</p><button class="btn" id="optimizeLegacyCovers" type="button">Optimizar portadas antiguas</button></details>`:''}
+ </div></div></main>`;
 }
 function mediaFolderOf(file){
  const path=file.path,index=S.mediaFolderIndex||[],matches=index.filter(x=>x.paths.has(path));
@@ -1929,7 +2008,7 @@ function syncEditedBodies(){$$('[data-sec-body]').forEach(el=>{const i=+el.datas
 function syncImportFields(){syncStructureFields();syncImportTarget();syncEditedBodies();saveImportCheckpoint()}
 function textBlocks(body){return String(body||'').split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean).map(x=>importTextBlock(x,'paragraph')).filter(Boolean)}
 function textBlocksPreserveImportedMedia(body,previous=[]){const images=(previous||[]).filter(b=>b.type==='image'),parts=String(body||'').split(/\n\s*\n/).map(x=>x.trim()).filter(Boolean);let imageIndex=0;const out=parts.map(x=>{if(/^\[Ilustración(?::[^\]]+)?\]$/i.test(x)&&images[imageIndex])return normalizeImportBlock(images[imageIndex++]);return importTextBlock(x,'paragraph')}).filter(Boolean);if(imageIndex<images.length)out.push(...images.slice(imageIndex).map(normalizeImportBlock));return out}
-async function loadStudioData(){if(!S.groups.length){S.studioTranslations=[];return}const ids=S.groups.map(g=>g.translator_groups?.id).filter(Boolean);if(!ids.length)return;S.studioTranslations=await jreqAllRows(`/rest/v1/translations?group_id=in.(${ids.join(',')})&select=id,title,status,language_code,group_id,editorial_mode,novels(id,title,cover_url,novel_type),volumes(id,status,sections(id)),translator_groups(id,name)&order=updated_at.desc`)||[]}
+async function loadStudioData(){if(!S.groups.length){S.studioTranslations=[];return}const ids=S.groups.map(g=>g.translator_groups?.id).filter(Boolean);if(!ids.length)return;S.studioTranslations=await jreqAllRows(`/rest/v1/translations?group_id=in.(${ids.join(',')})&select=id,title,status,updated_at,language_code,group_id,editorial_mode,novels(id,title,cover_url,novel_type),volumes(id,status,sections(id,status)),translator_groups(id,name)&order=updated_at.desc`)||[]}
 function importCanonicalText(v){return normalizeImportedText(String(v||'')).normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim()}
 function importFingerprint(title,blocks){const raw=importCanonicalText(title)+'\n'+importCanonicalText(blocksToPlainText((blocks||[]).map(normalizeImportBlock)));let h=2166136261;for(let i=0;i<raw.length;i++){h^=raw.charCodeAt(i);h=Math.imul(h,16777619)}return(h>>>0).toString(36)+':'+raw.length}
 async function rollbackImportedPaths(paths){let failed=0;for(const path of [...new Set(paths||[])].reverse())try{await storageDelete(path)}catch{failed++}return failed}
