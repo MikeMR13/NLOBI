@@ -2844,3 +2844,14 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .teamPublicExtras>strong{display:block;font-size:1.2rem;margin-bottom:8px}
 .teamPublicExtras p{white-space:pre-line;overflow-wrap:anywhere}
 @media(max-width:850px){.teamCustomLayout{grid-template-columns:1fr}.teamLivePreview{position:static;grid-row:1}.teamCustomSection{padding:14px}}
+
+
+.teamIdentityHero{--team-accent:#ffd400}
+.teamIdentityHero .teamIdentityBadge{border-color:var(--team-accent)}
+.teamIdentityHero.teamAvatar-redondeado .teamIdentityAvatar,.teamIdentityHero.teamAvatar-redondeado .teamIdentityAvatar img{border-radius:18px}
+.teamIdentityHero.teamAvatar-circular .teamIdentityAvatar,.teamIdentityHero.teamAvatar-circular .teamIdentityAvatar img{border-radius:50%}
+.teamIdentityHero.teamHero-minimalista .teamIdentityBanner{min-height:94px;background-image:none!important}
+.teamIdentityHero.teamHero-centrado .teamIdentityMain{justify-content:center;text-align:center;flex-direction:column}
+.teamIdentityHero.teamHero-centrado .teamIdentityCopy{align-items:center}
+.teamIdentityHero.teamHero-degradado .teamIdentityBanner{background-image:linear-gradient(125deg,var(--team-accent),#121212)!important}
+.teamPublicExtras .teamPublicLinks{display:flex;flex-wrap:wrap;gap:10px;margin-top:15px}
