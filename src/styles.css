@@ -2872,3 +2872,9 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  .studioCollaborationPanel select{max-width:100%}
 }
 @media(prefers-reduced-motion:reduce){.featuredCarouselDot::after{transition:none}}
+
+/* Logos de colaboradores: legibles, sin iconos diminutos ni botones duplicados */
+.collaborationCredit,.teamSingleCredit{display:inline-flex;align-items:center;justify-content:center;min-height:52px;padding:8px 14px;max-width:100%;overflow-wrap:anywhere}
+.collaborationCredit img,.teamSingleCredit img{display:block;max-width:min(200px,55vw);height:auto;max-height:70px;object-fit:contain;object-position:center}
+.collaborationCredits .row{align-items:center;gap:12px}
+@media(max-width:480px){.collaborationCredits .row{align-items:stretch}.collaborationCredit{flex:1 1 100%;min-width:0}.collaborationCredit img{max-width:100%;max-height:64px}}
