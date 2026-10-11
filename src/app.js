@@ -2055,7 +2055,7 @@ function novelDemographyPicker(id,current=''){return `<select id="${id}" require
 function splitMetaList(v){return [...new Set(String(v||'').split(',').map(x=>x.trim()).filter(Boolean).slice(0,30))]}
 async function saveEditorialStates(){
  const p=S.studioProject;
- if(!p||!isCurrentGroupEditor(p.group_id)){toast('No tienes permiso para editar estos estados.','bad');return}
+ if(!p||!teamCan(p.group_id,'edit')){toast('No tienes permiso para modificar estos estados.','bad');return}
  const p_novel_status=$('#projectNovelStatus')?.value,p_translation_status=$('#projectTranslationStatus')?.value,p_sequel_status=$('#projectSequelStatus')?.value;
  if(!NOVEL_PUBLICATION_STATES.some(([id])=>id===p_novel_status)||!TRANSLATION_EDITORIAL_STATES.some(([id])=>id===p_translation_status)||!SEQUEL_EDITORIAL_STATES.some(([id])=>id===p_sequel_status)){toast('Selecciona tres estados válidos.','bad');return}
  const button=$('#saveEditorialStates');
