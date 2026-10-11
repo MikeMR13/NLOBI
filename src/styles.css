@@ -2878,3 +2878,16 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 }
 .homeEditorial .featuredCarouselDot.active:before{width:15px;background:var(--accent);opacity:1}
 @media(prefers-reduced-motion:reduce){.homeEditorial .featuredCarouselDot:before{transition:none}}
+
+/* Indicadores decorativos, controles navegables de 44px y contador sin reflow. */
+.homeEditorial .featuredCarouselArrow{min-width:44px;min-height:44px;width:44px;height:44px}
+.homeEditorial .featuredCarouselDots{display:flex;align-items:center;justify-content:center;flex-wrap:nowrap;gap:3px;overflow:hidden}
+.homeEditorial .featuredCarouselCount{display:inline-block;flex:0 0 auto;white-space:nowrap;color:var(--muted);font-size:.72rem;font-variant-numeric:tabular-nums;margin-left:5px}
+.homeEditorial .featuredCarouselDot,.homeEditorial .featuredCarouselDot.active{
+ display:inline-block;flex:0 0 12px;max-width:none;width:12px;min-width:12px;height:30px;cursor:default
+}
+@media(max-width:640px){
+ .homeEditorial .featuredCarouselDot,.homeEditorial .featuredCarouselDot.active{flex-basis:10px;width:10px;min-width:10px}
+ .homeEditorial .featuredCarouselDots{gap:2px}
+ .homeEditorial .featuredCarouselCount{font-size:.67rem;margin-left:3px}
+}
