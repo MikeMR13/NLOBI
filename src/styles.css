@@ -2873,3 +2873,15 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .teamRecruitAction{margin-top:14px}
 .teamIdentitySlug{text-decoration:none}
 .teamIdentitySlug:hover{text-decoration:underline}
+
+
+.teamLivePreview .teamIdentityHero{margin:14px 0 18px;width:100%;min-width:0}
+.teamLivePreview .teamIdentityBanner{min-height:105px}
+.teamLivePreview .teamIdentityMain{padding:12px}
+.teamLivePreview .teamIdentityCopy h1{font-size:1.2rem}
+.teamLivePreview .teamIdentityAvatar{width:62px;height:62px;flex-shrink:0}
+.teamPublicPage[style*="background-image"]{background-attachment:scroll}
+.teamWorkCard{position:relative;min-width:0;height:100%}
+.teamWorkCard .novelCard{height:100%}
+.teamWorkBadge{position:absolute;right:9px;top:9px;max-width:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;border-radius:7px;padding:5px 9px;color:#141414;background:var(--accent);font-size:.68rem;font-weight:800;box-shadow:0 3px 12px rgba(0,0,0,.14);pointer-events:none}
+.teamWorkLogo{position:absolute;right:11px;bottom:11px;width:30px;height:30px;border-radius:50%;object-fit:cover;background:var(--panel);border:2px solid var(--line);pointer-events:none}
