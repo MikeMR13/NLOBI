@@ -56,7 +56,7 @@ assert.equal(requests.length,4,'Load only needed team-scoped collections');
 for(const req of requests)assert.ok(req.path.includes('group_id=in.('+gid+')'),'Private data must be scoped to authorized groups');
 
 const button={disabled:false,isConnected:true};
-for(const [selector,value] of [['#workNewGroup',gid],['#workNewTitle','Corregir capítulo 4'],['#workNewDetails','Trabajo del equipo'],['#workNewPriority','normal'],['#workNewProject',pid],['#workNewAssignee',uid],['#workNewDue','']])controls.set(selector,{value});
+for(const [selector,value] of [['#workNewGroup',gid],['#workNewTitle','Corregir capítulo 4'],['#workNewDetails','Trabajo del equipo'],['#workNewPriority','normal'],['#workNewProject',pid],['#workNewAssignee',uid],['#workNewDue','']])controls.set(selector,{value,options:[{dataset:{}}],selectedOptions:[{hidden:false}]});
 controls.set('#workCreate',button);
 workspace.bind();assert.equal(typeof button.onclick,'function');
 await button.onclick();
