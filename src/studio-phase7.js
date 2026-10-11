@@ -17,7 +17,7 @@ window.createStudioPhase7=function({
  const projectVolume=(P,id)=>(P?.volumes||[]).find(v=>v.id===id);
  const projectSection=(P,id)=>(P?.volumes||[]).flatMap(v=>(v.sections||[]).map(section=>({section,volume:v}))).find(x=>x.section.id===id);
  const pendingSchedule=(P,id)=>(P?.publication_schedules||[]).filter(s=>s.volume_id===id&&s.status==='pending').sort((a,b)=>Date.parse(a.scheduled_at)-Date.parse(b.scheduled_at));
- const isMember=P=>!!(S.user&&S.groups?.some(g=>g.translator_groups?.id===P?.group_id));
+ const isMember=P=>!!(S.user&&(S.admin||S.groups?.some(g=>g.translator_groups?.id===P?.group_id)));
  const publicationStats=P=>({volumes:(P?.volumes||[]).filter(v=>v.status==='published').length,sections:(P?.volumes||[]).flatMap(v=>v.sections||[]).filter(s=>s.status==='published').length,pending:(P?.publication_schedules||[]).filter(s=>s.status==='pending').length,failed:(P?.publication_schedules||[]).filter(s=>s.status==='failed').length});
  function readiness(P,mode,id){
   const isVolume=mode==='volume'||mode==='schedule';
