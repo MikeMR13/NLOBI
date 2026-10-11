@@ -29,7 +29,8 @@ const sandbox={
  console
 };
 vm.createContext(sandbox);
-vm.runInContext(section('function epubFontFamilyNames','async function uploadEmbeddedEpubFonts'),sandbox);
+vm.runInContext(section('function epubFontFamilyNames','async function parseEpubRich'),sandbox);
+vm.runInContext(section('function epubFontIndex','async function uploadEmbeddedEpubFonts'),sandbox);
 const warnings=[];
 const output=await sandbox.epubEmbeddedFonts(zip,{'style':{href:'css/book.css',mediaType:'text/css'}},'OEBPS/',warnings);
 assert.equal(output.fonts.length,3,'Embedded font variants should all be detected');
