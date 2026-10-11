@@ -2489,6 +2489,8 @@ if(CONFIG.qaMode===true){
   setView(view){S.view=validRoute(view)?view:'home';history.replaceState(null,'','#'+S.view);render()},
   getState(){return S},
   parseEpub(file){return parseEpubRich(file)},
+  parseDocx(file){return parseDocxRich(file)},
+  parsePdf(file){return parsePdfRich(file)},
   mediaUrl(url){return safeMediaUrl(url)},
   detectImportSections(blocks,text=''){return detectSectionsRich(blocks,text)}
  }
