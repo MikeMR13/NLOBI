@@ -21,11 +21,11 @@ const base=[
  {id:'sequel',status:'awaiting_sequel',title:'Próxima obra',group_id:'team1',updated_at:'2026-10-05T13:00:00Z',novels:{title:'Próxima obra',novel_type:'light_novel',genres:['Aventura']},volumes:[{status:'published',sections:[]}]},
  {id:'unconfirmed',status:'no_sequel_confirmed',title:'Sin secuela',group_id:'team2',updated_at:'2026-10-04T13:00:00Z',novels:{title:'Sin secuela',novel_type:'original',genres:['Misterio']},volumes:[]}
 ];
-const functionFactory=new Function('S','nav','status','teamCan','isCurrentGroupManager','isCurrentGroupEditor','safeMediaUrl','esc','novelTypeLabel','translationStatusLabel','TRANSLATION_STATUS_OPTIONS','NOVEL_TYPE_OPTIONS','localStorage',source+';return studio;');
+const functionFactory=new Function('S','nav','status','teamCan','isCurrentGroupManager','isCurrentGroupEditor','safeMediaUrl','esc','novelTypeLabel','translationStatusLabel','novelPublicationStatusLabel','NOVEL_PUBLICATION_STATUS_OPTIONS','TRANSLATION_STATUS_OPTIONS','NOVEL_TYPE_OPTIONS','localStorage',source+';return studio;');
 function show(filters={}){
  const S={groups:[group('team1'),group('team2')],studioTranslations:base, ...filters};
  const fn=functionFactory(S,()=>'<nav></nav>',()=>'',()=>true,()=>true,()=>true,()=>'',esc,
- t=>Object.fromEntries(typeOptions)[t]||t,t=>Object.fromEntries(statusOptions)[t]||t,statusOptions,typeOptions,{getItem:()=>null});
+ t=>Object.fromEntries(typeOptions)[t]||t,t=>Object.fromEntries(statusOptions)[t]||t,t=>({ongoing:'En publicación',completed:'Completada',hiatus:'En pausa',cancelled:'Cancelada'}[t]||'Sin definir'),[['ongoing','En publicación'],['completed','Completada'],['hiatus','En pausa'],['cancelled','Cancelada']],statusOptions,typeOptions,{getItem:()=>null});
  return fn();
 }
 const full=show();
