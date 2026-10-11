@@ -88,6 +88,42 @@ for each row execute function private.clear_manual_translation_final_status();
 
 -- Se ejecuta al PUBLICAR: sirve tanto al botón de Studio como al programador.
 -- Registra el origen y el estado previo para deshacer solo cambios automáticos.
+-- Si el último volumen final se corrige/oculta/elimina, recuperar el final
+-- publicado anterior (si existe) sin anular cambios manuales posteriores.
+create or replace function private.restore_previous_published_final(
+  p_volume_id uuid,p_translation_id uuid,p_final_status text
+)
+returns void language plpgsql security definer set search_path = ''
+as $restore$
+declare
+  tr public.translations%rowtype;
+  fallback_volume public.volumes%rowtype;
+begin
+  select * into tr from public.translations
+  where id=p_translation_id for update;
+  if not found or tr.auto_status_source_volume_id is distinct from p_volume_id then return; end if;
+  select * into fallback_volume
+  from public.volumes
+  where translation_id=p_translation_id
+    and id<>p_volume_id and is_final_volume and status='published'
+  order by published_at desc nulls last,volume_number desc limit 1;
+  update public.translations
+  set status=case
+        when status=p_final_status then coalesce(fallback_volume.final_translation_status,tr.auto_status_previous_status,'active')
+        else status end,
+      auto_status_source_volume_id=case
+        when status=p_final_status then fallback_volume.id
+        else null end,
+      auto_status_previous_status=case
+        when status=p_final_status and fallback_volume.id is not null
+        then tr.auto_status_previous_status else null end,
+      updated_at=now()
+  where id=p_translation_id;
+end;
+$restore$;
+revoke all on function private.restore_previous_published_final(uuid,uuid,text)
+from public,anon,authenticated;
+
 create or replace function private.sync_published_final_volume()
 returns trigger
 language plpgsql security definer set search_path = ''
@@ -97,17 +133,9 @@ declare
 begin
   if tg_op = 'DELETE' then
     if old.is_final_volume and old.status='published' then
-      select * into tr from public.translations where id=old.translation_id for update;
-      if tr.auto_status_source_volume_id=old.id then
-        update public.translations
-        set status=case when status=old.final_translation_status
-                        then coalesce(tr.auto_status_previous_status,'active')
-                        else status end,
-            auto_status_source_volume_id=null,
-            auto_status_previous_status=null,
-            updated_at=now()
-        where id=old.translation_id;
-      end if;
+      perform private.restore_previous_published_final(
+        old.id,old.translation_id,old.final_translation_status
+      );
     end if;
     return old;
   end if;
@@ -132,17 +160,9 @@ begin
     where id=new.translation_id;
   elsif old.status='published' and old.is_final_volume
     and (new.status is distinct from 'published' or not new.is_final_volume) then
-    select * into tr from public.translations where id=new.translation_id for update;
-    if tr.auto_status_source_volume_id=new.id then
-      update public.translations
-      set status=case when status=old.final_translation_status
-                      then coalesce(tr.auto_status_previous_status,'active')
-                      else status end,
-          auto_status_source_volume_id=null,
-          auto_status_previous_status=null,
-          updated_at=now()
-      where id=new.translation_id;
-    end if;
+    perform private.restore_previous_published_final(
+      new.id,new.translation_id,old.final_translation_status
+    );
   end if;
   return new;
 end;
