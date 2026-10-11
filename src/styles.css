@@ -2943,3 +2943,11 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .readerExperience.teamSeparator-libro .readerSceneSeparator::after{content:"❦"}
 .readerExperience.teamSeparator-japones .readerSceneSeparator::after{content:"※"}
 .readerExperience.teamSeparator-invisible .readerSceneSeparator::after{content:"";display:none}
+
+/* Indicador global de navegación y acciones: no bloquea la interfaz. */
+.pageBusyIndicator[hidden]{display:none!important}
+.pageBusyIndicator{position:fixed;z-index:110;top:78px;left:50%;transform:translateX(-50%);display:flex;align-items:center;gap:11px;max-width:calc(100vw - 28px);padding:12px 17px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--text);box-shadow:0 8px 28px rgba(0,0,0,.2);font-size:.88rem;font-weight:700;pointer-events:none}
+.pageBusySpinner{display:block;width:19px;height:19px;flex:0 0 19px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--accent);animation:pageBusySpin .8s linear infinite}
+@keyframes pageBusySpin{to{transform:rotate(360deg)}}
+@media(max-width:767px){.pageBusyIndicator{top:68px;padding:11px 15px;font-size:.82rem}}
+@media(prefers-reduced-motion:reduce){.pageBusySpinner{animation:none;border-color:var(--accent);border-right-color:transparent}}
