@@ -13,7 +13,9 @@ create index if not exists group_join_requests_group_status_idx
   on public.group_join_requests(group_id,status,created_at desc);
 alter table public.group_join_requests enable row level security;
 revoke all on public.group_join_requests from anon, authenticated;
-grant select,insert on public.group_join_requests to authenticated;
+grant select on public.group_join_requests to authenticated;
+grant insert(group_id,user_id,message) on public.group_join_requests to authenticated;
+create index if not exists group_join_requests_user_status_idx on public.group_join_requests(user_id,status);
 grant update(status,reviewed_at) on public.group_join_requests to authenticated;
 create policy "group_join_requests_read" on public.group_join_requests
 for select to authenticated
