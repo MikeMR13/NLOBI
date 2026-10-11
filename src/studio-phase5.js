@@ -9,10 +9,10 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
  const projectByVolume=id=>(S.studioTranslations||[]).find(p=>p.volumes?.some(v=>v.id===id));
  const projectTitle=p=>p?.novels?.title||p?.title||'Obra';
  const date=v=>v?new Date(v).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'}):'—';
- const work={data:null,loading:false,team:'all',status:'open',warning:''};
+ const work={data:null,loading:false,team:'all',status:'open',warning:'',scope:''};
  async function load(){
   if(work.loading)return;
-  const ids=groups().map(g=>g.id);
+  const ids=groups().map(g=>g.id),scope=work.scope;
   work.loading=true;work.warning='';
   try{
    if(!ids.length){work.data={tasks:[],reviews:[],schedule:[],members:[],taskReady:true,errors:[]};return}
@@ -23,14 +23,17 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
     jreq('/rest/v1/volume_publication_schedule?'+q+'&select=id,group_id,volume_id,status,scheduled_at,error_message&status=in.(pending,failed)&order=scheduled_at.asc&limit=200'),
     jreq('/rest/v1/group_members?'+q+'&select=group_id,user_id,role,permissions,profiles(id,username,display_name)')
    ]);
+   if(work.scope!==scope)return; // A different user or team must never receive stale results.
    const get=i=>result[i].status==='fulfilled'?result[i].value||[]:[];
    work.data={tasks:get(0),reviews:get(1),schedule:get(2),members:get(3),taskReady:result[0].status==='fulfilled',errors:result.slice(1).flatMap((r,i)=>r.status==='rejected'?[['revisiones','calendario','miembros'][i]]:[])};
    if(!work.data.taskReady)work.warning='Las tareas necesitan aplicar la migración de Studio Fase 5 en Supabase. El resto de herramientas puede utilizarse por separado.';
-  }catch(e){work.warning=friendlyError(e,'No se pudo cargar el escritorio editorial.')}
-  finally{work.loading=false;if(S.view==='studio:work')render()}
+  }catch(e){if(work.scope===scope)work.warning=friendlyError(e,'No se pudo cargar el escritorio editorial.')}
+  finally{if(work.scope===scope){work.loading=false;if(S.view==='studio:work')render()}}
  }
  function view(){
   const teams=groups();
+  const currentScope=(S.user?.id||'')+':'+teams.map(g=>g.id).sort().join(',');
+  if(work.scope!==currentScope){work.scope=currentScope;work.data=null;work.loading=false;work.warning='';work.team='all';work.status='open'}
   if(!S.user||!teams.length)return `${nav()}<main class="wrap"><div class="notice">Este espacio está reservado a los equipos traductores.</div><button class="btn" data-v="studio">Regresar a Studio</button></main>`;
   if(!work.data&&!work.loading)void load();
   const D=work.data;
