@@ -3192,6 +3192,8 @@ async function loadCatalog(earlyRender=false){
  S.catalog=(catalog||[]).map(x=>({...x,latestPublishedVolume:null}));
  const enrich=async()=>{
   const [volumeResult,sectionResult,teamResult,collaborationResult]=await secondaryResults;
+  // Los datos reales que terminan después de una inyección QA no deben borrar sus fixtures.
+  if(CONFIG.qaMode===true&&qaCatalogFixtureActive)return;
   if(volumeResult.status==='fulfilled'){
    const volumes=volumeResult.value||[];
    S.publishedVolumes=[...new Map(volumes.filter(v=>v.status==='published'&&v.published_at).map(v=>[v.id,v])).values()];

@@ -20,7 +20,7 @@ const candidate=elementAudit?.details?.items?.[0];
 const node=candidate?.node||{};
 const lcpElement={selector:node.selector||'',snippet:String(node.snippet||'').slice(0,420),url:node.nodeLabel||'',resource:candidate?.url||''};
 console.log('LCP diagnostics:',JSON.stringify({metrics,element:lcpElement}));
-for(const key of ['lcp-breakdown-insight','lcp-discovery-insight','render-blocking-resources','network-dependency-tree-insight']){
+for(const key of ['lcp-breakdown-insight','lcp-discovery-insight','render-blocking-resources','network-dependency-tree-insight','cls-culprits-insight','layout-shifts']){
  const audit=audits[key];
  if(audit)console.log('LCP insight '+key+':',JSON.stringify({score:audit.score,displayValue:audit.displayValue,details:audit.details?.items?.slice(0,5)}).slice(0,3200));
 }
