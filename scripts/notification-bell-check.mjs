@@ -73,6 +73,7 @@ try{
   assert.equal(await page.locator('[data-bell-surface="'+surface+'"] .headerNotificationMessage').count(),0,'Recovery clears error');
   await page.locator('[data-bell-surface="'+surface+'"] .headerNotificationAll').click();
   await page.waitForURL('**/#notifications');
+  await page.locator('h1#notificationsTitle').waitFor({state:'visible',timeout:5000});
   assert.equal(await page.locator('h1#notificationsTitle').count(),1,'All notifications button navigates');
   assert.equal(runtime.length,0,'Browser exceptions: '+runtime.join('; '));
   await context.close();
