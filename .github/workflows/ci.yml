@@ -21,6 +21,24 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Studio phase 1 regression
+        run: node scripts/studio-phase1-check.mjs
+      - name: Studio phase 2 regression
+        run: node scripts/studio-phase2-check.mjs
+      - name: Studio phase 3 regression
+        run: node scripts/studio-phase3-check.mjs
+      - name: Studio phase 4 regression
+        run: node scripts/studio-phase4-check.mjs
+      - name: Studio phase 5 regression
+        run: node scripts/studio-phase5-check.mjs
+      - name: Studio phase 6 regression
+        run: node scripts/studio-phase6-check.mjs
+      - name: Studio phase 7 regression
+        run: node scripts/studio-phase7-check.mjs
+      - name: Studio editorial workflow regression
+        run: node scripts/studio-status-workflow-check.mjs
+      - name: Studio original and translation status filters regression
+        run: node scripts/studio-dual-status-check.mjs
       - run: npm run build
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs

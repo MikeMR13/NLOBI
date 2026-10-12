@@ -60,6 +60,10 @@ for (const palette of paletteNames) {
           notes: [],
         }));
         if (viewport.width <= 1100) {
+          if (await page.locator('.mobileNav > summary').count() === 0) {
+            const detail = await page.evaluate(() => ({ view: window.__NLOBI_QA__?.getState().view, content: document.querySelector('#app')?.textContent?.slice(0, 400), header: !!document.querySelector('.top') }));
+            throw new Error('Mobile menu missing after render: ' + JSON.stringify({ detail, errors }));
+          }
           await page.locator('.mobileNav > summary').click();
           await page.waitForFunction(() => document.querySelector('.mobileNav')?.open && document.body.classList.contains('mobileNavOpen'), null, { timeout: 3000 });
         }
