@@ -54,7 +54,7 @@ for(const term of [
  "private.team_action_allowed(group_id,'edit')",
  "to_jsonb(new) - 'status' - 'sequel_status' - 'updated_at'",
  'for responsible in',
- 'with check ('
+ 'with check('
 ]) assert.ok(sql.includes(term),'Missing scoped editorial policy: '+term);
 assert.ok(!sql.includes('grant select, update on public.translations'),
  'Status updates must not open broad anonymous or authenticated privileges');
