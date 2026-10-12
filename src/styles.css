@@ -5229,3 +5229,73 @@ body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.
  .volumeGallery.isListView .volumeEditorialCard .volumeGalleryInfo{padding:10px 12px;gap:7px}
 }
 @media(prefers-reduced-motion:reduce){.volumeGallerySection .volumeEditorialCard,.volumeGalleryProgressFill{transition:none}.volumeGallerySection .volumeEditorialCard:hover{transform:none}}
+
+
+/* Detail phase 3: a volume acts as a book with an index, progress and adjacent navigation. */
+.volumeEditorialOpened{margin:26px 0 42px;scroll-margin-top:100px;min-width:0}
+.volumeOpenedToolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:15px}
+.volumeOpenedToolbar .btn{min-height:43px}
+.volumeOpenedCounter{font-weight:750;font-size:.85rem;color:var(--muted)}
+.volumeEditorialOpened .volumeOpenedHero{grid-template-columns:minmax(110px,170px) minmax(0,1fr);gap:clamp(16px,3vw,28px);padding:clamp(16px,3vw,26px);margin:0 0 16px;align-items:start;box-shadow:var(--shadow2)}
+.volumeEditorialOpened .volumeOpenedCover{width:100%;min-width:0;box-shadow:0 12px 22px rgba(0,0,0,.12)}
+.volumeEditorialOpened .volumeOpenedCover img{object-fit:contain;background:var(--panel2)}
+.volumeOpenedInfo{min-width:0}
+.volumeOpenedEyebrow{display:inline-block;margin:2px 8px 6px 0;font-weight:850;letter-spacing:.08em;text-transform:uppercase;font-size:.72rem;color:var(--accentText)}
+.volumeEditorialOpened .volumeOpenedHero h2{font-family:Georgia,"Times New Roman",serif;line-height:1.2;font-size:clamp(1.35rem,2.6vw,2.25rem);margin:9px 0 12px;overflow-wrap:anywhere}
+.volumeEditorialOpened .volumeOpenedHero p{line-height:1.55;margin:0 0 18px}
+.volumeOpenedProgress{max-width:540px;margin:0 0 20px}
+.volumeOpenedProgressLegend{display:flex;justify-content:space-between;gap:14px;font-size:.83rem;margin-bottom:8px}
+.volumeOpenedProgressLegend strong{color:var(--text)}
+.volumeOpenedProgressLegend span{color:var(--muted);font-variant-numeric:tabular-nums}
+.volumeOpenedProgress progress{display:block;width:100%;height:9px;overflow:hidden;appearance:none;-webkit-appearance:none;border:0;border-radius:99px;background:var(--panel3)}
+.volumeOpenedProgress progress::-webkit-progress-bar{background:var(--panel3);border-radius:99px}
+.volumeOpenedProgress progress::-webkit-progress-value{background:var(--accent);border-radius:99px}
+.volumeOpenedProgress progress::-moz-progress-bar{background:var(--accent);border-radius:99px}
+.volumeOpenedActions{display:flex;flex-wrap:wrap;align-items:center;gap:10px 15px}
+.volumeOpenedActions .btn{min-height:46px;max-width:100%}
+.volumeOpenedNextName{font-size:.8rem;line-height:1.5;color:var(--muted);overflow-wrap:anywhere}
+.volumeNeighborNav{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:12px;margin:16px 0 20px}
+.volumeNeighborNav>:last-child{justify-self:end}
+.volumeNeighborNav .volumeNeighborButton{min-height:44px;max-width:100%;white-space:normal}
+.volumeNeighborCurrent{text-align:center;font-size:.76rem;white-space:nowrap;color:var(--muted);font-weight:700}
+.volumeOpenedPreferences{min-width:0}
+.volumeIndexHeading{display:flex;align-items:end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:27px 0 14px}
+.volumeIndexHeading h3{font-family:Georgia,"Times New Roman",serif;font-size:clamp(1.35rem,2.5vw,1.9rem);margin:5px 0}
+.volumeIndexHeading p{font-size:.85rem;margin:0;color:var(--muted)}
+.volumeIndexCount{font-weight:750;font-size:.8rem;color:var(--muted)}
+.volumeEditorialOpened .volumeChapterIndex{padding:0 18px;overflow:hidden;box-shadow:var(--shadow2)}
+.volumeChapterIndex .volumeChapterRow{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:12px;padding:15px 3px;border-top:1px solid var(--line);min-height:85px}
+.volumeChapterIndex .volumeChapterRow:first-child{border-top:0}
+.volumeChapterIndex .volumeChapterRow.isNext{background:color-mix(in srgb,var(--accent) 7%,transparent);border-radius:10px;padding-inline:10px}
+.volumeChapterNumber{font-family:Georgia,"Times New Roman",serif;font-size:1.25rem;color:var(--muted);font-variant-numeric:tabular-nums;text-align:center}
+.volumeChapterMeta{display:flex;min-width:0;flex-direction:column;gap:4px;overflow-wrap:anywhere}
+.volumeChapterType{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:var(--muted)}
+.volumeChapterMeta strong{line-height:1.35;font-weight:750;font-size:.94rem;color:var(--text)}
+.volumeChapterState{font-size:.74rem;color:var(--muted)}
+.volumeChapterRow.isRead .volumeChapterState{color:var(--ok)}
+.volumeChapterRow.isNext .volumeChapterState{color:var(--accentText);font-weight:850}
+.volumeChapterRow .btn{min-width:88px;min-height:43px;justify-content:center}
+.volumeEditorialOpened .volumeCommentActions{margin-top:26px}
+@media(max-width:580px){
+ .volumeEditorialOpened .volumeOpenedHero{grid-template-columns:minmax(88px,118px) minmax(0,1fr);gap:13px;padding:13px}
+ .volumeEditorialOpened .volumeOpenedHero h2{font-size:clamp(1.1rem,4vw,1.45rem);margin:5px 0 8px}
+ .volumeEditorialOpened .volumeOpenedHero p{margin:0 0 12px;font-size:.8rem}
+ .volumeOpenedProgress{margin-bottom:12px}
+ .volumeOpenedActions .btn{width:100%}
+ .volumeOpenedNextName{font-size:.76rem}
+ .volumeChapterIndex .volumeChapterRow{grid-template-columns:30px minmax(0,1fr) auto;gap:8px;padding-block:12px}
+ .volumeEditorialOpened .volumeChapterIndex{padding-inline:10px}
+ .volumeChapterNumber{font-size:1rem}
+ .volumeChapterRow .btn{min-width:65px;padding-inline:8px;font-size:.8rem}
+ .volumeNeighborNav{gap:6px}
+ .volumeNeighborCurrent{font-size:.7rem}
+ .volumeNeighborNav .volumeNeighborButton{padding-inline:8px;font-size:.78rem}
+}
+@media(max-width:370px){
+ .volumeEditorialOpened .volumeOpenedHero{grid-template-columns:94px minmax(0,1fr)}
+ .volumeOpenedInfo .volumeEditorialTag{font-size:.57rem}
+ .volumeChapterIndex .volumeChapterRow{grid-template-columns:26px minmax(0,1fr)}
+ .volumeChapterRow .btn{grid-column:2;justify-self:start}
+ .volumeNeighborCurrent{max-width:88px;white-space:normal}
+}
+@media(prefers-reduced-motion:reduce){.volumeOpenedProgress progress,.volumeChapterRow{transition:none}}
