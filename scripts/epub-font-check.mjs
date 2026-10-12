@@ -99,6 +99,19 @@ assert.equal(styled.length,1);
 const styledFont=inlineContext.inlineContainerBlocks(paraStyled,'paragraph',Object.assign(()=>null,{textStyle:()=>({bold:true,italic:true})}));
 assert.match(styledFont[0].html,/<strong><em>Mensaje importante<\/em><\/strong>|<em><strong>Mensaje importante<\/strong><\/em>/,'CSS-only emphasis should survive with no embedded fonts');
 
+const readerContext={
+ normalizeBlock:block=>block,
+ editorialSafeHtml:html=>html,
+ esc:value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),
+ safeMediaUrl:value=>value,safeUrl:value=>value
+};
+vm.createContext(readerContext);
+vm.runInContext(section('function renderReaderBlock','function importSteps'),readerContext);
+const richReader=readerContext.renderReaderBlock({type:'paragraph',text:'Texto negrita y cursiva',html:'Texto <strong>negrita</strong> y <em>cursiva</em>'});
+assert.match(richReader,/<strong>negrita<\/strong>/,'Reader should render preserved bold tags');
+assert.match(richReader,/<em>cursiva<\/em>/,'Reader should render preserved italic tags');
+
+
 assert.match(source,/face=new FontFace\('NLOBI-EPUB-'\+index/,'Use a stable unique family index per weight/style variant');
 assert.match(source,/reader-font-original \[data-epub-family/,'Original mode must apply preserved inline styles');
 
