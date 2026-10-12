@@ -73,6 +73,15 @@ for(const width of [390,1280]){
    window.__NLOBI_QA__.setView(view);
   },{state:teamCase[2],view:teamCase[1]});
   await page.waitForFunction(()=>!!document.querySelector('#teamCustomPreview .teamIdentityKicker'),undefined,{timeout:8000});
+  const debug=await page.evaluate(()=>{
+   const e=document.querySelector('#teamCustomPreview .teamIdentityKicker');
+   const b=e?.closest('.teamIdentityBanner');
+   const s=e&&getComputedStyle(e),p=b&&getComputedStyle(b);
+   return {background:s?.backgroundColor,color:s?.color,opacity:s?.opacity,display:s?.display,
+    bannerBackground:p?.backgroundColor,bannerColor:p?.color,siteCss:document.getElementById('siteStyles')?.media,
+    rect:e?.getBoundingClientRect().toJSON(),html:e?.outerHTML};
+  });
+  console.log('TEAM CONTRAST DEBUG '+width+': '+JSON.stringify(debug));
   const result=await new AxeBuilder({page}).analyze();
   const serious=result.violations.filter(v=>['serious','critical'].includes(v.impact||''));
   report.push({url:'QA:Studio-custom-'+width,violations:serious});
