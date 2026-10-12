@@ -66,6 +66,8 @@ jobs:
         run: node scripts/studio-visual-browser-audit.mjs
       - name: Studio final volume checkbox and layout visual regression
         run: node scripts/studio-final-volume-visual-check.mjs
+      - name: Optional editorial statuses and public visibility regression
+        run: node scripts/studio-optional-status-check.mjs
       - name: axe accessibility audit
         id: axe
         continue-on-error: true
