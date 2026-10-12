@@ -3589,3 +3589,14 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
 .exploreFilterGrid :is(#catalogStatus,#catalogNovelStatus):focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .studioV3CoverRibbon{max-width:calc(100% - 12px);white-space:normal;overflow-wrap:anywhere;line-height:1.3}
 @media(max-width:560px){.catalogStatusRow{gap:6px}.catalogOriginalStatus{font-size:.68rem}}
+
+/* Studio consolidado: objetivos táctiles y reflow al ampliar texto */
+.studioV3ViewSwitch button{min-width:44px;min-height:44px}
+.studioStageAction{min-height:44px}
+.studioV6FindingsHead,.studioV6Filters{max-width:100%;min-width:0}
+.studioV6Filters input{width:min(100%,200px);min-width:0;max-width:100%;flex:1 1 10rem}
+@media(max-width:600px){
+ .studioV6FindingsHead{display:grid;grid-template-columns:minmax(0,1fr)}
+ .studioV6Filters{display:grid;grid-template-columns:minmax(0,1fr);width:100%;gap:8px}
+ .studioV6Filters :is(label,input,select){width:100%;min-width:0;max-width:100%;box-sizing:border-box}
+}
