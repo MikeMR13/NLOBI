@@ -3,7 +3,7 @@
  * El diálogo es una revisión previa; no confiere permisos ni crea notificaciones.
  */
 window.createStudioPhase7=function({
- S,esc,$,$$,jreq,toast,friendlyError,teamCan,renderReaderBlock,
+ S,esc,$,$=selector=>[...document.querySelectorAll(selector)],jreq,toast,friendlyError,teamCan,renderReaderBlock,
  safeMediaUrl,studioVolumeQuality,studioSectionQuality,activateEpubFonts,epubFontFamilyNames,refreshProject,loadCatalog
 }){
  const publicationStatusLabel={active:'Activa',paused:'En pausa',abandoned:'Abandonada',complete:'Finalizada',awaiting_sequel:'En espera de secuela',no_sequel_confirmed:'Sin secuela confirmada'};
