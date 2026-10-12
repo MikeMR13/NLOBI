@@ -62,6 +62,17 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
           npx playwright install --with-deps chromium firefox webkit
+      - name: axe accessibility audit
+        id: axe
+        continue-on-error: true
+        run: node scripts/axe-check.mjs
+      - name: Enforce accessibility before lengthy visual and quality suite
+        if: steps.axe.outcome == 'failure'
+        run: exit 1
+      - name: Home phase 4 responsive editorial matrix (Chromium + WebKit)
+        run: node scripts/home-editorial-phase4-check.mjs
+      - name: Mobile interaction audit (Chromium + WebKit)
+        run: node scripts/mobile-interactions-check.mjs
       - name: Studio account and works visual browser audit
         run: node scripts/studio-visual-browser-audit.mjs
       - name: Notification bell technical and responsive regression
@@ -70,22 +81,20 @@ jobs:
         run: node scripts/studio-final-volume-visual-check.mjs
       - name: Optional editorial statuses and public visibility regression
         run: node scripts/studio-optional-status-check.mjs
-      - name: axe accessibility audit
-        id: axe
-        continue-on-error: true
-        run: node scripts/axe-check.mjs
       - name: Visual layout audit
         run: node scripts/layout-check.mjs
       - name: Site appearance contrast audit (six palettes)
         run: node scripts/appearance-contrast-check.mjs
       - name: Visual cohesion phase 3 audit
         run: node scripts/visual-unification-phase3-check.mjs
+      - name: Home phase 2 editorial shelf and mobile regression
+        run: node scripts/home-editorial-phase2-check.mjs
+      - name: Home phase 3 immersive motion and accessibility regression
+        run: node scripts/home-editorial-phase3-check.mjs
       - name: Appearance visual regression phase 4 matrix
         run: node scripts/visual-regression-phase4-check.mjs
       - name: Mobile navigation phase 2 interaction audit
         run: node scripts/mobile-navigation-phase2-check.mjs
-      - name: Mobile interaction audit (Chromium + WebKit)
-        run: node scripts/mobile-interactions-check.mjs
       - name: Explore visual and interaction audit
         run: node scripts/explore-quality-check.mjs
       - name: Full platform quality pass
@@ -126,6 +135,7 @@ jobs:
           path: |
             visual-results/phase4-appearance-matrix.json
             visual-results/phase4-snapshots/
+            visual-results/home-phase4/
           if-no-files-found: warn
       - name: Upload visual layout report
         if: always()

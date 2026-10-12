@@ -3615,3 +3615,1054 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  .studioV6Filters{display:grid;grid-template-columns:minmax(0,1fr);width:100%;gap:8px}
  .studioV6Filters :is(label,input,select){width:100%;min-width:0;max-width:100%;box-sizing:border-box}
 }
+
+
+/* HOME — Fase 1: identidad editorial de lectura (2026-10-11).
+   Acabado exclusivo del inicio. Conserva los tokens de tema y
+   las preferencias de densidad, esquinas y movimiento. */
+.homeEditorial{
+ --home-paper:color-mix(in srgb,var(--panel) 96%,var(--accent) 4%);
+ --home-paper-edge:color-mix(in srgb,var(--line) 76%,var(--accent) 24%);
+ --home-display-accent:color-mix(in srgb,var(--accent) 36%,#111 64%);
+ --home-label-ink:color-mix(in srgb,var(--accent) 35%,#111 65%);
+ --home-serif:"Literata",Georgia,"Times New Roman",serif;
+}
+body.dark .homeEditorial{
+ --home-paper:color-mix(in srgb,var(--panel) 96%,var(--accent) 4%);
+ --home-paper-edge:color-mix(in srgb,var(--line) 72%,var(--accent) 28%);
+ --home-display-accent:var(--accent);
+ --home-label-ink:color-mix(in srgb,var(--accent) 88%,#fff 12%);
+}
+
+/* Un escaparate de lectura, no un panel genérico. */
+.homeEditorial .homeShowcase{
+ isolation:isolate;
+ min-height:470px;
+ gap:clamp(22px,4.2vw,64px);
+ padding:clamp(30px,4.8vw,60px);
+ border:1px solid var(--home-paper-edge);
+ background:
+   radial-gradient(circle at 78% 14%,color-mix(in srgb,var(--accent) 18%,transparent),transparent 42%),
+   linear-gradient(125deg,var(--home-paper) 0%,var(--panel) 56%,var(--panel2) 100%);
+ box-shadow:0 18px 48px rgba(0,0,0,.055);
+}
+.homeEditorial .homeShowcase::before{
+ inset:11px;
+ border:1px solid color-mix(in srgb,var(--home-paper-edge) 72%,transparent);
+ border-radius:clamp(12px,2vw,19px);
+}
+.homeEditorial .homeShowcase::after{
+ content:"";
+ position:absolute;
+ width:clamp(110px,17vw,240px);
+ height:clamp(110px,17vw,240px);
+ right:-72px;
+ top:-84px;
+ border:1px solid color-mix(in srgb,var(--accent) 24%,transparent);
+ border-radius:50%;
+ pointer-events:none;
+}
+.homeEditorial .homeShowcaseCopy{max-width:570px}
+.homeEditorial .homeEyebrow{
+ display:inline-flex;
+ align-items:center;
+ flex-wrap:wrap;
+ gap:7px;
+ color:var(--home-label-ink);
+ font-size:clamp(.69rem,.9vw,.79rem);
+ font-weight:800;
+ line-height:1.55;
+ letter-spacing:.11em;
+}
+.homeEditorial .homeEyebrow::before{
+ content:"";
+ flex:0 0 18px;
+ width:18px;
+ height:3px;
+ border-radius:3px;
+ background:var(--accent);
+}
+.homeEditorial .homeShowcaseCopy h1{
+ font-family:var(--home-serif);
+ font-size:clamp(2.4rem,4.5vw,4.65rem);
+ font-weight:600;
+ letter-spacing:-.04em;
+ line-height:1.11;
+ margin:17px 0 20px;
+ text-wrap:balance;
+}
+.homeEditorial .homeShowcaseCopy h1 em{
+ color:var(--home-display-accent);
+ font-style:italic;
+ font-weight:500;
+}
+.homeEditorial .homeShowcaseCopy>p{
+ font-size:clamp(.98rem,1.25vw,1.08rem);
+ line-height:1.8;
+ max-width:51ch;
+}
+.homeEditorial .homeShowcaseActions{margin:23px 0 16px;gap:11px}
+.homeEditorial .homeShowcaseActions .btn{
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ min-height:46px;
+ padding:11px 17px;
+ font-weight:750;
+}
+.homeEditorial .homeShowcaseActions .btn:not(.primary){
+ border-color:var(--home-paper-edge);
+ background:var(--panel);
+}
+.homeEditorial .homeShowcaseNote{
+ display:inline-flex;
+ align-items:center;
+ gap:8px;
+ max-width:100%;
+ padding-top:10px;
+ border-top:1px solid var(--home-paper-edge);
+ font-size:.8rem;
+ line-height:1.6;
+ letter-spacing:.015em;
+}
+
+/* La portada es el centro visual de la obra destacada. */
+.homeEditorial .homeFeatured{
+ position:relative;
+ border-color:var(--home-paper-edge);
+ background:var(--panel);
+ box-shadow:0 17px 40px rgba(0,0,0,.11);
+}
+.homeEditorial .homeFeaturedVisual{
+ position:relative;
+ isolation:isolate;
+ flex-basis:295px;
+ min-height:295px;
+ background:
+   radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--accent) 18%,var(--panel) 82%),transparent 71%),
+   linear-gradient(145deg,var(--panel2),var(--home-paper));
+}
+.homeEditorial .homeFeaturedVisual::before{
+ content:"";
+ position:absolute;
+ inset:23px 20%;
+ border:1px solid color-mix(in srgb,var(--accent) 22%,var(--line));
+ border-radius:10px;
+ transform:rotate(4deg);
+ pointer-events:none;
+}
+.homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+ position:relative;
+ z-index:1;
+ width:clamp(168px,54%,225px);
+ max-width:77%;
+ transform:rotate(-3deg);
+ border:1px solid rgba(0,0,0,.14);
+ box-shadow:9px 14px 28px rgba(0,0,0,.22),inset 4px 0 6px rgba(0,0,0,.11);
+}
+.homeEditorial .homeFeaturedInfo{
+ background:var(--panel);
+ padding:18px 24px 21px;
+}
+.homeEditorial .homeFeaturedSlideInfo h2{
+ font-family:var(--home-serif);
+ font-size:clamp(1.16rem,1.65vw,1.42rem);
+ font-weight:600;
+ line-height:1.3;
+ margin:9px 0 6px;
+ min-height:2.6em;
+ max-height:2.6em;
+}
+.homeEditorial .homeFeaturedSlideInfo p{
+ font-size:clamp(.79rem,.95vw,.89rem);
+ line-height:1.65;
+ margin:3px 0 8px;
+}
+.homeEditorial .homeFeaturedLabel,
+.homeEditorial .homeSectionKicker{
+ color:var(--home-label-ink);
+ font-size:clamp(.72rem,.8vw,.79rem);
+ font-weight:800;
+ letter-spacing:.1em;
+ line-height:1.5;
+}
+.homeEditorial .homeFeaturedSlideInfo .homeFeaturedLink{
+ color:var(--home-label-ink);
+ font-weight:800;
+}
+.homeEditorial .homeFeaturedSlideInfo .homeFeaturedLink:hover{
+ text-decoration:underline;
+ text-underline-offset:4px;
+}
+
+/* Una jerarquía editorial consistente entre las colecciones. */
+.homeEditorial .homeSectionKicker::before{
+ content:"";
+ display:inline-block;
+ width:15px;
+ height:2px;
+ margin:0 9px 3px 0;
+ border-radius:2px;
+ background:var(--accent);
+}
+.homeEditorial :is(.homeSectionHead h2,.discoverShelfHead h2,.homeClosing h2){
+ font-family:var(--home-serif);
+ font-weight:600;
+ line-height:1.2;
+ letter-spacing:-.025em;
+ text-wrap:balance;
+}
+.homeEditorial :is(.homeEditorialSection,.homeVolumeReleases,.homeGenres){
+ scroll-margin-top:92px;
+}
+.homeEditorial .discoverShelfHead{
+ border-bottom:1px solid var(--home-paper-edge);
+ padding-bottom:15px;
+}
+.homeEditorial .homeSectionHead{padding-bottom:14px}
+.homeEditorial .homeSectionHead p,
+.homeEditorial .homePersonalHint{line-height:1.6}
+.homeEditorial .newVolumeAnnouncement{
+ border:1px solid var(--home-paper-edge);
+ border-left:4px solid var(--accent);
+ border-radius:14px;
+ background:linear-gradient(115deg,var(--home-paper),var(--panel));
+}
+.homeEditorial .homeQuickLinks button{
+ border-color:var(--home-paper-edge);
+ box-shadow:inset 3px 0 0 color-mix(in srgb,var(--accent) 64%,transparent);
+ background:var(--home-paper);
+}
+.homeEditorial .homeQuickLinks button span:first-child{
+ color:var(--home-label-ink);
+}
+.homeEditorial .homeClosing{
+ border:1px solid color-mix(in srgb,var(--accent) 30%,#111);
+ background:
+   radial-gradient(circle at 95% 0%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 35%),
+   linear-gradient(135deg,#121212,#242117);
+ color:#fff;
+ padding:clamp(23px,3.1vw,37px);
+}
+.homeEditorial .homeClosing .homeSectionKicker{color:#ffdc4f}
+.homeEditorial .homeClosing p{color:#e2e0d8;line-height:1.65}
+.homeEditorial .homeClosing .btn.primary{color:#111;background:var(--accent)}
+
+/* Las preferencias de esquinas siguen prevaleciendo sobre esta fase. */
+html[data-site-corners="square"] .homeEditorial .homeFeatured,
+html[data-site-corners="square"] .homeEditorial .homeClosing,
+html[data-site-corners="square"] .homeEditorial .newVolumeAnnouncement{border-radius:3px}
+html[data-site-corners="soft"] .homeEditorial .homeFeatured,
+html[data-site-corners="soft"] .homeEditorial .homeClosing,
+html[data-site-corners="soft"] .homeEditorial .newVolumeAnnouncement{border-radius:25px}
+
+@media(min-width:641px) and (max-width:970px){
+ .homeEditorial .homeShowcase{min-height:0}
+ .homeEditorial .homeFeaturedVisual{min-height:270px}
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{width:clamp(145px,55%,190px)}
+}
+@media(max-width:640px){
+ .homeEditorial .homeShowcase{
+  min-height:0;
+  padding:clamp(19px,5vw,28px);
+  gap:20px;
+  margin-top:10px;
+ }
+ .homeEditorial .homeShowcase::before{inset:8px}
+ .homeEditorial .homeEyebrow{font-size:.7rem;letter-spacing:.06em}
+ .homeEditorial .homeShowcaseCopy h1{
+  font-size:clamp(2.08rem,8.3vw,2.87rem);
+  line-height:1.1;
+  margin:12px 0 13px;
+ }
+ .homeEditorial .homeShowcaseCopy>p{font-size:.96rem;line-height:1.65}
+ .homeEditorial .homeShowcaseActions{margin:17px 0 12px}
+ .homeEditorial .homeShowcaseActions .btn{flex:1 1 140px}
+ .homeEditorial .homeFeatured{
+  min-height:405px;
+  display:flex;
+  flex-direction:column;
+ }
+ .homeEditorial .homeFeaturedVisual{
+  flex:0 0 192px;
+  min-height:192px;
+  padding:9px;
+ }
+ .homeEditorial .homeFeaturedVisual::before{inset:12px 24%}
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+  width:min(44%,145px);
+  max-width:145px;
+ }
+ .homeEditorial .homeFeaturedInfo{
+  min-height:213px;
+  padding:13px 16px 14px;
+ }
+ .homeEditorial .homeFeaturedSlideInfo h2{
+  font-size:1.06rem;
+  min-height:2.6em;
+  max-height:2.6em;
+  margin:5px 0 3px;
+ }
+ .homeEditorial .homeFeaturedSlideInfo p{font-size:.79rem;line-height:1.5}
+ .homeEditorial :is(.homeSectionHead h2,.discoverShelfHead h2){font-size:clamp(1.45rem,5.9vw,1.75rem)}
+ .homeEditorial .homeClosing{padding:22px 20px}
+}
+@media(max-width:370px){
+ .homeEditorial .homeShowcase{padding:18px 14px}
+ .homeEditorial .homeFeaturedVisual{flex-basis:180px;min-height:180px}
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{width:126px}
+ .homeEditorial .homeFeaturedInfo{min-height:215px}
+}
+@media(prefers-reduced-motion:reduce){
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{transition:none}
+}
+
+
+/* HOME — Fase 2: estanterías y tarjetas de novelas (2026-10-11).
+   Reglas limitadas a #home para respetar Explorar, Studio y el lector. */
+.homeEditorial{
+ --home-book-edge:color-mix(in srgb,var(--line) 72%,var(--accent) 28%);
+ --home-book-surface:var(--panel);
+ --home-book-ink:var(--text);
+}
+.homeEditorial .discoverShelf{
+ isolation:isolate;
+ margin-block:clamp(30px,3.8vw,43px);
+}
+.homeEditorial .discoverShelfHead{align-items:flex-end;gap:13px}
+.homeEditorial .discoverShelfActions{
+ display:flex;
+ align-items:center;
+ flex-wrap:wrap;
+ justify-content:flex-end;
+ gap:8px;
+}
+.homeEditorial .discoverShelfActions .btn.ghost{
+ color:var(--text);
+ border-color:var(--home-book-edge);
+ background:var(--panel);
+ min-height:44px;
+ padding-inline:13px;
+}
+.homeEditorial .shelfArrow{
+ width:44px;
+ height:44px;
+ min-width:44px;
+ min-height:44px;
+ border:1px solid var(--home-book-edge);
+ border-radius:50%;
+ background:var(--panel);
+ color:var(--text);
+ font-size:1.1rem;
+ font-weight:700;
+ display:grid;
+ place-items:center;
+}
+.homeEditorial .shelfArrow:disabled{
+ opacity:.42;
+ color:var(--muted);
+ cursor:default;
+ transform:none;
+ box-shadow:none;
+ background:var(--panel2);
+}
+.homeEditorial .shelfArrow:not(:disabled):hover{
+ background:var(--accent);
+ border-color:var(--accent);
+ color:#111;
+}
+.homeEditorial .discoverShelfTrack{
+ position:relative;
+ gap:clamp(12px,1.5vw,19px);
+ padding:9px 5px 27px;
+ grid-auto-columns:clamp(180px,19vw,226px);
+ scroll-padding-inline:6px;
+ scroll-snap-type:x mandatory;
+ overscroll-behavior-x:contain;
+ scrollbar-width:thin;
+ scrollbar-color:var(--home-book-edge) transparent;
+ border-bottom:3px solid var(--home-book-edge);
+ box-shadow:inset 0 -5px 0 color-mix(in srgb,var(--accent) 11%,transparent);
+}
+
+/* Los dos diseños de tarjeta del Home comparten cuerpo, cubierta y etiquetas. */
+.homeEditorial .homeNovelTile{
+ display:flex;
+ flex-direction:column;
+ min-width:0;
+ height:100%;
+ border:1px solid var(--home-book-edge);
+ border-radius:15px;
+ overflow:hidden;
+ background:var(--home-book-surface);
+ box-shadow:0 7px 19px rgba(0,0,0,.055);
+ transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease;
+}
+.homeEditorial .homeNovelTile:hover,
+.homeEditorial .homeNovelTile:focus-within{
+ border-color:color-mix(in srgb,var(--accent) 70%,var(--line));
+ box-shadow:0 13px 26px rgba(0,0,0,.1);
+ transform:translateY(-3px);
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink){
+ position:relative;
+ display:block;
+ width:100%;
+ aspect-ratio:2/3;
+ flex:none;
+ overflow:hidden;
+ background:color-mix(in srgb,var(--panel2) 86%,var(--accent) 14%);
+ border-bottom:1px solid var(--home-book-edge);
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink)::before{
+ content:"";
+ position:absolute;
+ z-index:2;
+ inset:0 auto 0 0;
+ width:8px;
+ pointer-events:none;
+ background:linear-gradient(90deg,rgba(0,0,0,.19),rgba(255,255,255,.12),transparent);
+}
+.homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover){
+ width:100%;
+ height:100%;
+ aspect-ratio:2/3;
+ display:block;
+ padding:0;
+}
+.homeEditorial .homeNovelTile :is(.catalogBookArt>img,.homeBookCover .cover img){
+ display:block;
+ width:100%;
+ height:100%;
+ object-fit:contain;
+ object-position:center;
+ transition:transform .24s ease;
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink):hover img{
+ transform:scale(1.025);
+}
+.homeEditorial .homeBookCover .cover:has(img)::after,
+.homeEditorial .homeBookCover .cover:has(img) .coverTitle{
+ display:none;
+}
+/* La portada sin imagen sigue mostrando el título, sin tapar otras imágenes. */
+.homeEditorial .homeBookCover .cover:not(:has(img)){
+ padding:15px;
+}
+.homeEditorial .homeBookCover .cover:not(:has(img)) .coverTitle{
+ display:block;
+ font-size:clamp(.82rem,1.4vw,1.08rem);
+ line-height:1.3;
+ overflow-wrap:anywhere;
+}
+.homeEditorial .homeNovelTile .catalogCoverOverlay{
+ opacity:0;
+ pointer-events:none;
+ background:linear-gradient(transparent,rgba(0,0,0,.68));
+}
+.homeEditorial .homeNovelTile .catalogCoverButton:is(:hover,:focus-visible) .catalogCoverOverlay{
+ opacity:1;
+}
+/* Los avisos de lanzamiento siempre se leen sobre las ilustraciones. */
+.homeEditorial .homeNovelTile .newVolumeTag,
+.homeEditorial .volumeReleaseBadge{
+ display:inline-flex;
+ align-items:center;
+ flex-wrap:wrap;
+ gap:4px;
+ padding:6px 8px;
+ background:#161616;
+ color:#ffe052;
+ border:1px solid rgba(255,212,0,.85);
+ box-shadow:0 4px 14px rgba(0,0,0,.3);
+ border-radius:7px;
+ font-weight:850;
+ font-size:clamp(.58rem,.74vw,.69rem);
+ line-height:1.25;
+ max-width:calc(100% - 16px);
+}
+.homeEditorial .homeNovelTile .newVolumeTag span{
+ border-left:1px solid rgba(255,224,82,.45);
+ padding-left:5px;
+ color:inherit;
+}
+.homeEditorial .homeNovelTile .homeBookCoverLink>.newVolumeTag{
+ position:absolute;
+ z-index:3;
+ top:9px;
+ left:9px;
+}
+.homeEditorial .homeNovelTile :is(.catalogCardContent,.homeBookDetails){
+ display:flex;
+ flex:1;
+ flex-direction:column;
+ align-items:stretch;
+ gap:8px;
+ min-width:0;
+ padding:14px 13px 15px;
+}
+.homeEditorial .homeNovelTile .catalogStatusRow{justify-content:flex-start;gap:6px}
+.homeEditorial .homeNovelTile :is(.catalogStatusTag,.homeBookTags>span){
+ display:inline-flex;
+ align-items:center;
+ align-self:flex-start;
+ border:1px solid var(--home-book-edge);
+ border-radius:6px;
+ background:var(--home-paper);
+ color:var(--home-label-ink);
+ padding:4px 7px;
+ font-size:.7rem;
+ font-weight:750;
+ line-height:1.35;
+}
+.homeEditorial .homeNovelTile .catalogLanguage{
+ margin-left:auto;
+ padding:3px 0;
+ font-weight:750;
+}
+.homeEditorial .homeBookTags{gap:6px}
+.homeEditorial .homeNovelTile :is(.catalogCardContent h3,.homeBookDetails h3){
+ font-family:var(--home-serif);
+ font-weight:600;
+ font-size:clamp(.9rem,1.06vw,1.04rem);
+ line-height:1.38;
+ min-height:3.9em;
+ max-height:3.9em;
+ display:-webkit-box;
+ -webkit-box-orient:vertical;
+ -webkit-line-clamp:3;
+ overflow:hidden;
+ overflow-wrap:anywhere;
+ margin:3px 0 0;
+}
+.homeEditorial .homeNovelTile :is(.catalogTranslator,.homeBookDetails>p){
+ color:var(--muted);
+ font-size:.76rem;
+ line-height:1.45;
+ margin:0 0 4px;
+ display:-webkit-box;
+ -webkit-box-orient:vertical;
+ -webkit-line-clamp:2;
+ overflow:hidden;
+}
+.homeEditorial .homeNovelTile .catalogCardSynopsis{display:none}
+.homeEditorial .homeNovelTile .catalogGenres{margin:0 0 3px}
+.homeEditorial .homeNovelTile .catalogGenres span{
+ border:1px solid var(--line);
+ background:var(--panel2);
+ color:var(--text);
+}
+.homeEditorial .homeNovelTile .catalogUpdated{margin:0}
+.homeEditorial .homeNovelTile :is(.catalogCardActions,.homeBookOpen){
+ margin-top:auto;
+}
+.homeEditorial .homeNovelTile .catalogCardActions{display:flex;gap:7px}
+.homeEditorial .homeNovelTile .catalogCardActions .btn,
+.homeEditorial .homeNovelTile .homeBookOpen{
+ display:inline-flex;
+ justify-content:center;
+ align-items:center;
+ text-align:center;
+ min-height:44px;
+ font-size:.78rem;
+ font-weight:800;
+ border-radius:9px;
+}
+.homeEditorial .homeNovelTile .homeBookOpen{
+ width:100%;
+ border:1px solid var(--home-book-edge);
+ background:var(--panel2);
+ color:var(--text);
+ padding:9px 11px;
+}
+.homeEditorial .homeNovelTile .homeBookOpen:hover{
+ border-color:var(--accent);
+ background:var(--accentSoft);
+ color:var(--text);
+ text-decoration:none;
+}
+
+/* Lanzamientos como volúmenes de una misma colección. */
+.homeEditorial .homeVolumeReleases>.discoverShelfHead{
+ border-bottom:1px solid var(--home-book-edge);
+ padding-bottom:14px;
+}
+.homeEditorial .homeVolumeReleaseGrid{align-items:stretch;gap:clamp(12px,1.6vw,18px)}
+.homeEditorial .volumeReleaseCard{
+ min-width:0;
+ border:1px solid var(--home-book-edge);
+ border-radius:15px;
+ background:var(--panel);
+ box-shadow:0 7px 19px rgba(0,0,0,.055);
+ overflow:hidden;
+ transition:box-shadow .2s ease,border-color .2s ease;
+}
+.homeEditorial .volumeReleaseCard:hover,
+.homeEditorial .volumeReleaseCard:focus-within{
+ border-color:var(--accent);
+ box-shadow:0 13px 26px rgba(0,0,0,.1);
+}
+.homeEditorial .volumeReleaseCover{
+ aspect-ratio:2/3;
+ border-bottom:1px solid var(--home-book-edge);
+ background:var(--panel2);
+}
+.homeEditorial .volumeReleaseCover::before{
+ content:"";
+ position:absolute;
+ inset:0 auto 0 0;
+ width:8px;
+ z-index:2;
+ pointer-events:none;
+ background:linear-gradient(90deg,rgba(0,0,0,.2),rgba(255,255,255,.1),transparent);
+}
+.homeEditorial .volumeReleaseCover img{
+ object-fit:contain;
+ object-position:center;
+}
+.homeEditorial .volumeReleaseBody{
+ padding:14px 13px 15px;
+ gap:7px;
+}
+.homeEditorial .volumeReleaseNumber{
+ display:inline-flex;
+ align-self:flex-start;
+ color:var(--home-label-ink);
+ background:var(--home-paper);
+ border:1px solid var(--home-book-edge);
+ border-radius:5px;
+ padding:4px 7px;
+ letter-spacing:.07em;
+}
+.homeEditorial .volumeReleaseBody h3{
+ font-family:var(--home-serif);
+ font-size:clamp(.92rem,1.09vw,1.05rem);
+ font-weight:600;
+ display:-webkit-box;
+ -webkit-line-clamp:3;
+ -webkit-box-orient:vertical;
+ overflow:hidden;
+ line-height:1.4;
+}
+.homeEditorial .volumeReleaseSubtitle{
+ display:-webkit-box;
+ -webkit-line-clamp:2;
+ -webkit-box-orient:vertical;
+ overflow:hidden;
+}
+.homeEditorial .volumeReleaseTeam{margin-top:auto}
+.homeEditorial .volumeReleaseOpen{
+ min-height:44px;
+ margin-top:9px;
+}
+/* El último CTA tiene prioridad visual sin esconder el equipo ni la fecha. */
+.homeEditorial .volumeReleaseBody time{font-variant-numeric:tabular-nums}
+
+/* Personalización y tamaños táctiles permanecen activos. */
+html[data-site-corners="square"] .homeEditorial :is(.homeNovelTile,.volumeReleaseCard){border-radius:3px}
+html[data-site-corners="soft"] .homeEditorial :is(.homeNovelTile,.volumeReleaseCard){border-radius:25px}
+@media(hover:none){
+ .homeEditorial .homeNovelTile:hover{transform:none}
+}
+@media(max-width:760px){
+ .homeEditorial .discoverShelfHead{align-items:flex-start}
+ .homeEditorial .discoverShelfActions{justify-content:flex-end}
+ .homeEditorial .discoverShelfActions .btn.ghost{order:1}
+ .homeEditorial .discoverShelfTrack{
+  grid-auto-columns:clamp(164px,49vw,210px);
+  padding-bottom:22px;
+ }
+ .homeEditorial .homeNovelTile :is(.catalogCardContent,.homeBookDetails){padding:11px 10px 12px}
+ .homeEditorial .homeNovelTile .catalogCardActions{flex-wrap:wrap}
+ .homeEditorial .homeNovelTile .catalogCardActions .btn{flex:1 1 100%;min-height:44px}
+ .homeEditorial .homeBookGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .homeEditorial .homeVolumeReleaseGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:430px){
+ .homeEditorial .discoverShelfActions{gap:5px}
+ .homeEditorial .discoverShelfActions .btn.ghost{
+  order:0;
+  flex-basis:100%;
+  text-align:right;
+  justify-content:flex-end;
+ }
+ .homeEditorial .shelfArrow{width:44px;height:44px}
+ .homeEditorial .discoverShelfTrack{grid-auto-columns:clamp(159px,60vw,207px)}
+ .homeEditorial .homeNovelTile :is(.catalogCardContent h3,.homeBookDetails h3){font-size:.9rem}
+ .homeEditorial .volumeReleaseBadge{font-size:.57rem;padding:5px 6px}
+ .homeEditorial .volumeReleaseBody{padding:11px 10px}
+}
+
+/* Arregla la regresión detectada en Fase 1: primer pantallazo 390px. */
+@media(min-width:371px) and (max-width:640px){
+ .homeEditorial .homeShowcase{
+  gap:13px;
+  min-height:0;
+  padding:17px 17px 19px;
+ }
+ .homeEditorial .homeShowcaseCopy h1{
+  font-size:clamp(1.95rem,7.2vw,2.45rem);
+  line-height:1.1;
+  margin:9px 0 10px;
+ }
+ .homeEditorial .homeShowcaseCopy>p{
+  font-size:.91rem;
+  line-height:1.5;
+  margin-bottom:0;
+ }
+ .homeEditorial .homeShowcaseActions{margin:11px 0 9px}
+ .homeEditorial .homeShowcaseNote{padding-top:5px;line-height:1.45}
+ .homeEditorial .homeFeatured{
+  display:grid;
+  grid-template-columns:minmax(105px,38%) minmax(0,1fr);
+  align-items:stretch;
+  min-height:248px;
+ }
+ .homeEditorial .homeFeaturedVisual{
+  flex:initial;
+  min-height:248px;
+  height:100%;
+  padding:7px;
+ }
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+  width:min(86%,130px);
+  max-width:130px;
+ }
+ .homeEditorial .homeFeaturedInfo{
+  min-height:0;
+  padding:11px 10px 9px;
+  min-width:0;
+ }
+ .homeEditorial .homeFeaturedSlideInfo{
+  min-height:0;
+ }
+ .homeEditorial .homeFeaturedSlideInfo h2{
+  font-size:.97rem;
+  min-height:0;
+  max-height:3.9em;
+  -webkit-line-clamp:3;
+ }
+ .homeEditorial .homeFeaturedSlideInfo p{
+  min-height:0;
+  max-height:3.1em;
+  -webkit-line-clamp:2;
+  margin-bottom:0;
+ }
+ .homeEditorial .homeFeaturedSlideInfo .homeFeaturedLink{
+  font-size:.78rem;
+ }
+ .homeEditorial .featuredCarouselControls{
+  min-height:44px;
+  margin-top:auto;
+  gap:2px;
+  display:flex;
+  justify-content:space-between;
+ }
+ .homeEditorial .featuredCarouselDot{display:none}
+ .homeEditorial .featuredCarouselDots{gap:0}
+ .homeEditorial .featuredCarouselCount{font-size:.68rem;margin:0}
+ .homeEditorial .featuredCarouselArrow{flex:0 0 44px}
+}
+@media(prefers-reduced-motion:reduce){
+ .homeEditorial .homeNovelTile,
+ .homeEditorial .volumeReleaseCard,
+ .homeEditorial .homeNovelTile img{transition:none!important}
+ .homeEditorial .homeNovelTile:hover,
+ .homeEditorial .homeNovelTile:focus-within{transform:none}
+}
+@media(forced-colors:active){
+ .homeEditorial .homeNovelTile,
+ .homeEditorial .volumeReleaseCard,
+ .homeEditorial .discoverShelfTrack{border-color:CanvasText}
+ .homeEditorial .homeNovelTile .newVolumeTag,
+ .homeEditorial .volumeReleaseBadge{border:1px solid CanvasText}
+}
+
+
+/* HOME — Fase 3: experiencia inmersiva de lectura (2026-10-11).
+   Todas las microinteracciones se limitan al Home, usan transform/opacity
+   y no alteran medidas, scroll-snap ni contenido accesible. */
+
+/* Transición progresiva: el contenido permanece visible sin JavaScript. */
+.homeEditorial .homeMotionPending{
+ opacity:1;
+ transform:none;
+}
+/* Mantener texto y botones totalmente opacos en estanterías para WCAG. */
+@media (prefers-reduced-motion:no-preference){
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending,
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending.homeMotionShown{
+  opacity:1;
+  transform:none;
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending .discoverShelfHead::after{
+  content:"";
+  display:block;
+  width:0;
+  height:2px;
+  background:var(--accent);
+  margin-top:5px;
+  transition:width .3s ease-out;
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending.homeMotionShown .discoverShelfHead::after{
+  width:min(100%,100px);
+ }
+}
+
+/* Se conserva la perspectiva de un libro sin distorsionar las ilustraciones. */
+.homeEditorial .homeFeaturedVisual{perspective:900px}
+.homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+ transform-origin:16% 50%;
+ backface-visibility:hidden;
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink),
+.homeEditorial .volumeReleaseCover{
+ isolation:isolate;
+}
+.homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover),
+.homeEditorial .volumeReleaseCover img{
+ transform-origin:left center;
+ backface-visibility:hidden;
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink)::after,
+.homeEditorial .volumeReleaseCover::after{
+ content:"";
+ position:absolute;
+ right:0;
+ bottom:0;
+ z-index:2;
+ width:0;
+ height:0;
+ border-style:solid;
+ border-width:0 0 25px 25px;
+ border-color:transparent transparent color-mix(in srgb,var(--panel) 84%,var(--accent) 16%) transparent;
+ box-shadow:-1px -1px 2px rgba(0,0,0,.05);
+ opacity:0;
+ transform:translate3d(8px,8px,0);
+ pointer-events:none;
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink):focus-visible,
+.homeEditorial .volumeReleaseCover:focus-visible{
+ outline:3px solid var(--accent);
+ outline-offset:-3px;
+}
+
+/* El botón de abrir novela sigue funcionando sin esperar animación. */
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+  transition:transform .33s cubic-bezier(.2,.7,.25,1),box-shadow .33s ease;
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeFeaturedVisual .homeFeaturedBook:is(:hover,:focus-visible){
+  transform:rotate(-2deg) rotateY(-9deg) translate3d(0,-4px,0);
+  box-shadow:13px 19px 31px rgba(0,0,0,.26),inset 4px 0 6px rgba(0,0,0,.12);
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover),
+ html:not([data-site-motion="reduce"]) .homeEditorial .volumeReleaseCover img{
+  transition:transform .29s cubic-bezier(.2,.72,.3,1),filter .29s ease;
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink):is(:hover,:focus-visible) :is(.catalogBookArt,.cover),
+ html:not([data-site-motion="reduce"]) .homeEditorial .volumeReleaseCover:is(:hover,:focus-visible) img{
+  transform:perspective(950px) rotateY(-5deg) scale(.986) translate3d(1px,0,0);
+  filter:brightness(1.035);
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink)::after,
+ html:not([data-site-motion="reduce"]) .homeEditorial .volumeReleaseCover::after{
+  transition:opacity .22s ease,transform .28s cubic-bezier(.2,.72,.3,1);
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink):is(:hover,:focus-visible)::after,
+ html:not([data-site-motion="reduce"]) .homeEditorial .volumeReleaseCover:is(:hover,:focus-visible)::after{
+  opacity:1;
+  transform:none;
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile:hover,
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile:focus-within{
+  transform:translateY(-3px);
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeQuickLinks button:not(:disabled):hover{
+  transform:translateY(-2px);
+ }
+}
+/* No mover tarjetas sobre dispositivos táctiles ni con poca precisión. */
+/* Los títulos en pantallas estrechas nunca se mueven al recibir foco o clic. */
+@media (max-width:640px){
+ .homeEditorial .homeNovelTile:hover,
+ .homeEditorial .homeNovelTile:focus-within,
+ .homeEditorial .volumeReleaseCard:hover,
+ .homeEditorial .volumeReleaseCard:focus-within{
+  transform:none!important;
+ }
+}
+@media (hover:none), (pointer:coarse){
+ .homeEditorial .homeNovelTile:hover,
+ .homeEditorial .homeNovelTile:focus-within,
+ .homeEditorial .volumeReleaseCard:hover{
+  transform:none;
+ }
+ .homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover),
+ .homeEditorial .volumeReleaseCover img{
+  transform:none!important;
+ }
+}
+/* Mientras se lee el título o la sinopsis, el foco y el cursor pausan el autoavance. */
+.homeEditorial .featuredCarouselArrow{
+ transition:background-color .18s ease,border-color .18s ease,color .18s ease;
+}
+.homeEditorial .featuredCarouselArrow:is(:hover,:focus-visible){
+ background:var(--accent);
+ color:#111;
+ border-color:var(--accent);
+}
+
+/* Nunca esconder libros o desplazar controles con accesibilidad activa. */
+@media (prefers-reduced-motion:reduce){
+ .homeEditorial .homeMotionPending,
+ .homeEditorial .homeMotionPending.homeMotionShown{
+  opacity:1!important;
+  transform:none!important;
+  transition:none!important;
+ }
+}
+@media (prefers-reduced-motion:reduce){
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook,
+ .homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover),
+ .homeEditorial .volumeReleaseCover img,
+ .homeEditorial .featuredCarouselArrow{
+  animation:none!important;
+  transition:none!important;
+ }
+ .homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink)::after,
+ .homeEditorial .volumeReleaseCover::after{display:none}
+}
+html[data-site-motion="reduce"] .homeEditorial .homeFeaturedVisual .homeFeaturedBook,
+html[data-site-motion="reduce"] .homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover),
+html[data-site-motion="reduce"] .homeEditorial .volumeReleaseCover img{transition:none!important;animation:none!important}
+html[data-site-motion="reduce"] .homeEditorial .homeMotionPending{
+ opacity:1!important;
+ transform:none!important;
+}
+@media (forced-colors:active){
+ .homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink)::after,
+ .homeEditorial .volumeReleaseCover::after{display:none}
+}
+
+
+/* HOME — Fase 4: auditoría responsive y pulido final (2026-10-12).
+   Reflow estable, personalización visual y objetivos táctiles. */
+.homeEditorial .homeShowcase,
+.homeEditorial .homeFeatured,
+.homeEditorial .homeBookGrid,
+.homeEditorial .homeVolumeReleaseGrid,
+.homeEditorial .discoverShelf,
+.homeEditorial .discoverShelfHead,
+.homeEditorial .discoverShelfActions{min-width:0}
+.homeEditorial .discoverShelfHead>div:first-child,
+.homeEditorial .homeFeaturedSlideInfo,
+.homeEditorial .homeBookDetails,
+.homeEditorial .volumeReleaseBody{min-width:0;overflow-wrap:anywhere}
+.homeEditorial .homeNovelTile .catalogCardActions .btn,
+.homeEditorial .homeNovelTile .homeBookOpen,
+.homeEditorial .volumeReleaseOpen,
+.homeEditorial .homeShowcaseActions .btn{
+ min-height:44px;
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink):focus-visible,
+.homeEditorial .volumeReleaseCover:focus-visible{
+ outline-offset:-3px;
+}
+html[data-site-density="compact"] .homeEditorial .discoverShelfTrack{gap:10px}
+html[data-site-density="comfortable"] .homeEditorial .discoverShelfTrack{gap:clamp(17px,2vw,23px)}
+html[data-site-corners="square"] .homeEditorial :is(.homeShowcase,.homeProgressCard,.homeQuickLinks button){border-radius:3px}
+html[data-site-corners="soft"] .homeEditorial :is(.homeShowcase,.homeProgressCard,.homeQuickLinks button){border-radius:25px}
+@media(max-width:760px){
+ .homeEditorial .discoverShelfHead{align-items:start}
+ .homeEditorial .discoverShelfActions{min-width:0}
+ .homeEditorial .homeNovelTile :is(.catalogCardContent h3,.homeBookDetails h3){
+  overflow-wrap:anywhere;
+ }
+}
+@media(max-width:430px){
+ .homeEditorial .homeSectionHead,
+ .homeEditorial .discoverShelfHead{gap:10px}
+ .homeEditorial .homeFeaturedInfo{overflow-wrap:anywhere}
+ .homeEditorial .homeNovelTile .catalogStatusRow{gap:5px}
+ .homeEditorial .homeNovelTile :is(.catalogStatusTag,.homeBookTags>span){
+  max-width:100%;
+  overflow-wrap:anywhere;
+ }
+ .homeEditorial .homeGenreLinks button{min-height:44px;max-width:100%;overflow-wrap:anywhere}
+ .homeEditorial .homeVolumeReleaseGrid{gap:10px}
+ .homeEditorial .volumeReleaseOpen{white-space:normal;line-height:1.3}
+}
+@media(hover:none), (pointer:coarse){
+ .homeEditorial .homeQuickLinks button:hover,
+ .homeEditorial .shelfArrow:hover{
+  transform:none;
+ }
+ .homeEditorial .homeNovelTile .catalogCoverOverlay{
+  opacity:0;
+  pointer-events:none;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .homeEditorial .homeQuickLinks button,
+ .homeEditorial .shelfArrow{transition:none!important}
+}
+
+
+/* Fase 4: Safari/WebKit debe ubicar inmediatamente los enlaces de estanterías.
+   Evita competir con scrollIntoView en Home móvil; el arrastre táctil no cambia. */
+@media(max-width:760px){
+ html:has(.homeEditorial){scroll-behavior:auto}
+ .homeEditorial .discoverShelfTrack{scroll-behavior:auto}
+}
+
+
+/* QA — contraste WCAG y objetivos táctiles sin sacrificar efectos de portada. */
+.homeEditorial .discoverShelfActions .btn.ghost,
+.homeEditorial .discoverShelfHead .btn.ghost{
+ color:var(--text);background:var(--panel);opacity:1;
+}
+.homeEditorial .homeShowcaseActions .btn.primary{
+ background:var(--accent);color:#111;
+ border-color:color-mix(in srgb,var(--accent) 70%,#111);
+ opacity:1;
+}
+.homeEditorial .homeNovelTile :is(.catalogCardContent h3 a,.catalogTranslator,.catalogUpdated,.catalogLanguage,.catalogOriginalStatus),
+.homeEditorial .homeNovelTile .catalogGenres span{color:var(--text)}
+.homeEditorial .homeNovelTile .catalogStatusTag{color:var(--home-label-ink);background:var(--home-paper)}
+body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.catalogLanguage,.catalogOriginalStatus){color:var(--text)}
+.pagedFormatBar .btn{min-width:44px;min-height:44px}
+.teamIdentityKicker{
+ display:inline-flex;align-items:center;max-width:100%;
+ padding:6px 9px;border-radius:6px;
+ background-color:#111;color:#fff;
+ line-height:1.4;overflow-wrap:anywhere;
+}
+.teamIdentityMark{color:#ffd400}
+@media(prefers-reduced-motion:reduce){
+ .homeEditorial .homeMotionPending .discoverShelfHead::after{transition:none!important}
+}
+
+
+/* Studio > vista previa: .teamLivePreview span no debe neutralizar el contraste del banner. */
+.teamLivePreview .teamIdentityBanner > .teamIdentityKicker{
+ display:inline-flex;
+ align-items:center;
+ margin-top:0;
+ padding:6px 9px;
+ border-radius:6px;
+ background:#111;
+ color:#fff;
+ font-size:.7rem;
+ line-height:1.4;
+ letter-spacing:.12em;
+}
+.teamLivePreview .teamIdentityBanner > .teamIdentityMark{
+ display:inline-block;
+ margin-top:0;
+ padding:0;
+ border-radius:0;
+ background:transparent;
+ color:#ffd400;
+ font-size:2rem;
+}
