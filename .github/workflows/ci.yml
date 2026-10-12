@@ -80,6 +80,8 @@ jobs:
         run: node scripts/appearance-contrast-check.mjs
       - name: Visual cohesion phase 3 audit
         run: node scripts/visual-unification-phase3-check.mjs
+      - name: Home phase 2 editorial shelf and mobile regression
+        run: node scripts/home-editorial-phase2-check.mjs
       - name: Appearance visual regression phase 4 matrix
         run: node scripts/visual-regression-phase4-check.mjs
       - name: Mobile navigation phase 2 interaction audit
