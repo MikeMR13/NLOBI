@@ -5036,8 +5036,8 @@ body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.
   margin:8px 0 4px;
  }
  .homeEditorial .homeShowcaseActions .btn{
-  min-height:42px;
-  padding:7px 10px;
+  min-height:48px;
+  padding:9px 10px;
   font-size:.84rem;
  }
  .homeEditorial .homeShowcaseNote{display:none}
@@ -5109,3 +5109,9 @@ body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.
   min-height:382px;
  }
 }
+
+/* El Home puede pintar el encabezado mientras llega el catálogo; reservar la portada. */
+.homeEditorial .homeFeaturedLoading .homeLoadingCover{aspect-ratio:2/3;height:auto;width:min(80%,150px);max-height:230px;min-height:0}
+.homeEditorial .homeFeaturedLoading .homeFeaturedSlideInfo{justify-content:center;gap:15px}
+.homeEditorial .homeFeaturedLoading .homeLoadingLine{max-width:100%}
+@media(max-width:370px){.homeEditorial .homeFeaturedLoading{height:390px;min-height:390px}}
