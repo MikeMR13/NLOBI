@@ -69,6 +69,49 @@ assert.equal(blocks[0].text,'Hola ¡Quantico!');
 assert.match(blocks[0].html,/data-epub-family="1"/);
 assert.match(blocks[0].html,/data-epub-family="2"/);
 assert.match(blocks[0].html,/<strong>/,'Inline bold variants must survive import');
+
+const semanticGroup={childNodes:[
+ {nodeType:3,textContent:'Texto '},
+ {nodeType:1,tagName:'STRONG',getAttribute:()=>null,childNodes:[{nodeType:3,textContent:'negrita'}]},
+ {nodeType:3,textContent:' y '},
+ {nodeType:1,tagName:'EM',getAttribute:()=>null,childNodes:[{nodeType:3,textContent:'cursiva'}]}
+]};
+const sem=inlineContext.inlineContainerBlocks(semanticGroup,'paragraph');
+assert.equal(sem.length,1,'Semantic formatting should remain inside one paragraph');
+assert.equal(sem[0].text,'Texto negrita y cursiva');
+assert.match(sem[0].html,/<strong>negrita<\/strong>/,'Bold must survive without an EPUB font');
+assert.match(sem[0].html,/<em>cursiva<\/em>/,'Italic must survive without an EPUB font');
+assert.ok(!sem[0].html.includes('data-epub-family'),'Rich HTML must be preserved independently of embedded fonts');
+
+const cssEmphasis=[
+ 'p.emphasis {font-weight:700;font-style:italic}',
+ 'span.normal {font-weight:400;font-style:normal}'
+];
+const resolver= sandbox.epubFontCssResolver([],cssEmphasis);
+const para=element(['p.emphasis']),reset=element(['span.normal'],para);
+assert.equal(resolver.textStyle(para).bold,true,'EPUB stylesheet class should set bold');
+assert.equal(resolver.textStyle(para).italic,true,'EPUB stylesheet class should set italic');
+assert.equal(resolver.textStyle(reset).bold,false,'Nested class should cancel inherited bold');
+assert.equal(resolver.textStyle(reset).italic,false,'Nested class should cancel inherited italic');
+const paraStyled={childNodes:[{nodeType:3,textContent:'Mensaje importante'}]};
+const styled=inlineContext.inlineContainerBlocks(paraStyled,'paragraph',()=>null);
+assert.equal(styled.length,1);
+const styledFont=inlineContext.inlineContainerBlocks(paraStyled,'paragraph',Object.assign(()=>null,{textStyle:()=>({bold:true,italic:true})}));
+assert.match(styledFont[0].html,/<strong><em>Mensaje importante<\/em><\/strong>|<em><strong>Mensaje importante<\/strong><\/em>/,'CSS-only emphasis should survive with no embedded fonts');
+
+const readerContext={
+ normalizeBlock:block=>block,
+ editorialSafeHtml:html=>html,
+ esc:value=>String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'),
+ safeMediaUrl:value=>value,safeUrl:value=>value
+};
+vm.createContext(readerContext);
+vm.runInContext(section('function renderReaderBlock','function importSteps'),readerContext);
+const richReader=readerContext.renderReaderBlock({type:'paragraph',text:'Texto negrita y cursiva',html:'Texto <strong>negrita</strong> y <em>cursiva</em>'});
+assert.match(richReader,/<strong>negrita<\/strong>/,'Reader should render preserved bold tags');
+assert.match(richReader,/<em>cursiva<\/em>/,'Reader should render preserved italic tags');
+
+
 assert.match(source,/face=new FontFace\('NLOBI-EPUB-'\+index/,'Use a stable unique family index per weight/style variant');
 assert.match(source,/reader-font-original \[data-epub-family/,'Original mode must apply preserved inline styles');
 

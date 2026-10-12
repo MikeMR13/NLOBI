@@ -2144,9 +2144,17 @@ function textWithoutRubyAnnotations(node){const clone=node.cloneNode(true);clone
 function rubyBlock(node){const rt=node.querySelector('rt')?.textContent?.trim()||'';const clone=node.cloneNode(true);clone.querySelectorAll('rt,rp').forEach(x=>x.remove());const base=clone.textContent.trim();return base?{type:'ruby',base,reading:rt}:null}
 function inlineContainerBlocks(node,type='paragraph',resolveFont=null){
  const out=[];let buf='',pieces=[];
- const flush=()=>{const b=importTextBlock(buf,type);if(b){if(pieces.some(x=>x.includes('data-epub-family')))b.html=editorialSafeHtml(pieces.join(''));out.push(b)}buf='';pieces=[]};
- const append=(value,element)=>{buf+=value;const index=resolveFont?resolveFont(element):null;pieces.push(Number.isInteger(index)&&index>=0&&index<32?'<span data-epub-family="'+index+'">'+esc(value)+'</span>':esc(value))};
- const walk=(child,parent)=>{if(child.nodeType===Node.TEXT_NODE){append(child.textContent||'',parent);return}if(child.nodeType!==Node.ELEMENT_NODE)return;const tag=child.tagName.toLowerCase();if(tag==='ruby'){flush();const b=rubyBlock(child);if(b){const font=resolveFont?.(child);if(Number.isInteger(font)&&font>=0&&font<32)b.epubFamily=font;out.push(b)}return}if(tag==='img'){flush();const src=child.getAttribute('src')||'';if(src)out.push({type:'image',url:src,alt:child.getAttribute('alt')||'',caption:child.getAttribute('title')||''});return}if(tag==='br'){buf+='\n';pieces.push('<br>');return}const wrapper={b:'strong',strong:'strong',i:'em',em:'em',u:'u',s:'s'}[tag];const style=child.getAttribute('style')||'';const bold=!wrapper&&/(?:^|;)\s*font-weight\s*:\s*(?:bold|[6-9]00)(?:\s*!important)?\s*(?:;|$)/i.test(style);const italic=!wrapper&&/(?:^|;)\s*font-style\s*:\s*(?:italic|oblique)(?:\s*!important)?\s*(?:;|$)/i.test(style);if(wrapper)pieces.push('<'+wrapper+'>');if(bold)pieces.push('<strong>');if(italic)pieces.push('<em>');for(const nested of child.childNodes)walk(nested,child);if(italic)pieces.push('</em>');if(bold)pieces.push('</strong>');if(wrapper)pieces.push('</'+wrapper+'>')};
+ const flush=()=>{const b=importTextBlock(buf,type);if(b){if(pieces.some(x=>x.includes('<')))b.html=editorialSafeHtml(pieces.join(''));out.push(b)}buf='';pieces=[]};
+ const append=(value,element)=>{
+  buf+=value;
+  const index=resolveFont?resolveFont(element):null,style=resolveFont?.textStyle?.(element);
+  let fragment=esc(value);
+  if(Number.isInteger(index)&&index>=0&&index<32)fragment='<span data-epub-family="'+index+'">'+fragment+'</span>';
+  if(style?.bold)fragment='<strong>'+fragment+'</strong>';
+  if(style?.italic)fragment='<em>'+fragment+'</em>';
+  pieces.push(fragment);
+ };
+ const walk=(child,parent)=>{if(child.nodeType===Node.TEXT_NODE){append(child.textContent||'',parent);return}if(child.nodeType!==Node.ELEMENT_NODE)return;const tag=child.tagName.toLowerCase();if(tag==='ruby'){flush();const b=rubyBlock(child);if(b){const font=resolveFont?.(child);if(Number.isInteger(font)&&font>=0&&font<32)b.epubFamily=font;out.push(b)}return}if(tag==='img'){flush();const src=child.getAttribute('src')||'';if(src)out.push({type:'image',url:src,alt:child.getAttribute('alt')||'',caption:child.getAttribute('title')||''});return}if(tag==='br'){buf+='\n';pieces.push('<br>');return}const wrapper={b:'strong',strong:'strong',i:'em',em:'em',u:'u',s:'s'}[tag];const style=child.getAttribute('style')||'';const bold=!resolveFont?.textStyle&&!wrapper&&/(?:^|;)\s*font-weight\s*:\s*(?:bold|[6-9]00)(?:\s*!important)?\s*(?:;|$)/i.test(style);const italic=!resolveFont?.textStyle&&!wrapper&&/(?:^|;)\s*font-style\s*:\s*(?:italic|oblique)(?:\s*!important)?\s*(?:;|$)/i.test(style);if(wrapper)pieces.push('<'+wrapper+'>');if(bold)pieces.push('<strong>');if(italic)pieces.push('<em>');for(const nested of child.childNodes)walk(nested,child);if(italic)pieces.push('</em>');if(bold)pieces.push('</strong>');if(wrapper)pieces.push('</'+wrapper+'>')};
  for(const child of node.childNodes)walk(child,node);flush();return out
 }
 function htmlNodesToBlocks(root,resolveFont=null){
@@ -2206,8 +2214,45 @@ function epubFontCssResolver(fonts,styles){
    }
   }
  }
+ const textRules=[];
+ const boldValue=value=>/^(?:bold|bolder|[6-9]00)(?:\s*!important)?$/i.test(String(value||'').trim());
+ const italicValue=value=>/^(?:italic|oblique)(?:\s|!important|$)/i.test(String(value||'').trim());
+ const cssValue=(declarations,property)=>String(declarations||'').match(new RegExp('(?:^|;)\\s*'+property+'\\s*:\\s*([^;}]*)','i'))?.[1]?.trim();
+ for(const css of styles||[]){
+  const plain=String(css||'').replace(/\/\*[\s\S]*?\*\//g,'').replace(/@font-face\s*\{[^}]*\}/gi,'');
+  for(const m of plain.matchAll(/([^{}]+)\{([^{}]*)\}/g)){
+   const weight=cssValue(m[2],'font-weight'),style=cssValue(m[2],'font-style');
+   if(weight===undefined&&style===undefined)continue;
+   for(const selector of m[1].split(',')){
+    const clean=selector.trim();
+    if(clean&&!clean.startsWith('@')&&clean.length<=160&&textRules.length<400)textRules.push({selector:clean,weight,style});
+   }
+  }
+ }
+ const emphasisCache=new WeakMap();
+ const textStyle=element=>{
+  if(!element||element.nodeType!==Node.ELEMENT_NODE)return {bold:false,italic:false};
+  if(emphasisCache.has(element))return emphasisCache.get(element);
+  let weight,style,current=element;
+  while(current&&current.nodeType===Node.ELEMENT_NODE&&(weight===undefined||style===undefined)){
+   const inline=current.getAttribute('style')||'';
+   let ownWeight=cssValue(inline,'font-weight'),ownStyle=cssValue(inline,'font-style');
+   for(let i=textRules.length-1;i>=0&&(ownWeight===undefined||ownStyle===undefined);i--)try{
+    if(current.matches(textRules[i].selector)){
+     if(ownWeight===undefined)ownWeight=textRules[i].weight;
+     if(ownStyle===undefined)ownStyle=textRules[i].style;
+    }
+   }catch{}
+   if(weight===undefined&&ownWeight!==undefined)weight=ownWeight;
+   if(style===undefined&&ownStyle!==undefined)style=ownStyle;
+   current=current.parentElement;
+  }
+  const value={bold:boldValue(weight),italic:italicValue(style)};
+  emphasisCache.set(element,value);
+  return value;
+ };
  const cache=new WeakMap();
- return element=>{
+ const resolve=element=>{
   if(!element||element.nodeType!==Node.ELEMENT_NODE)return null;
   if(cache.has(element))return cache.get(element);
   let current=element,result=null;
@@ -2218,7 +2263,9 @@ function epubFontCssResolver(fonts,styles){
    current=current.parentElement;
   }
   cache.set(element,result);return result
- }
+ };
+ resolve.textStyle=textStyle;
+ return resolve;
 }
 async function epubEmbeddedFonts(zip,manifest,opfBase,warnings){
  const declared=Object.values(manifest).filter(x=>/\.css(?:$|[?#])/i.test(x.href||'')||x.mediaType==='text/css').map(x=>epubHrefKey(opfBase,x.href));
