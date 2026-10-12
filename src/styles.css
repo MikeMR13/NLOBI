@@ -4849,7 +4849,7 @@ body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.
   flex:1 1 auto;
   justify-content:flex-start;
   height:auto;
-  min-height:210px;
+  min-height:315px;
   padding:13px 18px 16px;
  }
  .homeEditorial .homeFeaturedSlideInfo{
@@ -4893,7 +4893,7 @@ body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.
   max-height:170px;
  }
  .homeEditorial .homeFeaturedVisual .homeFeaturedBook{width:99px;max-width:99px}
- .homeEditorial .homeFeaturedInfo{min-height:205px;padding:12px 14px 14px}
+ .homeEditorial .homeFeaturedInfo{min-height:330px;padding:12px 14px 14px}
  .homeEditorial .homeFeaturedSlideInfo h2{font-size:1.03rem}
  .homeEditorial .featuredCarouselControls{gap:4px}
 }
