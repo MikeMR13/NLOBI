@@ -2069,7 +2069,6 @@ function setupHomeReadingMotion(){
   for(const entry of entries){
    if(!entry.isIntersecting)continue;
    entry.target.classList.add('homeMotionShown');
-   entry.target.classList.remove('homeMotionPending');
    homeRevealObserver?.unobserve(entry.target);
   }
  },{rootMargin:'0px 0px 72px 0px',threshold:0});
