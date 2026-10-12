@@ -87,7 +87,7 @@ const scenarios=[
  ['user-library-collections-edit','library',{...authBase,catalog:[collectionTranslation],libraryTab:'collections',readerCollections:[collectionFixture],savedCollections:[],discoverCollections:[],collectionFormOpen:true,collectionEditingId:'collection-qa'}],
  ['user-profile','auth',authBase],['user-notifications','notifications',authBase],
  ['user-notifications-volume','notifications',{...authBase,notes:[{id:'notice-volume',notification_type:'new_publication',title:'Nuevo volumen · Historia QA',body:'Vol. 1',translation_id:'project-1',volume_id:'volume-1',section_id:null,created_at:now,read_at:null}]}],['user-beta','beta',authBase],
- ['creator-studio','studio',authBase],['creator-new','studio:new',authBase],
+ ['creator-studio','studio',authBase],['creator-work','studio:work',authBase],['creator-new','studio:new',authBase],
  ['creator-project','studio:project:project-1',{...authBase,studioProject:translation,teamMembers}],
  ['creator-team','studio:team:group-1',{...authBase,studioTeam:group,teamMembers}],
   ...['identity','custom','reader','requests','members','permissions','links'].map(tab=>['creator-team-'+tab,'studio:team:group-1',{...authBase,studioTeam:{...group,join_requests:[],profile_settings:{show_reader_logo:true,status:'activo'}},teamSettingsTab:tab,teamMembers}]),
@@ -145,7 +145,7 @@ const report=[],failures=[];
 for(const [vpName,width,height] of viewports){
  for(const [name,view,state] of scenarios){
   const full=vpName==='mobile-390'||vpName==='desktop-1280';
-  const edge=['public-home','public-home-carousel','public-explore','public-detail','public-reader','user-library','creator-studio','creator-project','creator-team','creator-project-block-editor','creator-project-paged-editor','creator-team-reader','creator-team-custom','import-edit','admin','error-state'];
+  const edge=['public-home','public-home-carousel','public-explore','public-detail','public-reader','user-library','creator-studio','creator-work','creator-project','creator-team','creator-project-block-editor','creator-project-paged-editor','creator-team-reader','creator-team-custom','import-edit','admin','error-state'];
   if(!full&&!edge.includes(name))continue;
   const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block',colorScheme:'light'});await prepare(context);
   const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!/favicon|Failed to load resource/i.test(m.text()))runtime.push(m.text())});
@@ -157,6 +157,7 @@ for(const [vpName,width,height] of viewports){
    await page.screenshot({path:'quality-results/studio-audit-'+name+'-'+vpName+'.png',fullPage:true});
    const appMain=await page.locator('main').first().innerText().catch(()=> '');
    if(name==='creator-studio' && !appMain.includes('Mis obras'))failures.push({...row,error:'studio-mis-obras-not-rendered'});
+   if((await page.locator('#mainContent').count())!==1)failures.push({...row,error:'skip-link-main-target-missing'});
    if(name==='creator-project-block-editor' && (await page.locator('[data-team-template="translator_note"]').count())!==1)failures.push({...row,error:'team-note-toolbar-button-invalid'});
    if(name.startsWith('creator-team-') && ['identity','custom','reader','requests','members','permissions','links'].includes(name.slice(13))){
     const current=name.slice(13);
