@@ -3387,6 +3387,7 @@ function registerPwa(){
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;S.pwaInstallReady=true;render()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;S.pwaInstallReady=false;toast('El Obi del Lector quedó instalado.','ok');render()});
 async function boot(isRetry=false){
+ let renderedAfterCatalog=false;
  S.catalogLoading=true;
  applySiteAppearance();
  S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();
@@ -3406,7 +3407,7 @@ async function boot(isRetry=false){
    try{await loadCatalog(S.view==='home');S.catalogLoaded=true;S.err=''}catch(error){S.err=friendlyError(error,'No se pudo cargar el catálogo.');console.warn('[NLOBI] El catálogo no impide recuperar la cuenta',error)}
    S.catalogLoading=false;
    // El contenido principal y su portada no esperan valoraciones ni información de cuenta.
-   render();
+   render();renderedAfterCatalog=true;
    if(isRetry)toast('Conexión restablecida.','ok');
 
    // Valoraciones solo enriquecen vistas secundarias: nunca bloquean el hero.
@@ -3421,12 +3422,13 @@ async function boot(isRetry=false){
    // Las rutas privadas de Studio sí necesitan el contexto de sesión.
    if(S.view==='studio'||S.view.startsWith('studio:')||S.view==='admin')await sessionTask;
    await resolveDynamicRoute(S.view);
-   render();
+   // En Home no hay resolución adicional: evita reconstruir todo el DOM sin cambios.
+   if(S.view!=='home')render();
    // Evitar promesas sin manejar; estas tareas siguen independientemente del primer render.
    void ratingsTask;void sessionTask;
   }else{await resolveDynamicRoute(S.view);S.err=''}
  }catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}
- finally{S.catalogLoading=false;render()}
+ finally{S.catalogLoading=false;if(!renderedAfterCatalog||S.err)render()}
  const notice=sessionStorage.getItem('nlobi_auth_notice');
  if(notice){sessionStorage.removeItem('nlobi_auth_notice');const bad=notice.startsWith('error:'),msg=notice.slice(notice.indexOf(':')+1);toast(bad?'No se pudo confirmar el correo: '+msg:msg,bad?'bad':'ok')}
 }
