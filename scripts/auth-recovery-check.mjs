@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 const app=readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
 new Function(app);
 const extract=(start,end)=>{const a=app.indexOf(start),b=app.indexOf(end,a+start.length);assert.ok(a>=0&&b>a,'Missing region: '+start);return app.slice(a,b)};
-for(const value of ['id="forgotPassword"','id="recoverPasswordForm"','id="resetPasswordForm"','id="recoverEmail"','id="recoveryNewPassword"','id="recoveryConfirmPassword"','type=\'recovery\'','authSessionInvalid','let authValidated=false'])assert.ok(app.includes(value),'Missing recovery/session feature '+value);
+for(const value of ['id="forgotPassword"','id="recoverPasswordForm"','id="resetPasswordForm"','id="recoverEmail"','id="recoveryNewPassword"','id="recoveryConfirmPassword"',"p.get('type')==='recovery'",'authSessionInvalid','let authValidated=false'])assert.ok(app.includes(value),'Missing recovery/session feature '+value);
 const callbackSrc=extract('function consumeAuthCallback(){','\nasync function refreshSession()');
 const captured=[];const storage={setItem:(k,v)=>captured.push([k,v])};
 let route='';const location={hash:'#access_token=test&refresh_token=refresh&type=recovery',pathname:'/',search:''};
