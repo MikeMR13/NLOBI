@@ -85,6 +85,8 @@ jobs:
         run: node scripts/detail-editorial-phase2-check.mjs
       - name: Detail editorial phase 3 chapter index and navigation regression (Chromium + WebKit)
         run: node scripts/detail-editorial-phase3-check.mjs
+      - name: Detail editorial phase 4 book motion, paper and accessibility regression (Chromium + WebKit)
+        run: node scripts/detail-editorial-phase4-check.mjs
       - name: Featured cover size and motion regression (Chromium + WebKit)
         run: node scripts/home-featured-balance-check.mjs
       - name: Mobile interaction audit (Chromium + WebKit)

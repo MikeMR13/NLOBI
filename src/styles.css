@@ -5299,3 +5299,122 @@ body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.
  .volumeNeighborCurrent{max-width:88px;white-space:normal}
 }
 @media(prefers-reduced-motion:reduce){.volumeOpenedProgress progress,.volumeChapterRow{transition:none}}
+
+
+/* Ficha editorial · Fase 4: acabados literarios livianos, sin imágenes adicionales.
+   El lector y las portadas conservan sus estilos/formatos originales. */
+.volumeGallerySection .volumeGallery:not(.isListView){
+  padding-bottom:12px;
+  border-bottom:2px solid color-mix(in srgb,var(--accent) 23%,var(--line));
+}
+.volumeGallerySection .volumeEditorialCard{
+  transform-origin:22% 55%;
+  backface-visibility:hidden;
+}
+.volumeGallerySection .volumeEditorialCard .volumeGalleryArtwork{
+  box-shadow:inset 8px 0 9px -8px rgba(0,0,0,.34);
+}
+.volumeGallerySection .volumeEditorialCard .volumeGalleryInfo{
+  background-image:linear-gradient(180deg,color-mix(in srgb,var(--accent) 2%,transparent),transparent 46%);
+}
+.volumeGallerySection .volumeEditorialCard .volumeGalleryCardAction span{
+  display:inline-block;
+}
+.volumeEditorialOpened .volumeOpenedHero{
+  position:relative;
+  isolation:isolate;
+  background-image:linear-gradient(132deg,color-mix(in srgb,var(--accent) 5%,var(--panel)),var(--panel) 55%);
+}
+.volumeEditorialOpened .volumeOpenedCover{
+  position:relative;
+  transform-origin:8% 50%;
+  backface-visibility:hidden;
+}
+.volumeEditorialOpened .volumeOpenedCover::after{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:6px;
+  pointer-events:none;
+  background:linear-gradient(90deg,rgba(0,0,0,.27),rgba(255,255,255,.14),transparent);
+  border-radius:10px 0 0 10px;
+}
+.volumeEditorialOpened .volumeIndexHeading{
+  padding-bottom:12px;
+  border-bottom:1px solid color-mix(in srgb,var(--accent) 30%,var(--line));
+}
+.volumeEditorialOpened .volumeIndexHeading h3{
+  text-wrap:balance;
+}
+.volumeEditorialOpened .volumeChapterIndex{
+  background-color:var(--panel);
+  background-image:repeating-linear-gradient(
+    to bottom,
+    transparent 0px,transparent 43px,
+    color-mix(in srgb,var(--accent) 4%,transparent) 44px,
+    transparent 45px,transparent 88px
+  );
+}
+.volumeEditorialOpened .volumeChapterRow.isNext{
+  position:relative;
+  box-shadow:inset 3px 0 0 color-mix(in srgb,var(--accent) 82%,var(--line));
+}
+.volumeEditorialOpened .volumeChapterRow:is(.isRead,.isNext) .volumeChapterNumber{
+  color:var(--accentText);
+}
+@keyframes obiVolumeCoverOpen{
+  from{opacity:.55;transform:perspective(900px) rotateY(-12deg) translateY(5px)}
+  to{opacity:1;transform:perspective(900px) rotateY(0) translateY(0)}
+}
+@keyframes obiVolumePaperEnter{
+  from{opacity:.7;transform:translateY(7px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@media(prefers-reduced-motion:no-preference){
+  html:not([data-site-motion="reduce"]) .volumeEditorialOpened .volumeOpenedCover{
+    animation:obiVolumeCoverOpen .42s cubic-bezier(.22,.75,.28,1) both;
+  }
+  html:not([data-site-motion="reduce"]) .volumeEditorialOpened .volumeChapterIndex{
+    animation:obiVolumePaperEnter .30s ease-out both;
+  }
+}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  html:not([data-site-motion="reduce"]) .volumeGallerySection .volumeEditorialCard{
+    transition:transform .24s cubic-bezier(.2,.7,.3,1),box-shadow .24s ease,border-color .18s ease;
+  }
+  html:not([data-site-motion="reduce"]) .volumeGallerySection .volumeEditorialCard:hover{
+    transform:perspective(950px) rotateY(-3deg) translateY(-5px);
+    box-shadow:9px 15px 30px rgba(0,0,0,.15);
+  }
+  html:not([data-site-motion="reduce"]) .volumeGallerySection .volumeEditorialCard:hover .volumeGalleryCardAction span{
+    transform:translateX(3px);
+    transition:transform .20s ease;
+  }
+}
+@media(hover:none){
+  .volumeGallerySection .volumeEditorialCard:hover{transform:none}
+}
+@media(max-width:580px){
+  .volumeEditorialOpened .volumeChapterIndex{
+    background-size:100% 89px;
+  }
+  .volumeGallerySection .volumeGallery:not(.isListView){padding-bottom:8px}
+}
+@media(forced-colors:active){
+  .volumeGallerySection .volumeEditorialCard .volumeGalleryInfo,
+  .volumeEditorialOpened .volumeOpenedHero,
+  .volumeEditorialOpened .volumeChapterIndex{background-image:none}
+  .volumeEditorialOpened .volumeChapterRow.isNext{outline:2px solid Highlight;outline-offset:-2px}
+}
+@media(prefers-reduced-motion:reduce){
+  .volumeEditorialOpened .volumeOpenedCover,
+  .volumeEditorialOpened .volumeChapterIndex,
+  .volumeGallerySection .volumeEditorialCard,
+  .volumeGallerySection .volumeGalleryCardAction span{animation:none!important;transition:none!important;transform:none!important}
+}
+html[data-site-motion="reduce"] .volumeEditorialOpened .volumeOpenedCover,
+html[data-site-motion="reduce"] .volumeEditorialOpened .volumeChapterIndex,
+html[data-site-motion="reduce"] .volumeGallerySection .volumeEditorialCard,
+html[data-site-motion="reduce"] .volumeGallerySection .volumeGalleryCardAction span{
+  animation:none!important;transition:none!important;transform:none!important;
+}
