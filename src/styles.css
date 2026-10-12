@@ -4377,3 +4377,152 @@ html[data-site-corners="soft"] .homeEditorial :is(.homeNovelTile,.volumeReleaseC
  .homeEditorial .homeNovelTile .newVolumeTag,
  .homeEditorial .volumeReleaseBadge{border:1px solid CanvasText}
 }
+
+
+/* HOME — Fase 3: experiencia inmersiva de lectura (2026-10-11).
+   Todas las microinteracciones se limitan al Home, usan transform/opacity
+   y no alteran medidas, scroll-snap ni contenido accesible. */
+
+/* Transición progresiva: el contenido permanece visible sin JavaScript. */
+.homeEditorial .homeMotionPending{
+ opacity:1;
+ transform:none;
+}
+@media (prefers-reduced-motion:no-preference){
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending{
+  opacity:0;
+  transform:translate3d(0,13px,0);
+  transition:opacity .4s ease-out,transform .4s cubic-bezier(.2,.7,.25,1);
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending.homeMotionShown{
+  opacity:1;
+  transform:none;
+ }
+}
+
+/* Se conserva la perspectiva de un libro sin distorsionar las ilustraciones. */
+.homeEditorial .homeFeaturedVisual{perspective:900px}
+.homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+ transform-origin:16% 50%;
+ backface-visibility:hidden;
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink),
+.homeEditorial .volumeReleaseCover{
+ isolation:isolate;
+}
+.homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover),
+.homeEditorial .volumeReleaseCover img{
+ transform-origin:left center;
+ backface-visibility:hidden;
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink)::after,
+.homeEditorial .volumeReleaseCover::after{
+ content:"";
+ position:absolute;
+ right:0;
+ bottom:0;
+ z-index:2;
+ width:0;
+ height:0;
+ border-style:solid;
+ border-width:0 0 25px 25px;
+ border-color:transparent transparent color-mix(in srgb,var(--panel) 84%,var(--accent) 16%) transparent;
+ box-shadow:-1px -1px 2px rgba(0,0,0,.05);
+ opacity:0;
+ transform:translate3d(8px,8px,0);
+ pointer-events:none;
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink):focus-visible,
+.homeEditorial .volumeReleaseCover:focus-visible{
+ outline:3px solid var(--accent);
+ outline-offset:-3px;
+}
+
+/* El botón de abrir novela sigue funcionando sin esperar animación. */
+@media (hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+  transition:transform .33s cubic-bezier(.2,.7,.25,1),box-shadow .33s ease;
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeFeaturedVisual .homeFeaturedBook:is(:hover,:focus-visible){
+  transform:rotate(-2deg) rotateY(-9deg) translate3d(0,-4px,0);
+  box-shadow:13px 19px 31px rgba(0,0,0,.26),inset 4px 0 6px rgba(0,0,0,.12);
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover),
+ html:not([data-site-motion="reduce"]) .homeEditorial .volumeReleaseCover img{
+  transition:transform .29s cubic-bezier(.2,.72,.3,1),filter .29s ease;
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink):is(:hover,:focus-visible) :is(.catalogBookArt,.cover),
+ html:not([data-site-motion="reduce"]) .homeEditorial .volumeReleaseCover:is(:hover,:focus-visible) img{
+  transform:perspective(950px) rotateY(-5deg) scale(.986) translate3d(1px,0,0);
+  filter:brightness(1.035);
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink)::after,
+ html:not([data-site-motion="reduce"]) .homeEditorial .volumeReleaseCover::after{
+  transition:opacity .22s ease,transform .28s cubic-bezier(.2,.72,.3,1);
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink):is(:hover,:focus-visible)::after,
+ html:not([data-site-motion="reduce"]) .homeEditorial .volumeReleaseCover:is(:hover,:focus-visible)::after{
+  opacity:1;
+  transform:none;
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile:hover,
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeNovelTile:focus-within{
+  transform:translateY(-3px);
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeQuickLinks button:not(:disabled):hover{
+  transform:translateY(-2px);
+ }
+}
+/* No mover tarjetas sobre dispositivos táctiles ni con poca precisión. */
+@media (hover:none), (pointer:coarse){
+ .homeEditorial .homeNovelTile:hover,
+ .homeEditorial .homeNovelTile:focus-within,
+ .homeEditorial .volumeReleaseCard:hover{
+  transform:none;
+ }
+ .homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover),
+ .homeEditorial .volumeReleaseCover img{
+  transform:none!important;
+ }
+}
+/* Mientras se lee el título o la sinopsis, el foco y el cursor pausan el autoavance. */
+.homeEditorial .featuredCarouselArrow{
+ transition:background-color .18s ease,border-color .18s ease,color .18s ease;
+}
+.homeEditorial .featuredCarouselArrow:is(:hover,:focus-visible){
+ background:var(--accent);
+ color:#111;
+ border-color:var(--accent);
+}
+
+/* Nunca esconder libros o desplazar controles con accesibilidad activa. */
+@media (prefers-reduced-motion:reduce){
+ .homeEditorial .homeMotionPending,
+ .homeEditorial .homeMotionPending.homeMotionShown{
+  opacity:1!important;
+  transform:none!important;
+  transition:none!important;
+ }
+}
+@media (prefers-reduced-motion:reduce){
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook,
+ .homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover),
+ .homeEditorial .volumeReleaseCover img,
+ .homeEditorial .featuredCarouselArrow{
+  animation:none!important;
+  transition:none!important;
+ }
+ .homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink)::after,
+ .homeEditorial .volumeReleaseCover::after{display:none}
+}
+html[data-site-motion="reduce"] .homeEditorial .homeFeaturedVisual .homeFeaturedBook,
+html[data-site-motion="reduce"] .homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover),
+html[data-site-motion="reduce"] .homeEditorial .volumeReleaseCover img{transition:none!important;animation:none!important}
+html[data-site-motion="reduce"] .homeEditorial .homeMotionPending{
+ opacity:1!important;
+ transform:none!important;
+}
+@media (forced-colors:active){
+ .homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink)::after,
+ .homeEditorial .volumeReleaseCover::after{display:none}
+}
