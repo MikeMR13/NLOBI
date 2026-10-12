@@ -5548,3 +5548,163 @@ html[data-site-motion="reduce"] :is(.homeEditorial,.exploreEditorial,.libraryEdi
 :is(.catalogEditorialCard,.homeBookCard,.libraryShelfCard,.homeQuickLinks button){
  animation:none!important;transition:none!important;transform:none!important;
 }
+
+
+/* NLOBI · Sistema visual literario compartido — Etapa 2 (comunidad y perfiles).
+   Nunca sobrescribir la identidad, logos, imágenes ni el fondo personalizado de equipos. */
+:is(.publicReaderProfile,.readerDirectory,.teamPublicPage,.notificationsEditorial){
+  --obi-community-paper:color-mix(in srgb,var(--accent) 2.5%,var(--panel));
+  --obi-community-rule:color-mix(in srgb,var(--accent) 35%,var(--line));
+  --obi-community-shadow:0 6px 19px rgba(0,0,0,.06),0 1px 3px rgba(0,0,0,.035);
+  --obi-community-shadow-hover:0 13px 26px rgba(0,0,0,.11),0 2px 8px rgba(0,0,0,.055);
+}
+/* La comunidad comparte una estética de papel y biblioteca con la página de obras. */
+.readerDirectory .readerDirectoryHero{
+  position:relative;
+  isolation:isolate;
+  background-image:linear-gradient(126deg,var(--obi-community-paper),var(--panel) 70%);
+  box-shadow:var(--obi-community-shadow);
+}
+.readerDirectory .readerDirectoryHero::before{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:5px;
+  background:var(--obi-community-rule);
+  pointer-events:none;
+  border-radius:22px 0 0 22px;
+}
+:is(.publicReaderProfile,.teamPublicPage) :is(.publicReaderSectionHeader,.teamPublicSection>.sectionHead),
+.notificationsEditorial .notificationsToolbar{
+  padding-bottom:13px;
+  border-bottom:2px solid var(--obi-community-rule);
+}
+:is(.publicReaderProfile,.teamPublicPage,.notificationsEditorial,.readerDirectory)
+:is(.publicReaderSectionHeader,.teamPublicSection>.sectionHead,.notificationsToolbar) h2{
+  font-family:Georgia,"Times New Roman",serif;
+  letter-spacing:-.015em;
+  line-height:1.25;
+  text-wrap:balance;
+  overflow-wrap:anywhere;
+}
+:is(.readerDirectory .readerDirectoryCard,.readerDirectory .readerFeed,
+    .readerDirectory .readerFeedItem,.publicReaderProfile .publicReaderBookButton,
+    .publicReaderProfile .publicReaderActivityItem,.publicReaderProfile .publicReaderStats>div,
+    .teamPublicPage .teamPublicStat,.teamPublicPage .teamPublicIntro,
+    .teamPublicPage .teamPublicLink,.teamPublicPage .teamPublicRecentItem,
+    .notificationsEditorial .notificationFeedCard,.notificationsEditorial .notificationSettings){
+  min-width:0;
+  background-color:var(--panel);
+  background-image:linear-gradient(160deg,var(--obi-community-paper),var(--panel) 64%);
+  border-color:var(--line);
+  box-shadow:var(--obi-community-shadow);
+}
+:is(.readerDirectory .readerDirectoryCard,.readerDirectory .readerFeedItem,
+    .publicReaderProfile .publicReaderBookButton,.teamPublicPage .teamPublicRecentItem,
+    .teamPublicPage .teamPublicLink,.notificationsEditorial .notificationFeedCard):focus-within{
+  border-color:var(--obi-community-rule);
+}
+/* Indicadores discretos de capítulo: solo ornamentación, nunca contenido interactivo. */
+.notificationsEditorial .notificationFeedCard.unread{
+  border-left:4px solid var(--accent);
+  background-image:linear-gradient(92deg,color-mix(in srgb,var(--accent) 7%,var(--panel)),var(--panel) 42%);
+}
+.notificationsEditorial .notificationDateGroup::after{
+  background:var(--obi-community-rule);
+}
+.notificationsEditorial .notificationFeedContent h3,
+.teamPublicPage .teamPublicRecentItem strong,
+.readerDirectory .readerDirectoryIdentity h2{
+  overflow-wrap:anywhere;
+  text-wrap:pretty;
+}
+.readerDirectory .readerDirectoryAvatar{
+  color:#111;
+  background:var(--accent);
+}
+.teamPublicPage .teamPublicNav{
+  border-bottom:2px solid var(--obi-community-rule);
+}
+.teamPublicPage :is(.teamPublicStat strong,.teamPublicIntro .eyebrow){
+  font-variant-numeric:tabular-nums;
+}
+.teamPublicPage .teamPublicRecentItem >div,
+.notificationsEditorial .notificationFeedContent{
+  min-width:0;
+}
+.publicReaderProfile .publicReaderBookCover{
+  position:relative;
+  isolation:isolate;
+}
+.publicReaderProfile .publicReaderBookCover img{
+  object-fit:contain;
+  background:var(--panel2);
+}
+.publicReaderProfile .publicReaderBookCover::after{
+  content:"";
+  position:absolute;
+  inset:0 auto 0 0;
+  width:5px;
+  background:linear-gradient(90deg,rgba(0,0,0,.24),rgba(255,255,255,.08),transparent);
+  pointer-events:none;
+}
+:is(.readerDirectory,.publicReaderProfile,.teamPublicPage,.notificationsEditorial)
+:is(button,a,summary,input,select):focus-visible{
+  outline:3px solid var(--accent);
+  outline-offset:3px;
+}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+  html:not([data-site-motion="reduce"]) :is(
+    .readerDirectory .readerDirectoryCard,
+    .publicReaderProfile .publicReaderBookButton,
+    .teamPublicPage .teamPublicRecentItem,
+    .teamPublicPage .teamPublicLink,
+    .notificationsEditorial .notificationFeedCard){
+    transition:transform .20s cubic-bezier(.2,.7,.3,1),border-color .18s ease,box-shadow .20s ease;
+  }
+  html:not([data-site-motion="reduce"]) :is(
+    .readerDirectory .readerDirectoryCard,
+    .publicReaderProfile .publicReaderBookButton,
+    .teamPublicPage .teamPublicRecentItem,
+    .teamPublicPage .teamPublicLink):hover{
+    transform:translateY(-2px);
+    border-color:var(--obi-community-rule);
+    box-shadow:var(--obi-community-shadow-hover);
+  }
+}
+@media(hover:none){
+  :is(.readerDirectory .readerDirectoryCard,.publicReaderProfile .publicReaderBookButton,
+      .teamPublicPage .teamPublicRecentItem,.teamPublicPage .teamPublicLink):hover{
+    transform:none;
+  }
+}
+@media(max-width:430px){
+  .readerDirectory .readerDirectoryHero{padding:18px}
+  .readerDirectory .readerDirectoryCard{padding:14px}
+  .notificationsEditorial .notificationFeedCard{min-width:0}
+  .teamPublicPage .teamPublicRecentItem{min-width:0}
+}
+@media(forced-colors:active){
+  :is(.readerDirectory .readerDirectoryCard,.readerDirectory .readerFeed,
+      .readerDirectory .readerFeedItem,.publicReaderProfile .publicReaderBookButton,
+      .teamPublicPage .teamPublicStat,.teamPublicPage .teamPublicIntro,
+      .teamPublicPage .teamPublicLink,.teamPublicPage .teamPublicRecentItem,
+      .notificationsEditorial .notificationFeedCard){
+    background-image:none;border-color:CanvasText;
+  }
+  .publicReaderProfile .publicReaderBookCover::after{display:none}
+  .notificationsEditorial .notificationFeedCard.unread{outline:2px solid Highlight;outline-offset:-2px}
+}
+@media(prefers-reduced-motion:reduce){
+  :is(.readerDirectory .readerDirectoryCard,.readerDirectory .readerFeedItem,
+      .publicReaderProfile .publicReaderBookButton,.teamPublicPage .teamPublicRecentItem,
+      .teamPublicPage .teamPublicLink,.notificationsEditorial .notificationFeedCard){
+    animation:none!important;transition:none!important;transform:none!important;
+  }
+}
+html[data-site-motion="reduce"] :is(.readerDirectory .readerDirectoryCard,
+  .readerDirectory .readerFeedItem,.publicReaderProfile .publicReaderBookButton,
+  .teamPublicPage .teamPublicRecentItem,.teamPublicPage .teamPublicLink,
+  .notificationsEditorial .notificationFeedCard){
+  animation:none!important;transition:none!important;transform:none!important;
+}

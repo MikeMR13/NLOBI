@@ -7,7 +7,9 @@ const failures=[];
 for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
  const browser=await type.launch({headless:true});
  for(const width of [320,375,390,430]){
-  const context=await browser.newContext({viewport:{width,height:844},serviceWorkers:'block'});
+  // Esta suite comprueba clics y navegación, no animaciones (cubiertas por la matriz de Home).
+  // Reducir movimiento estabiliza el scroll-snap de WebKit en el carrusel móvil.
+  const context=await browser.newContext({viewport:{width,height:844},serviceWorkers:'block',reducedMotion:'reduce'});
   await context.route('**/runtime-config.js',route=>route.fulfill({status:200,contentType:'application/javascript',body:"window.__NLOBI_CONFIG__={supabaseUrl:'"+api+"',supabasePublishableKey:'qa',qaMode:true};"}));
   await context.route(api+'/**',route=>route.fulfill({status:200,contentType:'application/json',body:'[]'}));
   const page=await context.newPage();
@@ -45,7 +47,9 @@ for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
     const r=link.getBoundingClientRect();
     return r.width>0&&r.height>0&&r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth;
    },undefined,{timeout:6000});
-   await page.locator('a.catalogTitleLink').first().click({timeout:8000});
+   // WebKit puede seguir resolviendo scroll-snap un fotograma después del scroll instantáneo.
+   await page.waitForTimeout(350);
+   await page.locator('a.catalogTitleLink').first().click({timeout:15000});
    await page.waitForURL(/#detail:test-book/);
   }catch(e){failures.push({browser:name,width,error:String(e)})}
   await context.close();
