@@ -7,11 +7,11 @@ const sql=read('supabase/migrations/20261011062000_studio_phase7_publication_lau
 new Function(source);new Function(app);
 const win={};new Function('window',source)(win);
 assert.equal(typeof win.createStudioPhase7,'function');
-for(const str of ["studioLaunch?.bind()","studioLaunch?.summary(P)","studioLaunch.review('volume',id)","studioLaunch.review('section',id)","studioLaunch.review('schedule',id,date)","editorial_publication_events?translation_id=eq."]){
+for(const str of ["studioLaunch?.bind()","studioLaunch?.summary(P)","studioLaunch.review(updating?'update':'volume',id)","studioLaunch.review('section',id)","studioLaunch.review('schedule',id,date)","editorial_publication_events?translation_id=eq."]){
  assert.ok(app.includes(str),'Missing integration '+str);
 }
-assert.ok(app.includes("studioLaunch.review('volume',I.savedVolumeId,null,project)"),'Publishing saved imports must use preflight');
-assert.ok(app.includes("studioLaunch.review('volume',volume.id,null,freshProject)"),'Import wizard direct publication must use preflight');
+assert.ok(app.includes("studioLaunch.review(updating?'update':'volume',I.savedVolumeId,null,project)"),'Publishing saved imports must use correct preflight');
+assert.ok(app.includes("studioLaunch.review(volume.status==='published'?'update':'volume',volume.id,null,freshProject)"),'Import wizard must choose publish versus update');
 assert.ok(source.includes('actorName(e.actor_user_id)'), 'History must identify responsible team member');
 for(const key of ['studio-phase7.js','studioV7Hub','studioV7Dialog'])assert.ok((html+build+css+sw).includes(key),'Missing asset '+key);
 for(const key of ['enable row level security','editorial_events_team_read','studio_publication_audit_volumes','studio_publication_audit_sections','studio_publication_audit_schedule','schedule_rescheduled','volume_schedule_one_pending_per_volume']){
