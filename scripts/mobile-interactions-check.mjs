@@ -29,7 +29,23 @@ for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
    await page.waitForURL(/#detail:test-book/);
    await page.goto(base+'#home',{waitUntil:'networkidle'});
    await page.evaluate(n=>window.__NLOBI_QA__.setState({catalog:[n],catalogLoaded:true,catalogLoading:false}),novel);
-   await page.locator('a.catalogTitleLink').first().click();
+   // WebKit: ubicar el enlace del carrusel de forma estable antes del clic real.
+   // La estantería tiene scroll-snap horizontal y queda debajo del primer pantallazo.
+   await page.evaluate(()=>{
+    const link=document.querySelector('a.catalogTitleLink');
+    if(!link)return;
+    const rail=link.closest('[data-shelf-track]');
+    if(rail)rail.scrollTo({left:0,behavior:'instant'});
+    const rect=link.getBoundingClientRect();
+    window.scrollTo({top:Math.max(0,scrollY+rect.top-innerHeight*.45),behavior:'instant'});
+   });
+   await page.waitForFunction(()=>{
+    const link=document.querySelector('a.catalogTitleLink');
+    if(!link)return false;
+    const r=link.getBoundingClientRect();
+    return r.width>0&&r.height>0&&r.top>=0&&r.bottom<=innerHeight&&r.left>=0&&r.right<=innerWidth;
+   },undefined,{timeout:6000});
+   await page.locator('a.catalogTitleLink').first().click({timeout:8000});
    await page.waitForURL(/#detail:test-book/);
   }catch(e){failures.push({browser:name,width,error:String(e)})}
   await context.close();
