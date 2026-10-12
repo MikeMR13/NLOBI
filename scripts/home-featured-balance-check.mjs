@@ -60,8 +60,8 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
     failures.push({engineName,label:test.label,error:'portada cortada',before});
    if(desktop&&!(before.visual.right<=before.info.x+2&&before.card.h<=530&&before.cover.w<=198))
     failures.push({engineName,label:test.label,error:'escritorio sin dos columnas o tamaños excesivos',before});
-   if(!desktop&&!(before.visual.bottom<=before.info.y+2&&before.card.h<=680&&before.cover.w<=125))
-    failures.push({engineName,label:test.label,error:'tamaño móvil excesivo',before});
+   if(!desktop&&!(before.visual.right<=before.info.x+2&&before.card.h<=410&&before.cover.w<=125))
+    failures.push({engineName,label:test.label,error:'móvil no compacto en dos columnas',before});
    if(before.arrows.some(x=>!x||x.h<43||x.w<43))
     failures.push({engineName,label:test.label,error:'controles pequeños',before});
    if(engineName==='Chromium'&&(test.width===390||test.width===1185)){
