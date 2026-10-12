@@ -76,6 +76,11 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
     window.__NLOBI_QA__.setView('home');
    },{books,volume});
    await page.waitForFunction(()=>document.querySelectorAll('.discoverShelfTrack .homeNovelTile').length>=8);
+   // La hoja de estilos se activa de forma diferida; WebKit puede pintar el HTML
+   // antes de que aplique la escala del usuario. Exigimos el tamaño real.
+   await page.waitForFunction(expected=>
+    Math.abs(parseFloat(getComputedStyle(document.documentElement).fontSize)-expected)<.7,
+    16*config.scale/100,{timeout:8000});
    const measurement=await page.evaluate(()=>{
     const root=document.documentElement,main=document.querySelector('main.homeEditorial');
     const rect=el=>{if(!el)return null;const r=el.getBoundingClientRect();return {x:r.left,right:r.right,y:r.top,bottom:r.bottom,width:r.width,height:r.height}};
