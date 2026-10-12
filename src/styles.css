@@ -5085,3 +5085,27 @@ body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.
   max-height:390px;
  }
 }
+
+
+/* Reserva de altura editorial estable para títulos largos en el destacado.
+   Evita que cambie el alto de la tarjeta cuando se alterna entre libros. */
+@media(min-width:901px){
+ .homeEditorial .homeFeatured{
+  min-height:448px;
+ }
+ .homeEditorial .homeFeaturedVisual{
+  min-height:448px;
+  padding:14px;
+ }
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+  width:min(83%,188px);
+  max-width:188px;
+ }
+}
+@media(max-width:370px){
+ .homeEditorial .homeFeatured,
+ .homeEditorial .homeFeaturedVisual,
+ .homeEditorial .homeFeaturedInfo{
+  min-height:382px;
+ }
+}
