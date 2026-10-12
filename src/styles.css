@@ -4388,15 +4388,24 @@ html[data-site-corners="soft"] .homeEditorial :is(.homeNovelTile,.volumeReleaseC
  opacity:1;
  transform:none;
 }
+/* Mantener texto y botones totalmente opacos en estanterías para WCAG. */
 @media (prefers-reduced-motion:no-preference){
- html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending{
-  opacity:0;
-  transform:none;
-  transition:opacity .3s ease-out;
- }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending,
  html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending.homeMotionShown{
   opacity:1;
   transform:none;
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending .discoverShelfHead::after{
+  content:"";
+  display:block;
+  width:0;
+  height:2px;
+  background:var(--accent);
+  margin-top:5px;
+  transition:width .3s ease-out;
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending.homeMotionShown .discoverShelfHead::after{
+  width:min(100%,100px);
  }
 }
 
@@ -4605,4 +4614,31 @@ html[data-site-corners="soft"] .homeEditorial :is(.homeShowcase,.homeProgressCar
 @media(max-width:760px){
  html:has(.homeEditorial){scroll-behavior:auto}
  .homeEditorial .discoverShelfTrack{scroll-behavior:auto}
+}
+
+
+/* QA — contraste WCAG y objetivos táctiles sin sacrificar efectos de portada. */
+.homeEditorial .discoverShelfActions .btn.ghost,
+.homeEditorial .discoverShelfHead .btn.ghost{
+ color:var(--text);background:var(--panel);opacity:1;
+}
+.homeEditorial .homeShowcaseActions .btn.primary{
+ background:var(--accent);color:#111;
+ border-color:color-mix(in srgb,var(--accent) 70%,#111);
+ opacity:1;
+}
+.homeEditorial .homeNovelTile :is(.catalogCardContent h3 a,.catalogTranslator,.catalogUpdated,.catalogLanguage,.catalogOriginalStatus),
+.homeEditorial .homeNovelTile .catalogGenres span{color:var(--text)}
+.homeEditorial .homeNovelTile .catalogStatusTag{color:var(--home-label-ink);background:var(--home-paper)}
+body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.catalogLanguage,.catalogOriginalStatus){color:var(--text)}
+.pagedFormatBar .btn{min-width:44px;min-height:44px}
+.teamIdentityKicker{
+ display:inline-flex;align-items:center;max-width:100%;
+ padding:6px 9px;border-radius:6px;
+ background:rgba(0,0,0,.9);color:#fff;
+ line-height:1.4;overflow-wrap:anywhere;
+}
+.teamIdentityMark{color:#ffd400}
+@media(prefers-reduced-motion:reduce){
+ .homeEditorial .homeMotionPending .discoverShelfHead::after{transition:none!important}
 }
