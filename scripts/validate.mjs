@@ -477,7 +477,8 @@ for(const marker of [
  const html=fs.readFileSync('src/index.html','utf8'),css=fs.readFileSync('src/styles.css','utf8');
  for(const marker of ['id="pageBusyIndicator"','data-busy-label','pageBusyBook'])if(!html.includes(marker))throw new Error('Carga: falta indicador '+marker);
  for(const marker of ['function startPageBusy(','pageBusyCount','finally{done?.()}'])if(!app.includes(marker))throw new Error('Carga: falta control de estado '+marker);
-  const routeHandler=app.slice(app.indexOf("window.addEventListener('hashchange'"),app.indexOf("window.addEventListener('online'"));
+  const routeBegin=app.indexOf("window.addEventListener('hashchange'");
+  const routeHandler=routeBegin>=0?app.slice(routeBegin,app.indexOf("window.addEventListener('online'",routeBegin)):'';
   if(!routeHandler.includes('finally{done();if(S.view===route){render();')||!routeHandler.includes('if(!restore)window.scrollTo(')||!routeHandler.includes('if(restore)requestAnimationFrame('))throw new Error('Carga: el cambio de ruta debe terminar el estado busy, pintar y restaurar posición solo al regresar del lector');
  for(const marker of ['.pageBusyIndicator[hidden]','@keyframes obiBookLeft','@keyframes obiBookRight','prefers-reduced-motion:reduce'])if(!css.includes(marker))throw new Error('Carga: estilos incompletos '+marker);
 }
