@@ -7,6 +7,12 @@ const sql=read('supabase/migrations/20261011062000_studio_phase7_publication_lau
 new Function(source);new Function(app);
 const win={};new Function('window',source)(win);
 assert.equal(typeof win.createStudioPhase7,'function');
+const docForMissingSelector={querySelectorAll:selector=>[]};
+const isolatedWindow={};
+new Function('window','document',source)(isolatedWindow,docForMissingSelector);
+const isolatedStudio=isolatedWindow.createStudioPhase7({S:{}});
+assert.doesNotThrow(()=>isolatedStudio.bind(),'Fase 7 no debe destruir la vista cuando falta el selector múltiple');
+assert.ok(source.includes('const selectAll=selector=>[...document.querySelectorAll(selector)]'),'El selector múltiple debe ser independiente de la integración de Studio');
 for(const str of ["studioLaunch?.bind()","studioLaunch?.summary(P)","studioLaunch.review(updating?'update':'volume',id)","studioLaunch.review('section',id)","studioLaunch.review('schedule',id,date)","editorial_publication_events?translation_id=eq."]){
  assert.ok(app.includes(str),'Missing integration '+str);
 }
