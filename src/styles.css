@@ -5001,3 +5001,49 @@ body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.
  .homeEditorial .homeFeaturedSlideInfo h2{font-size:.9rem;line-height:1.27}
  .homeEditorial .homeFeaturedSlideInfo p{font-size:.72rem}
 }
+
+
+/* HOME — Estabilidad frente a títulos extremos y altura del primer pantallazo. */
+@media(min-width:901px){
+ .homeEditorial .homeFeatured{min-height:446px}
+ .homeEditorial .homeFeaturedVisual{min-height:446px}
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+  width:min(100%,182px);
+  max-width:182px;
+ }
+}
+@media(max-width:640px){
+ .homeEditorial .homeShowcase{
+  gap:9px;
+  padding:12px 14px 15px;
+ }
+ .homeEditorial .homeShowcaseCopy h1{
+  font-size:clamp(1.66rem,6.6vw,2rem);
+  line-height:1.08;
+  margin:6px 0 7px;
+ }
+ .homeEditorial .homeShowcaseCopy>p{
+  font-size:clamp(.78rem,3vw,.88rem);
+  line-height:1.42;
+  margin:0;
+ }
+ .homeEditorial .homeEyebrow{
+  font-size:clamp(.59rem,2.35vw,.69rem);
+  line-height:1.35;
+ }
+ .homeEditorial .homeShowcaseActions{
+  gap:6px;
+  margin:8px 0 4px;
+ }
+ .homeEditorial .homeShowcaseActions .btn{
+  min-height:42px;
+  padding:7px 10px;
+  font-size:.84rem;
+ }
+ .homeEditorial .homeShowcaseNote{display:none}
+}
+@media(max-width:370px){
+ .homeEditorial .homeFeatured,
+ .homeEditorial .homeFeaturedVisual,
+ .homeEditorial .homeFeaturedInfo{min-height:382px}
+}
