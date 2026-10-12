@@ -85,6 +85,8 @@ jobs:
         run: node scripts/global-literary-phase2-check.mjs
       - name: Global literary visual phase 3 — Studio and administration (Chromium + WebKit)
         run: node scripts/global-literary-phase3-check.mjs
+      - name: Global literary visual phase 4 — configurable reader presentation (Chromium + WebKit)
+        run: node scripts/global-literary-phase4-reader-check.mjs
       - name: Detail editorial phase 1 responsive and interaction regression
         run: node scripts/detail-editorial-phase1-check.mjs
       - name: Detail editorial phase 2 volume gallery regression (Chromium + WebKit)
