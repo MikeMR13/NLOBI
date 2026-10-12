@@ -12,7 +12,7 @@ const isolatedWindow={};
 new Function('window','document',source)(isolatedWindow,docForMissingSelector);
 const isolatedStudio=isolatedWindow.createStudioPhase7({S:{}});
 assert.doesNotThrow(()=>isolatedStudio.bind(),'Fase 7 no debe destruir la vista cuando falta el selector múltiple');
-assert.ok(source.includes('$=selector=>[...document.querySelectorAll(selector)]'),'El selector múltiple debe contar con respaldo en Studio');
+assert.ok(source.includes('const selectAll=selector=>[...document.querySelectorAll(selector)]'),'El selector múltiple debe ser independiente de la integración de Studio');
 for(const str of ["studioLaunch?.bind()","studioLaunch?.summary(P)","studioLaunch.review(updating?'update':'volume',id)","studioLaunch.review('section',id)","studioLaunch.review('schedule',id,date)","editorial_publication_events?translation_id=eq."]){
  assert.ok(app.includes(str),'Missing integration '+str);
 }
