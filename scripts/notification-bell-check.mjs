@@ -63,12 +63,12 @@ try{
   await page.locator('[data-bell-surface="'+surface+'"] > summary').click();
   await page.waitForFunction(()=>window.__NLOBI_QA__.getState().notificationLoading===false);
   failRefresh=true;
-  await page.locator('[data-bell-surface="'+surface+'"] [data-bell-refresh]').click();
+  await page.locator('[data-bell-surface="'+surface+'"] .headerNotificationRefresh').click();
   await page.waitForFunction(()=>window.__NLOBI_QA__.getState().notificationLoading===false);
   assert.match(await page.locator('[data-bell-surface="'+surface+'"] .headerNotificationMessage').textContent(),/No se pudieron actualizar/);
   assert.equal(await page.locator('[data-bell-surface="'+surface+'"] .headerNotificationItem').count(),3,'Transient error must not erase messages');
   failRefresh=false;
-  await page.locator('[data-bell-surface="'+surface+'"] [data-bell-refresh]').click();
+  await page.locator('[data-bell-surface="'+surface+'"] .headerNotificationRefresh').click();
   await page.waitForFunction(()=>window.__NLOBI_QA__.getState().notificationLoading===false);
   assert.equal(await page.locator('[data-bell-surface="'+surface+'"] .headerNotificationMessage').count(),0,'Recovery clears error');
   await page.locator('[data-bell-surface="'+surface+'"] .headerNotificationAll').click();
