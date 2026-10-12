@@ -57,7 +57,7 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    });
    if(initial.count!==3||initial.ids.join(',')!=='volume-1,volume-2,volume-3'||initial.progress.join(',')!=='50%,100%,0%'||
     !initial.states[0].includes('En lectura')||!initial.states[1].includes('Completado')||!initial.states[2].includes('Sin empezar')||
-    !initial.badges[1].includes('Nuevo')||!initial.badges[2].includes('Final')||!initial.aria||initial.imageFit!=='contain'||initial.overflow>2||initial.list)
+    !initial.badges[1].toLocaleLowerCase('es').includes('nuevo')||!initial.badges[2].toLocaleLowerCase('es').includes('final')||!initial.aria||initial.imageFit!=='contain'||initial.overflow>2||initial.list)
     failures.push({engineName,width,stage:'gallery',initial});
    const listButton=page.locator('[data-detail-volume-view="list"]');
    await listButton.click();
