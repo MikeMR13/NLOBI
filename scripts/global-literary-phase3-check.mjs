@@ -70,7 +70,7 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
     }
     if(view.name==='admin'){
      // Verificar que la navegación administrativa conserva su funcionalidad.
-     await page.locator('[data-admin-tab="users"]').click();
+     await page.locator('.adminDashboardKpi[data-admin-tab="users"]').click();
      const users=await page.evaluate(()=>({table:!!document.querySelector('.adminDirectory'),
        title:document.querySelector('.adminCurrentHead')?.textContent||''}));
      if(!users.table||!users.title.includes('Usuarios'))results.push({engineName,width:config.width,view:'admin-directory',users});
