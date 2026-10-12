@@ -8,8 +8,8 @@ const {scenarios}=new Function(source.slice(from,to)+'\nreturn {scenarios};')();
 const scenario=scenarios.find(([name])=>name==='public-home-carousel');
 if(!scenario)throw Error('Falta muestra de portada destacada en Home');
 const modes=[
- {label:'escritorio',width:1280,height:900,siteMotion:'normal',osMotion:'no-preference'},
- {label:'movil',width:390,height:844,siteMotion:'normal',osMotion:'no-preference'},
+ {label:'escritorio',width:1280,height:900,siteMotion:'system',osMotion:'no-preference'},
+ {label:'movil',width:390,height:844,siteMotion:'system',osMotion:'no-preference'},
  {label:'movil-accesible',width:320,height:800,siteMotion:'reduce',osMotion:'reduce'},
  {label:'escritorio-accesible',width:1280,height:900,siteMotion:'reduce',osMotion:'reduce'}
 ];
