@@ -21,7 +21,7 @@ const documentMock={
  getElementById:id=>id==='studioProjectVolumes'?{}:id==='studioSectionFilterCount'?status:null,
  querySelectorAll:selector=>selector==='.studioVolumeGrid [data-studio-section-id]'?rows:[]
 };
-const tools=new Function('S','esc','document',section('function studioProjectNavigation','function studioProjectReadOnlyView')+';return {studioProjectNavigation,studioProjectSectionFilters,applyStudioSectionFilters};')(state,esc,documentMock);
+const tools=new Function('S','esc','document',section('function studioProjectNavigation','function studioProjectView')+';return {studioProjectNavigation,studioProjectSectionFilters,applyStudioSectionFilters};')(state,esc,documentMock);
 const project={volumes:[{sections:[{id:'a'},{id:'b'}]}],editingSection:{id:'a'}};
 assert.match(tools.studioProjectNavigation(project),/studioProjectOverview/);
 assert.match(tools.studioProjectNavigation(project),/studioProjectMetadata/);
