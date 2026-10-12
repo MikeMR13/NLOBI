@@ -79,6 +79,10 @@ jobs:
         run: exit 1
       - name: Home phase 4 responsive editorial matrix (Chromium + WebKit)
         run: node scripts/home-editorial-phase4-check.mjs
+      - name: Detail editorial phase 1 responsive and interaction regression
+        run: node scripts/detail-editorial-phase1-check.mjs
+      - name: Detail editorial phase 2 volume gallery regression (Chromium + WebKit)
+        run: node scripts/detail-editorial-phase2-check.mjs
       - name: Featured cover size and motion regression (Chromium + WebKit)
         run: node scripts/home-featured-balance-check.mjs
       - name: Mobile interaction audit (Chromium + WebKit)
