@@ -1,4 +1,4 @@
-const CACHE='nlobi-shell-v19-29';
+const CACHE='nlobi-shell-v19-33';
 const CORE=['/','/index.html','/assets/styles.css','/assets/app.js','/assets/studio-phase5.js','/assets/studio-phase6.js','/assets/studio-phase7.js','/runtime-config.js','/manifest.webmanifest','/icon.svg','/icon-192.png','/icon-512.png'];
 const NETWORK_FIRST=new Set(['/index.html','/assets/styles.css','/assets/app.js','/assets/studio-phase5.js','/assets/studio-phase6.js','/assets/studio-phase7.js','/runtime-config.js']);
 

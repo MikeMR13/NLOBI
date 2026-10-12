@@ -62,6 +62,14 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
           npx playwright install --with-deps chromium firefox webkit
+      - name: Mobile Lighthouse performance report
+        id: lighthouse
+        continue-on-error: true
+        run: |
+          mkdir -p performance-results
+          npx --yes lighthouse@12 http://127.0.0.1:4173/#home --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --form-factor=mobile --screenEmulation.mobile=true --throttling-method=simulate --only-categories=performance,accessibility --output=json --output-path=performance-results/mobile-home.json --quiet
+          node -e "const r=require('./performance-results/mobile-home.json');const a=r.audits;const m={performance:Math.round(100*r.categories.performance.score),accessibility:Math.round(100*r.categories.accessibility.score),LCP:a['largest-contentful-paint']?.numericValue,CLS:a['cumulative-layout-shift']?.numericValue,TBT:a['total-blocking-time']?.numericValue};console.log('Lighthouse mobile:',JSON.stringify(m));require('node:fs').writeFileSync('performance-results/summary.json',JSON.stringify(m,null,2))"
+          node scripts/lcp-diagnostics.mjs
       - name: axe accessibility audit
         id: axe
         continue-on-error: true
@@ -71,6 +79,8 @@ jobs:
         run: exit 1
       - name: Home phase 4 responsive editorial matrix (Chromium + WebKit)
         run: node scripts/home-editorial-phase4-check.mjs
+      - name: Featured cover size and motion regression (Chromium + WebKit)
+        run: node scripts/home-featured-balance-check.mjs
       - name: Mobile interaction audit (Chromium + WebKit)
         run: node scripts/mobile-interactions-check.mjs
       - name: Studio account and works visual browser audit
@@ -103,13 +113,6 @@ jobs:
         run: node scripts/full-quality-check.mjs
       - name: Cross-browser smoke
         run: node scripts/cross-browser-check.mjs
-      - name: Mobile Lighthouse performance report
-        id: lighthouse
-        continue-on-error: true
-        run: |
-          mkdir -p performance-results
-          npx --yes lighthouse@12 http://127.0.0.1:4173/#home --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --form-factor=mobile --screenEmulation.mobile=true --throttling-method=simulate --only-categories=performance,accessibility --output=json --output-path=performance-results/mobile-home.json --quiet
-          node -e "const r=require('./performance-results/mobile-home.json');const a=r.audits;const m={performance:Math.round(100*r.categories.performance.score),accessibility:Math.round(100*r.categories.accessibility.score),LCP:a['largest-contentful-paint']?.numericValue,CLS:a['cumulative-layout-shift']?.numericValue,TBT:a['total-blocking-time']?.numericValue};console.log('Lighthouse mobile:',JSON.stringify(m));require('node:fs').writeFileSync('performance-results/summary.json',JSON.stringify(m,null,2))"
       - name: Upload performance report
         if: always()
         continue-on-error: true
@@ -136,6 +139,7 @@ jobs:
             visual-results/phase4-appearance-matrix.json
             visual-results/phase4-snapshots/
             visual-results/home-phase4/
+            visual-results/home-featured/
           if-no-files-found: warn
       - name: Upload visual layout report
         if: always()

@@ -7,6 +7,8 @@ if (!URL || !KEY) {
   console.error("[NLOBI] Falta configuración pública de Supabase.");
 }
 const S={view:'home',authMode:'login',user:null,token:localStorage.getItem('nlobi_token')||'',refreshToken:localStorage.getItem('nlobi_refresh_token')||'',tokenExpiresAt:Number(localStorage.getItem('nlobi_token_expires_at')||0),profile:null,catalog:[],groups:[],library:[],apps:[],notes:[],notificationBellOpen:'',notificationLoading:false,notificationError:'',admin:false,adminTab:'overview',adminUsers:[],adminTeams:[],adminReports:[],adminContent:[],adminVolumes:[],adminSections:[],adminPurchaseLinks:[],adminAudit:[],adminBetaFeedback:[],betaFeedback:[],betaFeedbackError:'',betaChecks:[],studioTranslations:[],studioLoadError:'',studioProject:null,studioNovelTypeFilter:'all',studioNovelPublicationFilter:'all',studioTeamFilter:'all',studioGenreFilter:'all',studioPublicationFilter:'all',studioWorkflowFilter:'all',studioProjectSort:'recent',studioDisplay:'grid',studioSectionQuery:'',studioSectionStatusFilter:'all',studioSectionTypeFilter:'all',studioNovelStatusFilter:'all',studioSequelStatusFilter:'all',studioCollaborationInvites:[],studioTeam:null,teamMembers:[],publicProfile:null,currentDetail:null,detailReviews:[],detailReviewsFor:null,reviewSort:'recent',reviewRatingDistribution:[],adminReviewReports:[],detailBackRoute:null,blockEditor:null,mediaFiles:[],mediaQuery:'',mediaTarget:null,mediaGroupId:null,mediaLoading:false,mediaPage:0,mediaPageSize:40,mediaUsage:{},mediaSelected:[],mediaFolderNovel:'all',mediaFolderVolume:'all',mediaFolderIndex:[],revisionHistory:[],revisionPreview:null,pwaInstallReady:false,notificationPrefs:{new_publications:true,comment_replies:true,team_updates:true,system_updates:true},readingProgress:[],readingHistory:[],libraryFilter:'all',readerSection:null,readerComments:[],readSections:[],searchQuery:'',searchStatus:'all',searchNovelStatus:'all',searchSequelStatus:'all',searchNovelType:'all',searchLanguage:'all',searchGenre:'all',searchTag:'all',searchDemography:'all',searchTeam:'all',searchAvailability:'all',searchSort:'updated',publicGroup:null,readerPrefs:{theme:localStorage.getItem('reader_theme')||'light',fontSize:Number(localStorage.getItem('reader_font')||18),width:localStorage.getItem('reader_width')||'normal',lineHeight:localStorage.getItem('reader_line_height')||'comfortable',fontFamily:localStorage.getItem('reader_font_family')||'original',paragraphSpace:localStorage.getItem('reader_paragraph_space')||'normal',indent:localStorage.getItem('reader_indent')||'none',align:localStorage.getItem('reader_align')||'left',contrast:localStorage.getItem('reader_contrast')||'standard',images:localStorage.getItem('reader_images')||'show'},follows:[],readerFollows:[],followedReaderProfiles:[],readerActivity:[],readerDirectory:[],readerQuery:'',readerGenre:'all',readerOrder:'similar',readerViewMode:'discover',online:navigator.onLine,catalogLoading:true,catalogLoaded:false,importState:{step:'file',file:null,type:'',name:'',text:'',parsedBlocks:[],detectedSections:[],sections:[],warnings:[],translationId:'',volumeNumber:'1',volumeTitle:'',busy:false,message:'',epubFonts:[]},err:''};
+// Las pruebas de navegador deben conservar sus datos cuando finalizan consultas iniciadas por boot().
+let qaCatalogFixtureActive=false;
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const safeUrl=u=>{if(!u)return'#';try{const v=/^https?:\/\//i.test(String(u))?String(u):'https://'+String(u);const x=new globalThis.URL(v);return ['http:','https:'].includes(x.protocol)?x.href:'#'}catch{return'#'}};const safeMediaUrl=u=>{const raw=String(u||'');if(/^data:image\/(png|jpeg|jpg|gif|webp);base64,/i.test(raw))return raw;const url=safeUrl(raw);try{const parsed=new globalThis.URL(url),origin=new globalThis.URL(URL),prefix='/storage/v1/object/public/nlobi-media/';if(parsed.origin===origin.origin&&parsed.pathname.startsWith(prefix))return '/media/'+parsed.pathname.slice(prefix.length)+parsed.search} catch{}return url};const safeCssUrl=u=>safeUrl(u).replace(/[\\'"()]/g,c=>'%'+c.charCodeAt(0).toString(16).padStart(2,'0').toUpperCase());
@@ -508,7 +510,7 @@ function featuredNovels(items=visibleCatalog()){
 }
 function featuredVisualMarkup(book){
  const url=book?.novels?.cover_url?safeMediaUrl(book.novels.cover_url):'';
- return `<a class="homeFeaturedBook homeFeaturedCoverLink" href="#detail:${encodeURIComponent(book.id)}" aria-label="Abrir novela destacada: ${esc(titleOf(book))}">${url?`<img src="${esc(url)}" alt="Portada de ${esc(titleOf(book))}" width="320" height="480" decoding="async">`:`<div class="homeFeaturedFallback"><span>物語</span><strong>${esc(titleOf(book))}</strong></div>`}</a>`;
+ return `<a class="homeFeaturedBook homeFeaturedCoverLink" href="#detail:${encodeURIComponent(book.id)}" aria-label="Abrir novela destacada: ${esc(titleOf(book))}">${url?`<img src="${esc(url)}" alt="Portada de ${esc(titleOf(book))}" width="320" height="480" loading="eager" fetchpriority="high" decoding="async">`:`<div class="homeFeaturedFallback"><span>物語</span><strong>${esc(titleOf(book))}</strong></div>`}</a>`;
 }
 function featuredInfoMarkup(book,real){
  const synopsis=String(book?.novels?.synopsis||book?.synopsis||'Historias para descubrir, leer y guardar en tu biblioteca.');
@@ -535,21 +537,27 @@ function rotateFeaturedBook(nextIndex,manual=false){
  const count=root.querySelector('[data-featured-count]');
  if(count)count.textContent=(index+1)+' de '+books.length;
  if(manual)featuredPauseUntil=Date.now()+15000;
+ // La diapositiva cambia inmediatamente (sin bloquear links ni el teclado).
+ // Solo su contenido visual recibe animación; las dimensiones son constantes.
  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&document.documentElement.dataset.siteMotion!=='reduce'){
   const cover=visual.querySelector('.homeFeaturedBook');
   if(cover&&typeof cover.animate==='function'){
    cover.animate([
-    {opacity:.72,transform:'rotate(-3deg) rotateY(-7deg)'},
-    {opacity:1,transform:'rotate(-3deg) rotateY(0deg)'}
-   ],{duration:290,easing:'cubic-bezier(.2,.75,.2,1)'});
+    {opacity:.35,transform:'perspective(850px) rotate(-2deg) rotateY(12deg) translateY(8px)'},
+    {opacity:1,transform:'rotate(-2deg)'}
+   ],{duration:360,easing:'cubic-bezier(.22,.8,.24,1)'});
   }
   if(typeof info.animate==='function'){
-   info.animate([{opacity:.55},{opacity:1}],{duration:260,easing:'ease-out'});
+   info.animate([
+    {opacity:.35,transform:'translate3d(0,7px,0)'},
+    {opacity:1,transform:'translate3d(0,0,0)'}
+   ],{duration:300,easing:'cubic-bezier(.2,.72,.25,1)'});
   }
  }
 }
 function home(){
- if(S.catalogLoading)return `${nav()}<main class="wrap homeEditorial" id="mainContent" aria-busy="true"><section class="homeLoading" role="status" aria-label="Cargando biblioteca"><div class="homeLoadingHero"><div><span class="homeLoadingLine short"></span><span class="homeLoadingLine headline"></span><span class="homeLoadingLine"></span><span class="homeLoadingLine medium"></span></div><div class="homeLoadingCover"></div></div><div class="homeLoadingLabel">Preparando tu biblioteca…</div><div class="homeLoadingBooks" aria-hidden="true">${Array.from({length:4},()=>'<span></span>').join('')}</div></section></main>`;
+ if(S.catalogLoading)return `${nav()}<main class="wrap homeEditorial" id="mainContent" aria-busy="true"><section class="homeShowcase" aria-label="Bienvenida y obra destacada"><div class="homeShowcaseCopy"><span class="homeEyebrow">EL OBI DEL LECTOR <span aria-hidden="true">—</span> BIBLIOTECA DE NOVELAS LIGERAS</span><h1>Abre un libro.<br><em>Entra en otra historia.</em></h1><p>Tu rincón para descubrir novelas ligeras, seguir traducciones y disfrutar cada capítulo a tu ritmo.</p><div class="homeShowcaseActions"><button class="btn primary" data-v="explore">Explorar novelas <span aria-hidden="true">→</span></button><button class="btn" data-v="${S.user?'library':'auth'}">${S.user?'Mi biblioteca':'Crear cuenta'}</button></div><div class="homeShowcaseNote"><span aria-hidden="true">✦</span> Nuevas historias, un capítulo a la vez.</div></div>
+ <div class="homeFeatured homeFeaturedLoading" aria-label="Preparando novedades"><div class="homeFeaturedVisual"><span class="homeLoadingCover" aria-hidden="true"></span></div><div class="homeFeaturedInfo"><div class="homeFeaturedSlideInfo" aria-hidden="true"><span class="homeLoadingLine short"></span><span class="homeLoadingLine headline"></span><span class="homeLoadingLine medium"></span></div></div></div></section><section class="homeLoading" role="status" aria-label="Cargando biblioteca"><div class="homeLoadingLabel">Preparando tu biblioteca…</div><div class="homeLoadingBooks" aria-hidden="true">${Array.from({length:4},()=>'<span></span>').join('')}</div></section></main>`;
  const real=S.catalog.length,items=visibleCatalog(),newVolumes=items.filter(x=>recentPublishedVolume(x)).sort((a,b)=>new Date(b.latestPublishedVolume.published_at)-new Date(a.latestPublishedVolume.published_at)),featured=featuredNovels(items),spotlight=featured.length?featured[((S.featuredIndex||0)%featured.length+featured.length)%featured.length]:items[0],recent=items.slice().sort((a,b)=>new Date(b.updated_at||0)-new Date(a.updated_at||0)).slice(0,8);
  const synopsis=spotlight?.novels?.synopsis||spotlight?.synopsis||'Historias para descubrir, leer y guardar en tu biblioteca.';
  const genreLinks=[...new Set(items.flatMap(x=>x.novels?.genres||[]).filter(Boolean))].slice(0,6);
@@ -2112,7 +2120,17 @@ function render(){
   const preserveMobileNav=mobileNavLockedScroll!==null&&mobileNavOpenedView===S.view&&
    window.innerWidth<=1100&&!!app.querySelector('.mobileNav[open]');
   if(mobileNavLockedScroll!==null&&!preserveMobileNav)mobileNavClose(false);
-  app.innerHTML=html;
+  // Conserva el titular ya pintado cuando la respuesta del catálogo sustituye el esqueleto.
+  // Esto evita volver a retrasar el LCP mientras se actualiza solo el contenido editorial.
+  const existingHomeCopy=S.view==='home'?app.querySelector('.homeShowcaseCopy'):null;
+  if(existingHomeCopy&&html.includes('homeShowcaseCopy')){
+   const next=document.createElement('template');next.innerHTML=html;
+   const freshCopy=next.content.querySelector('.homeShowcaseCopy');
+   if(freshCopy&&freshCopy.textContent===existingHomeCopy.textContent){
+    freshCopy.replaceWith(existingHomeCopy);
+    app.replaceChildren(next.content);
+   }else app.innerHTML=html;
+  }else app.innerHTML=html;
   if(preserveMobileNav){
    const replacement=app.querySelector('.mobileNav');
    if(replacement){
@@ -3171,6 +3189,7 @@ async function loadCatalog(earlyRender=false){
  // Each request starts in parallel, but the first real paint needs only translations.
  const secondaryResults=Promise.allSettled([volumeRequest,sectionRequest,teamRequest,collaborationRequest]);
  const catalog=await catalogRequest;
+ if(CONFIG.qaMode===true&&qaCatalogFixtureActive)return;
  S.catalog=(catalog||[]).map(x=>({...x,latestPublishedVolume:null}));
  const enrich=async()=>{
   const [volumeResult,sectionResult,teamResult,collaborationResult]=await secondaryResults;
@@ -3459,7 +3478,7 @@ window.addEventListener('error',e=>{console.error('[NLOBI global error]',e.error
 window.addEventListener('unhandledrejection',e=>{console.error('[NLOBI unhandled rejection]',e.reason)});
 if(CONFIG.qaMode===true){
  window.__NLOBI_QA__={
-  setState(patch={}){Object.assign(S,patch);render()},
+  setState(patch={}){if(Object.prototype.hasOwnProperty.call(patch,'catalog'))qaCatalogFixtureActive=true;Object.assign(S,patch);render()},
   setView(view){S.view=validRoute(view)?view:'home';history.replaceState(null,'','#'+S.view);render()},
   getState(){return S},
   parseEpub(file){return parseEpubRich(file)},
