@@ -46,6 +46,15 @@ assert.ok(!view.includes('<ejemplo>'),'User-controlled titles should be escaped'
 assert.equal(mod.readiness(project,'volume','v1').allowed,true);
 assert.ok(mod.readiness(project,'volume','v2').errors.length);
 assert.equal(mod.readiness(project,'section','s1').allowed,true);
+project.volumes[0].status='published';
+assert.equal(mod.readiness(project,'volume','v1').allowed,false,'Publicación inicial debe rechazar volumen ya publicado');
+assert.equal(mod.readiness(project,'update','v1').allowed,true,'La actualización debe aceptar el volumen publicado');
+assert.equal(mod.readiness(project,'update','v2').allowed,false,'No se puede actualizar un borrador como publicado');
+project.volumes[0].status='draft';
+assert.ok(app.includes("studioLaunch.review(updating?'update':'volume',id)"),'Actualizar desde Studio debe tener preflight propio');
+assert.ok(app.includes("studioLaunch.review(volume.status==='published'?'update':'volume',volume.id,null,freshProject)"),'Actualizar desde importación debe tener preflight propio');
+assert.ok(app.includes("&status=in.(draft,review)&select=id"),'La actualización debe preservar capítulos ocultos');
+assert.ok(app.includes('Actualizar publicación'),'Botón de actualizar volumen visible');
 
 project.publication_schedules.push({id:'sched1',volume_id:'v1',status:'pending',scheduled_at:'2026-10-15T12:00:00Z'});
 assert.equal(mod.readiness(project,'volume','v1').allowed,false,'Do not publish over pending schedule');
