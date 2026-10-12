@@ -30,7 +30,7 @@ const refresh=async()=>{};
 const saveFactory=new Function('S','$','jreq','toast','friendlyError','teamCan',
  'NOVEL_PUBLICATION_STATES','TRANSLATION_EDITORIAL_STATES','SEQUEL_EDITORIAL_STATES',
  'loadStudioData','loadCatalog','refreshStudioProject',
- extract('async function saveEditorialStates(){','\nasync function loadStudioProject(')+';return saveEditorialStates;');
+ extract('async function saveEditorialStates(){','\nasync function saveTranslationStatus(')+';return saveEditorialStates;');
 const save=saveFactory(S,$,request,toast,e=>e.message,()=>true,novelOptions,translationOptions,sequelOptions,refresh,refresh,refresh);
 await save();
 assert.equal(requests.length,1);
