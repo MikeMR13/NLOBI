@@ -818,7 +818,7 @@ function auth(){
  return `${nav()}<main class="wrap">${status()}<div class="authShell"><div class="authVisual"><span class="eyebrow">Cuenta El Obi del Lector</span><h2>Una biblioteca que recuerda dónde te quedaste.</h2><p>Para lectores, traductores y equipos que quieren publicar de forma ordenada.</p></div><div class="authPanel"><div class="switch" role="tablist" aria-label="Acceso a El Obi del Lector"><button type="button" role="tab" aria-controls="authPanelFields" id="loginTab" class="${S.authMode==='login'?'active':''}" aria-selected="${S.authMode==='login'?'true':'false'}">Iniciar sesión</button><button type="button" role="tab" aria-controls="authPanelFields" id="signupTab" class="${S.authMode==='signup'?'active':''}" aria-selected="${S.authMode==='signup'?'true':'false'}">Crear cuenta</button></div>${S.authMode==='login'?`<div id="authPanelFields"><h1>Bienvenido de nuevo</h1><div id="authError" class="formError" role="alert" aria-live="assertive" hidden></div><div class="field"><label for="email">Correo</label><input id="email" type="email" autocomplete="email" inputmode="email" required aria-required="true" aria-describedby="authError"></div><div class="field"><label for="pass">Contraseña</label><input id="pass" type="password" autocomplete="current-password" required aria-required="true" aria-describedby="authError"></div><div class="row"><button class="btn primary" id="login">Entrar</button><button class="btn" id="resendVerification" type="button">Reenviar verificación</button></div><div class="row"><button class="btn" id="forgotPassword" type="button">¿Olvidaste tu contraseña?</button></div></div>`:`<div id="authPanelFields"><h1>Crea tu cuenta</h1><div id="authError" class="formError" role="alert" aria-live="assertive" hidden></div><div class="field"><label for="name">Nombre visible</label><input id="name" autocomplete="name" required aria-required="true" aria-describedby="authError"></div><div class="field"><label for="email">Correo</label><input id="email" type="email" autocomplete="email" inputmode="email" required aria-required="true" aria-describedby="authError"></div><div class="field"><label for="pass">Contraseña</label><input id="pass" type="password" autocomplete="new-password" required minlength="8" aria-required="true" aria-describedby="authError"></div><label class="radio"><input type="radio" name="atype" value="reader" checked><span><b>Solo lector</b><br><span class="muted">Biblioteca, seguimiento y lectura.</span></span></label><label class="radio"><input type="radio" name="atype" value="reader_translator"><span><b>Lector y traductor</b><br><span class="muted">Lee y solicita acceso a Studio.</span></span></label><label class="radio"><input type="radio" name="atype" value="translator"><span><b>Solo traductor</b><br><span class="muted">Cuenta enfocada en publicación.</span></span></label><button class="btn primary" id="signup">Crear cuenta</button></div>`}</div></div></main>`
 }
 function application(){return `${nav()}<main class="wrap">${status()}<div class="authShell"><div class="authVisual"><h2>Publica con tu equipo.</h2><p>Las solicitudes se revisan antes de habilitar Studio.</p></div><div class="authPanel"><h1>Alta de equipo traductor</h1><div class="field"><label for="teamName">Nombre del equipo</label><input id="teamName" required aria-required="true"></div><div class="field"><label for="teamDesc">Descripción</label><textarea id="teamDesc" rows="5"></textarea></div><div class="field"><label for="teamWeb">Sitio web</label><input id="teamWeb" type="url" inputmode="url" autocomplete="url" placeholder="https://..."></div><button class="btn primary" id="sendApp">Enviar solicitud</button></div></div></main>`}
-const studioLaunch=window.createStudioPhase7?.({S,esc,$,$$,jreq,toast,friendlyError,teamCan,renderReaderBlock,safeMediaUrl,studioVolumeQuality,studioSectionQuality,refreshProject:refreshStudioProject,loadCatalog});
+const studioLaunch=window.createStudioPhase7?.({S,esc,$,$,jreq,toast,friendlyError,teamCan,renderReaderBlock,safeMediaUrl,studioVolumeQuality,studioSectionQuality,activateEpubFonts,epubFontFamilyNames,refreshProject:refreshStudioProject,loadCatalog});
 const studioQuality=window.createStudioPhase6?.({S,esc,$,$$,teamCan,editSection:editStudioSection,toast,blocksToPlainText});
 const studioWorkflow=window.createStudioPhase5?.({S,nav,status,context:studioContextNav,esc,jreq,toast,friendlyError,render,$,$$,teamCan,isManager:isCurrentGroupManager,openProject:openStudioProject,roleLabel});
 function studioTeamsManagement(){
@@ -1947,7 +1947,7 @@ function readerView(){
  if(!R)return `${nav()}<main class="wrap"><div class="empty"><div class="emptyArt" aria-hidden="true">📖</div><strong>Capítulo no disponible</strong><div style="margin-top:12px"><button class="btn" data-v="library">← Biblioteca</button></div></div></main>`;
  const ns=R.navigation||[],i=ns.findIndex(x=>x.id===R.id),prev=i>0?ns[i-1]:null,next=i>=0&&i<ns.length-1?ns[i+1]:null;
  const theme=S.readerPrefs.theme||'light',width=S.readerPrefs.width||'normal',lineHeight=S.readerPrefs.lineHeight||'comfortable',fontFamily=S.readerPrefs.fontFamily||'original',paragraphSpace=S.readerPrefs.paragraphSpace||'normal';
-  const embedded=epubFontFamilyNames(R.epub_fonts),preferredFamily=(R.epub_fonts||[]).find(x=>x.primary)?.family||embedded.find(x=>/^(?:Times New Roman|Georgia|Cambria)$/i.test(x))||embedded[0],selectedEpubIndex=fontFamily.startsWith('epub:')?Number(fontFamily.slice(5)):0,activeEpubIndex=fontFamily==='original'?Math.max(0,embedded.indexOf(preferredFamily)):selectedEpubIndex,validEpub=Number.isInteger(activeEpubIndex)&&activeEpubIndex>=0&&activeEpubIndex<embedded.length,epubFontCss=validEpub?'"NLOBI-EPUB-'+activeEpubIndex+'", Georgia, serif':'Georgia, serif',epubFingerprint=JSON.stringify(R.epub_fonts||[]),embeddedReady=S.epubFontLoaded===epubFingerprint&&S.epubFontCount>0;
+  const embedded=epubFontFamilyNames(R.epub_fonts),preferredFamily=(R.epub_fonts||[]).find(x=>x.primary)?.family||embedded.find(x=>/^(?:Times New Roman|Georgia|Cambria)$/i.test(x))||embedded[0],selectedEpubIndex=fontFamily.startsWith('epub:')?Number(fontFamily.slice(5)):0,activeEpubIndex=fontFamily==='original'?Math.max(0,embedded.indexOf(preferredFamily)):selectedEpubIndex,validEpub=Number.isInteger(activeEpubIndex)&&activeEpubIndex>=0&&activeEpubIndex<embedded.length,epubFontCss=validEpub?'"NLOBI-EPUB-'+activeEpubIndex+'", Georgia, serif':'Georgia, serif',epubFingerprint=JSON.stringify(R.epub_fonts||[]),embeddedReady=S.epubFontLoaded===epubFingerprint&&S.epubFontAvailable?.has(activeEpubIndex)===true;
 
  const continuous=ensureReaderContinuous(),savedVolumePos=readReaderVolumePosition(R.volume_id),nextVolume=ns.slice(i+1).find(ch=>ch.volume_id!==R.volume_id)||null;
  const readingPosition=savedVolumePos&&ns.some(x=>x.id===savedVolumePos.sectionId)?savedVolumePos:readReaderPosition(R.id);
@@ -2278,27 +2278,41 @@ async function uploadEmbeddedEpubFonts(file,descriptors,groupId,volumeId,uploade
 }
 function epubFontFamilyNames(fonts){return [...new Set((fonts||[]).map(x=>x?.family).filter(Boolean))]}
 async function activateEpubFonts(fonts){
- if(!('FontFace' in window))return;
  const entries=Array.isArray(fonts)?fonts.filter(x=>x&&typeof x.family==='string'&&typeof x.url==='string'):[];
  const fingerprint=JSON.stringify(entries);
  if(S.epubFontLoaded===fingerprint||S.epubFontLoading===fingerprint)return;
+ const version=S.epubFontRequestVersion=(S.epubFontRequestVersion||0)+1;
  S.epubFontLoading=fingerprint;
  try{
-  const names=epubFontFamilyNames(entries),faces=[],prefix=URL+'/storage/v1/object/public/nlobi-media/';
-  for(const item of entries){
+  const names=epubFontFamilyNames(entries),prefix=URL+'/storage/v1/object/public/nlobi-media/';
+  // All files load independently: a missing optional variant must not delay the main text face.
+  const results=await Promise.all(entries.map(async item=>{
    const clean=safeUrl(item.url),index=names.indexOf(item.family);
-   if(!clean.startsWith(prefix)||index<0)continue;
-   const face=new FontFace('NLOBI-EPUB-'+index,'url("'+safeMediaUrl(clean).replace(/["\\]/g,'')+'")',{style:['normal','italic','oblique'].includes(item.style)?item.style:'normal',weight:/^(normal|bold|[1-9]00)$/.test(item.weight||'')?item.weight:'normal'});
-   try{await face.load();faces.push(face)}catch(e){console.warn('No se pudo cargar una variante de fuente EPUB',e)}
-  }
+   if(!('FontFace' in window)||!clean.startsWith(prefix)||index<0)return {index,face:null};
+   const style=['normal','italic','oblique'].includes(item.style)?item.style:'normal';
+   const weight=/^(normal|bold|[1-9]00)$/.test(item.weight||'')?item.weight:'normal';
+   // First try our same-origin media proxy; retry the approved Supabase URL if the proxy fails.
+   for(const url of [...new Set([safeMediaUrl(clean),clean])]){
+    const face=new FontFace('NLOBI-EPUB-'+index,'url("'+url.replace(/["\\]/g,'')+'")',{style,weight});
+    try{await face.load();return {index,face}}catch{}
+   }
+   return {index,face:null};
+  }));
+  if(version!==S.epubFontRequestVersion)return;
+  const faces=results.filter(x=>x.face).map(x=>x.face);
   if(S.epubFontFaces)for(const old of S.epubFontFaces)document.fonts.delete(old);
   for(const face of faces)document.fonts.add(face);
-  let style=document.getElementById('nlobiEpubFontStyles');
-  if(!style){style=document.createElement('style');style.id='nlobiEpubFontStyles';document.head.appendChild(style)}
-  style.textContent=names.slice(0,32).map((_,i)=>'.readerPaper.reader-font-original [data-epub-family="'+i+'"]{font-family:"NLOBI-EPUB-'+i+'",Georgia,serif}').join('\n');
-  S.epubFontFaces=faces;S.epubFontCount=faces.length;S.epubFontLoaded=fingerprint;
+  let sheet=document.getElementById('nlobiEpubFontStyles');
+  if(!sheet){sheet=document.createElement('style');sheet.id='nlobiEpubFontStyles';document.head.appendChild(sheet)}
+  sheet.textContent=names.slice(0,32).map((_,i)=>'.readerPaper.reader-font-original [data-epub-family="'+i+'"]{font-family:"NLOBI-EPUB-'+i+'",Georgia,serif}').join('\n');
+  S.epubFontFaces=faces;
+  S.epubFontAvailable=new Set(results.filter(x=>x.face).map(x=>x.index));
+  S.epubFontCount=faces.length;
+  S.epubFontFailures=entries.length-faces.length;
+  S.epubFontLoaded=fingerprint;
+  if(S.epubFontFailures)console.warn('[NLOBI] Fuentes EPUB no disponibles:',S.epubFontFailures,'de',entries.length);
   if(S.view.startsWith('reader:'))render();
- }finally{S.epubFontLoading=null}
+ }finally{if(version===S.epubFontRequestVersion)S.epubFontLoading=null}
 }
 
 async function parseEpubRich(file){
@@ -2610,8 +2624,8 @@ async function loadStudioProject(id){
  const base='/rest/v1/translations?id=eq.'+encodeURIComponent(id);
  const required=',novels(id,title,title_original,synopsis,cover_url,author_name,genres,tags,demography,novel_type,status,sequel_status),translator_groups(id,name,avatar_url,review_required)';
  const sections='sections(id,title,section_type,section_number,status,sort_order,content,updated_at)';
- const full=base+'&select=id,title,status,language_code,group_id,editorial_mode,auto_status_source_volume_id'+required+',volumes!volumes_translation_id_fkey(id,volume_number,title,status,cover_url,is_final_volume,final_translation_status,'+sections+')&limit=1';
- const legacy=base+'&select=id,title,status,language_code,group_id,editorial_mode'+required+',volumes!volumes_translation_id_fkey(id,volume_number,title,status,cover_url,'+sections+')&limit=1';
+ const full=base+'&select=id,title,status,language_code,group_id,editorial_mode,auto_status_source_volume_id'+required+',volumes!volumes_translation_id_fkey(id,volume_number,title,status,cover_url,epub_fonts,is_final_volume,final_translation_status,'+sections+')&limit=1';
+ const legacy=base+'&select=id,title,status,language_code,group_id,editorial_mode'+required+',volumes!volumes_translation_id_fkey(id,volume_number,title,status,cover_url,epub_fonts,'+sections+')&limit=1';
  let rows,phase2Ready=true;
  try{rows=await jreq(full)}
  catch(error){
