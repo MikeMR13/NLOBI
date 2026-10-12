@@ -4,7 +4,7 @@
  */
 window.createStudioPhase7=function({
  S,esc,$,$$,jreq,toast,friendlyError,teamCan,renderReaderBlock,
- safeMediaUrl,studioVolumeQuality,studioSectionQuality,refreshProject,loadCatalog
+ safeMediaUrl,studioVolumeQuality,studioSectionQuality,activateEpubFonts,epubFontFamilyNames,refreshProject,loadCatalog
 }){
  const publicationStatusLabel={active:'Activa',paused:'En pausa',abandoned:'Abandonada',complete:'Finalizada',awaiting_sequel:'En espera de secuela',no_sequel_confirmed:'Sin secuela confirmada'};
  const eventsLabels={volume_published:'Volumen publicado',volume_hidden:'Volumen ocultado',volume_updated:'Volumen actualizado',
@@ -126,7 +126,7 @@ window.createStudioPhase7=function({
   node.setAttribute('aria-label','Vista previa privada del volumen');
   node.innerHTML=`<div class="studioV7PreviewHead"><div><span class="studioV3Kicker">PREVISUALIZACIÓN PRIVADA · NO PUBLICA</span><h2>${esc(P.novels?.title||P.title||'Novela')}</h2><p>Volumen ${esc(v.volume_number)} · ${esc(v.title||'')}</p></div><button type="button" class="btn" data-studio-v7-close>Cerrar</button></div>
   <div class="studioV7PreviewToolbar"><label for="studioV7PreviewChapter">Sección</label><select id="studioV7PreviewChapter">${list.map(s=>`<option value="${esc(s.id)}">${esc(s.title||'Sin título')}</option>`).join('')}</select><span>Se muestra el formato del lector y el contenido guardado.</span></div>
-  <div class="readerExperience studioV7ReaderSimulation"><div class="studioV7BookHead">${escapedLogo}<div><strong>${esc(P.novels?.title||P.title||'Novela')}</strong><small>Vol. ${esc(v.volume_number)} · ${esc(v.title||'')}</small></div></div><article class="readerPaper" id="studioV7ReaderPaper" tabindex="0" aria-live="polite"></article></div>`;
+  <div class="readerExperience studioV7ReaderSimulation"><div class="studioV7BookHead">${escapedLogo}<div><strong>${esc(P.novels?.title||P.title||'Novela')}</strong><small>Vol. ${esc(v.volume_number)} · ${esc(v.title||'')}</small></div></div><article class="readerPaper reader-font-original" id="studioV7ReaderPaper" tabindex="0" aria-live="polite"></article></div>`;
   function draw(secId){
    const section=list.find(s=>s.id===secId)||first;
    const paper=node.querySelector('#studioV7ReaderPaper');
@@ -145,6 +145,19 @@ window.createStudioPhase7=function({
   document.body.append(node);
   try{node.showModal()}catch{node.setAttribute('open','')}
   draw(first?.id);
+  // Studio must preview the same embedded typography as the public reader.
+  const fonts=Array.isArray(v.epub_fonts)?v.epub_fonts:[];
+  if(fonts.length&&typeof epubFontFamilyNames==='function'){
+   const names=epubFontFamilyNames(fonts);
+   const preferred=fonts.find(f=>f.primary)?.family||names.find(n=>/^(?:Times New Roman|Georgia|Cambria)$/i.test(n))||names[0];
+   const index=Math.max(0,names.indexOf(preferred));
+   const paper=node.querySelector('#studioV7ReaderPaper');
+   if(paper)paper.style.setProperty('--epub-reader-font','"NLOBI-EPUB-'+index+'",Georgia,serif');
+   if(typeof activateEpubFonts==='function')Promise.resolve(activateEpubFonts(fonts)).then(()=>{
+    if(!node.isConnected||!paper)return;
+    if(!S.epubFontAvailable?.has(index))paper.classList.remove('reader-font-original');
+   }).catch(e=>console.warn('[NLOBI] Fuentes EPUB no disponibles en la vista previa',e));
+  }
  }
  async function reschedule(id){
   const P=S.studioProject,sch=P?.publication_schedules?.find(s=>s.id===id&&s.status==='pending');
