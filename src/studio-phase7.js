@@ -3,9 +3,10 @@
  * El diálogo es una revisión previa; no confiere permisos ni crea notificaciones.
  */
 window.createStudioPhase7=function({
- S,esc,$,$=selector=>[...document.querySelectorAll(selector)],jreq,toast,friendlyError,teamCan,renderReaderBlock,
+ S,esc,$,jreq,toast,friendlyError,teamCan,renderReaderBlock,
  safeMediaUrl,studioVolumeQuality,studioSectionQuality,activateEpubFonts,epubFontFamilyNames,refreshProject,loadCatalog
 }){
+ const selectAll=selector=>[...document.querySelectorAll(selector)];
  const publicationStatusLabel={active:'Activa',paused:'En pausa',abandoned:'Abandonada',complete:'Finalizada',awaiting_sequel:'En espera de secuela',no_sequel_confirmed:'Sin secuela confirmada'};
  const eventsLabels={volume_published:'Volumen publicado',volume_hidden:'Volumen ocultado',volume_updated:'Volumen actualizado',
   section_published:'Capítulo publicado',section_hidden:'Capítulo ocultado',section_updated:'Capítulo actualizado',
@@ -192,8 +193,8 @@ window.createStudioPhase7=function({
   });
  }
  function bind(){
-  $$('[data-studio-v7-preview]').forEach(b=>b.onclick=()=>openPreview(b.dataset.studioV7Preview==='selected'?$('#studioV7PreviewVolume')?.value:b.dataset.studioV7Preview));
-  $$('[data-studio-v7-reschedule]').forEach(b=>b.onclick=()=>reschedule(b.dataset.studioV7Reschedule));
+  selectAll('[data-studio-v7-preview]').forEach(b=>b.onclick=()=>openPreview(b.dataset.studioV7Preview==='selected'?$('#studioV7PreviewVolume')?.value:b.dataset.studioV7Preview));
+  selectAll('[data-studio-v7-reschedule]').forEach(b=>b.onclick=()=>reschedule(b.dataset.studioV7Reschedule));
  }
  return {summary,readiness,review,openPreview,reschedule,bind,publicationStats};
 };
