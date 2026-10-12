@@ -535,11 +535,17 @@ function rotateFeaturedBook(nextIndex,manual=false){
  const count=root.querySelector('[data-featured-count]');
  if(count)count.textContent=(index+1)+' de '+books.length;
  if(manual)featuredPauseUntil=Date.now()+15000;
- if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches){
-  [visual,info].forEach(el=>el.animate([
-   {opacity:.35,transform:'translateY(6px)'},
-   {opacity:1,transform:'translateY(0)'}
-  ],{duration:360,easing:'cubic-bezier(.2,.75,.2,1)'}));
+ if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&document.documentElement.dataset.siteMotion!=='reduce'){
+  const cover=visual.querySelector('.homeFeaturedBook');
+  if(cover&&typeof cover.animate==='function'){
+   cover.animate([
+    {opacity:.72,transform:'rotate(-3deg) rotateY(-7deg)'},
+    {opacity:1,transform:'rotate(-3deg) rotateY(0deg)'}
+   ],{duration:290,easing:'cubic-bezier(.2,.75,.2,1)'});
+  }
+  if(typeof info.animate==='function'){
+   info.animate([{opacity:.55},{opacity:1}],{duration:260,easing:'ease-out'});
+  }
  }
 }
 function home(){
@@ -2047,6 +2053,33 @@ function observeShelves(){
   syncShelfScrollControls(track);
  });
 }
+let homeRevealObserver=null;
+function setupHomeReadingMotion(){
+ if(homeRevealObserver){homeRevealObserver.disconnect();homeRevealObserver=null}
+ if(S.view!=='home'||typeof IntersectionObserver!=='function'||document.hidden)return;
+ if(window.matchMedia('(prefers-reduced-motion: reduce)').matches||
+   document.documentElement.dataset.siteMotion==='reduce')return;
+ const home=document.querySelector('.homeEditorial');
+ if(!home)return;
+ const sections=[...home.querySelectorAll(
+  '.homeVolumeReleases,.homePersonalSection,.discoverShelf,.homeEditorialSection,.homeGenres,.homeClosing'
+ )];
+ if(!sections.length)return;
+ homeRevealObserver=new IntersectionObserver(entries=>{
+  for(const entry of entries){
+   if(!entry.isIntersecting)continue;
+   entry.target.classList.add('homeMotionShown');
+   entry.target.classList.remove('homeMotionPending');
+   homeRevealObserver?.unobserve(entry.target);
+  }
+ },{rootMargin:'0px 0px 72px 0px',threshold:0});
+ for(const section of sections){
+  // Nunca ocultar contenido inicialmente visible: evita parpadeos/LCP.
+  if(section.getBoundingClientRect().top<=window.innerHeight+32)continue;
+  section.classList.add('homeMotionPending');
+  homeRevealObserver.observe(section);
+ }
+}
 function render(){
  const app=document.getElementById('app');
  if(!app)return;
@@ -2095,6 +2128,7 @@ function render(){
   if(metaDescription)metaDescription.content=S.view.startsWith('group:')&&S.publicGroup?String(teamSettings(S.publicGroup).seo_description||S.publicGroup.description||'Equipo traductor de El Obi del Lector').slice(0,300):'Biblioteca digital de novelas ligeras para lectores y equipos de traducción: catálogo, progreso de lectura, Studio e importación de proyectos.';
   bind();
   observeShelves();
+  setupHomeReadingMotion();
   if(preserveMobileNav)app.querySelector('.mobileNavClose')?.focus({preventScroll:true});
   applyStudioActionAccess();
   setNetworkBadge();
@@ -3405,7 +3439,18 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshPub
 window.addEventListener('focus',()=>refreshPublicReleases());
 window.setInterval(()=>refreshPublicReleases(),60000);
 let featuredPauseUntil=0;
-window.setInterval(()=>{if(S.view!=='home'||document.hidden||Date.now()<featuredPauseUntil||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;const n=featuredNovels().length;if(n<2)return;rotateFeaturedBook((S.featuredIndex||0)+1)},6500);
+window.setInterval(()=>{
+ if(S.view!=='home'||document.hidden||Date.now()<featuredPauseUntil||
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches||
+    document.documentElement.dataset.siteMotion==='reduce')return;
+ const root=document.querySelector('[data-home-featured]');
+ if(!root||root.matches(':hover')||root.contains(document.activeElement))return;
+ const box=root.getBoundingClientRect();
+ if(box.bottom<=0||box.top>=window.innerHeight)return;
+ const n=featuredNovels().length;
+ if(n<2)return;
+ rotateFeaturedBook((S.featuredIndex||0)+1);
+},6500);
 window.addEventListener('hashchange',async()=>{const route=routeFromHash(),done=startPageBusy('Abriendo página…');S.notificationBellOpen='';pendingRouteFocus=true;S.view=route;render();window.scrollTo({top:0,behavior:'smooth'});try{await resolveDynamicRoute(route);if(S.view===route)S.err=''}catch(e){if(S.view===route)S.err=friendlyError(e,'No se pudo abrir esta vista.');console.error(e)}finally{done();if(S.view===route)render()}});
 window.addEventListener('online',async()=>{S.online=true;setNetworkBadge();toast('Conexión restablecida.','ok');await flushProgressQueue();boot(true)});
 window.addEventListener('offline',()=>{S.online=false;setNetworkBadge();render();toast('Sin conexión. Los capítulos guardados siguen disponibles.','bad')});
