@@ -7,8 +7,8 @@ if(first<0||last<=first)throw Error('Fixtures de plataforma no disponibles');
 const {scenarios}=new Function(source.slice(first,last)+'\nreturn {scenarios};')();
 const views=[
  {name:'creator-studio',route:'studio',selector:'.studioV3',surface:'.studioV3Stat'},
- {name:'admin',route:'admin',selector:'.adminWorkspace',surface:'.adminDashboardKpi'},
- {name:'creator-work',route:'studio:work',selector:'.studioV5',surface:'.studioV5Panel'}
+ {name:'creator-work',route:'studio:work',selector:'.studioV5',surface:'.studioV5Panel'},
+ {name:'admin',route:'admin',selector:'.adminWorkspace',surface:'.adminDashboardKpi'}
 ];
 for(const view of views)if(!scenarios.find(([name])=>name===view.name))throw Error('Fixture faltante: '+view.name);
 const css=fs.readFileSync('src/styles.css','utf8');
@@ -42,7 +42,10 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
       window.__NLOBI_QA__.setState({...state,catalogLoading:false,catalogLoaded:true});
       window.__NLOBI_QA__.setView(route);
     },{route,state});
-    await page.waitForFunction(target=>window.__NLOBI_QA__?.getState()?.view===target,route,{timeout:8000});
+    await page.waitForFunction(({route,selector,surface})=>
+      window.__NLOBI_QA__?.getState()?.view===route&&
+      !!document.querySelector(selector)&&!!document.querySelector(surface),
+      {route,selector:view.selector,surface:view.surface},{timeout:12000});
     const m=await page.evaluate(v=>{
      const root=document.documentElement,main=document.querySelector('main'),panel=document.querySelector(v.surface);
      const style=panel?getComputedStyle(panel):null;
