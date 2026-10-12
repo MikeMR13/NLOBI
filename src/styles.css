@@ -4642,3 +4642,27 @@ body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.
 @media(prefers-reduced-motion:reduce){
  .homeEditorial .homeMotionPending .discoverShelfHead::after{transition:none!important}
 }
+
+
+/* Studio > vista previa: .teamLivePreview span no debe neutralizar el contraste del banner. */
+.teamLivePreview .teamIdentityBanner > .teamIdentityKicker{
+ display:inline-flex;
+ align-items:center;
+ margin-top:0;
+ padding:6px 9px;
+ border-radius:6px;
+ background:#111;
+ color:#fff;
+ font-size:.7rem;
+ line-height:1.4;
+ letter-spacing:.12em;
+}
+.teamLivePreview .teamIdentityBanner > .teamIdentityMark{
+ display:inline-block;
+ margin-top:0;
+ padding:0;
+ border-radius:0;
+ background:transparent;
+ color:#ffd400;
+ font-size:2rem;
+}
