@@ -79,6 +79,8 @@ jobs:
         run: exit 1
       - name: Home phase 4 responsive editorial matrix (Chromium + WebKit)
         run: node scripts/home-editorial-phase4-check.mjs
+      - name: Global literary visual system phase 1 — Home, Explore and Library (Chromium + WebKit)
+        run: node scripts/global-literary-phase1-check.mjs
       - name: Detail editorial phase 1 responsive and interaction regression
         run: node scripts/detail-editorial-phase1-check.mjs
       - name: Detail editorial phase 2 volume gallery regression (Chromium + WebKit)
