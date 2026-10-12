@@ -34,7 +34,7 @@ assert.equal(result.S.groups[0].role,'owner');
 assert.equal(result.S.admin,true,'History failure must not revoke admin');
 assert.equal(result.S.accountPermissionsReady,true);
 assert.equal(result.S.adminPermissionsReady,true);
-assert.ok(result.errors.includes('historial'));
+assert.deepEqual(result.S.readingHistory,[],'History failure should not block the account');
 assert.ok(result.renders.some(x=>x.admin&&x.groups===1),'Permissions must render before secondary data');
 const unavailable=await scenario('/group_members?');
 assert.equal(unavailable.S.admin,true,'Team query failure must not affect platform admin');
