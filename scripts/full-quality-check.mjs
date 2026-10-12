@@ -16,7 +16,7 @@ const section1={id:'section-1',volume_id:'volume-1',title:'Capítulo 1 — Un en
 ]};
 const section2={id:'section-2',volume_id:'volume-1',title:'Capítulo 2',section_type:'chapter',section_number:2,status:'published',sort_order:2,updated_at:now,content:[{type:'paragraph',text:'Segundo capítulo.'}]};
 const translation={id:'project-1',title:longTitle,status:'active',language_code:'es',popularity_score:99,updated_at:now,group_id:'group-1',editorial_mode:true,
- novels:{id:'novel-1',title:longTitle,synopsis:'Sinopsis extensa para validar comportamiento visual. '.repeat(20),cover_url:null,author_name:'Autor de prueba',genres:['Romance','Comedia','Fantasía'],tags:['school-life','slow-burn','etiqueta-extremadamente-larga']},
+ novels:{id:'novel-1',title:longTitle,novel_type:'light_novel',status:'ongoing',sequel_status:'unspecified',synopsis:'Sinopsis extensa para validar comportamiento visual. '.repeat(20),cover_url:null,author_name:'Autor de prueba',genres:['Romance','Comedia','Fantasía'],tags:['school-life','slow-burn','etiqueta-extremadamente-larga']},
  translator_groups:{id:'group-1',name:'Equipo traductor con un nombre largo de control de calidad'},
  volumes:[
   {id:'volume-1',volume_number:1,title:'Volumen uno con un subtítulo muy largo para probar la vista editorial',status:'published',cover_url:null,sections:[section1,section2]},
@@ -291,6 +291,12 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
  await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:translation,teamMembers});
  await page.waitForFunction(()=>!!document.querySelector('[data-volume-status="volume-2"][data-status="published"]'));
  await page.evaluate(()=>document.querySelector('[data-volume-status="volume-2"][data-status="published"]')?.click());
+ const modal=page.locator('#studioV7ConfirmProceed');
+ await modal.waitFor({state:'visible',timeout:3000});
+ const warnings=page.locator('#studioV7WarningsAccepted');
+ if(await warnings.count())await warnings.check();
+ if(await modal.isEnabled())await modal.click();
+ else calls.push({kind:'publication-blocked',body:await page.locator('.studioV7Dialog').innerText()});
  await page.waitForTimeout(650);
  const rename=calls.find(x=>x.kind==='rename'),publish=calls.find(x=>x.kind==='publish');
  if(runtime.length||rename?.body?.p_translation_id!=='project-1'||rename?.body?.p_title!=='Nombre actualizado QA'||publish?.body?.p_volume_id!=='volume-2'){
