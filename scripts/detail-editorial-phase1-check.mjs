@@ -23,7 +23,7 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
   const errors=[];
   page.on('pageerror',e=>errors.push(e.message));
   try{
-   await page.goto('http://127.0.0.1:4173/#detail:project-1',{waitUntil:'domcontentloaded'});
+   await page.goto('http://127.0.0.1:4173/#detail:project-1',{waitUntil:'networkidle'});
    await page.waitForFunction(()=>!!window.__NLOBI_QA__,undefined,{timeout:15000});
    await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('detail:project-1')},baseline);
    await page.locator('#detailNovelTitle').waitFor();
@@ -39,9 +39,11 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    const toggle=page.locator('#detailSynopsisToggle');
    if(!await toggle.count())throw Error('Synopsis expand control missing');
    await toggle.click();
+   await page.waitForFunction(()=>document.querySelector('#detailSynopsisToggle')?.getAttribute('aria-expanded')==='true'&&!!document.querySelector('.detailSynopsis.is-expanded'),undefined,{timeout:5000}).catch(()=>{});
    if(await toggle.getAttribute('aria-expanded')!=='true'||!await page.locator('.detailSynopsis.is-expanded').count())failures.push({engineName,width,phase:'expand'});
    if(!await toggle.evaluate(e=>document.activeElement===e))failures.push({engineName,width,phase:'focus'});
    await toggle.click();
+   await page.waitForFunction(()=>document.querySelector('#detailSynopsisToggle')?.getAttribute('aria-expanded')==='false',undefined,{timeout:5000}).catch(()=>{});
    if(await toggle.getAttribute('aria-expanded')!=='false')failures.push({engineName,width,phase:'collapse'});
    const imageWork={...baseline.currentDetail,novels:{...baseline.currentDetail.novels,cover_url:'https://example.test/cover.jpg'}};
    await page.evaluate((state)=>{
