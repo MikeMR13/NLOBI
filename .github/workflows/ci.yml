@@ -25,6 +25,8 @@ jobs:
         run: node scripts/auth-recovery-check.mjs
       - name: Restore team owner and platform administrator regression
         run: node scripts/auth-permissions-check.mjs
+      - name: Linked works Studio and PostgREST FK regression
+        run: node scripts/account-work-catalog-check.mjs
       - name: Studio phase 1 regression
         run: node scripts/studio-phase1-check.mjs
       - name: Studio phase 2 regression
@@ -60,6 +62,8 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
           npx playwright install --with-deps chromium firefox webkit
+      - name: Studio account and works visual browser audit
+        run: node scripts/studio-visual-browser-audit.mjs
       - name: axe accessibility audit
         id: axe
         continue-on-error: true

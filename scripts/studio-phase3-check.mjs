@@ -12,6 +12,7 @@ const statuses=[['active','Activa'],['paused','En pausa'],['abandoned','Abandona
 const escapeText=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fakeGroup=id=>({role:id==='alpha'?'editor':'proofreader',translator_groups:{id,name:id==='alpha'?'Equipo A':'Equipo B'}});
 const base={
+ accountPermissionsReady:true,
  groups:[fakeGroup('alpha'),fakeGroup('beta')],
  studioTranslations:[
   {id:'first',status:'active',group_id:'alpha',title:'Primera',updated_at:'2026-10-09T13:00:00Z',

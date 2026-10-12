@@ -8,7 +8,7 @@ const studioStart=app.indexOf('function studioWorkspaceSidebar(');
 const studioEnd=app.indexOf('\nfunction mediaFolderOf(',studioStart);
 assert.ok(studioStart>=0&&studioEnd>studioStart);
 const source=app.slice(studioStart,studioEnd);
-assert.ok(app.includes('novels(id,title,title_original,author_name,cover_url,novel_type,genres,status),volumes(id,status,sections(id,status))'),'Studio must fetch genres and authors, not only filter fixture data');
+assert.ok(app.includes('novels(id,title,title_original,author_name,cover_url,status,sequel_status,novel_type,genres),volumes!volumes_translation_id_fkey(id,status,sections(id,status))'),'Studio must fetch genres and authors, not only filter fixture data');
 const typeOptions=[['light_novel','Novela ligera'],['web_novel','Novela web'],['original','Novela original']];
 const statusOptions=[['active','Activa'],['paused','En pausa'],['abandoned','Abandonada'],['awaiting_sequel','En espera de secuela'],['no_sequel_confirmed','Sin secuela confirmada'],['complete','Completada']];
 const esc=v=>String(v??'').replace(/[&<>"']/g,x=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[x]));
@@ -23,7 +23,7 @@ const base=[
 ];
 const functionFactory=new Function('S','nav','status','teamCan','isCurrentGroupManager','isCurrentGroupEditor','safeMediaUrl','esc','novelTypeLabel','translationStatusLabel','novelPublicationStatusLabel','NOVEL_PUBLICATION_STATUS_OPTIONS','TRANSLATION_STATUS_OPTIONS','NOVEL_TYPE_OPTIONS','localStorage',source+';return studio;');
 function show(filters={}){
- const S={groups:[group('team1'),group('team2')],studioTranslations:base, ...filters};
+ const S={accountPermissionsReady:true,groups:[group('team1'),group('team2')],studioTranslations:base, ...filters};
  const fn=functionFactory(S,()=>'<nav></nav>',()=>'',()=>true,()=>true,()=>true,()=>'',esc,
  t=>Object.fromEntries(typeOptions)[t]||t,t=>Object.fromEntries(statusOptions)[t]||t,t=>({ongoing:'En publicación',completed:'Completada',hiatus:'En pausa',cancelled:'Cancelada'}[t]||'Sin definir'),[['ongoing','En publicación'],['completed','Completada'],['hiatus','En pausa'],['cancelled','Cancelada']],statusOptions,typeOptions,{getItem:()=>null});
  return fn();
