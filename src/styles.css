@@ -4598,3 +4598,11 @@ html[data-site-corners="soft"] .homeEditorial :is(.homeShowcase,.homeProgressCar
  .homeEditorial .homeQuickLinks button,
  .homeEditorial .shelfArrow{transition:none!important}
 }
+
+
+/* Fase 4: Safari/WebKit debe ubicar inmediatamente los enlaces de estanterías.
+   Evita competir con scrollIntoView en Home móvil; el arrastre táctil no cambia. */
+@media(max-width:760px){
+ html:has(.homeEditorial){scroll-behavior:auto}
+ .homeEditorial .discoverShelfTrack{scroll-behavior:auto}
+}
