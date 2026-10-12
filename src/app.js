@@ -535,16 +535,21 @@ function rotateFeaturedBook(nextIndex,manual=false){
  const count=root.querySelector('[data-featured-count]');
  if(count)count.textContent=(index+1)+' de '+books.length;
  if(manual)featuredPauseUntil=Date.now()+15000;
+ // La diapositiva cambia inmediatamente (sin bloquear links ni el teclado).
+ // Solo su contenido visual recibe animación; las dimensiones son constantes.
  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&document.documentElement.dataset.siteMotion!=='reduce'){
   const cover=visual.querySelector('.homeFeaturedBook');
   if(cover&&typeof cover.animate==='function'){
    cover.animate([
-    {opacity:.72,transform:'rotate(-3deg) rotateY(-7deg)'},
-    {opacity:1,transform:'rotate(-3deg) rotateY(0deg)'}
-   ],{duration:290,easing:'cubic-bezier(.2,.75,.2,1)'});
+    {opacity:.35,transform:'perspective(850px) rotate(-2deg) rotateY(12deg) translateY(8px)'},
+    {opacity:1,transform:'rotate(-2deg)'}
+   ],{duration:360,easing:'cubic-bezier(.22,.8,.24,1)'});
   }
   if(typeof info.animate==='function'){
-   info.animate([{opacity:.55},{opacity:1}],{duration:260,easing:'ease-out'});
+   info.animate([
+    {opacity:.35,transform:'translate3d(0,7px,0)'},
+    {opacity:1,transform:'translate3d(0,0,0)'}
+   ],{duration:300,easing:'cubic-bezier(.2,.72,.25,1)'});
   }
  }
 }
