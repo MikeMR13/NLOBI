@@ -3916,3 +3916,464 @@ html[data-site-corners="soft"] .homeEditorial .newVolumeAnnouncement{border-radi
 @media(prefers-reduced-motion:reduce){
  .homeEditorial .homeFeaturedVisual .homeFeaturedBook{transition:none}
 }
+
+
+/* HOME — Fase 2: estanterías y tarjetas de novelas (2026-10-11).
+   Reglas limitadas a #home para respetar Explorar, Studio y el lector. */
+.homeEditorial{
+ --home-book-edge:color-mix(in srgb,var(--line) 72%,var(--accent) 28%);
+ --home-book-surface:var(--panel);
+ --home-book-ink:var(--text);
+}
+.homeEditorial .discoverShelf{
+ isolation:isolate;
+ margin-block:clamp(30px,3.8vw,43px);
+}
+.homeEditorial .discoverShelfHead{align-items:flex-end;gap:13px}
+.homeEditorial .discoverShelfActions{
+ display:flex;
+ align-items:center;
+ flex-wrap:wrap;
+ justify-content:flex-end;
+ gap:8px;
+}
+.homeEditorial .discoverShelfActions .btn.ghost{
+ color:var(--text);
+ border-color:var(--home-book-edge);
+ background:var(--panel);
+ min-height:44px;
+ padding-inline:13px;
+}
+.homeEditorial .shelfArrow{
+ width:44px;
+ height:44px;
+ min-width:44px;
+ min-height:44px;
+ border:1px solid var(--home-book-edge);
+ border-radius:50%;
+ background:var(--panel);
+ color:var(--text);
+ font-size:1.1rem;
+ font-weight:700;
+ display:grid;
+ place-items:center;
+}
+.homeEditorial .shelfArrow:disabled{
+ opacity:.42;
+ color:var(--muted);
+ cursor:default;
+ transform:none;
+ box-shadow:none;
+ background:var(--panel2);
+}
+.homeEditorial .shelfArrow:not(:disabled):hover{
+ background:var(--accent);
+ border-color:var(--accent);
+ color:#111;
+}
+.homeEditorial .discoverShelfTrack{
+ position:relative;
+ gap:clamp(12px,1.5vw,19px);
+ padding:9px 5px 27px;
+ grid-auto-columns:clamp(180px,19vw,226px);
+ scroll-padding-inline:6px;
+ scroll-snap-type:x mandatory;
+ overscroll-behavior-x:contain;
+ scrollbar-width:thin;
+ scrollbar-color:var(--home-book-edge) transparent;
+ border-bottom:3px solid var(--home-book-edge);
+ box-shadow:inset 0 -5px 0 color-mix(in srgb,var(--accent) 11%,transparent);
+}
+
+/* Los dos diseños de tarjeta del Home comparten cuerpo, cubierta y etiquetas. */
+.homeEditorial .homeNovelTile{
+ display:flex;
+ flex-direction:column;
+ min-width:0;
+ height:100%;
+ border:1px solid var(--home-book-edge);
+ border-radius:15px;
+ overflow:hidden;
+ background:var(--home-book-surface);
+ box-shadow:0 7px 19px rgba(0,0,0,.055);
+ transition:border-color .2s ease,box-shadow .2s ease,transform .2s ease;
+}
+.homeEditorial .homeNovelTile:hover,
+.homeEditorial .homeNovelTile:focus-within{
+ border-color:color-mix(in srgb,var(--accent) 70%,var(--line));
+ box-shadow:0 13px 26px rgba(0,0,0,.1);
+ transform:translateY(-3px);
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink){
+ position:relative;
+ display:block;
+ width:100%;
+ aspect-ratio:2/3;
+ flex:none;
+ overflow:hidden;
+ background:color-mix(in srgb,var(--panel2) 86%,var(--accent) 14%);
+ border-bottom:1px solid var(--home-book-edge);
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink)::before{
+ content:"";
+ position:absolute;
+ z-index:2;
+ inset:0 auto 0 0;
+ width:8px;
+ pointer-events:none;
+ background:linear-gradient(90deg,rgba(0,0,0,.19),rgba(255,255,255,.12),transparent);
+}
+.homeEditorial .homeNovelTile :is(.catalogBookArt,.homeBookCover .cover){
+ width:100%;
+ height:100%;
+ aspect-ratio:2/3;
+ display:block;
+ padding:0;
+}
+.homeEditorial .homeNovelTile :is(.catalogBookArt>img,.homeBookCover .cover img){
+ display:block;
+ width:100%;
+ height:100%;
+ object-fit:contain;
+ object-position:center;
+ transition:transform .24s ease;
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink):hover img{
+ transform:scale(1.025);
+}
+.homeEditorial .homeBookCover .cover:has(img)::after,
+.homeEditorial .homeBookCover .cover:has(img) .coverTitle{
+ display:none;
+}
+/* La portada sin imagen sigue mostrando el título, sin tapar otras imágenes. */
+.homeEditorial .homeBookCover .cover:not(:has(img)){
+ padding:15px;
+}
+.homeEditorial .homeBookCover .cover:not(:has(img)) .coverTitle{
+ display:block;
+ font-size:clamp(.82rem,1.4vw,1.08rem);
+ line-height:1.3;
+ overflow-wrap:anywhere;
+}
+.homeEditorial .homeNovelTile .catalogCoverOverlay{
+ opacity:0;
+ pointer-events:none;
+ background:linear-gradient(transparent,rgba(0,0,0,.68));
+}
+.homeEditorial .homeNovelTile .catalogCoverButton:is(:hover,:focus-visible) .catalogCoverOverlay{
+ opacity:1;
+}
+/* Los avisos de lanzamiento siempre se leen sobre las ilustraciones. */
+.homeEditorial .homeNovelTile .newVolumeTag,
+.homeEditorial .volumeReleaseBadge{
+ display:inline-flex;
+ align-items:center;
+ flex-wrap:wrap;
+ gap:4px;
+ padding:6px 8px;
+ background:#161616;
+ color:#ffe052;
+ border:1px solid rgba(255,212,0,.85);
+ box-shadow:0 4px 14px rgba(0,0,0,.3);
+ border-radius:7px;
+ font-weight:850;
+ font-size:clamp(.58rem,.74vw,.69rem);
+ line-height:1.25;
+ max-width:calc(100% - 16px);
+}
+.homeEditorial .homeNovelTile .newVolumeTag span{
+ border-left:1px solid rgba(255,224,82,.45);
+ padding-left:5px;
+ color:inherit;
+}
+.homeEditorial .homeNovelTile .homeBookCoverLink>.newVolumeTag{
+ position:absolute;
+ z-index:3;
+ top:9px;
+ left:9px;
+}
+.homeEditorial .homeNovelTile :is(.catalogCardContent,.homeBookDetails){
+ display:flex;
+ flex:1;
+ flex-direction:column;
+ align-items:stretch;
+ gap:8px;
+ min-width:0;
+ padding:14px 13px 15px;
+}
+.homeEditorial .homeNovelTile .catalogStatusRow{justify-content:flex-start;gap:6px}
+.homeEditorial .homeNovelTile :is(.catalogStatusTag,.homeBookTags>span){
+ display:inline-flex;
+ align-items:center;
+ align-self:flex-start;
+ border:1px solid var(--home-book-edge);
+ border-radius:6px;
+ background:var(--home-paper);
+ color:var(--home-label-ink);
+ padding:4px 7px;
+ font-size:.7rem;
+ font-weight:750;
+ line-height:1.35;
+}
+.homeEditorial .homeNovelTile .catalogLanguage{
+ margin-left:auto;
+ padding:3px 0;
+ font-weight:750;
+}
+.homeEditorial .homeBookTags{gap:6px}
+.homeEditorial .homeNovelTile :is(.catalogCardContent h3,.homeBookDetails h3){
+ font-family:var(--home-serif);
+ font-weight:600;
+ font-size:clamp(.9rem,1.06vw,1.04rem);
+ line-height:1.38;
+ min-height:3.9em;
+ max-height:3.9em;
+ display:-webkit-box;
+ -webkit-box-orient:vertical;
+ -webkit-line-clamp:3;
+ overflow:hidden;
+ overflow-wrap:anywhere;
+ margin:3px 0 0;
+}
+.homeEditorial .homeNovelTile :is(.catalogTranslator,.homeBookDetails>p){
+ color:var(--muted);
+ font-size:.76rem;
+ line-height:1.45;
+ margin:0 0 4px;
+ display:-webkit-box;
+ -webkit-box-orient:vertical;
+ -webkit-line-clamp:2;
+ overflow:hidden;
+}
+.homeEditorial .homeNovelTile .catalogCardSynopsis{display:none}
+.homeEditorial .homeNovelTile .catalogGenres{margin:0 0 3px}
+.homeEditorial .homeNovelTile .catalogGenres span{
+ border:1px solid var(--line);
+ background:var(--panel2);
+ color:var(--text);
+}
+.homeEditorial .homeNovelTile .catalogUpdated{margin:0}
+.homeEditorial .homeNovelTile :is(.catalogCardActions,.homeBookOpen){
+ margin-top:auto;
+}
+.homeEditorial .homeNovelTile .catalogCardActions{display:flex;gap:7px}
+.homeEditorial .homeNovelTile .catalogCardActions .btn,
+.homeEditorial .homeNovelTile .homeBookOpen{
+ display:inline-flex;
+ justify-content:center;
+ align-items:center;
+ text-align:center;
+ min-height:44px;
+ font-size:.78rem;
+ font-weight:800;
+ border-radius:9px;
+}
+.homeEditorial .homeNovelTile .homeBookOpen{
+ width:100%;
+ border:1px solid var(--home-book-edge);
+ background:var(--panel2);
+ color:var(--text);
+ padding:9px 11px;
+}
+.homeEditorial .homeNovelTile .homeBookOpen:hover{
+ border-color:var(--accent);
+ background:var(--accentSoft);
+ color:var(--text);
+ text-decoration:none;
+}
+
+/* Lanzamientos como volúmenes de una misma colección. */
+.homeEditorial .homeVolumeReleases>.discoverShelfHead{
+ border-bottom:1px solid var(--home-book-edge);
+ padding-bottom:14px;
+}
+.homeEditorial .homeVolumeReleaseGrid{align-items:stretch;gap:clamp(12px,1.6vw,18px)}
+.homeEditorial .volumeReleaseCard{
+ min-width:0;
+ border:1px solid var(--home-book-edge);
+ border-radius:15px;
+ background:var(--panel);
+ box-shadow:0 7px 19px rgba(0,0,0,.055);
+ overflow:hidden;
+ transition:box-shadow .2s ease,border-color .2s ease;
+}
+.homeEditorial .volumeReleaseCard:hover,
+.homeEditorial .volumeReleaseCard:focus-within{
+ border-color:var(--accent);
+ box-shadow:0 13px 26px rgba(0,0,0,.1);
+}
+.homeEditorial .volumeReleaseCover{
+ aspect-ratio:2/3;
+ border-bottom:1px solid var(--home-book-edge);
+ background:var(--panel2);
+}
+.homeEditorial .volumeReleaseCover::before{
+ content:"";
+ position:absolute;
+ inset:0 auto 0 0;
+ width:8px;
+ z-index:2;
+ pointer-events:none;
+ background:linear-gradient(90deg,rgba(0,0,0,.2),rgba(255,255,255,.1),transparent);
+}
+.homeEditorial .volumeReleaseCover img{
+ object-fit:contain;
+ object-position:center;
+}
+.homeEditorial .volumeReleaseBody{
+ padding:14px 13px 15px;
+ gap:7px;
+}
+.homeEditorial .volumeReleaseNumber{
+ display:inline-flex;
+ align-self:flex-start;
+ color:var(--home-label-ink);
+ background:var(--home-paper);
+ border:1px solid var(--home-book-edge);
+ border-radius:5px;
+ padding:4px 7px;
+ letter-spacing:.07em;
+}
+.homeEditorial .volumeReleaseBody h3{
+ font-family:var(--home-serif);
+ font-size:clamp(.92rem,1.09vw,1.05rem);
+ font-weight:600;
+ display:-webkit-box;
+ -webkit-line-clamp:3;
+ -webkit-box-orient:vertical;
+ overflow:hidden;
+ line-height:1.4;
+}
+.homeEditorial .volumeReleaseSubtitle{
+ display:-webkit-box;
+ -webkit-line-clamp:2;
+ -webkit-box-orient:vertical;
+ overflow:hidden;
+}
+.homeEditorial .volumeReleaseTeam{margin-top:auto}
+.homeEditorial .volumeReleaseOpen{
+ min-height:44px;
+ margin-top:9px;
+}
+/* El último CTA tiene prioridad visual sin esconder el equipo ni la fecha. */
+.homeEditorial .volumeReleaseBody time{font-variant-numeric:tabular-nums}
+
+/* Personalización y tamaños táctiles permanecen activos. */
+html[data-site-corners="square"] .homeEditorial :is(.homeNovelTile,.volumeReleaseCard){border-radius:3px}
+html[data-site-corners="soft"] .homeEditorial :is(.homeNovelTile,.volumeReleaseCard){border-radius:25px}
+@media(hover:none){
+ .homeEditorial .homeNovelTile:hover{transform:none}
+}
+@media(max-width:760px){
+ .homeEditorial .discoverShelfHead{align-items:flex-start}
+ .homeEditorial .discoverShelfActions{justify-content:flex-end}
+ .homeEditorial .discoverShelfActions .btn.ghost{order:1}
+ .homeEditorial .discoverShelfTrack{
+  grid-auto-columns:clamp(164px,49vw,210px);
+  padding-bottom:22px;
+ }
+ .homeEditorial .homeNovelTile :is(.catalogCardContent,.homeBookDetails){padding:11px 10px 12px}
+ .homeEditorial .homeNovelTile .catalogCardActions{flex-wrap:wrap}
+ .homeEditorial .homeNovelTile .catalogCardActions .btn{flex:1 1 100%;min-height:44px}
+ .homeEditorial .homeBookGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .homeEditorial .homeVolumeReleaseGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:430px){
+ .homeEditorial .discoverShelfActions{gap:5px}
+ .homeEditorial .discoverShelfActions .btn.ghost{
+  order:0;
+  flex-basis:100%;
+  text-align:right;
+  justify-content:flex-end;
+ }
+ .homeEditorial .shelfArrow{width:44px;height:44px}
+ .homeEditorial .discoverShelfTrack{grid-auto-columns:clamp(159px,60vw,207px)}
+ .homeEditorial .homeNovelTile :is(.catalogCardContent h3,.homeBookDetails h3){font-size:.9rem}
+ .homeEditorial .volumeReleaseBadge{font-size:.57rem;padding:5px 6px}
+ .homeEditorial .volumeReleaseBody{padding:11px 10px}
+}
+
+/* Arregla la regresión detectada en Fase 1: primer pantallazo 390px. */
+@media(min-width:371px) and (max-width:640px){
+ .homeEditorial .homeShowcase{
+  gap:13px;
+  min-height:0;
+  padding:17px 17px 19px;
+ }
+ .homeEditorial .homeShowcaseCopy h1{
+  font-size:clamp(1.95rem,7.2vw,2.45rem);
+  line-height:1.1;
+  margin:9px 0 10px;
+ }
+ .homeEditorial .homeShowcaseCopy>p{
+  font-size:.91rem;
+  line-height:1.5;
+  margin-bottom:0;
+ }
+ .homeEditorial .homeShowcaseActions{margin:11px 0 9px}
+ .homeEditorial .homeShowcaseNote{padding-top:5px;line-height:1.45}
+ .homeEditorial .homeFeatured{
+  display:grid;
+  grid-template-columns:minmax(105px,38%) minmax(0,1fr);
+  align-items:stretch;
+  min-height:248px;
+ }
+ .homeEditorial .homeFeaturedVisual{
+  flex:initial;
+  min-height:248px;
+  height:100%;
+  padding:7px;
+ }
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+  width:min(86%,130px);
+  max-width:130px;
+ }
+ .homeEditorial .homeFeaturedInfo{
+  min-height:0;
+  padding:11px 10px 9px;
+  min-width:0;
+ }
+ .homeEditorial .homeFeaturedSlideInfo{
+  min-height:0;
+ }
+ .homeEditorial .homeFeaturedSlideInfo h2{
+  font-size:.97rem;
+  min-height:0;
+  max-height:3.9em;
+  -webkit-line-clamp:3;
+ }
+ .homeEditorial .homeFeaturedSlideInfo p{
+  min-height:0;
+  max-height:3.1em;
+  -webkit-line-clamp:2;
+  margin-bottom:0;
+ }
+ .homeEditorial .homeFeaturedSlideInfo .homeFeaturedLink{
+  font-size:.78rem;
+ }
+ .homeEditorial .featuredCarouselControls{
+  min-height:44px;
+  margin-top:auto;
+  gap:2px;
+  display:flex;
+  justify-content:space-between;
+ }
+ .homeEditorial .featuredCarouselDot{display:none}
+ .homeEditorial .featuredCarouselDots{gap:0}
+ .homeEditorial .featuredCarouselCount{font-size:.68rem;margin:0}
+ .homeEditorial .featuredCarouselArrow{flex:0 0 44px}
+}
+@media(prefers-reduced-motion:reduce){
+ .homeEditorial .homeNovelTile,
+ .homeEditorial .volumeReleaseCard,
+ .homeEditorial .homeNovelTile img{transition:none!important}
+ .homeEditorial .homeNovelTile:hover,
+ .homeEditorial .homeNovelTile:focus-within{transform:none}
+}
+@media(forced-colors:active){
+ .homeEditorial .homeNovelTile,
+ .homeEditorial .volumeReleaseCard,
+ .homeEditorial .discoverShelfTrack{border-color:CanvasText}
+ .homeEditorial .homeNovelTile .newVolumeTag,
+ .homeEditorial .volumeReleaseBadge{border:1px solid CanvasText}
+}
