@@ -5836,3 +5836,79 @@ html[data-site-motion="reduce"] .studioV3 :is(.studioV3BookCard,.studioV3TeamLis
 html[data-site-motion="reduce"] .adminWorkspace .adminDashboardKpi{
  animation:none!important;transition:none!important;transform:none!important;
 }
+
+
+/* NLOBI — Sistema literario global, fase 4: presentación del lector (opcional).
+   El modo clásico permanece por defecto. No modificar tipografía EPUB, bloques,
+   negritas/cursivas, paginado por capítulos, lectura continua ni el modo enfoque. */
+.readerExperience .readerPresentationHint{
+ display:block;margin:8px 0 0;color:var(--reader-secondary);font-size:.76rem;line-height:1.5;
+}
+/* El diseño editorial solo se aplica con una preferencia explícita de estilo. */
+.readerExperience.readerPresentation-editorial{
+ --reader-paper-shadow:0 14px 42px rgba(0,0,0,.1),0 2px 8px rgba(0,0,0,.045);
+}
+.readerExperience.readerPresentation-editorial .readerPaper{
+ position:relative;
+ box-sizing:border-box;
+ padding:clamp(24px,5vw,52px) clamp(18px,4.4vw,54px) clamp(40px,5vw,64px);
+ border:1px solid var(--reader-rule)!important;
+ border-radius:18px;
+ background:linear-gradient(150deg,var(--reader-ui),color-mix(in srgb,var(--reader-ui) 92%,var(--reader-stage)))!important;
+ color:var(--reader-ink)!important;
+ box-shadow:var(--reader-paper-shadow)!important;
+}
+.readerExperience.readerPresentation-editorial .readerPaper::before{
+ content:"";
+ position:absolute;
+ inset:12px auto 12px 12px;
+ width:3px;
+ background:linear-gradient(180deg,transparent,var(--reader-rule),transparent);
+ pointer-events:none;
+ border-radius:2px;
+}
+.readerExperience.readerPresentation-editorial .readerMeta{
+ color:var(--reader-secondary);
+ letter-spacing:.04em;
+}
+.readerExperience.readerPresentation-editorial .readerChapterDivider{
+ height:1px;
+ background:linear-gradient(90deg,transparent,var(--reader-rule) 14%,var(--reader-rule) 86%,transparent);
+}
+.readerExperience.readerPresentation-editorial .readerContinuousChapter+.readerContinuousChapter{
+ border-top-color:var(--reader-rule);
+}
+/* En enfoque no se añade un marco distractor ni se oculta el botón de salida. */
+.readerExperience.readerPresentation-editorial.readerFocused .readerPaper{
+ border:0!important;
+ background:transparent!important;
+ box-shadow:none!important;
+ border-radius:0;
+}
+.readerExperience.readerPresentation-editorial.readerFocused .readerPaper::before{display:none}
+@media(max-width:700px){
+ .readerExperience.readerPresentation-editorial .readerPaper{
+  padding:23px 15px 37px;
+  border-radius:12px;
+ }
+ .readerExperience.readerPresentation-editorial .readerPaper::before{
+  inset:8px auto 8px 7px;width:2px;
+ }
+}
+@media(max-width:360px){
+ .readerExperience.readerPresentation-editorial{padding-inline:10px}
+ .readerExperience.readerPresentation-editorial .readerPaper{padding-inline:12px}
+}
+@media(forced-colors:active){
+ .readerExperience.readerPresentation-editorial .readerPaper{
+  background:Canvas!important;color:CanvasText!important;
+  border-color:CanvasText!important;box-shadow:none!important;
+ }
+ .readerExperience.readerPresentation-editorial .readerPaper::before{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .readerExperience.readerPresentation-editorial .readerPaper{scroll-behavior:auto;animation:none!important;transition:none!important}
+}
+html[data-site-motion="reduce"] .readerExperience.readerPresentation-editorial .readerPaper{
+ scroll-behavior:auto;animation:none!important;transition:none!important;
+}
