@@ -3615,3 +3615,304 @@ html[data-site-density="comfortable"] :is(.homeBookGrid,.exploreNovelGrid,.libra
  .studioV6Filters{display:grid;grid-template-columns:minmax(0,1fr);width:100%;gap:8px}
  .studioV6Filters :is(label,input,select){width:100%;min-width:0;max-width:100%;box-sizing:border-box}
 }
+
+
+/* HOME — Fase 1: identidad editorial de lectura (2026-10-11).
+   Acabado exclusivo del inicio. Conserva los tokens de tema y
+   las preferencias de densidad, esquinas y movimiento. */
+.homeEditorial{
+ --home-paper:color-mix(in srgb,var(--panel) 96%,var(--accent) 4%);
+ --home-paper-edge:color-mix(in srgb,var(--line) 76%,var(--accent) 24%);
+ --home-display-accent:color-mix(in srgb,var(--accent) 36%,#111 64%);
+ --home-label-ink:color-mix(in srgb,var(--accent) 35%,#111 65%);
+ --home-serif:"Literata",Georgia,"Times New Roman",serif;
+}
+body.dark .homeEditorial{
+ --home-paper:color-mix(in srgb,var(--panel) 96%,var(--accent) 4%);
+ --home-paper-edge:color-mix(in srgb,var(--line) 72%,var(--accent) 28%);
+ --home-display-accent:var(--accent);
+ --home-label-ink:color-mix(in srgb,var(--accent) 88%,#fff 12%);
+}
+
+/* Un escaparate de lectura, no un panel genérico. */
+.homeEditorial .homeShowcase{
+ isolation:isolate;
+ min-height:470px;
+ gap:clamp(22px,4.2vw,64px);
+ padding:clamp(30px,4.8vw,60px);
+ border:1px solid var(--home-paper-edge);
+ background:
+   radial-gradient(circle at 78% 14%,color-mix(in srgb,var(--accent) 18%,transparent),transparent 42%),
+   linear-gradient(125deg,var(--home-paper) 0%,var(--panel) 56%,var(--panel2) 100%);
+ box-shadow:0 18px 48px rgba(0,0,0,.055);
+}
+.homeEditorial .homeShowcase::before{
+ inset:11px;
+ border:1px solid color-mix(in srgb,var(--home-paper-edge) 72%,transparent);
+ border-radius:clamp(12px,2vw,19px);
+}
+.homeEditorial .homeShowcase::after{
+ content:"";
+ position:absolute;
+ width:clamp(110px,17vw,240px);
+ height:clamp(110px,17vw,240px);
+ right:-72px;
+ top:-84px;
+ border:1px solid color-mix(in srgb,var(--accent) 24%,transparent);
+ border-radius:50%;
+ pointer-events:none;
+}
+.homeEditorial .homeShowcaseCopy{max-width:570px}
+.homeEditorial .homeEyebrow{
+ display:inline-flex;
+ align-items:center;
+ flex-wrap:wrap;
+ gap:7px;
+ color:var(--home-label-ink);
+ font-size:clamp(.69rem,.9vw,.79rem);
+ font-weight:800;
+ line-height:1.55;
+ letter-spacing:.11em;
+}
+.homeEditorial .homeEyebrow::before{
+ content:"";
+ flex:0 0 18px;
+ width:18px;
+ height:3px;
+ border-radius:3px;
+ background:var(--accent);
+}
+.homeEditorial .homeShowcaseCopy h1{
+ font-family:var(--home-serif);
+ font-size:clamp(2.4rem,4.5vw,4.65rem);
+ font-weight:600;
+ letter-spacing:-.04em;
+ line-height:1.11;
+ margin:17px 0 20px;
+ text-wrap:balance;
+}
+.homeEditorial .homeShowcaseCopy h1 em{
+ color:var(--home-display-accent);
+ font-style:italic;
+ font-weight:500;
+}
+.homeEditorial .homeShowcaseCopy>p{
+ font-size:clamp(.98rem,1.25vw,1.08rem);
+ line-height:1.8;
+ max-width:51ch;
+}
+.homeEditorial .homeShowcaseActions{margin:23px 0 16px;gap:11px}
+.homeEditorial .homeShowcaseActions .btn{
+ display:inline-flex;
+ align-items:center;
+ justify-content:center;
+ min-height:46px;
+ padding:11px 17px;
+ font-weight:750;
+}
+.homeEditorial .homeShowcaseActions .btn:not(.primary){
+ border-color:var(--home-paper-edge);
+ background:var(--panel);
+}
+.homeEditorial .homeShowcaseNote{
+ display:inline-flex;
+ align-items:center;
+ gap:8px;
+ max-width:100%;
+ padding-top:10px;
+ border-top:1px solid var(--home-paper-edge);
+ font-size:.8rem;
+ line-height:1.6;
+ letter-spacing:.015em;
+}
+
+/* La portada es el centro visual de la obra destacada. */
+.homeEditorial .homeFeatured{
+ position:relative;
+ border-color:var(--home-paper-edge);
+ background:var(--panel);
+ box-shadow:0 17px 40px rgba(0,0,0,.11);
+}
+.homeEditorial .homeFeaturedVisual{
+ position:relative;
+ isolation:isolate;
+ flex-basis:295px;
+ min-height:295px;
+ background:
+   radial-gradient(ellipse at 50% 45%,color-mix(in srgb,var(--accent) 18%,var(--panel) 82%),transparent 71%),
+   linear-gradient(145deg,var(--panel2),var(--home-paper));
+}
+.homeEditorial .homeFeaturedVisual::before{
+ content:"";
+ position:absolute;
+ inset:23px 20%;
+ border:1px solid color-mix(in srgb,var(--accent) 22%,var(--line));
+ border-radius:10px;
+ transform:rotate(4deg);
+ pointer-events:none;
+}
+.homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+ position:relative;
+ z-index:1;
+ width:clamp(168px,54%,225px);
+ max-width:77%;
+ transform:rotate(-3deg);
+ border:1px solid rgba(0,0,0,.14);
+ box-shadow:9px 14px 28px rgba(0,0,0,.22),inset 4px 0 6px rgba(0,0,0,.11);
+}
+.homeEditorial .homeFeaturedInfo{
+ background:var(--panel);
+ padding:18px 24px 21px;
+}
+.homeEditorial .homeFeaturedSlideInfo h2{
+ font-family:var(--home-serif);
+ font-size:clamp(1.16rem,1.65vw,1.42rem);
+ font-weight:600;
+ line-height:1.3;
+ margin:9px 0 6px;
+ min-height:2.6em;
+ max-height:2.6em;
+}
+.homeEditorial .homeFeaturedSlideInfo p{
+ font-size:clamp(.79rem,.95vw,.89rem);
+ line-height:1.65;
+ margin:3px 0 8px;
+}
+.homeEditorial .homeFeaturedLabel,
+.homeEditorial .homeSectionKicker{
+ color:var(--home-label-ink);
+ font-size:clamp(.72rem,.8vw,.79rem);
+ font-weight:800;
+ letter-spacing:.1em;
+ line-height:1.5;
+}
+.homeEditorial .homeFeaturedSlideInfo .homeFeaturedLink{
+ color:var(--home-label-ink);
+ font-weight:800;
+}
+.homeEditorial .homeFeaturedSlideInfo .homeFeaturedLink:hover{
+ text-decoration:underline;
+ text-underline-offset:4px;
+}
+
+/* Una jerarquía editorial consistente entre las colecciones. */
+.homeEditorial .homeSectionKicker::before{
+ content:"";
+ display:inline-block;
+ width:15px;
+ height:2px;
+ margin:0 9px 3px 0;
+ border-radius:2px;
+ background:var(--accent);
+}
+.homeEditorial :is(.homeSectionHead h2,.discoverShelfHead h2,.homeClosing h2){
+ font-family:var(--home-serif);
+ font-weight:600;
+ line-height:1.2;
+ letter-spacing:-.025em;
+ text-wrap:balance;
+}
+.homeEditorial :is(.homeEditorialSection,.homeVolumeReleases,.homeGenres){
+ scroll-margin-top:92px;
+}
+.homeEditorial .discoverShelfHead{
+ border-bottom:1px solid var(--home-paper-edge);
+ padding-bottom:15px;
+}
+.homeEditorial .homeSectionHead{padding-bottom:14px}
+.homeEditorial .homeSectionHead p,
+.homeEditorial .homePersonalHint{line-height:1.6}
+.homeEditorial .newVolumeAnnouncement{
+ border:1px solid var(--home-paper-edge);
+ border-left:4px solid var(--accent);
+ border-radius:14px;
+ background:linear-gradient(115deg,var(--home-paper),var(--panel));
+}
+.homeEditorial .homeQuickLinks button{
+ border-color:var(--home-paper-edge);
+ box-shadow:inset 3px 0 0 color-mix(in srgb,var(--accent) 64%,transparent);
+ background:var(--home-paper);
+}
+.homeEditorial .homeQuickLinks button span:first-child{
+ color:var(--home-label-ink);
+}
+.homeEditorial .homeClosing{
+ border:1px solid color-mix(in srgb,var(--accent) 30%,#111);
+ background:
+   radial-gradient(circle at 95% 0%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 35%),
+   linear-gradient(135deg,#121212,#242117);
+ color:#fff;
+ padding:clamp(23px,3.1vw,37px);
+}
+.homeEditorial .homeClosing .homeSectionKicker{color:#ffdc4f}
+.homeEditorial .homeClosing p{color:#e2e0d8;line-height:1.65}
+.homeEditorial .homeClosing .btn.primary{color:#111;background:var(--accent)}
+
+/* Las preferencias de esquinas siguen prevaleciendo sobre esta fase. */
+html[data-site-corners="square"] .homeEditorial .homeFeatured,
+html[data-site-corners="square"] .homeEditorial .homeClosing,
+html[data-site-corners="square"] .homeEditorial .newVolumeAnnouncement{border-radius:3px}
+html[data-site-corners="soft"] .homeEditorial .homeFeatured,
+html[data-site-corners="soft"] .homeEditorial .homeClosing,
+html[data-site-corners="soft"] .homeEditorial .newVolumeAnnouncement{border-radius:25px}
+
+@media(min-width:641px) and (max-width:970px){
+ .homeEditorial .homeShowcase{min-height:0}
+ .homeEditorial .homeFeaturedVisual{min-height:270px}
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{width:clamp(145px,55%,190px)}
+}
+@media(max-width:640px){
+ .homeEditorial .homeShowcase{
+  min-height:0;
+  padding:clamp(19px,5vw,28px);
+  gap:20px;
+  margin-top:10px;
+ }
+ .homeEditorial .homeShowcase::before{inset:8px}
+ .homeEditorial .homeEyebrow{font-size:.7rem;letter-spacing:.06em}
+ .homeEditorial .homeShowcaseCopy h1{
+  font-size:clamp(2.08rem,8.3vw,2.87rem);
+  line-height:1.1;
+  margin:12px 0 13px;
+ }
+ .homeEditorial .homeShowcaseCopy>p{font-size:.96rem;line-height:1.65}
+ .homeEditorial .homeShowcaseActions{margin:17px 0 12px}
+ .homeEditorial .homeShowcaseActions .btn{flex:1 1 140px}
+ .homeEditorial .homeFeatured{
+  min-height:405px;
+  display:flex;
+  flex-direction:column;
+ }
+ .homeEditorial .homeFeaturedVisual{
+  flex:0 0 192px;
+  min-height:192px;
+  padding:9px;
+ }
+ .homeEditorial .homeFeaturedVisual::before{inset:12px 24%}
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+  width:min(44%,145px);
+  max-width:145px;
+ }
+ .homeEditorial .homeFeaturedInfo{
+  min-height:213px;
+  padding:13px 16px 14px;
+ }
+ .homeEditorial .homeFeaturedSlideInfo h2{
+  font-size:1.06rem;
+  min-height:2.6em;
+  max-height:2.6em;
+  margin:5px 0 3px;
+ }
+ .homeEditorial .homeFeaturedSlideInfo p{font-size:.79rem;line-height:1.5}
+ .homeEditorial :is(.homeSectionHead h2,.discoverShelfHead h2){font-size:clamp(1.45rem,5.9vw,1.75rem)}
+ .homeEditorial .homeClosing{padding:22px 20px}
+}
+@media(max-width:370px){
+ .homeEditorial .homeShowcase{padding:18px 14px}
+ .homeEditorial .homeFeaturedVisual{flex-basis:180px;min-height:180px}
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{width:126px}
+ .homeEditorial .homeFeaturedInfo{min-height:215px}
+}
+@media(prefers-reduced-motion:reduce){
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{transition:none}
+}
