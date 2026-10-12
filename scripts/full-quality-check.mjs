@@ -347,13 +347,26 @@ for(const item of [['home',{catalog:[translation]}],['reader:section-1',{readerS
   if(p==='/rest/v1/novels'&&r.request().method()==='DELETE'){calls.push({kind:'delete-novel',url:r.request().url()});return r.fulfill({status:200,contentType:'application/json',body:JSON.stringify([{id:'novel-1'}])})}
   return r.fulfill({status:200,contentType:'application/json',body:'[]'});
  });
- const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));
- page.on('dialog',async d=>{if(d.type()==='prompt')await d.accept('ELIMINAR');else await d.accept()});
+ const page=await context.newPage(),runtime=[],dialogs=[];page.on('pageerror',e=>runtime.push(e.message));
+ page.on('dialog',async d=>{dialogs.push({type:d.type(),message:d.message()});if(d.type()==='prompt')await d.accept('ELIMINAR');else await d.accept()});
  await page.goto(base+'#home',{waitUntil:'networkidle'});await page.waitForFunction(()=>!!window.__NLOBI_QA__);
  const project={...translation,novels:{...translation.novels,id:'novel-1'}};
  await page.evaluate(state=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView('studio:project:project-1')},{...authBase,studioProject:project,teamMembers});
- await page.locator('#deleteStudioProject').click();await page.waitForTimeout(80);
- if(runtime.length||!calls.some(x=>x.kind==='delete-novel'))failures.push({scenario:'studio-delete-project',runtime,calls,error:'project-delete-not-issued'});
+ // The deletion flow asynchronously loads the complete novel snapshot before asking for confirmation.
+ // Wait for the actual DELETE response instead of racing that preflight with an 80 ms sleep.
+ let deletionResponse=null,waitError=null;
+ try{
+  const [response]=await Promise.all([
+   page.waitForResponse(r=>r.request().method()==='DELETE'&&new URL(r.url()).pathname==='/rest/v1/novels',{timeout:12000}),
+   page.locator('#deleteStudioProject').click()
+  ]);
+  deletionResponse={status:response.status(),url:response.url()};
+ }catch(e){waitError=e.message}
+ const confirmed=dialogs.some(d=>d.type==='prompt'&&d.message.includes('ELIMINAR'));
+ const requested=calls.some(x=>x.kind==='delete-novel'&&new URL(x.url).searchParams.get('id')==='eq.novel-1');
+ if(runtime.length||waitError||!confirmed||!requested||deletionResponse?.status!==200){
+  failures.push({scenario:'studio-delete-project',runtime,dialogs,calls,deletionResponse,waitError,error:'project-delete-not-issued'});
+ }
  await context.close();
 }
 
