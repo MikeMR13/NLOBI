@@ -25,6 +25,8 @@ jobs:
         run: node scripts/auth-recovery-check.mjs
       - name: Restore team owner and platform administrator regression
         run: node scripts/auth-permissions-check.mjs
+      - name: Linked works Studio and PostgREST FK regression
+        run: node scripts/account-work-catalog-check.mjs
       - name: Studio phase 1 regression
         run: node scripts/studio-phase1-check.mjs
       - name: Studio phase 2 regression
