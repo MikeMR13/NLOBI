@@ -1,6 +1,6 @@
-const CACHE='nlobi-shell-v19-27';
+const CACHE='nlobi-shell-v19-28';
 const CORE=['/','/index.html','/assets/styles.css','/assets/app.js','/assets/studio-phase5.js','/assets/studio-phase6.js','/assets/studio-phase7.js','/runtime-config.js','/manifest.webmanifest','/icon.svg','/icon-192.png','/icon-512.png'];
-const NETWORK_FIRST=new Set(['/index.html','/assets/styles.css','/assets/app.js','/runtime-config.js']);
+const NETWORK_FIRST=new Set(['/index.html','/assets/styles.css','/assets/app.js','/assets/studio-phase5.js','/assets/studio-phase6.js','/assets/studio-phase7.js','/runtime-config.js']);
 
 self.addEventListener('install',event=>{
   event.waitUntil(

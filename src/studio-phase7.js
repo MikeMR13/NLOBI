@@ -20,7 +20,7 @@ window.createStudioPhase7=function({
  const isMember=P=>!!(S.user&&(S.admin||S.groups?.some(g=>g.translator_groups?.id===P?.group_id)));
  const publicationStats=P=>({volumes:(P?.volumes||[]).filter(v=>v.status==='published').length,sections:(P?.volumes||[]).flatMap(v=>v.sections||[]).filter(s=>s.status==='published').length,pending:(P?.publication_schedules||[]).filter(s=>s.status==='pending').length,failed:(P?.publication_schedules||[]).filter(s=>s.status==='failed').length});
  function readiness(P,mode,id){
-  const isVolume=mode==='volume'||mode==='schedule';
+  const isVolume=['volume','update','schedule'].includes(mode);
   const v=isVolume?projectVolume(P,id):projectSection(P,id)?.volume;
   const section=isVolume?null:projectSection(P,id)?.section;
   const check=v?(isVolume?studioVolumeQuality(v):studioSectionQuality(section)):{issues:['No se encontró el contenido.'],warnings:[]};
@@ -28,7 +28,8 @@ window.createStudioPhase7=function({
   if(!v)return {v,section,errors,warnings,allowed:false};
   if(mode==='volume'&&pendingSchedule(P,v.id).length)errors.push('Este volumen tiene una programación pendiente. Cancélala antes de publicarlo inmediatamente.');
   if(mode==='schedule'&&pendingSchedule(P,v.id).length)errors.push('Ya hay una programación pendiente. Utiliza Reprogramar en vez de crear otra.');
-  if(isVolume&&v.status==='published')errors.push('Este volumen ya se encuentra publicado.');
+  if(mode==='volume'&&v.status==='published')errors.push('El volumen ya está publicado. Utiliza «Actualizar publicación».');
+  if(mode==='update'&&v.status!=='published')errors.push('Solo se puede actualizar una publicación existente. Utiliza «Publicar volumen».');
   if(section?.status==='published')errors.push('El capítulo ya está publicado.');
   if(v.is_final_volume&&!['complete','awaiting_sequel','no_sequel_confirmed'].includes(v.final_translation_status))errors.push('Configura el estado automático de este volumen final.');
   if(P?.translator_groups?.review_required){
@@ -78,16 +79,16 @@ window.createStudioPhase7=function({
  function buildReviewHtml(P,mode,id,when=null){
   const check=readiness(P,mode,id),v=check.v,section=check.section,isScheduled=mode==='schedule';
   const rows=mode==='section'?[section].filter(Boolean):sortSections(v||{});
-  const isFinal=!!v?.is_final_volume;
-  return `<div class="studioV7Confirm"><div class="studioV7ConfirmHead"><span class="studioV3Kicker">CONFIRMACIÓN EDITORIAL</span><h2 id="studioV7ModalTitle">${isScheduled?'Programar publicación':mode==='section'?'Publicar capítulo':'Publicar volumen'}</h2><p>${esc(P?.novels?.title||P?.title||'Obra')} · Vol. ${esc(v?.volume_number??'—')}</p></div>
-  <div class="studioV7ConfirmNumbers"><div><strong>${rows.length}</strong><span>Secciones incluidas</span></div><div><strong>${rows.filter(s=>s.status!=='published').length}</strong><span>Pendientes de publicación</span></div></div>
+  const isFinal=!!v?.is_final_volume,isUpdate=mode==='update';
+  return `<div class="studioV7Confirm"><div class="studioV7ConfirmHead"><span class="studioV3Kicker">CONFIRMACIÓN EDITORIAL</span><h2 id="studioV7ModalTitle">${isScheduled?'Programar publicación':isUpdate?'Actualizar volumen publicado':mode==='section'?'Publicar capítulo':'Publicar volumen'}</h2><p>${esc(P?.novels?.title||P?.title||'Obra')} · Vol. ${esc(v?.volume_number??'—')}</p></div>
+  <div class="studioV7ConfirmNumbers"><div><strong>${rows.length}</strong><span>Secciones incluidas</span></div><div><strong>${rows.filter(s=>isUpdate?['draft','review'].includes(s.status):s.status!=='published').length}</strong><span>Pendientes de publicación</span></div></div>
   <h3>Contenido incluido</h3><ul class="studioV7ChapterList">${rows.map(s=>`<li><span>${esc(s.title||'Sin título')}</span><span class="badge">${esc(statusBadge(s.status))}</span></li>`).join('')}</ul>
-  <p class="muted">${isScheduled?'Fecha prevista: '+esc(dateLabel(when)):mode==='section'?'Solo se publica el capítulo seleccionado.':'Se publicará el volumen y sus capítulos en una operación.'}</p>
+  <p class="muted">${isScheduled?'Fecha prevista: '+esc(dateLabel(when)):isUpdate?'Los cambios guardados ya están disponibles. Se publicarán los capítulos pendientes, sin volver a publicar los ocultos ni alterar las fechas de los capítulos publicados.':mode==='section'?'Solo se publica el capítulo seleccionado.':'Se publicará el volumen y sus capítulos en una operación.'}</p>
   <p class="studioV7Final">${isFinal?'Volumen final: al publicar, la traducción cambiará automáticamente a «'+esc(publicationStatusLabel[v.final_translation_status]||v.final_translation_status)+'».':'Este volumen no está marcado como final.'}</p>
   ${check.errors.length?`<div class="studioV7Errors" role="alert"><strong>Se requiere corrección</strong><ul>${check.errors.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}
   ${check.warnings.length?`<div class="studioV7Warnings"><strong>Advertencias (${check.warnings.length})</strong><ul>${check.warnings.map(x=>`<li>${esc(x)}</li>`).join('')}</ul><label class="studioV7Accept"><input type="checkbox" id="studioV7WarningsAccepted"> He revisado las advertencias y deseo continuar.</label></div>`:''}
-  <p class="studioV7ConfirmNote">Se respetarán las validaciones de permisos y revisiones del servidor. Los seguidores recibirán avisos solamente cuando la publicación se complete.</p>
-  <div class="studioV7ConfirmButtons"><button type="button" class="btn" data-studio-v7-close>Volver</button><button type="button" class="btn primary" id="studioV7ConfirmProceed" ${check.errors.length?'disabled':''}>${isScheduled?'Confirmar programación':'Confirmar publicación'}</button></div></div>`;
+  <p class="studioV7ConfirmNote">Se respetarán las validaciones de permisos y revisiones del servidor. Los seguidores recibirán un único aviso por volumen cuando exista actividad publicable; no se volverá a anunciar un volumen sin cambios.</p>
+  <div class="studioV7ConfirmButtons"><button type="button" class="btn" data-studio-v7-close>Volver</button><button type="button" class="btn primary" id="studioV7ConfirmProceed" ${check.errors.length?'disabled':''}>${isScheduled?'Confirmar programación':isUpdate?'Confirmar actualización':'Confirmar publicación'}</button></div></div>`;
  }
  function review(mode,id,when=null,projectOverride=null){
   const P=projectOverride||S.studioProject;
