@@ -39,7 +39,7 @@ const results=[],failures=[];
 const snapDir='visual-results/home-phase4';
 fs.mkdirSync(snapDir,{recursive:true});
 for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
- const browser=await engine.launch({headless:true,args:['--no-sandbox']});
+ const browser=await engine.launch(engineName==='Chromium'?{headless:true,args:['--no-sandbox']}:{headless:true});
  for(const config of tests.filter(x=>engineName==='Chromium'||['telefono-320','telefono-390','tableta-768'].includes(x.name))){
   const context=await browser.newContext({
    viewport:{width:config.width,height:config.height},
