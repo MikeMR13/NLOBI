@@ -5418,3 +5418,133 @@ html[data-site-motion="reduce"] .volumeGallerySection .volumeEditorialCard,
 html[data-site-motion="reduce"] .volumeGallerySection .volumeGalleryCardAction span{
   animation:none!important;transition:none!important;transform:none!important;
 }
+
+
+/* NLOBI · Sistema visual literario compartido — Etapa 1 (Inicio / Explorar / Biblioteca).
+   Capas CSS sin nuevas imágenes, fuentes, JS ni cambios en los flujos de lectura. */
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial){
+  --obi-book-edge:color-mix(in srgb,var(--accent) 32%,var(--line));
+  --obi-book-paper:color-mix(in srgb,var(--accent) 3%,var(--panel));
+  --obi-book-depth:0 7px 20px rgba(0,0,0,.065),0 1px 2px rgba(0,0,0,.05);
+  --obi-book-hover-depth:0 15px 31px rgba(0,0,0,.13),0 3px 9px rgba(0,0,0,.065);
+  --obi-book-rule:color-mix(in srgb,var(--accent) 35%,var(--line));
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial)
+:is(.homeSectionHead,.discoverShelfHead,.libraryShelfSection>.sectionHead,.libraryContinueSection>.sectionHead,.exploreResultsBar){
+  min-width:0;
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial)
+:is(.homeSectionHead,.discoverShelfHead,.libraryShelfSection>.sectionHead,.libraryContinueSection>.sectionHead) h2{
+  font-family:Georgia,"Times New Roman",serif;
+  letter-spacing:-.018em;
+  line-height:1.22;
+  text-wrap:balance;
+  overflow-wrap:anywhere;
+}
+.homeEditorial :is(.discoverShelfHead,.homeSectionHead),
+.libraryEditorial :is(.libraryShelfSection>.sectionHead,.libraryContinueSection>.sectionHead){
+  padding-bottom:13px;
+  border-bottom:2px solid var(--obi-book-rule);
+}
+:is(.homeEditorial .catalogEditorialCard,.homeEditorial .homeBookCard,
+    .exploreEditorial .catalogEditorialCard,.libraryEditorial .libraryShelfCard){
+  isolation:isolate;
+  border-color:var(--line);
+  background-color:var(--panel);
+  background-image:linear-gradient(180deg,var(--obi-book-paper),var(--panel) 53%);
+  box-shadow:var(--obi-book-depth);
+  min-width:0;
+  backface-visibility:hidden;
+}
+:is(.homeEditorial .catalogEditorialCard,.homeEditorial .homeBookCard,
+    .exploreEditorial .catalogEditorialCard,.libraryEditorial .libraryShelfCard):focus-within{
+  border-color:var(--obi-book-edge);
+  box-shadow:var(--obi-book-depth);
+}
+/* Los libros se muestran completos, incluso cuando la imagen no es 2:3. */
+:is(.homeEditorial .catalogBookArt>img,.homeEditorial .homeBookCover img,
+    .exploreEditorial .catalogBookArt>img,.libraryEditorial .libraryShelfCover img,
+    .libraryEditorial .libraryContinueCover img){
+  object-fit:contain;
+  object-position:center;
+  background-color:var(--panel2);
+}
+/* El lomo no tapa portadas, texto, botones ni las insignias. */
+:is(.homeEditorial .catalogCoverButton,.homeEditorial .homeBookCover,
+    .exploreEditorial .catalogCoverButton,.libraryEditorial .libraryShelfCover){
+  position:relative;
+  isolation:isolate;
+}
+:is(.homeEditorial .catalogCoverButton,.homeEditorial .homeBookCover,
+    .exploreEditorial .catalogCoverButton,.libraryEditorial .libraryShelfCover)::after{
+  content:"";
+  position:absolute;
+  z-index:2;
+  top:0;
+  bottom:0;
+  left:0;
+  width:6px;
+  max-width:7%;
+  pointer-events:none;
+  border-right:1px solid rgba(255,255,255,.11);
+  background:linear-gradient(to right,rgba(0,0,0,.24),rgba(255,255,255,.07),transparent);
+}
+.homeEditorial .homeQuickLinks button,
+.libraryEditorial .libraryTabs button,
+.exploreEditorial .exploreViewSwitch button,
+.libraryEditorial .libraryShelfSwitch button{
+  border-radius:11px;
+  min-height:44px;
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial)
+:is(.catalogEditorialCard,.homeBookCard,.libraryShelfCard) :is(a,button,summary):focus-visible{
+  outline:3px solid var(--accent);
+  outline-offset:3px;
+}
+/* Profundidad física solo para apuntadores precisos: no mover tarjetas con tacto. */
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeQuickLinks button,
+ html:not([data-site-motion="reduce"]) .exploreEditorial .catalogEditorialCard,
+ html:not([data-site-motion="reduce"]) .libraryEditorial .libraryShelfCard,
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeBookCard{
+   transition:transform .22s cubic-bezier(.2,.7,.3,1),box-shadow .22s ease,border-color .18s ease;
+ }
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeQuickLinks button:hover{
+   transform:translateY(-2px);
+ }
+ html:not([data-site-motion="reduce"]) .exploreEditorial .exploreNovelGrid:not(.exploreListView)>.catalogEditorialCard:hover,
+ html:not([data-site-motion="reduce"]) .libraryEditorial .libraryShelf:not(.libraryShelfList)>.libraryShelfCard:hover,
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeBookCard:hover{
+   transform:perspective(1100px) rotateY(-2deg) translateY(-4px);
+   border-color:var(--obi-book-edge);
+   box-shadow:var(--obi-book-hover-depth);
+ }
+}
+@media(hover:none){
+ .exploreEditorial .catalogEditorialCard:hover,
+ .libraryEditorial .libraryShelfCard:hover,
+ .homeEditorial .homeBookCard:hover,
+ .homeEditorial .homeQuickLinks button:hover{transform:none}
+}
+@media(max-width:430px){
+ .libraryEditorial .libraryShelf:not(.libraryShelfList){gap:11px}
+ .libraryEditorial .libraryShelfInfo{min-width:0}
+ .homeEditorial .homeQuickLinks{min-width:0}
+ .homeEditorial .homeQuickLinks button{min-width:0;overflow-wrap:anywhere}
+}
+@media(forced-colors:active){
+ :is(.homeEditorial,.exploreEditorial,.libraryEditorial)
+ :is(.catalogEditorialCard,.homeBookCard,.libraryShelfCard){background-image:none;border:1px solid CanvasText}
+ :is(.homeEditorial,.exploreEditorial,.libraryEditorial)
+ :is(.catalogCoverButton,.homeBookCover,.libraryShelfCover)::after{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ :is(.homeEditorial,.exploreEditorial,.libraryEditorial)
+ :is(.catalogEditorialCard,.homeBookCard,.libraryShelfCard,.homeQuickLinks button){
+  animation:none!important;transition:none!important;transform:none!important;
+ }
+}
+html[data-site-motion="reduce"] :is(.homeEditorial,.exploreEditorial,.libraryEditorial)
+:is(.catalogEditorialCard,.homeBookCard,.libraryShelfCard,.homeQuickLinks button){
+ animation:none!important;transition:none!important;transform:none!important;
+}
