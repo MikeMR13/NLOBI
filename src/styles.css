@@ -4920,3 +4920,84 @@ body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.
   animation:none!important;
  }
 }
+
+
+/* HOME — Destacado móvil compacto en dos columnas para evitar hero excesivo */
+@media(max-width:640px){
+ .homeEditorial .homeFeatured{
+  display:grid;
+  grid-template-columns:minmax(0,39%) minmax(0,61%);
+  align-items:stretch;
+  min-height:332px;
+  max-height:none;
+ }
+ .homeEditorial .homeFeaturedVisual{
+  display:grid;
+  align-self:stretch;
+  flex:none;
+  height:auto;
+  min-height:332px;
+  max-height:none;
+  padding:10px 7px;
+ }
+ .homeEditorial .homeFeaturedVisual::before{inset:38px 12%}
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+  width:min(84%,118px);
+  max-width:118px;
+  height:auto;
+ }
+ .homeEditorial .homeFeaturedInfo{
+  min-height:332px;
+  height:auto;
+  padding:13px 10px 12px;
+  justify-content:center;
+ }
+ .homeEditorial .homeFeaturedSlideInfo{
+  flex:1 1 auto;
+  min-height:0;
+  gap:6px;
+  justify-content:center;
+ }
+ .homeEditorial .homeFeaturedSlideInfo h2{
+  display:block;
+  font-size:clamp(.91rem,3.7vw,1.06rem);
+  line-height:1.27;
+  min-height:0;
+  max-height:none;
+  overflow:visible;
+  -webkit-line-clamp:unset;
+ }
+ .homeEditorial .homeFeaturedSlideInfo p{
+  font-size:.74rem;
+  line-height:1.42;
+  -webkit-line-clamp:2;
+ }
+ .homeEditorial .homeFeaturedLabel{
+  font-size:.64rem;
+  letter-spacing:.05em;
+  line-height:1.4;
+ }
+ .homeEditorial .homeFeaturedSlideInfo .homeFeaturedLink{
+  font-size:.76rem;
+  min-height:44px;
+  padding:7px 0;
+ }
+ .homeEditorial .featuredCarouselControls{
+  display:grid;
+  grid-template-columns:44px minmax(0,1fr) 44px;
+  align-items:center;
+  gap:2px;
+  margin-top:3px;
+  min-height:44px;
+ }
+ .homeEditorial .featuredCarouselArrow{flex:0 0 44px}
+ .homeEditorial .featuredCarouselCount{font-size:.7rem}
+}
+@media(max-width:370px){
+ .homeEditorial .homeFeatured{grid-template-columns:minmax(0,38%) minmax(0,62%);min-height:352px}
+ .homeEditorial .homeFeaturedVisual{height:auto;min-height:352px;max-height:none;padding:7px 5px}
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{width:min(83%,101px);max-width:101px}
+ .homeEditorial .homeFeaturedInfo{min-height:352px;padding:10px 8px 10px}
+ .homeEditorial .homeFeaturedSlideInfo h2{font-size:.9rem;line-height:1.27}
+ .homeEditorial .homeFeaturedSlideInfo p{font-size:.72rem}
+}
