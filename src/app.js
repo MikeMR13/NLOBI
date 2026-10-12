@@ -2120,14 +2120,13 @@ function render(){
   const preserveMobileNav=mobileNavLockedScroll!==null&&mobileNavOpenedView===S.view&&
    window.innerWidth<=1100&&!!app.querySelector('.mobileNav[open]');
   if(mobileNavLockedScroll!==null&&!preserveMobileNav)mobileNavClose(false);
-  // Conserva el titular ya pintado cuando la respuesta del catálogo sustituye el esqueleto.
-  // Esto evita volver a retrasar el LCP mientras se actualiza solo el contenido editorial.
-  const existingHomeCopy=S.view==='home'?app.querySelector('.homeShowcaseCopy'):null;
-  if(existingHomeCopy&&html.includes('homeShowcaseCopy')){
+  // El h1 del Home conserva su nodo desde el HTML inicial incluso al recibir el catálogo.
+  const stableHeading=S.view==='home'?app.querySelector('.homeShowcaseCopy h1'):null;
+  if(stableHeading&&html.includes('homeShowcaseCopy')){
    const next=document.createElement('template');next.innerHTML=html;
-   const freshCopy=next.content.querySelector('.homeShowcaseCopy');
-   if(freshCopy&&freshCopy.textContent===existingHomeCopy.textContent){
-    freshCopy.replaceWith(existingHomeCopy);
+   const freshHeading=next.content.querySelector('.homeShowcaseCopy h1');
+   if(freshHeading&&freshHeading.textContent===stableHeading.textContent){
+    freshHeading.replaceWith(stableHeading);
     app.replaceChildren(next.content);
    }else app.innerHTML=html;
   }else app.innerHTML=html;
