@@ -10,8 +10,6 @@ fs.mkdirSync(path.join(dist, "assets"), { recursive: true });
 fs.copyFileSync(path.join(root, "src", "index.html"), path.join(dist, "index.html"));
 fs.copyFileSync(path.join(root, "src", "styles.css"), path.join(dist, "assets", "styles.css"));
 fs.copyFileSync(path.join(root, "src", "app.js"), path.join(dist, "assets", "app.js"));
-fs.copyFileSync(path.join(root, "src", "initial-route.js"), path.join(dist, "assets", "initial-route.js"));
-fs.copyFileSync(path.join(root, "src", "boot-loader.js"), path.join(dist, "assets", "boot-loader.js"));
 fs.copyFileSync(path.join(root, "src", "studio-phase7.js"), path.join(dist, "assets", "studio-phase7.js"));
 fs.copyFileSync(path.join(root, "src", "studio-phase6.js"), path.join(dist, "assets", "studio-phase6.js"));
 fs.copyFileSync(path.join(root, "src", "studio-phase5.js"), path.join(dist, "assets", "studio-phase5.js"));
@@ -35,8 +33,6 @@ const requiredBuiltFiles = [
   "index.html",
   "assets/styles.css",
   "assets/app.js",
-  "assets/initial-route.js",
-  "assets/boot-loader.js",
   "assets/studio-phase7.js",
   "assets/studio-phase6.js",
   "assets/studio-phase5.js",

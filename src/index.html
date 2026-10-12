@@ -26,7 +26,7 @@
 <link rel="dns-prefetch" href="//fonts.googleapis.com">
 <link rel="dns-prefetch" href="//fonts.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,500&family=Lora:wght@400;500&family=Merriweather:wght@400;700&display=swap" rel="stylesheet" media="print" id="readerFonts">
-<script src="/assets/initial-route.js?v=home-first-paint-20261012"></script>
+<link rel="modulepreload" href="/assets/app.js?v=home-lcp-ci-20261012">
 <style id="criticalHomeCss">
 :root{--bg:#f5f5f3;--panel:#fff;--panel2:#f0f0ed;--line:#d9d9d2;--text:#101010;--muted:#676767;--accent:#ffd400}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
@@ -35,47 +35,15 @@ body.dark{--bg:#080808;--panel:#111;--panel2:#1a1a1a;--line:#3b3b3b;--text:#f7f7
 .bar{max-width:1240px;margin:auto;padding:12px 20px;display:flex;align-items:center;gap:18px}.brand{display:flex;align-items:center;gap:10px;margin-right:auto;font-weight:900;text-decoration:none}.brandMark{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#111;color:#ffd400}
 .wrap{max-width:1240px;margin:auto;padding:28px 20px 84px}.homeShowcase{display:grid;grid-template-columns:1fr 1fr;gap:24px}.homeShowcase h1{font-family:Georgia,serif}.homeFeatured img{max-width:100%;height:auto}.nav{display:flex;gap:6px;flex-wrap:wrap}.mobileNav{display:none}
 @media(max-width:767px){.bar{padding:9px 12px}.nav{display:none}.mobileNav{display:block}.wrap{padding:18px 12px 48px}.homeShowcase{grid-template-columns:minmax(0,1fr)}}
-
-/* Primer contenido útil: misma geometría general que el Home final. */
-html[data-initial-home="no"] .homeInitialShell{display:none}
-.homeInitialShell .bar{min-height:60px}
-.homeInitialMenu{margin-left:auto;display:grid;place-items:center;min-height:42px;padding:9px 12px;border:1px solid var(--line);border-radius:12px}
-.homeInitialShell .homeShowcase{position:relative;align-items:center;min-height:450px;margin:22px 0 16px;padding:clamp(25px,5vw,68px);border:1px solid var(--line);border-radius:28px;background:linear-gradient(130deg,var(--panel),var(--panel2));overflow:hidden}
-.homeInitialShell .homeShowcaseCopy h1{font-size:clamp(2.45rem,5vw,4.8rem);line-height:1.08;letter-spacing:-.045em;margin:20px 0;text-wrap:balance}
-.homeInitialShell .homeShowcaseCopy h1 em{font-weight:400;color:var(--accent)}
-.homeInitialShell .homeShowcaseCopy>p{line-height:1.75;color:var(--muted);max-width:490px}
-.homeInitialShell .homeEyebrow{font-size:.68rem;font-weight:800;letter-spacing:.17em;color:var(--accent)}
-.homeInitialShell .homeShowcaseActions{display:flex;flex-wrap:wrap;gap:10px;margin:25px 0 17px}
-.homeInitialShell .homeShowcaseActions .btn{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:9px 12px;text-decoration:none;border-radius:11px;border:1px solid var(--line);color:var(--text);background:var(--panel2);font-weight:700}
-.homeInitialShell .homeShowcaseActions .btn.primary{background:var(--accent);color:#111}
-.homeInitialShell .homeFeatured{min-width:0;min-height:334px;height:334px;display:grid;grid-template-columns:39% 61%;border:1px solid var(--line);border-radius:21px;background:var(--panel);overflow:hidden}
-.homeInitialShell .homeFeaturedVisual{display:grid;place-items:center;min-height:334px}
-.homeInitialShell .homeFeaturedInfo{display:grid;place-content:center;padding:14px;gap:12px}
-.homeInitialShell .homeLoadingCover{width:84px;height:126px;background:var(--panel2);border-radius:7px}
-.homeInitialShell .homeLoadingLine{display:block;width:75%;height:16px;background:var(--panel2);border-radius:6px}
-.homeInitialShell .homeLoadingLine.headline{height:38px;width:100%}
-.homeInitialShell .homeLoadingLine.short{width:55%}
-@media(min-width:901px){.homeInitialShell .homeFeatured,.homeInitialShell .homeFeaturedVisual{min-height:446px;height:446px}}
-@media(min-width:641px) and (max-width:900px){.homeInitialShell .homeFeatured,.homeInitialShell .homeFeaturedVisual{min-height:316px;height:316px}}
-@media(max-width:970px){.homeInitialShell .homeShowcase{grid-template-columns:1fr;padding:35px}}
-@media(max-width:640px){
- .homeInitialShell .homeShowcase{padding:12px 14px 15px;margin-top:10px;gap:9px;border-radius:19px;min-height:0}
- .homeInitialShell .homeShowcaseCopy h1{font-size:clamp(1.66rem,6.6vw,2rem);line-height:1.08;margin:6px 0 7px}
- .homeInitialShell .homeShowcaseCopy>p{font-size:clamp(.78rem,3vw,.88rem);line-height:1.42;margin:0}
- .homeInitialShell .homeShowcaseActions{gap:6px;margin:8px 0 4px}
- .homeInitialShell .homeShowcaseActions .btn{min-height:48px;padding:9px 10px;font-size:.84rem}
- .homeInitialShell .homeShowcaseNote{display:none}
-}
-@media(max-width:370px){.homeInitialShell .homeFeatured,.homeInitialShell .homeFeaturedVisual{min-height:390px;height:390px}}
 </style>
-<link rel="stylesheet" href="/assets/styles.css?v=home-first-paint-20261012" media="print" id="siteStyles">
-<noscript><link rel="stylesheet" href="/assets/styles.css?v=home-first-paint-20261012"></noscript>
+<link rel="stylesheet" href="/assets/styles.css?v=home-lcp-ci-20261012" media="print" id="siteStyles">
+<noscript><link rel="stylesheet" href="/assets/styles.css?v=home-lcp-ci-20261012"></noscript>
 
 </head>
 <body>
 <a class="skipLink" href="#mainContent">Saltar al contenido</a>
 <div id="pageBusyIndicator" class="pageBusyIndicator" role="status" aria-live="polite" aria-atomic="true" hidden><span class="pageBusyBook" aria-hidden="true"><span class="pageBusyBookSpine"></span><span class="pageBusyBookPage pageBusyBookPageLeft"></span><span class="pageBusyBookPage pageBusyBookPageRight"></span></span><span class="pageBusyCopy"><strong class="pageBusyBrand">EL OBI DEL LECTOR</strong><span data-busy-label>Cargando contenido…</span></span></div>
-<div id="app"><div class="homeInitialShell"><header class="top"><div class="bar"><a class="brand" href="#home" aria-label="El Obi del Lector, ir al inicio"><span class="brandMark" aria-hidden="true">オ</span><span class="brandFull">El Obi del Lector</span><span class="brandCompact" aria-hidden="true">El Obi</span></a><span class="homeInitialMenu" aria-hidden="true">☰ Menú</span></div></header><main class="wrap homeEditorial" id="mainContent" aria-busy="true"><section class="homeShowcase" aria-label="Bienvenida y obra destacada"><div class="homeShowcaseCopy"><span class="homeEyebrow">EL OBI DEL LECTOR <span aria-hidden="true">—</span> BIBLIOTECA DE NOVELAS LIGERAS</span><h1>Abre un libro.<br><em>Entra en otra historia.</em></h1><p>Tu rincón para descubrir novelas ligeras, seguir traducciones y disfrutar cada capítulo a tu ritmo.</p><div class="homeShowcaseActions"><a class="btn primary" href="#explore">Explorar novelas <span aria-hidden="true">→</span></a><a class="btn" href="#auth">Crear cuenta</a></div><div class="homeShowcaseNote"><span aria-hidden="true">✦</span> Nuevas historias, un capítulo a la vez.</div></div><div class="homeFeatured homeFeaturedLoading" aria-hidden="true"><div class="homeFeaturedVisual"><span class="homeLoadingCover"></span></div><div class="homeFeaturedInfo"><span class="homeLoadingLine short"></span><span class="homeLoadingLine headline"></span><span class="homeLoadingLine"></span></div></div></section></main></div></div>
+<div id="app"></div>
 <div id="toastHost" class="toastHost" aria-live="polite" aria-atomic="true"></div>
 <div id="routeAnnouncer" class="srOnly" aria-live="polite" aria-atomic="true"></div>
 <div id="netBadge" class="netBadge" role="status" aria-live="polite" hidden></div>
@@ -83,7 +51,7 @@ html[data-initial-home="no"] .homeInitialShell{display:none}
 <script src="/assets/studio-phase5.js?v=studio-phase5-20261011" defer></script>
 <script src="/assets/studio-phase6.js?v=studio-phase6-20261011" defer></script>
 <script src="/assets/studio-phase7.js?v=studio-phase7-20261011" defer></script>
-<script src="/assets/boot-loader.js?v=home-painted-first-20261012" defer></script>
+<script type="module" src="/assets/app.js?v=home-lcp-ci-20261012"></script>
 <script src="/assets/activate-styles.js" defer></script>
 <!-- NLOBI_BETA19_ARCHITECTURE -->
 </body>

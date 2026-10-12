@@ -2087,44 +2087,9 @@ function setupHomeReadingMotion(){
   homeRevealObserver.observe(section);
  }
 }
-// Conserva el hero ya pintado en el HTML. Sustituir #app por completo
-// provoca desplazamientos de diseño visibles y vuelve a declarar el H1 como LCP.
-function hydrateHomeInPlace(app,html){
- const shell=app.querySelector(':scope > .homeInitialShell');
- const parent=shell||app;
- const currentMain=parent.querySelector(':scope > main.homeEditorial');
- const currentHero=currentMain?.querySelector(':scope > .homeShowcase');
- if(!currentMain||!currentHero)return false;
- const next=document.createElement('template');next.innerHTML=html;
- const newMain=next.content.querySelector('main.homeEditorial');
- const newHero=newMain?.querySelector(':scope > .homeShowcase');
- if(!newHero||currentHero.querySelector('h1')?.textContent!==newHero.querySelector('h1')?.textContent)return false;
- const currentHeader=parent.querySelector(':scope > header.top');
- const newHeader=next.content.querySelector('header.top');
- if(currentHeader&&newHeader)currentHeader.replaceWith(newHeader);
- // Preservar el encabezado y toda su geometría: solo cambian los datos del destacado.
- for(const selector of ['.homeShowcaseActions','.homeFeatured']){
-  const current=currentHero.querySelector(':scope > '+(selector==='.homeFeatured'?selector:'.homeShowcaseCopy '+selector));
-  const incoming=newHero.querySelector(':scope > '+(selector==='.homeFeatured'?selector:'.homeShowcaseCopy '+selector));
-  if(current&&incoming)current.replaceWith(incoming);
- }
- currentMain.className=newMain.className;
- currentMain.removeAttribute('aria-busy');
- // Agregar las estanterías antes/después sin mover el hero existente.
- for(const child of [...currentMain.children])if(child!==currentHero)child.remove();
- let afterHero=false;
- for(const child of [...newMain.children]){
-  if(child===newHero){afterHero=true;continue}
-  currentMain.insertBefore(child,afterHero?null:currentHero);
- }
- if(shell)app.replaceChildren(...shell.childNodes);
- return true;
-}
 function render(){
  const app=document.getElementById('app');
  if(!app)return;
- // El contenido estático ya es útil; esperar al catálogo evita un segundo reflujo.
- if(S.view==='home'&&S.catalogLoading&&app.querySelector(':scope > .homeInitialShell'))return;
  try{
   let html=S.view==='home'?home():'';
   if(S.view==='explore')html=explore();
@@ -2155,8 +2120,17 @@ function render(){
   const preserveMobileNav=mobileNavLockedScroll!==null&&mobileNavOpenedView===S.view&&
    window.innerWidth<=1100&&!!app.querySelector('.mobileNav[open]');
   if(mobileNavLockedScroll!==null&&!preserveMobileNav)mobileNavClose(false);
-  // Actualizar solo los elementos que realmente cambian, sin mover el H1.
-  if(!(S.view==='home'&&!S.catalogLoading&&hydrateHomeInPlace(app,html)))app.innerHTML=html;
+  // Conserva el titular ya pintado cuando la respuesta del catálogo sustituye el esqueleto.
+  // Esto evita volver a retrasar el LCP mientras se actualiza solo el contenido editorial.
+  const existingHomeCopy=S.view==='home'?app.querySelector('.homeShowcaseCopy'):null;
+  if(existingHomeCopy&&html.includes('homeShowcaseCopy')){
+   const next=document.createElement('template');next.innerHTML=html;
+   const freshCopy=next.content.querySelector('.homeShowcaseCopy');
+   if(freshCopy&&freshCopy.textContent===existingHomeCopy.textContent){
+    freshCopy.replaceWith(existingHomeCopy);
+    app.replaceChildren(next.content);
+   }else app.innerHTML=html;
+  }else app.innerHTML=html;
   if(preserveMobileNav){
    const replacement=app.querySelector('.mobileNav');
    if(replacement){
@@ -3219,8 +3193,6 @@ async function loadCatalog(earlyRender=false){
  S.catalog=(catalog||[]).map(x=>({...x,latestPublishedVolume:null}));
  const enrich=async()=>{
   const [volumeResult,sectionResult,teamResult,collaborationResult]=await secondaryResults;
-  // Los datos reales que terminan después de una inyección QA no deben borrar sus fixtures.
-  if(CONFIG.qaMode===true&&qaCatalogFixtureActive)return;
   if(volumeResult.status==='fulfilled'){
    const volumes=volumeResult.value||[];
    S.publishedVolumes=[...new Map(volumes.filter(v=>v.status==='published'&&v.published_at).map(v=>[v.id,v])).values()];
@@ -3416,7 +3388,6 @@ function registerPwa(){
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;S.pwaInstallReady=true;render()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;S.pwaInstallReady=false;toast('El Obi del Lector quedó instalado.','ok');render()});
 async function boot(isRetry=false){
- let renderedAfterCatalog=false;
  S.catalogLoading=true;
  applySiteAppearance();
  S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();
@@ -3436,7 +3407,7 @@ async function boot(isRetry=false){
    try{await loadCatalog(S.view==='home');S.catalogLoaded=true;S.err=''}catch(error){S.err=friendlyError(error,'No se pudo cargar el catálogo.');console.warn('[NLOBI] El catálogo no impide recuperar la cuenta',error)}
    S.catalogLoading=false;
    // El contenido principal y su portada no esperan valoraciones ni información de cuenta.
-   render();renderedAfterCatalog=true;
+   render();
    if(isRetry)toast('Conexión restablecida.','ok');
 
    // Valoraciones solo enriquecen vistas secundarias: nunca bloquean el hero.
@@ -3451,13 +3422,12 @@ async function boot(isRetry=false){
    // Las rutas privadas de Studio sí necesitan el contexto de sesión.
    if(S.view==='studio'||S.view.startsWith('studio:')||S.view==='admin')await sessionTask;
    await resolveDynamicRoute(S.view);
-   // En Home no hay resolución adicional: evita reconstruir todo el DOM sin cambios.
-   if(S.view!=='home')render();
+   render();
    // Evitar promesas sin manejar; estas tareas siguen independientemente del primer render.
    void ratingsTask;void sessionTask;
   }else{await resolveDynamicRoute(S.view);S.err=''}
  }catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}
- finally{S.catalogLoading=false;if(!renderedAfterCatalog||S.err)render()}
+ finally{S.catalogLoading=false;render()}
  const notice=sessionStorage.getItem('nlobi_auth_notice');
  if(notice){sessionStorage.removeItem('nlobi_auth_notice');const bad=notice.startsWith('error:'),msg=notice.slice(notice.indexOf(':')+1);toast(bad?'No se pudo confirmar el correo: '+msg:msg,bad?'bad':'ok')}
 }

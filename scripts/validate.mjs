@@ -28,21 +28,13 @@ const html = fs.readFileSync("src/index.html", "utf8");
 for (const marker of [
   "/assets/styles.css",
   "/runtime-config.js",
-  "/assets/boot-loader.js",
+  "/assets/app.js",
   "NLOBI_BETA19_ARCHITECTURE",
 ]) {
   if (!html.includes(marker)) throw new Error(`Index no contiene ${marker}`);
 }
 
-const bootLoader = fs.readFileSync("src/boot-loader.js", "utf8");
-if (!bootLoader.includes("/assets/app.js") || !bootLoader.includes("requestAnimationFrame") ||
-    !bootLoader.includes("dataset.initialHome") || !bootLoader.includes("setTimeout(start,500)")) {
-  throw new Error("Optimización LCP: falta carga segura de app.js después del primer pintado.");
-}
 const app = fs.readFileSync("src/app.js", "utf8");
-for(const marker of ["function hydrateHomeInPlace(app,html)", "app.replaceChildren(...shell.childNodes)", "if(S.view==='home'&&S.catalogLoading&&app.querySelector(':scope > .homeInitialShell'))return;"]){
- if(!app.includes(marker))throw new Error("Home CLS: falta preservación de contenido inicial: "+marker);
-}
 for (const requiredFn of ["function render(){","function detailView(){","function publicGroupView(){","function readerView(){","function htmlNodesToBlocks(","function pdfTextLines(","function revisionHistoryPanel(){","function revisionPreviewPanel(){","async function cleanupOrphanMedia(){","async function storageSelfTest(){"]) { if (!app.includes(requiredFn)) throw new Error(`Falta función crítica: ${requiredFn}`); }
 
 if (app.includes("const KEY='") || app.includes("const URL='https://")) {
