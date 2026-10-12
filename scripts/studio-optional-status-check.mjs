@@ -42,7 +42,8 @@ try{
   await page.evaluate(()=>window.__NLOBI_QA__.setView('studio:project:project-qa'));
   assert.equal(await page.locator('#projectNovelStatus').inputValue(),'');
   assert.equal(await page.locator('#projectSequelStatus').inputValue(),'');
-  assert.equal(await page.locator('.studioProjectStatusSummary dt').allInnerTexts().then(x=>x.join('|')),'Traducción','Resumen: no inventar la situación original ni de la secuela');
+  await page.locator('.studioProjectStatusSummary').scrollIntoViewIfNeeded();
+  assert.equal(await page.locator('.studioProjectStatusSummary dt').allTextContents().then(x=>x.map(y=>y.trim()).join('|')),'Traducción','Resumen: no inventar la situación original ni de la secuela');
   await page.locator('#projectNovelStatus').selectOption('ongoing');
   await page.locator('#projectNovelStatus').selectOption('');
   assert.equal(await page.locator('#projectNovelStatus').inputValue(),'','El estado original puede limpiarse');
