@@ -3,7 +3,7 @@ import {readFileSync} from 'node:fs';
 import {chromium} from 'playwright';
 
 const app=readFileSync(new URL('../src/app.js',import.meta.url),'utf8');
-const migration=readFileSync(new URL('../supabase/migrations/20261011214500_optional_editorial_metadata_statuses.sql',import.meta.url),'utf8');
+const migration=readFileSync(new URL('../supabase/migrations/20261012033923_optional_editorial_metadata_statuses.sql',import.meta.url),'utf8');
 for(const [source,label,pattern] of [
  [migration,'No se asigna estado original predeterminado',/alter column status drop default/i],
  [migration,'No se asigna estado de secuela predeterminado',/alter column sequel_status drop default/i],
