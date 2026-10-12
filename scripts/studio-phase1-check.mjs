@@ -38,7 +38,7 @@ assert.ok(!atomicSave.includes('/rest/v1/section_revisions'),'Must save revision
 
 assert.match(app,/baseUpdatedAt:sec\.updated_at/,'Local draft should remember the base version');
 assert.match(app,/if\(draft\.baseUpdatedAt\)sec\.updated_at=draft\.baseUpdatedAt/,'Restore base version for conflict check');
-assert.match(app,/translator_groups\(id,name,review_required\)/);
+assert.match(app,/translator_groups\(id,name,(?:avatar_url,)?review_required\)/);
 assert.doesNotMatch(app,/id="teamPanel-identity"[^>]*id="teamProfileSettings"/);
 
 assert.match(sql,/security invoker/i);
@@ -47,7 +47,7 @@ assert.match(sql,/STUDIO_EDIT_CONFLICT/);
 assert.match(sql,/insert into public\.section_revisions/);
 assert.match(sql,/revoke all on function public\.save_studio_section_atomic/i);
 assert.match(sql,/grant execute on function public\.save_studio_section_atomic[\s\S]*to authenticated, service_role/i);
-for(const value of ['light_novel','web_novel','original','active','paused','abandoned','complete','awaiting_sequel','no_sequel_confirmed','is_final_volume']){
+for(const value of ['light_novel','web_novel','original','active','paused','abandoned','complete','withdrawn','is_final_volume']){
  assert.ok(sql.includes(value),'Missing expected metadata value: '+value);
 }
 console.log('Studio Phase 1 checks OK: reviewer scopes, local drafts, optimistic saves, schema preparation.');
