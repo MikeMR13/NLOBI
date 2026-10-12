@@ -28,10 +28,11 @@ const toast=(message,type)=>toasts.push({message,type});
 const request=async(path,options)=>{requests.push({path,options});return []};
 const refresh=async()=>{};
 const saveFactory=new Function('S','$','jreq','toast','friendlyError','teamCan',
- 'NOVEL_PUBLICATION_STATES','TRANSLATION_EDITORIAL_STATES','SEQUEL_EDITORIAL_STATES',
+ 'NOVEL_PUBLICATION_STATES','TRANSLATION_EDITORIAL_STATES','SEQUEL_EDITORIAL_STATES','confirmedNovelStatus','confirmedSequelStatus',
  'loadStudioData','loadCatalog','refreshStudioProject',
  extract('async function saveEditorialStates(){','\nasync function saveTranslationStatus(')+';return saveEditorialStates;');
-const save=saveFactory(S,$,request,toast,e=>e.message,()=>true,novelOptions,translationOptions,sequelOptions,refresh,refresh,refresh);
+const save=saveFactory(S,$,request,toast,e=>e.message,()=>true,novelOptions,translationOptions,sequelOptions,
+ state=>novelOptions.some(([key])=>key===state),state=>sequelOptions.some(([key])=>key===state&&key!=='unspecified'),refresh,refresh,refresh);
 await save();
 assert.equal(requests.length,1);
 assert.equal(requests[0].path,'/rest/v1/rpc/update_editorial_states');
@@ -39,6 +40,17 @@ assert.deepEqual(JSON.parse(requests[0].options.body),{
  p_translation_id:'translation',p_novel_status:'completed',p_translation_status:'paused',p_sequel_status:'awaiting'
 });
 assert.ok(toasts.some(x=>x.type==='ok'));
+// Los campos no confirmados pueden enviarse como NULL sin inventar un estado editorial.
+controls['#projectNovelStatus'].value='';
+controls['#projectSequelStatus'].value='';
+requests.length=0;toasts.length=0;
+await save();
+assert.deepEqual(JSON.parse(requests[0].options.body),{
+ p_translation_id:'translation',p_novel_status:null,p_translation_status:'paused',p_sequel_status:null
+});
+assert.ok(toasts.some(x=>x.type==='ok'));
+controls['#projectNovelStatus'].value='completed';
+controls['#projectSequelStatus'].value='awaiting';
 controls['#projectTranslationStatus'].value='awaiting_sequel';
 requests.length=0;toasts.length=0;
 await save();

@@ -30,7 +30,7 @@ const user={id:'user-1',email:'qa@example.test'};
 const profile={id:'user-1',username:'qa_creator',display_name:'Creador QA con nombre largo',avatar_url:null,bio:'Biografía larga de control de calidad. '.repeat(12),account_type:'reader_translator',public_library:true,public_activity:true};
 const group={id:'group-1',slug:'equipo-qa',name:'Equipo traductor con un nombre largo de control de calidad',description:'Descripción extensa del equipo. '.repeat(16),avatar_url:null,banner_url:null,primary_color:'#111111',secondary_color:'#ffd400',support_links:[{id:'support-1',label:'Ko-fi',url:'https://example.test'}]};
 const groups=[{role:'owner',translator_groups:{id:'group-1',name:group.name,slug:group.slug}}];
-const studioTranslations=[{id:'project-1',title:longTitle,status:'active',language_code:'es',group_id:'group-1',editorial_mode:true,novels:{id:'novel-1',title:longTitle},translator_groups:{id:'group-1',name:group.name}}];
+const studioTranslations=[translation];
 const library=[{translation_id:'project-1',status:'reading',is_favorite:true,updated_at:now,translations:{id:'project-1',title:longTitle,novels:{id:'novel-1',title:longTitle,cover_url:null},translator_groups:{id:'group-1',name:group.name}}}];
 const progress=[{translation_id:'project-1',volume_id:'volume-1',section_id:'section-1',progress_percent:57,anchor:'p-3',updated_at:now,volumes:{id:'volume-1',volume_number:1,title:'Volumen 1'},sections:{id:'section-1',title:section1.title,section_number:1}}];
 const history=[{section_id:'section-1',translation_id:'project-1',viewed_at:now,sections:{id:'section-1',title:section1.title,section_number:1,volumes:{id:'volume-1',volume_number:1,translations:{id:'project-1',title:longTitle,novels:{id:'novel-1',title:longTitle}}}}}];
@@ -55,7 +55,7 @@ const adminData={
  adminAudit:[{id:'audit-1',action_type:'qa',target_type:'translation',target_id:'project-1',details:{note:'prueba'},created_at:now}],
  adminBetaFeedback:[{id:'beta-1',user_id:'user-1',category:'ux',title:'Reporte QA',description:'Descripción '.repeat(10),page:'#beta',status:'open',admin_note:null,created_at:now,profiles:{display_name:'Creador QA'}}]
 };
-const authBase={user,profile,groups,library,readingProgress:progress,readingHistory:history,notes,studioTranslations,betaFeedback:adminData.adminBetaFeedback,follows:[{target_type:'translation',target_id:'project-1',created_at:now}],...adminData};
+const authBase={user,profile,groups,accountPermissionsReady:true,adminPermissionsReady:true,library,readingProgress:progress,readingHistory:history,notes,studioTranslations,betaFeedback:adminData.adminBetaFeedback,follows:[{target_type:'translation',target_id:'project-1',created_at:now}],...adminData};
 
 function importState(step){
  const sections=[{title:'Capítulo 1 muy largo para validar el importador en móvil',section_type:'chapter',section_number:1,body:'Texto importado '.repeat(80),blocks:[{type:'heading',text:'Capítulo 1'},{type:'paragraph',text:'Texto importado '.repeat(40)}]},{title:'閑話',section_type:'interlude',section_number:2,body:'Interludio',blocks:[{type:'paragraph',text:'Interludio'}]}];
@@ -87,9 +87,16 @@ const scenarios=[
  ['user-library-collections-edit','library',{...authBase,catalog:[collectionTranslation],libraryTab:'collections',readerCollections:[collectionFixture],savedCollections:[],discoverCollections:[],collectionFormOpen:true,collectionEditingId:'collection-qa'}],
  ['user-profile','auth',authBase],['user-notifications','notifications',authBase],
  ['user-notifications-volume','notifications',{...authBase,notes:[{id:'notice-volume',notification_type:'new_publication',title:'Nuevo volumen · Historia QA',body:'Vol. 1',translation_id:'project-1',volume_id:'volume-1',section_id:null,created_at:now,read_at:null}]}],['user-beta','beta',authBase],
- ['creator-studio','studio',authBase],['creator-new','studio:new',authBase],
+ ['creator-studio','studio',authBase],['creator-work','studio:work',authBase],['creator-new','studio:new',authBase],
  ['creator-project','studio:project:project-1',{...authBase,studioProject:translation,teamMembers}],
  ['creator-team','studio:team:group-1',{...authBase,studioTeam:group,teamMembers}],
+  ...['identity','custom','reader','requests','members','permissions','links'].map(tab=>['creator-team-'+tab,'studio:team:group-1',{...authBase,studioTeam:{...group,join_requests:[],profile_settings:{show_reader_logo:true,status:'activo'}},teamSettingsTab:tab,teamMembers}]),
+  ['creator-project-block-editor','studio:project:project-1',{...authBase,studioProject:{...translation,editingSection:section1,review_requests:[],publication_schedules:[],review_members:teamMembers},studioEditorMode:'blocks',blockEditor:{sectionId:section1.id,blocks:section1.content},revisionHistory:[],teamMembers}],
+  ['creator-project-paged-editor','studio:project:project-1',{...authBase,studioProject:{...translation,editingSection:section1,review_requests:[],publication_schedules:[],review_members:teamMembers},studioEditorMode:'paged',blockEditor:{sectionId:section1.id,blocks:section1.content},revisionHistory:[],teamMembers}],
+  ['creator-project-volume-editor','studio:project:project-1',{...authBase,studioProject:translation,studioEditVolumeId:'volume-1',teamMembers}],
+  ['creator-studio-search-empty','studio',{...authBase,studioProjectSearch:'obra-que-no-existe-12345'}],
+  ['creator-studio-loading','studio',{...authBase,studioLoadError:'Consulta fallida; comprobando la recuperación de obras'}],
+  ['creator-teams-list','studio:teams',{...authBase,studioTeam:group,teamMembers}],
  ['creator-media','studio:media:group-1',{...authBase,mediaGroupId:'group-1',mediaLoading:false,mediaFiles:[{name:'cover.jpg',path:'teams/group-1/cover.jpg',size:2048,mimetype:'image/jpeg',updated_at:now}],mediaUsage:{'teams/group-1/cover.jpg':1}}],
  ['import-file','studio:import',{...authBase,importState:importState('file')}],
  ['import-analysis','studio:import',{...authBase,importState:importState('analysis')}],
@@ -138,7 +145,7 @@ const report=[],failures=[];
 for(const [vpName,width,height] of viewports){
  for(const [name,view,state] of scenarios){
   const full=vpName==='mobile-390'||vpName==='desktop-1280';
-  const edge=['public-home','public-home-carousel','public-explore','public-detail','public-reader','user-library','creator-studio','creator-project','creator-team','import-edit','admin','error-state'];
+  const edge=['public-home','public-home-carousel','public-explore','public-detail','public-reader','user-library','creator-studio','creator-work','creator-project','creator-team','creator-project-block-editor','creator-project-paged-editor','creator-team-reader','creator-team-custom','import-edit','admin','error-state'];
   if(!full&&!edge.includes(name))continue;
   const context=await browser.newContext({viewport:{width,height},serviceWorkers:'block',colorScheme:'light'});await prepare(context);
   const page=await context.newPage(),runtime=[];page.on('pageerror',e=>runtime.push(e.message));page.on('console',m=>{if(m.type()==='error'&&!/favicon|Failed to load resource/i.test(m.text()))runtime.push(m.text())});
@@ -146,6 +153,17 @@ for(const [vpName,width,height] of viewports){
   await page.evaluate(({state,view})=>{window.__NLOBI_QA__.setState(state);window.__NLOBI_QA__.setView(view)},{state,view});await page.waitForTimeout(25);
   const check=await inspect(page),axe=await new AxeBuilder({page}).analyze(),seriousViolations=axe.violations.filter(v=>['serious','critical'].includes(v.impact||'')),serious=seriousViolations.map(v=>v.id),axeDetails=seriousViolations.flatMap(v=>v.nodes.slice(0,7).map(n=>({id:v.id,selector:n.target,reason:n.failureSummary?.slice(0,220),html:n.html?.slice(0,130)})));
   const row={viewport:vpName,scenario:name,...check,runtime,axeSerious:serious,axeDetails};report.push(row);
+  if(name.startsWith('creator-')||name.startsWith('import-')){
+   await page.screenshot({path:'quality-results/studio-audit-'+name+'-'+vpName+'.png',fullPage:true});
+   const appMain=await page.locator('main').first().innerText().catch(()=> '');
+   if(name==='creator-studio' && !appMain.includes('Mis obras'))failures.push({...row,error:'studio-mis-obras-not-rendered'});
+   if((await page.locator('#mainContent').count())!==1)failures.push({...row,error:'skip-link-main-target-missing'});
+   if(name==='creator-project-block-editor' && (await page.locator('[data-team-template="translator_note"]').count())!==1)failures.push({...row,error:'team-note-toolbar-button-invalid'});
+   if(name.startsWith('creator-team-') && ['identity','custom','reader','requests','members','permissions','links'].includes(name.slice(13))){
+    const current=name.slice(13);
+    if((await page.locator('#teamPanel-'+current+':visible').count())!==1)failures.push({...row,error:'team-tab-panel-not-visible'});
+   }
+  }
   if(check.overflow>2)failures.push({...row,error:'horizontal-overflow'});if(check.clipped.length)failures.push({...row,error:'clipped-controls'});if(check.tiny.length)failures.push({...row,error:'small-targets'});if(check.badText.length)failures.push({...row,error:'bad-visible-text'});if(!check.main||check.content<2)failures.push({...row,error:'empty-main'});if(runtime.length)failures.push({...row,error:'runtime-error'});if(serious.length)failures.push({...row,error:'axe-serious'});
   if(name==='public-home-carousel'){
    const initial=await page.evaluate(()=>{
