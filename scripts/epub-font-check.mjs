@@ -71,4 +71,53 @@ assert.match(blocks[0].html,/data-epub-family="2"/);
 assert.match(blocks[0].html,/<strong>/,'Inline bold variants must survive import');
 assert.match(source,/face=new FontFace\('NLOBI-EPUB-'\+index/,'Use a stable unique family index per weight/style variant');
 assert.match(source,/reader-font-original \[data-epub-family/,'Original mode must apply preserved inline styles');
+
+const studio=fs.readFileSync(new URL('../src/studio-phase7.js',import.meta.url),'utf8');
+const vercel=fs.readFileSync(new URL('../vercel.json',import.meta.url),'utf8');
+assert.match(source,/Promise\.all\(entries\.map/,'All EPUB variants should load concurrently');
+assert.match(vercel,/font-src[^;]*https:\/\/\*\.supabase\.co/,'Allow approved storage origin as a font fallback');
+assert.match(source,/activateEpubFonts,epubFontFamilyNames/,'Studio should receive embedded font loader');
+assert.match(source,/cover_url,epub_fonts,is_final_volume/,'Studio must request volume font metadata');
+assert.match(studio,/activateEpubFonts\(fonts\)/,'Studio preview must load EPUB faces');
+
+let loading=0,peak=0,renderCalls=0,proxyFailures=0;
+const added=new Set(),sheets=new Map();
+class FontFaceStub{
+ constructor(family,url,properties){this.family=family;this.url=url;this.properties=properties}
+ async load(){
+  loading++;peak=Math.max(peak,loading);
+  await Promise.resolve();
+  loading--;
+  if(this.url.includes('/media/')){proxyFailures++;throw new Error('Simulated media rewrite issue')}
+  return this;
+ }
+}
+const entries=[0,1,2].map(i=>({family:'Font '+i,url:'https://project.supabase.co/storage/v1/object/public/nlobi-media/teams/test/font-'+i+'.ttf',style:'normal',weight:'normal'}));
+Object.assign(sandbox,{
+ URL:'https://project.supabase.co',
+ window:{FontFace:FontFaceStub},FontFace:FontFaceStub,
+ S:{view:'reader:test',readerSection:{epub_fonts:entries}},
+ safeUrl:x=>x,
+ safeMediaUrl:x=>x.replace('https://project.supabase.co/storage/v1/object/public/nlobi-media/','/media/'),
+ render:()=>{renderCalls++},
+ document:{
+  fonts:{add:x=>added.add(x),delete:x=>added.delete(x)},
+  getElementById:id=>sheets.get(id)||null,
+  createElement:()=>({id:'',textContent:''}),
+  head:{appendChild:node=>sheets.set(node.id,node)}
+ }
+});
+await sandbox.activateEpubFonts(entries);
+assert.ok(peak>=3,'Embedded font loads should be concurrent, not serial');
+assert.equal(proxyFailures,3,'The test must exercise a failing proxy path');
+assert.equal(added.size,3,'All fonts should retry against approved storage when the proxy fails');
+assert.equal(sandbox.S.epubFontCount,3);
+assert.ok(sandbox.S.epubFontAvailable.has(0));
+assert.equal(sandbox.S.epubFontFailures,0);
+assert.equal(renderCalls,1);
+assert.match(sheets.get('nlobiEpubFontStyles').textContent,/reader-font-original/);
+await sandbox.activateEpubFonts(entries);
+assert.equal(renderCalls,1,'Do not reload the same font set unnecessarily');
+console.log('EPUB font loading regression: concurrent variants and storage fallback OK');
+
 console.log('EPUB font preservation regression: OK');
