@@ -64,6 +64,8 @@ jobs:
           npx playwright install --with-deps chromium firefox webkit
       - name: Home phase 4 responsive editorial matrix (Chromium + WebKit)
         run: node scripts/home-editorial-phase4-check.mjs
+      - name: Mobile interaction audit (Chromium + WebKit)
+        run: node scripts/mobile-interactions-check.mjs
       - name: Studio account and works visual browser audit
         run: node scripts/studio-visual-browser-audit.mjs
       - name: Notification bell technical and responsive regression
@@ -90,8 +92,6 @@ jobs:
         run: node scripts/visual-regression-phase4-check.mjs
       - name: Mobile navigation phase 2 interaction audit
         run: node scripts/mobile-navigation-phase2-check.mjs
-      - name: Mobile interaction audit (Chromium + WebKit)
-        run: node scripts/mobile-interactions-check.mjs
       - name: Explore visual and interaction audit
         run: node scripts/explore-quality-check.mjs
       - name: Full platform quality pass
