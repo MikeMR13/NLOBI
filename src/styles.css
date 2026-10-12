@@ -4391,8 +4391,8 @@ html[data-site-corners="soft"] .homeEditorial :is(.homeNovelTile,.volumeReleaseC
 @media (prefers-reduced-motion:no-preference){
  html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending{
   opacity:0;
-  transform:translate3d(0,13px,0);
-  transition:opacity .4s ease-out,transform .4s cubic-bezier(.2,.7,.25,1);
+  transform:none;
+  transition:opacity .3s ease-out;
  }
  html:not([data-site-motion="reduce"]) .homeEditorial .homeMotionPending.homeMotionShown{
   opacity:1;
@@ -4474,6 +4474,15 @@ html[data-site-corners="soft"] .homeEditorial :is(.homeNovelTile,.volumeReleaseC
  }
 }
 /* No mover tarjetas sobre dispositivos táctiles ni con poca precisión. */
+/* Los títulos en pantallas estrechas nunca se mueven al recibir foco o clic. */
+@media (max-width:640px){
+ .homeEditorial .homeNovelTile:hover,
+ .homeEditorial .homeNovelTile:focus-within,
+ .homeEditorial .volumeReleaseCard:hover,
+ .homeEditorial .volumeReleaseCard:focus-within{
+  transform:none!important;
+ }
+}
 @media (hover:none), (pointer:coarse){
  .homeEditorial .homeNovelTile:hover,
  .homeEditorial .homeNovelTile:focus-within,
