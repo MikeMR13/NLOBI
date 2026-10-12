@@ -37,6 +37,7 @@ for(const [name,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    const galleryY=await page.evaluate(()=>window.scrollY);
    await page.locator('[data-open-volume="volume-1"]').click();
    await page.locator('#volumeOpenedTitle').waitFor();
+   const capturedGalleryY=await page.evaluate(()=>window.__NLOBI_QA__.getState().detailGalleryReturnY);
    const opened=await page.evaluate(()=>{
     const index=document.querySelector('.volumeChapterIndex');
     return {count:index?.querySelectorAll('.volumeChapterRow').length,
@@ -69,9 +70,9 @@ for(const [name,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    if(await page.locator('[data-switch-volume="volume-4"]').count()||await page.locator('[data-switch-volume="volume-2"]').count()===0)
      failures.push({name,width,stage:'last-volume'});
    await page.locator('[data-volume-gallery]').click();
-   await page.waitForFunction(()=>document.querySelector('#detailVolumeGrid')&&Math.abs(window.scrollY-190)<=5,undefined,{timeout:4000}).catch(()=>{});
+   await page.waitForFunction(y=>document.querySelector('#detailVolumeGrid')&&Math.abs(window.scrollY-y)<=5,capturedGalleryY,{timeout:4000}).catch(()=>{});
    const back=await page.evaluate(()=>({isGallery:!!document.querySelector('#detailVolumeGrid'),y:window.scrollY,overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth}));
-   if(!back.isGallery||Math.abs(back.y-galleryY)>8||back.overflow>2)failures.push({name,width,stage:'return-to-gallery',back,galleryY});
+   if(!back.isGallery||Math.abs(back.y-capturedGalleryY)>8||back.overflow>2)failures.push({name,width,stage:'return-to-gallery',back,capturedGalleryY,initialY:galleryY});
    if(name==='Chromium'&&(width===390||width===1280)){
     await page.locator('[data-open-volume="volume-2"]').click();
     await page.screenshot({path:'visual-results/detail-editorial-phase3-'+width+'.png',fullPage:false});
