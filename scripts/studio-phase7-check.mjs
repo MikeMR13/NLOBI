@@ -14,10 +14,12 @@ assert.ok(app.includes("studioLaunch.review('volume',I.savedVolumeId,null,projec
 assert.ok(app.includes("studioLaunch.review('volume',volume.id,null,freshProject)"),'Import wizard direct publication must use preflight');
 assert.ok(source.includes('actorName(e.actor_user_id)'), 'History must identify responsible team member');
 for(const key of ['studio-phase7.js','studioV7Hub','studioV7Dialog'])assert.ok((html+build+css+sw).includes(key),'Missing asset '+key);
-for(const key of ['enable row level security','editorial_events_team_read','studio_publication_audit_volumes','studio_publication_audit_sections','studio_publication_audit_schedule','schedule_rescheduled','trg_notify_volume_published','nlobi.batch_publishing_volume','volume_schedule_one_pending_per_volume']){
+for(const key of ['enable row level security','editorial_events_team_read','studio_publication_audit_volumes','studio_publication_audit_sections','studio_publication_audit_schedule','schedule_rescheduled','volume_schedule_one_pending_per_volume']){
  assert.ok(sql.includes(key),'Missing database protection '+key);
 }
 assert.ok(sql.includes("grant select on public.editorial_publication_events to authenticated"));
+assert.ok(sql.includes('Se mantienen las funciones y triggers de notificación actuales'), 'No reemplazar los avisos por volumen en una migración editorial');
+assert.ok(!sql.includes('create trigger trg_notify_volume_published'), 'Evitar avisos duplicados sobre las notificaciones ya existentes');
 assert.ok(!/grant\s+(?:insert|update|delete)[^;]*editorial_publication_events\s+to\s+authenticated/i.test(sql));
 
 const escape=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
