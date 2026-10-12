@@ -71,6 +71,8 @@ jobs:
         run: exit 1
       - name: Home phase 4 responsive editorial matrix (Chromium + WebKit)
         run: node scripts/home-editorial-phase4-check.mjs
+      - name: Featured cover size and motion regression (Chromium + WebKit)
+        run: node scripts/home-featured-balance-check.mjs
       - name: Mobile interaction audit (Chromium + WebKit)
         run: node scripts/mobile-interactions-check.mjs
       - name: Studio account and works visual browser audit
@@ -136,6 +138,7 @@ jobs:
             visual-results/phase4-appearance-matrix.json
             visual-results/phase4-snapshots/
             visual-results/home-phase4/
+            visual-results/home-featured/
           if-no-files-found: warn
       - name: Upload visual layout report
         if: always()
