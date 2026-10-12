@@ -5047,3 +5047,41 @@ body.dark .homeEditorial .homeNovelTile :is(.catalogTranslator,.catalogUpdated,.
  .homeEditorial .homeFeaturedVisual,
  .homeEditorial .homeFeaturedInfo{min-height:382px}
 }
+
+
+/* Home destacado: reserva estable para novelas de títulos largos.
+   El cambio de portada jamás reduce o agranda el panel ni empuja el contenido. */
+@media(min-width:901px){
+ .homeEditorial .homeFeatured{
+  height:446px;
+  min-height:446px;
+  max-height:446px;
+ }
+ .homeEditorial .homeFeaturedVisual{
+  height:446px;
+  min-height:446px;
+  max-height:446px;
+ }
+ .homeEditorial .homeFeaturedInfo{
+  height:446px;
+  min-height:0;
+  max-height:446px;
+ }
+}
+@media(max-width:370px){
+ .homeEditorial .homeFeatured{
+  height:390px;
+  min-height:390px;
+  max-height:390px;
+ }
+ .homeEditorial .homeFeaturedVisual{
+  height:390px;
+  min-height:390px;
+  max-height:390px;
+ }
+ .homeEditorial .homeFeaturedInfo{
+  height:390px;
+  min-height:0;
+  max-height:390px;
+ }
+}
