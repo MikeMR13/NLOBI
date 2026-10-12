@@ -21,6 +21,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Password recovery and session regression
+        run: node scripts/auth-recovery-check.mjs
       - name: Studio phase 1 regression
         run: node scripts/studio-phase1-check.mjs
       - name: Studio phase 2 regression
