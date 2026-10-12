@@ -4535,3 +4535,66 @@ html[data-site-motion="reduce"] .homeEditorial .homeMotionPending{
  .homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink)::after,
  .homeEditorial .volumeReleaseCover::after{display:none}
 }
+
+
+/* HOME — Fase 4: auditoría responsive y pulido final (2026-10-12).
+   Reflow estable, personalización visual y objetivos táctiles. */
+.homeEditorial .homeShowcase,
+.homeEditorial .homeFeatured,
+.homeEditorial .homeBookGrid,
+.homeEditorial .homeVolumeReleaseGrid,
+.homeEditorial .discoverShelf,
+.homeEditorial .discoverShelfHead,
+.homeEditorial .discoverShelfActions{min-width:0}
+.homeEditorial .discoverShelfHead>div:first-child,
+.homeEditorial .homeFeaturedSlideInfo,
+.homeEditorial .homeBookDetails,
+.homeEditorial .volumeReleaseBody{min-width:0;overflow-wrap:anywhere}
+.homeEditorial .homeNovelTile .catalogCardActions .btn,
+.homeEditorial .homeNovelTile .homeBookOpen,
+.homeEditorial .volumeReleaseOpen,
+.homeEditorial .homeShowcaseActions .btn{
+ min-height:44px;
+}
+.homeEditorial .homeNovelTile :is(.catalogCoverButton,.homeBookCoverLink):focus-visible,
+.homeEditorial .volumeReleaseCover:focus-visible{
+ outline-offset:-3px;
+}
+html[data-site-density="compact"] .homeEditorial .discoverShelfTrack{gap:10px}
+html[data-site-density="comfortable"] .homeEditorial .discoverShelfTrack{gap:clamp(17px,2vw,23px)}
+html[data-site-corners="square"] .homeEditorial :is(.homeShowcase,.homeProgressCard,.homeQuickLinks button){border-radius:3px}
+html[data-site-corners="soft"] .homeEditorial :is(.homeShowcase,.homeProgressCard,.homeQuickLinks button){border-radius:25px}
+@media(max-width:760px){
+ .homeEditorial .discoverShelfHead{align-items:start}
+ .homeEditorial .discoverShelfActions{min-width:0}
+ .homeEditorial .homeNovelTile :is(.catalogCardContent h3,.homeBookDetails h3){
+  overflow-wrap:anywhere;
+ }
+}
+@media(max-width:430px){
+ .homeEditorial .homeSectionHead,
+ .homeEditorial .discoverShelfHead{gap:10px}
+ .homeEditorial .homeFeaturedInfo{overflow-wrap:anywhere}
+ .homeEditorial .homeNovelTile .catalogStatusRow{gap:5px}
+ .homeEditorial .homeNovelTile :is(.catalogStatusTag,.homeBookTags>span){
+  max-width:100%;
+  overflow-wrap:anywhere;
+ }
+ .homeEditorial .homeGenreLinks button{min-height:44px;max-width:100%;overflow-wrap:anywhere}
+ .homeEditorial .homeVolumeReleaseGrid{gap:10px}
+ .homeEditorial .volumeReleaseOpen{white-space:normal;line-height:1.3}
+}
+@media(hover:none), (pointer:coarse){
+ .homeEditorial .homeQuickLinks button:hover,
+ .homeEditorial .shelfArrow:hover{
+  transform:none;
+ }
+ .homeEditorial .homeNovelTile .catalogCoverOverlay{
+  opacity:0;
+  pointer-events:none;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .homeEditorial .homeQuickLinks button,
+ .homeEditorial .shelfArrow{transition:none!important}
+}
