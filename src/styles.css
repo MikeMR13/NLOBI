@@ -5708,3 +5708,131 @@ html[data-site-motion="reduce"] :is(.readerDirectory .readerDirectoryCard,
   .notificationsEditorial .notificationFeedCard){
   animation:none!important;transition:none!important;transform:none!important;
 }
+
+
+/* NLOBI · Sistema literario global · Etapa 3: Studio y administración.
+   Solo paneles y navegación: no alterar editor, preview, diálogos o acciones. */
+:is(.studioV3,.studioV5,.adminWorkspace){
+ --obi-desk-paper:color-mix(in srgb,var(--accent) 2.5%,var(--panel));
+ --obi-desk-rule:color-mix(in srgb,var(--accent) 36%,var(--line));
+ --obi-desk-shadow:0 7px 20px rgba(0,0,0,.065),0 1px 3px rgba(0,0,0,.04);
+ --obi-desk-shadow-hover:0 12px 27px rgba(0,0,0,.105),0 2px 6px rgba(0,0,0,.05);
+}
+.studioV3 .studioV3PageHeading h1,
+.adminWorkspace .adminWorkspaceHeader h1{
+ text-wrap:balance;
+ overflow-wrap:anywhere;
+}
+.studioV3 :is(.studioV3OverviewHeader,.studioV3SmallHead) h2,
+.studioV5 .studioV5Panel>h2,
+.adminWorkspace :is(.adminCurrentHead,.adminDashboardIntro,.adminEditorialIntro,.adminModerationIntro) :is(h2,h3){
+ font-family:Georgia,"Times New Roman",serif;
+ line-height:1.25;
+ letter-spacing:-.016em;
+ text-wrap:balance;
+ overflow-wrap:anywhere;
+}
+.studioV3 :is(.studioV3OverviewHeader,.studioV3SmallHead),
+.adminWorkspace :is(.adminWorkspaceHeader,.adminCurrentHead,.adminDashboardIntro){
+ border-bottom:2px solid var(--obi-desk-rule);
+ padding-bottom:13px;
+}
+.studioV3 :is(.studioV3Sidebar,.studioV3Stat,.studioV3Insight,.studioV3BookCard,
+ .studioV3Filters,.studioV3TeamList>button),
+.studioV5 :is(.studioV5Panel,.studioV5Stats>div,.studioV5Item),
+.adminWorkspace :is(.adminWorkspaceSidebar,.adminDashboardKpi,.adminDashboardPanel,
+ .adminDirectoryTableWrap,.adminEditorialIntro,.adminEditorialCard,
+ .adminModerationIntro,.adminModerationItem){
+ min-width:0;
+ border-color:var(--line);
+ background-color:var(--panel);
+ background-image:linear-gradient(155deg,var(--obi-desk-paper),var(--panel) 63%);
+ box-shadow:var(--obi-desk-shadow);
+}
+.studioV3 .studioV3BookCover{
+ position:relative;
+ isolation:isolate;
+}
+/* Pequeño lomo editorial, sin cambiar object-fit:contain ni cubrir el título. */
+.studioV3 .studioV3BookCover::after{
+ content:"";
+ position:absolute;
+ inset:0 auto 0 0;
+ width:6px;
+ max-width:6%;
+ background:linear-gradient(90deg,rgba(0,0,0,.24),rgba(255,255,255,.08),transparent);
+ pointer-events:none;
+}
+.studioV3 .studioV3InsightHead,
+.adminWorkspace .adminDashboardPanelTitle{
+ border-bottom:1px solid var(--obi-desk-rule);
+ padding-bottom:10px;
+}
+.studioV3 .studioV3BookCard:focus-within,
+.adminWorkspace .adminDashboardKpi:focus-visible,
+.adminWorkspace .adminDashboardPanel:focus-within{
+ border-color:var(--obi-desk-rule);
+}
+.studioV3 .studioV3NavItem.active,
+.adminWorkspace .adminSideLink.isActive{
+ box-shadow:inset 3px 0 0 var(--accent);
+}
+.studioV3 .studioV3BookBody,
+.adminWorkspace .adminDashboardPriorityLabel{
+ min-width:0;
+ overflow-wrap:anywhere;
+}
+.studioV3 .studioV3Sidebar,
+.adminWorkspace .adminWorkspaceSidebar{
+ overscroll-behavior:contain;
+}
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ html:not([data-site-motion="reduce"]) .studioV3 .studioV3BookCard,
+ html:not([data-site-motion="reduce"]) .studioV3 .studioV3TeamList>button,
+ html:not([data-site-motion="reduce"]) .adminWorkspace .adminDashboardKpi{
+  transition:transform .20s cubic-bezier(.2,.7,.3,1),box-shadow .20s ease,border-color .18s ease;
+ }
+ html:not([data-site-motion="reduce"]) .studioV3 .studioV3BookCard:hover,
+ html:not([data-site-motion="reduce"]) .studioV3 .studioV3TeamList>button:hover,
+ html:not([data-site-motion="reduce"]) .adminWorkspace .adminDashboardKpi:hover{
+  transform:translateY(-2px);
+  border-color:var(--obi-desk-rule);
+  box-shadow:var(--obi-desk-shadow-hover);
+ }
+}
+@media(hover:none){
+ .studioV3 .studioV3BookCard:hover,
+ .studioV3 .studioV3TeamList>button:hover,
+ .adminWorkspace .adminDashboardKpi:hover{transform:none}
+}
+@media(max-width:430px){
+ .studioV3 .studioV3PageHeading,
+ .adminWorkspace .adminWorkspaceHeader{
+  min-width:0;
+ }
+ .studioV3 .studioV3BookBody{
+  padding-inline:clamp(10px,3vw,15px);
+ }
+ .adminWorkspace .adminDashboardKpi{min-width:0}
+}
+@media(forced-colors:active){
+ .studioV3 :is(.studioV3Sidebar,.studioV3Stat,.studioV3Insight,.studioV3BookCard),
+ .adminWorkspace :is(.adminWorkspaceSidebar,.adminDashboardKpi,.adminDashboardPanel,
+ .adminDirectoryTableWrap,.adminEditorialCard,.adminModerationItem){
+  background-image:none;
+  border-color:CanvasText;
+ }
+ .studioV3 .studioV3BookCover::after{display:none}
+ .studioV3 .studioV3NavItem.active,
+ .adminWorkspace .adminSideLink.isActive{outline:2px solid Highlight;outline-offset:-2px}
+}
+@media(prefers-reduced-motion:reduce){
+ .studioV3 :is(.studioV3BookCard,.studioV3TeamList>button),
+ .adminWorkspace .adminDashboardKpi{
+  animation:none!important;transition:none!important;transform:none!important;
+ }
+}
+html[data-site-motion="reduce"] .studioV3 :is(.studioV3BookCard,.studioV3TeamList>button),
+html[data-site-motion="reduce"] .adminWorkspace .adminDashboardKpi{
+ animation:none!important;transition:none!important;transform:none!important;
+}
