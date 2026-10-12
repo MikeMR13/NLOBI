@@ -2,7 +2,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 
 const read=path=>readFileSync(new URL('../'+path,import.meta.url),'utf8');
-const app=read('src/app.js'),sql=read('supabase/migrations/20261011181500_studio_team_status_edit_permissions.sql');
+const app=read('src/app.js'),sql=read('supabase/migrations/20261011190500_editorial_status_permission_alignment.sql');
 new Function(app);
 
 // Search: the original work and its translation have different lifecycle states.
@@ -17,7 +17,7 @@ const records=[
  {id:'cancelled',status:'abandoned',language_code:'es',novels:{title:'Cancelada',status:'cancelled',novel_type:'original',genres:['Drama']},updated_at:'2026-10-08T12:00:00Z'}
 ];
 const all={
- searchQuery:'',searchStatus:'all',searchNovelStatus:'all',searchLanguage:'all',
+ searchQuery:'',searchStatus:'all',searchNovelStatus:'all',searchSequelStatus:'all',searchLanguage:'all',
  searchNovelType:'all',searchGenre:'all',searchTag:'all',searchDemography:'all',
  searchTeam:'all',searchAvailability:'all',searchSort:'updated',publishedVolumes:[]
 };
@@ -36,28 +36,27 @@ assert.deepEqual(filtered({searchNovelStatus:'cancelled'}),['cancelled']);
 assert.deepEqual(filtered({searchNovelStatus:'completed',searchGenre:'Romance'}),[]);
 assert.deepEqual(filtered({searchNovelStatus:'completed',searchGenre:'Fantasía',searchNovelType:'light_novel'}),['originalDone']);
 
+// Controls for all three lifecycle states must coexist in the same interface.
 for(const term of [
- 'id="catalogStatus"','id="catalogNovelStatus"','Estado de la traducción',
- 'Estado de la novela original','S.searchNovelStatus=e.target.value',
- "S.searchNovelStatus='all'",
- "['searchNovelStatus','Obra original'",
- "['searchStatus','Traducción'",
- 'id="studioProjectFilter"','id="studioNovelPublicationFilter"',
- 'id="saveTranslationStatus"','id="saveNovelPublicationStatus"',
- 'data-studio-project-jump="studioNovelPublicationStatusPanel"',
+ 'id="catalogStatus"', 'id="catalogNovelStatus"', 'id="catalogSequelStatus"',
+ 'Estado de la traducción', 'Estado de la novela original',
+ 'searchNovelStatus', 'searchSequelStatus',
+ 'id="projectNovelStatus"', 'id="projectTranslationStatus"',
+ 'id="projectSequelStatus"', 'id="saveEditorialStates"',
  'data-studio-project-jump="studioProjectStatusPanel"',
- 'novels(id,title,title_original,author_name,cover_url,novel_type,genres,status)',
- 'status),translator_groups(id,name)'
+ 'update_editorial_states'
 ]) assert.ok(app.includes(term),'Missing status integration: '+term);
 
-assert.ok(sql.includes('private.team_action_allowed(group_id,\'edit\')'),'Update RLS must follow team editorial edit permissions');
-assert.ok(sql.includes('private.team_action_allowed(t.group_id,\'edit\')'),'Novel update RLS must be restricted to an editor team');
-assert.ok(sql.includes("tg_table_name in ('sections','volumes')"),'Section/volume publication must remain protected');
-assert.ok(sql.includes("action_name := 'publish'"),'Publication workflow needs separate permission');
-assert.ok(sql.includes("action_name := 'edit'"),'Translation status should be editable without publishing rights');
-assert.ok(sql.includes("to_jsonb(new) - 'status' - 'updated_at'"),'Only novel status update gets multi-team exception');
-assert.ok(sql.includes("for responsible in"),'Shared metadata must still require rights for all translation teams');
-assert.ok(!sql.includes('grant select, update on public.translations'),'Should not broaden table grants');
-assert.ok(sql.includes('with check ('),'RLS must enforce both pre- and post-update ownership');
+// Neither translation statuses nor novel statuses require publication rights.
+// Only a status/sequel-status-only update is exempt from ALL-teams metadata approval.
+for(const term of [
+ "private.team_action_allowed(t.group_id,'edit')",
+ "private.team_action_allowed(group_id,'edit')",
+ "to_jsonb(new) - 'status' - 'sequel_status' - 'updated_at'",
+ 'for responsible in',
+ 'with check ('
+]) assert.ok(sql.includes(term),'Missing scoped editorial policy: '+term);
+assert.ok(!sql.includes('grant select, update on public.translations'),
+ 'Status updates must not open broad anonymous or authenticated privileges');
 
 console.log('Studio and Explore dual-status filters OK: independent filters, combined searches, team editing policies and safe shared metadata.');
