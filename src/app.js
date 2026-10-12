@@ -2087,9 +2087,44 @@ function setupHomeReadingMotion(){
   homeRevealObserver.observe(section);
  }
 }
+// Conserva el hero ya pintado en el HTML. Sustituir #app por completo
+// provoca desplazamientos de diseño visibles y vuelve a declarar el H1 como LCP.
+function hydrateHomeInPlace(app,html){
+ const shell=app.querySelector(':scope > .homeInitialShell');
+ const parent=shell||app;
+ const currentMain=parent.querySelector(':scope > main.homeEditorial');
+ const currentHero=currentMain?.querySelector(':scope > .homeShowcase');
+ if(!currentMain||!currentHero)return false;
+ const next=document.createElement('template');next.innerHTML=html;
+ const newMain=next.content.querySelector('main.homeEditorial');
+ const newHero=newMain?.querySelector(':scope > .homeShowcase');
+ if(!newHero||currentHero.querySelector('h1')?.textContent!==newHero.querySelector('h1')?.textContent)return false;
+ const currentHeader=parent.querySelector(':scope > header.top');
+ const newHeader=next.content.querySelector('header.top');
+ if(currentHeader&&newHeader)currentHeader.replaceWith(newHeader);
+ // Preservar el encabezado y toda su geometría: solo cambian los datos del destacado.
+ for(const selector of ['.homeShowcaseActions','.homeFeatured']){
+  const current=currentHero.querySelector(':scope > '+(selector==='.homeFeatured'?selector:'.homeShowcaseCopy '+selector));
+  const incoming=newHero.querySelector(':scope > '+(selector==='.homeFeatured'?selector:'.homeShowcaseCopy '+selector));
+  if(current&&incoming)current.replaceWith(incoming);
+ }
+ currentMain.className=newMain.className;
+ currentMain.removeAttribute('aria-busy');
+ // Agregar las estanterías antes/después sin mover el hero existente.
+ for(const child of [...currentMain.children])if(child!==currentHero)child.remove();
+ let afterHero=false;
+ for(const child of [...newMain.children]){
+  if(child===newHero){afterHero=true;continue}
+  currentMain.insertBefore(child,afterHero?null:currentHero);
+ }
+ if(shell)app.replaceChildren(...shell.childNodes);
+ return true;
+}
 function render(){
  const app=document.getElementById('app');
  if(!app)return;
+ // El contenido estático ya es útil; esperar al catálogo evita un segundo reflujo.
+ if(S.view==='home'&&S.catalogLoading&&app.querySelector(':scope > .homeInitialShell'))return;
  try{
   let html=S.view==='home'?home():'';
   if(S.view==='explore')html=explore();
@@ -2120,16 +2155,8 @@ function render(){
   const preserveMobileNav=mobileNavLockedScroll!==null&&mobileNavOpenedView===S.view&&
    window.innerWidth<=1100&&!!app.querySelector('.mobileNav[open]');
   if(mobileNavLockedScroll!==null&&!preserveMobileNav)mobileNavClose(false);
-  // El h1 del Home conserva su nodo desde el HTML inicial incluso al recibir el catálogo.
-  const stableHeading=S.view==='home'?app.querySelector('.homeShowcaseCopy h1'):null;
-  if(stableHeading&&html.includes('homeShowcaseCopy')){
-   const next=document.createElement('template');next.innerHTML=html;
-   const freshHeading=next.content.querySelector('.homeShowcaseCopy h1');
-   if(freshHeading&&freshHeading.textContent===stableHeading.textContent){
-    freshHeading.replaceWith(stableHeading);
-    app.replaceChildren(next.content);
-   }else app.innerHTML=html;
-  }else app.innerHTML=html;
+  // Actualizar solo los elementos que realmente cambian, sin mover el H1.
+  if(!(S.view==='home'&&!S.catalogLoading&&hydrateHomeInPlace(app,html)))app.innerHTML=html;
   if(preserveMobileNav){
    const replacement=app.querySelector('.mobileNav');
    if(replacement){
