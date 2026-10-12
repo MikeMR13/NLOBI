@@ -71,7 +71,11 @@ for(const config of viewports){
    else{
     await next.click();
     await page.waitForFunction(()=>document.querySelector('.discoverShelfTrack')?.scrollLeft>10,undefined,{timeout:3500});
-    if(await prev.isDisabled())failures.push({config,error:'flecha anterior no se habilita tras avanzar'});
+    await page.waitForFunction(()=>{
+     const track=document.querySelector('.discoverShelfTrack');
+     const previous=document.querySelector('.discoverShelf [data-direction="-1"]');
+     return track&&track.scrollLeft>10&&previous&&!previous.disabled;
+    },undefined,{timeout:3500});
    }
   }
   if(config.width===1280){
