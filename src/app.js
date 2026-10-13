@@ -527,7 +527,7 @@ function featuredNovels(items=visibleCatalog()){
 function primeHomeCover(book){
  if(S.view!=='home'||CONFIG.qaMode===true)return;
  const src=book?.novels?.cover_url?safeMediaUrl(book.novels.cover_url):'';
- const url=src?new URL(src,location.origin):null;
+ const url=src?new globalThis.URL(src,location.origin):null;
  const allowed=url?.origin===location.origin&&url.pathname.startsWith('/media/')&&!url.hash;
  const old=document.querySelector('link[data-home-cover-hint]');
  if(!allowed){old?.remove();try{localStorage.removeItem('nlobi_home_cover_hint_v1')}catch{};return}
