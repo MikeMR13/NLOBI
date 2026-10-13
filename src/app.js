@@ -2362,8 +2362,10 @@ function render(){
   else if(S.view.startsWith('studio:project:'))html=studioProjectView();
   else if(S.view.startsWith('studio:team:'))html=studioTeamView();
   else if(S.view.startsWith('studio:media:'))html=studioMediaView();
-  const preserveMobileNav=mobileNavLockedScroll!==null&&mobileNavOpenedView===S.view&&
-   window.innerWidth<=1100&&!!app.querySelector('.mobileNav[open]');
+  // El evento nativo toggle es asíncrono: conservar una apertura reciente aunque
+  // todavía no se haya fijado mobileNavLockedScroll al llegar un render de datos.
+  const preserveMobileNav=window.innerWidth<=1100&&!!app.querySelector('.mobileNav[open]')&&
+   (mobileNavLockedScroll===null||mobileNavOpenedView===S.view);
   if(mobileNavLockedScroll!==null&&!preserveMobileNav)mobileNavClose(false);
   // Conserva el titular ya pintado cuando la respuesta del catálogo sustituye el esqueleto.
   // Esto evita volver a retrasar el LCP mientras se actualiza solo el contenido editorial.
@@ -2389,6 +2391,10 @@ function render(){
    const replacement=app.querySelector('.mobileNav');
    if(replacement){
     replacement.open=true;
+    mobileNavOpenedView=S.view;
+    if(mobileNavLockedScroll===null)mobileNavLockedScroll=window.scrollY;
+    document.body.classList.add('mobileNavOpen');
+    document.documentElement.classList.add('mobileNavOpen');
     const toggle=replacement.querySelector(':scope > summary');
     toggle?.setAttribute('aria-expanded','true');
     toggle?.setAttribute('aria-label','Cerrar menú de navegación');
