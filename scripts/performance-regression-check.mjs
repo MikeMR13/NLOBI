@@ -11,7 +11,7 @@ assert.match(app,/if\(route==='admin'\).*loadAdminData\(\)/);
 assert.match(app,/if\(route==='beta'\).*loadBetaFeedback\(\)/);
 assert.match(app,/if\(S\.admin&&S\.view==='admin'\).*loadAdminData\(\)/);
 assert.match(app,/if\(S\.view==='beta'\).*loadBetaFeedback\(\)/);
-assert.equal((app.match(/loadRatings\(\)/g)||[]).length,4,'Revisar llamadas duplicadas de valoraciones');
+assert.ok((app.match(/loadRatings\(\)/g)||[]).length<=3,'Revisar llamadas duplicadas de valoraciones');
 
 // El SW no debe forzar volver a transferir recursos con cache:no-store.
 assert.doesNotMatch(sw,/fetch\(req,\{cache:'no-store'\}\)/);
