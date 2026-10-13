@@ -690,7 +690,7 @@ function showMoreCatalogBatch(type){
  const firstNew=cards[previous];
  if(firstNew){
   firstNew.querySelector('a[href],button')?.focus({preventScroll:true});
-  firstNew.scrollIntoView({block:'nearest',behavior:'instant'});
+  firstNew.scrollIntoView({block:'nearest',behavior:'auto'});
  }
 }
 function explore(){
