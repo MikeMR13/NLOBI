@@ -115,6 +115,8 @@ jobs:
         run: node scripts/studio-interactive-reset-check.mjs
       - name: Global action matrix by role (Chromium + WebKit)
         run: node scripts/global-action-matrix-check.mjs
+      - name: Button async feedback and duplicate-write guard (Chromium + WebKit)
+        run: node scripts/button-feedback-check.mjs
       - name: Notification bell technical and responsive regression
         run: node scripts/notification-bell-check.mjs
       - name: Studio final volume checkbox and layout visual regression
