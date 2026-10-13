@@ -4,9 +4,15 @@ import vm from 'node:vm';
 
 const handlers = new Map();
 const records = new Map();
+let delayedMediaWrite = null;
+let releaseMediaWrite = null;
+const pendingWrites = [];
 const keyOf = item => typeof item === 'string' ? item : item.url;
 const cache = {
-  async put(key, response) { records.set(keyOf(key), response.clone()); },
+  async put(key, response) {
+    if (keyOf(key).includes('/media/') && delayedMediaWrite) await delayedMediaWrite;
+    records.set(keyOf(key), response.clone());
+  },
   async match(key) { const match = records.get(keyOf(key)); return match ? match.clone() : null; },
 };
 const caches = {
@@ -33,13 +39,21 @@ async function intercepted(url, method='GET') {
   handlers.get('fetch')({
     request: {url,method,mode:'cors'},
     respondWith(value) { response=value; },
+    waitUntil(value) { pendingWrites.push(Promise.resolve(value)); },
   });
   return response ? await response : null;
 }
 
 const media = 'https://nlobi.vercel.app/media/teams/demo/cover.jpg';
+delayedMediaWrite = new Promise(resolve => { releaseMediaWrite = resolve; });
 assert.equal(await (await intercepted(media)).text(),'revision-1', 'First cover must load from network');
+assert.equal(records.has(media),false,'Media response must not wait for the cache write');
+releaseMediaWrite();
+delayedMediaWrite = null;
+await Promise.all(pendingWrites.splice(0));
+assert.equal(records.has(media),true,'Background media write must finish');
 assert.equal(await (await intercepted(media)).text(),'revision-2', 'Updated cover must bypass cached copy');
+await Promise.all(pendingWrites.splice(0));
 online=false;
 assert.equal(await (await intercepted(media)).text(),'revision-2', 'Offline cover must fall back to latest cache');
 online=true;
