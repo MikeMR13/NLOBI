@@ -1,4 +1,4 @@
-const CACHE='nlobi-shell-v19-38';
+const CACHE='nlobi-shell-v19-39';
 const CORE=['/','/index.html','/assets/styles.css','/assets/app.js','/assets/studio-phase5.js','/assets/studio-phase6.js','/assets/studio-phase7.js','/runtime-config.js','/manifest.webmanifest','/icon.svg','/icon-192.png','/icon-512.png'];
 const NETWORK_FIRST=new Set(['/index.html','/assets/styles.css','/assets/app.js','/assets/studio-phase5.js','/assets/studio-phase6.js','/assets/studio-phase7.js','/runtime-config.js']);
 
@@ -18,10 +18,10 @@ self.addEventListener('activate',event=>{
   );
 });
 
-async function networkFirst(req,cacheKey=req){
+async function networkFirst(req,cacheKey=req,cacheMode='no-cache'){
   const cache=await caches.open(CACHE);
   try{
-    const fresh=await fetch(req,{cache:'no-store'});
+    const fresh=await fetch(req,{cache:cacheMode});
     if(fresh.ok)await cache.put(cacheKey,fresh.clone());
     return fresh;
   }catch{
@@ -41,7 +41,7 @@ self.addEventListener('fetch',event=>{
   }
 
   if(url.pathname.startsWith('/media/')){
-    event.respondWith(networkFirst(req,req));
+    event.respondWith(networkFirst(req,req,'default'));
     return;
   }
   if(NETWORK_FIRST.has(url.pathname)){
