@@ -40,7 +40,14 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
   page.on('pageerror',e=>runtime.push(String(e)));
   try{
    await page.goto('http://127.0.0.1:4173/#home',{waitUntil:'domcontentloaded'});
-   await page.waitForFunction(()=>!!window.__NLOBI_QA__&&document.querySelector('#siteStyles')?.media==='all',undefined,{timeout:18000});
+   // QA no debe sustituir la vista durante boot(): WebKit puede perder el click
+   // si una renderización pendiente reemplaza el botón entre pointerdown y click.
+   await page.waitForFunction(()=>{
+    const qa=window.__NLOBI_QA__,state=qa?.getState();
+    return !!qa&&!!state?.catalogLoaded&&!state.catalogLoading&&
+     document.querySelector('#siteStyles')?.media==='all';
+   },undefined,{timeout:18000});
+   await page.waitForLoadState('networkidle');
 
    await page.evaluate(({fixture,books})=>{
     window.__NLOBI_QA__.setState({...fixture,catalog:books,catalogLoading:false,catalogLoaded:true,
@@ -53,6 +60,9 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    await explorer.first().waitFor();
    assert.equal(await explorer.count(),24,'Explorar debe mostrar 24 tarjetas inicialmente');
    assert.match(await page.locator('.exploreResultsBar').innerText(),/65 novelas encontradas/);
+   // Simular una actualización secundaria sin cambiar la consulta activa.
+   await page.evaluate(()=>window.__NLOBI_QA__.setState({notificationBellOpen:''}));
+   assert.equal(await explorer.count(),24,'Los handlers deben mantenerse tras render');
    await page.evaluate(()=>{
     window.__batchClicks=[];
     document.addEventListener('click',event=>{
