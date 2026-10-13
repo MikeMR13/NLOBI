@@ -76,7 +76,7 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
     });
     if(width<=767)assert.ok(ui.heights.every(x=>x>=43.5),
      engineName+' '+width+' admin/reader action targets: '+ui.heights);
-    assert.equal(ui.spinner,'" "','Busy indicator spinner is missing');
+    assert.equal(ui.spinner,'""','Busy indicator spinner is missing');
     assert.equal(ui.spinnerAnimation,'none','Reduced-motion users must not see spinning actions');
     assert.equal(ui.overflow,false,engineName+' '+width+' unexpected horizontal overflow');
     assert.deepEqual(crashes,[],engineName+' '+width+' browser errors');
