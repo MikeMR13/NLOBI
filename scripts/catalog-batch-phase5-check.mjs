@@ -54,6 +54,7 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    assert.equal(await explorer.count(),24,'Explorar debe mostrar 24 tarjetas inicialmente');
    assert.match(await page.locator('.exploreResultsBar').innerText(),/65 novelas encontradas/);
    await page.locator('[data-catalog-more="explore"]').click();
+   await page.waitForFunction(()=>document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length===48,null,{timeout:5000});
    assert.equal(await explorer.count(),48,'Explorar debe mostrar 48 obras tras ampliar');
    await page.locator('#catalogSearch').fill('Historia QA 065');
    assert.equal(await explorer.count(),1,'Buscar debe encontrar obras fuera del primer lote');
@@ -74,6 +75,7 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    assert.equal(await readerShelf.count(),24,'Biblioteca debe mostrar 24 libros inicialmente');
    assert.match(await page.locator('.libraryResultCount').innerText(),/65 novelas/);
    await page.locator('[data-catalog-more="library"]').click();
+   await page.waitForFunction(()=>document.querySelectorAll('.libraryShelf .libraryShelfCard').length===48,null,{timeout:5000});
    assert.equal(await readerShelf.count(),48,'Biblioteca debe permitir mostrar más');
    await page.locator('#librarySearch').fill('Lectura QA 065');
    assert.equal(await readerShelf.count(),1,'Búsqueda de biblioteca debe recorrer las 65 entradas');
