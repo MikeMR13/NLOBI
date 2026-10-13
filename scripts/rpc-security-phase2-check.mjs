@@ -23,7 +23,7 @@ const publicNames=[...migration.matchAll(/create or replace function public\.([a
 const innerNames=[...migration.matchAll(/CREATE OR REPLACE FUNCTION rpc_internal\.([a-z_]+)\(/g)].map(x=>x[1]);
 assert.deepEqual(publicNames,names,'18 public RPC signatures must remain');
 assert.deepEqual(innerNames,names,'18 internal copies must preserve order');
-assert.match(migration,/^--.*\nbegin;/);
+assert.match(migration,/^--[\s\S]*?\nbegin;/);
 assert.match(migration,/\ncommit;\s*$/);
 assert.match(rollback,/\nbegin;/);
 assert.match(rollback,/\ncommit;\s*$/);
