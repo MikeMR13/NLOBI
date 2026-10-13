@@ -3488,6 +3488,19 @@ async function loadPublicGroupData(id){
  const published=(volumes||[]).map(v=>{const chapter=latestChapter.get(v.id),volumeDate=Date.parse(v.published_at||''),chapterDate=chapter?Date.parse(chapter.published_at):NaN;if(!Number.isFinite(volumeDate)||volumeDate>Date.now())return null;const updated=Number.isFinite(chapterDate)&&chapterDate>volumeDate;return {type:updated?'chapter':'volume',volume_id:v.id,translation_id:v.translation_id,translation_title:titleOf(own.get(v.translation_id)),volume_number:v.volume_number,title:updated?chapter.title:null,published_at:updated?chapter.published_at:v.published_at}}).filter(Boolean).sort((a,b)=>Date.parse(b.published_at)-Date.parse(a.published_at));
  const memberIds=(publicMembers||[]).map(x=>x.user_id).filter(x=>/^[0-9a-f-]{36}$/i.test(x));const publicProfiles=memberIds.length?await jreq('/rest/v1/profiles?id=in.('+memberIds.join(',')+')&select=id,username,display_name,avatar_url&limit=100'):[];return {...g,translations:translations||[],support_links:support||[],stats:stats?.[0]||{},recent_publications:published,public_members:publicProfiles||[]}
 }
+// El lector no necesita comprar/descargar/comentar al entrar a un capítulo:
+ // cargar únicamente los datos de navegación y la identidad de la traducción.
+const readerTranslationMetaCache=new Map();
+async function loadReaderTranslationMeta(id){
+ const cache=readerTranslationMetaCache.get(id);
+ if(cache&&Date.now()-cache.time<90000)return cache.value;
+ const query='/rest/v1/translations?id=eq.'+encodeURIComponent(id)+
+  '&status=in.(active,complete,paused)&select=id,title,status,novels(id,title),translator_groups(id,name,avatar_url,slug,profile_settings,review_required),volumes!volumes_translation_id_fkey(id,volume_number,title,status,sections(id,title,section_number,status,sort_order))&limit=1';
+ const rows=await jreq(query);
+ const value=rows?.[0]||null;
+ if(value)readerTranslationMetaCache.set(id,{time:Date.now(),value});
+ return value;
+}
 async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}){
  if(!navigator.onLine){
   const cached=readCachedChapter(sectionId);if(!cached)throw new Error('Este capítulo no está disponible sin conexión todavía.');
@@ -3497,7 +3510,7 @@ async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}
  const sec=secRows?.[0];if(!sec)throw new Error('El capítulo no está disponible.');
  const volRows=await jreq(`/rest/v1/volumes?id=eq.${sec.volume_id}&status=eq.published&select=id,translation_id,volume_number,title,epub_font_url,epub_font_family,epub_fonts&limit=1`);
  const vol=volRows?.[0];if(!vol)throw new Error('El volumen no está disponible.');
- const trId=vol.translation_id,tr=await loadTranslationDetail(trId);if(!tr)throw new Error('La obra no está disponible.');
+ const trId=vol.translation_id,tr=await loadReaderTranslationMeta(trId);if(!tr)throw new Error('La obra no está disponible.');
  const navigation=(tr.volumes||[]).filter(v=>v.status==='published').sort((a,b)=>Number(a.volume_number)-Number(b.volume_number)).flatMap(v=>(v.sections||[]).filter(x=>x.status==='published').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(x=>({...x,volume_id:v.id,volume_number:v.volume_number})));
  S.readerSection={...sec,translation_id:trId,volume_number:vol.volume_number,novel_title:tr.novels?.title,translator_groups:tr.translator_groups,navigation,epub_font_url:vol.epub_font_url,epub_font_family:vol.epub_font_family,epub_fonts:vol.epub_fonts?.length?vol.epub_fonts:(vol.epub_font_url?[{url:vol.epub_font_url,family:vol.epub_font_family||'Original',style:'normal',weight:'normal'}]:[])};activateEpubFonts(S.readerSection.epub_fonts);
  cacheReaderChapter(S.readerSection);S.readerContinuous=null;S.readerScrollIntent=false;applyReaderPreferencesForVolume(vol.id);
