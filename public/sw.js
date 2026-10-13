@@ -41,7 +41,7 @@ self.addEventListener('fetch',event=>{
   }
 
   if(url.pathname.startsWith('/media/')){
-    event.respondWith(networkFirst(req,req,'default'));
+    event.respondWith(networkFirst(req,req));
     return;
   }
   if(NETWORK_FIRST.has(url.pathname)){
