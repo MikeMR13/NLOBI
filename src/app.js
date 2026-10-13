@@ -522,6 +522,23 @@ function releasesView(){
 function featuredNovels(items=visibleCatalog()){
  return items.filter(x=>x.novels?.cover_url&&!x.demo).slice(0,8);
 }
+// Precarga el LCP antes del render definitivo; solo se guarda la ruta pública
+// de la portada destacada (nunca títulos, tokens ni preferencias del lector).
+function primeHomeCover(book){
+ if(S.view!=='home'||CONFIG.qaMode===true)return;
+ const src=book?.novels?.cover_url?safeMediaUrl(book.novels.cover_url):'';
+ const url=src?new globalThis.URL(src,location.origin):null;
+ const allowed=url?.origin===location.origin&&url.pathname.startsWith('/media/')&&!url.hash;
+ const old=document.querySelector('link[data-home-cover-hint]');
+ if(!allowed){old?.remove();try{localStorage.removeItem('nlobi_home_cover_hint_v1')}catch{};return}
+ if(old?.href!==url.href){
+  old?.remove();
+  const link=document.createElement('link');link.rel='preload';link.as='image';
+  link.href=url.href;link.fetchPriority='high';link.dataset.homeCoverHint='1';
+  document.head.append(link);
+ }
+ try{localStorage.setItem('nlobi_home_cover_hint_v1',JSON.stringify({path:url.pathname+url.search,at:Date.now()}))}catch{}
+}
 function featuredVisualMarkup(book){
  const url=book?.novels?.cover_url?safeMediaUrl(book.novels.cover_url):'';
  return `<a class="homeFeaturedBook homeFeaturedCoverLink" href="#detail:${encodeURIComponent(book.id)}" aria-label="Abrir novela destacada: ${esc(titleOf(book))}">${url?`<img src="${esc(url)}" alt="Portada de ${esc(titleOf(book))}" width="320" height="480" loading="eager" fetchpriority="high" decoding="async">`:`<div class="homeFeaturedFallback"><span>物語</span><strong>${esc(titleOf(book))}</strong></div>`}</a>`;
@@ -2328,11 +2345,20 @@ function render(){
   // Conserva el titular ya pintado cuando la respuesta del catálogo sustituye el esqueleto.
   // Esto evita volver a retrasar el LCP mientras se actualiza solo el contenido editorial.
   const existingHomeCopy=S.view==='home'?app.querySelector('.homeShowcaseCopy'):null;
+  const existingFeaturedVisual=S.view==='home'&&!S.catalogLoading?app.querySelector('.homeFeaturedVisual'):null;
   if(existingHomeCopy&&html.includes('homeShowcaseCopy')){
    const next=document.createElement('template');next.innerHTML=html;
    const freshCopy=next.content.querySelector('.homeShowcaseCopy');
    if(freshCopy&&freshCopy.textContent===existingHomeCopy.textContent){
     freshCopy.replaceWith(existingHomeCopy);
+    // No decodificar ni solicitar de nuevo la misma portada en renders consecutivos.
+    const nextVisual=next.content.querySelector('.homeFeaturedVisual');
+    const oldImage=existingFeaturedVisual?.querySelector('.homeFeaturedBook img');
+    const newImage=nextVisual?.querySelector('.homeFeaturedBook img');
+    if(oldImage&&newImage&&oldImage.getAttribute('src')===newImage.getAttribute('src')&&
+       existingFeaturedVisual.querySelector('a')?.getAttribute('href')===nextVisual.querySelector('a')?.getAttribute('href')){
+      nextVisual.replaceWith(existingFeaturedVisual);
+    }
     app.replaceChildren(next.content);
    }else app.innerHTML=html;
   }else app.innerHTML=html;
@@ -3513,17 +3539,24 @@ async function resendVerification(){try{setAuthError('');const email=$('#email')
 function logout(){resetLocalReaderUiPreferences();const token=S.token;if(token)fetch(URL+'/auth/v1/logout',{method:'POST',headers:{apikey:KEY,Authorization:'Bearer '+token}}).catch(()=>{});clearSession();S.user=S.profile=null;S.readerSection=null;S.readerContinuous=null;hydrateReaderSettings();S.groups=[];S.library=[];S.readerCollections=[];S.savedCollections=[];S.collectionSaveCounts=new Map();S.discoverCollections=[];S.readerFollows=[];S.followedReaderProfiles=[];S.readerActivity=[];S.readerDirectory=[];S.readSections=[];S.readingProgress=[];S.readingHistory=[];S.notes=[];S.notificationBellOpen='';S.notificationError='';S.admin=false;S.adminUsers=[];S.adminTeams=[];S.adminReports=[];S.adminReviewReports=[];S.adminContent=[];S.adminVolumes=[];S.adminSections=[];S.adminPurchaseLinks=[];S.adminBetaFeedback=[];S.adminAudit=[];S.view='home';render()}
 async function loadCatalog(earlyRender=false){
  const catalogRequest=jreqAllRows('/rest/v1/translations?select=id,title,status,language_code,popularity_score,updated_at,novels(id,title,synopsis,cover_url,author_name,demography,genres,tags,status,sequel_status),translator_groups(id,name,avatar_url,slug,profile_settings)&status=in.(active,complete,paused)&order=updated_at.desc');
- const volumeRequest=jreq('/rest/v1/volumes?select=id,translation_id,volume_number,title,cover_url,published_at,status&status=eq.published&published_at=not.is.null&order=published_at.desc&limit=200');
- const sectionRequest=jreq('/rest/v1/sections?select=id,volume_id,title,section_type,section_number,published_at,status&status=eq.published&published_at=not.is.null&order=published_at.desc&limit=200');
- const teamRequest=jreqAllRows('/rest/v1/translator_groups?select=id,name,slug,description,avatar_url&order=name.asc');
- const collaborationRequest=jreqAllRows('/rest/v1/translation_collaborations?status=eq.accepted&select=translation_id,invited_group_id').catch(e=>{console.warn('Créditos de colaboración no disponibles',e);return []});
- // Each request starts in parallel, but the first real paint needs only translations.
- const secondaryResults=Promise.allSettled([volumeRequest,sectionRequest,teamRequest,collaborationRequest]);
+ // El Home necesita primero la traducción y su portada: no hacer competir
+ // cuatro consultas editoriales auxiliares con la solicitud crítica.
+ const loadSecondary=()=>{
+  const volumeRequest=jreq('/rest/v1/volumes?select=id,translation_id,volume_number,title,cover_url,published_at,status&status=eq.published&published_at=not.is.null&order=published_at.desc&limit=200');
+  const sectionRequest=jreq('/rest/v1/sections?select=id,volume_id,title,section_type,section_number,published_at,status&status=eq.published&published_at=not.is.null&order=published_at.desc&limit=200');
+  const teamRequest=jreqAllRows('/rest/v1/translator_groups?select=id,name,slug,description,avatar_url&order=name.asc');
+  const collaborationRequest=jreqAllRows('/rest/v1/translation_collaborations?status=eq.accepted&select=translation_id,invited_group_id').catch(e=>{console.warn('Créditos de colaboración no disponibles',e);return []});
+  return Promise.allSettled([volumeRequest,sectionRequest,teamRequest,collaborationRequest]);
+ };
+ const secondaryResults=earlyRender?null:loadSecondary();
  const catalog=await catalogRequest;
  if(CONFIG.qaMode===true&&qaCatalogFixtureActive)return;
  S.catalog=(catalog||[]).map(x=>({...x,latestPublishedVolume:null}));
+ if(S.view==='home')primeHomeCover(featuredNovels(S.catalog)[Math.max(0,Number(S.featuredIndex)||0)%Math.max(1,featuredNovels(S.catalog).length)]||null);
  const enrich=async()=>{
-  const [volumeResult,sectionResult,teamResult,collaborationResult]=await secondaryResults;
+  const [volumeResult,sectionResult,teamResult,collaborationResult]=await (secondaryResults||loadSecondary());
+  // Si la QA inyectó fixtures mientras se diferían solicitudes, no sobrescribirlos.
+  if(CONFIG.qaMode===true&&qaCatalogFixtureActive)return;
   if(volumeResult.status==='fulfilled'){
    const volumes=volumeResult.value||[];
    S.publishedVolumes=[...new Map(volumes.filter(v=>v.status==='published'&&v.published_at).map(v=>[v.id,v])).values()];
@@ -3539,7 +3572,7 @@ async function loadCatalog(earlyRender=false){
   const credits=collaborationResult.status==='fulfilled'?collaborationResult.value||[]:[];const byTranslation=new Map();for(const credit of credits){const group=(S.translatorDirectory||[]).find(g=>g.id===credit.invited_group_id);if(group){if(!byTranslation.has(credit.translation_id))byTranslation.set(credit.translation_id,[]);byTranslation.get(credit.translation_id).push(group)}}S.catalog=S.catalog.map(t=>({...t,collaboration_groups:byTranslation.get(t.id)||[]}));
   if(earlyRender&&['home','releases','explore','translators'].includes(S.view))render();
  };
- if(earlyRender){void enrich().catch(e=>console.warn('[NLOBI] Error de datos secundarios',e));return}
+ if(earlyRender){setTimeout(()=>{void enrich().catch(e=>console.warn('[NLOBI] Error de datos secundarios',e))},80);return}
  await enrich();
 }
 async function safeOptionalLoad(label,promise){try{return await promise}catch(e){console.warn('[NLOBI] No se pudo cargar '+label,e);return null}}
@@ -3735,6 +3768,7 @@ function registerPwa(){
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;S.pwaInstallReady=true;render()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;S.pwaInstallReady=false;toast('El Obi del Lector quedó instalado.','ok');render()});
 async function boot(isRetry=false){
+ let homeFirstPaintDone=false;
  S.catalogLoading=true;
  applySiteAppearance();
  S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();
@@ -3755,6 +3789,7 @@ async function boot(isRetry=false){
    S.catalogLoading=false;
    // El contenido principal y su portada no esperan valoraciones ni información de cuenta.
    render();
+   homeFirstPaintDone=S.view==='home';
    if(isRetry)toast('Conexión restablecida.','ok');
 
    // Valoraciones solo enriquecen vistas secundarias: nunca bloquean el hero.
@@ -3769,12 +3804,13 @@ async function boot(isRetry=false){
    // Las rutas privadas de Studio sí necesitan el contexto de sesión.
    if(S.view==='studio'||S.view.startsWith('studio:')||S.view==='admin')await sessionTask;
    await resolveDynamicRoute(S.view);
-   render();
+   // El Home ya quedó pintado: evitar volver a construir todo el DOM sin cambios.
+   if(S.view!=='home')render();
    // Evitar promesas sin manejar; estas tareas siguen independientemente del primer render.
    void ratingsTask;void sessionTask;
   }else{await resolveDynamicRoute(S.view);S.err=''}
  }catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}
- finally{S.catalogLoading=false;render()}
+ finally{S.catalogLoading=false;if(!homeFirstPaintDone||S.view!=='home'||S.err)render()}
  const notice=sessionStorage.getItem('nlobi_auth_notice');
  if(notice){sessionStorage.removeItem('nlobi_auth_notice');const bad=notice.startsWith('error:'),msg=notice.slice(notice.indexOf(':')+1);toast(bad?'No se pudo confirmar el correo: '+msg:msg,bad?'bad':'ok')}
 }

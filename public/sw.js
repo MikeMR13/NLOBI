@@ -1,6 +1,6 @@
 const CACHE='nlobi-shell-v19-40';
-const CORE=['/','/index.html','/assets/styles.css','/assets/app.js','/assets/activate-styles.js','/runtime-config.js','/manifest.webmanifest','/icon.svg','/icon-192.png','/icon-512.png'];
-const NETWORK_FIRST=new Set(['/index.html','/assets/styles.css','/assets/app.js','/assets/studio-phase5.js','/assets/studio-phase6.js','/assets/studio-phase7.js','/runtime-config.js']);
+const CORE=['/','/index.html','/assets/styles.css','/assets/app.js','/assets/activate-styles.js','/assets/home-cover-hint.js','/runtime-config.js','/manifest.webmanifest','/icon.svg','/icon-192.png','/icon-512.png'];
+const NETWORK_FIRST=new Set(['/index.html','/assets/styles.css','/assets/app.js','/assets/home-cover-hint.js','/assets/studio-phase5.js','/assets/studio-phase6.js','/assets/studio-phase7.js','/runtime-config.js']);
 
 self.addEventListener('install',event=>{
   event.waitUntil(
@@ -46,7 +46,7 @@ self.addEventListener('fetch',event=>{
   }
   // Las URL versionadas contienen SHA-256 del archivo: no se vuelven a descargar
   // durante las visitas sucesivas de la misma versión.
-  if(['/assets/app.js','/assets/styles.css','/assets/activate-styles.js'].includes(url.pathname)&&/^[a-f0-9]{12}$/.test(url.searchParams.get('v')||'')){
+  if(['/assets/app.js','/assets/styles.css','/assets/activate-styles.js','/assets/home-cover-hint.js'].includes(url.pathname)&&/^[a-f0-9]{12}$/.test(url.searchParams.get('v')||'')){
     event.respondWith(caches.open(CACHE).then(async cache=>{
       const hit=await cache.match(req);
       if(hit)return hit;

@@ -7,13 +7,14 @@ const sw=fs.readFileSync('dist/sw.js','utf8');
 const app=fs.readFileSync('src/app.js','utf8');
 
 assert.doesNotMatch(src,/<script[^>]+src="\/assets\/studio-phase[567]\.js/);
+assert.ok(src.includes('home-cover-hint.js'));
 assert.match(src,/nlobi-studio-lazy-assets/);
 assert.match(app,/async function ensureStudioModules\(\)/);
 assert.match(app,/if\(route==='studio'\|\|route\.startsWith\('studio:'\)\)await ensureStudioModules\(\)/);
 assert.match(app,/async function loadReaderTranslationMeta\(id\)/);
 assert.match(app,/const trId=vol\.translation_id,tr=await loadReaderTranslationMeta\(trId\)/);
 
-for(const file of ['app.js','styles.css','activate-styles.js']){
+for(const file of ['app.js','styles.css','activate-styles.js','home-cover-hint.js']){
  const pattern=new RegExp('/assets/'+file.replaceAll('.','\\.')+'\\?v=([a-f0-9]{12})');
  const match=html.match(pattern);
  assert.ok(match,'Falta versión de /assets/'+file);
