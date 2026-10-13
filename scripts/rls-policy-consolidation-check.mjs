@@ -2,9 +2,9 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
 const migration=fs.readFileSync(
- 'supabase/migrations/20261013183000_consolidate_editorial_rls_policies.sql','utf8');
+ 'supabase/migrations/20261013172211_consolidate_editorial_rls_policies.sql','utf8');
 const rollback=fs.readFileSync(
- 'supabase/rollbacks/20261013183000_consolidate_editorial_rls_policies.rollback.sql','utf8');
+ 'supabase/rollbacks/20261013172211_consolidate_editorial_rls_policies.rollback.sql','utf8');
 const norm=sql=>sql.toLowerCase().replace(/--[^\n]*/g,'').replace(/\s+/g,' ');
 const sql=norm(migration),undo=norm(rollback);
 
