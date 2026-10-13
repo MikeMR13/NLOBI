@@ -53,8 +53,23 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    await explorer.first().waitFor();
    assert.equal(await explorer.count(),24,'Explorar debe mostrar 24 tarjetas inicialmente');
    assert.match(await page.locator('.exploreResultsBar').innerText(),/65 novelas encontradas/);
+   await page.evaluate(()=>{
+    window.__batchClicks=[];
+    document.addEventListener('click',event=>{
+     const target=event.target.closest?.('[data-catalog-more]');
+     if(target)window.__batchClicks.push({type:target.dataset.catalogMore,view:window.__NLOBI_QA__?.getState().view});
+    },{capture:true});
+   });
    await page.locator('[data-catalog-more="explore"]').click();
-   await page.waitForFunction(()=>document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length===48,null,{timeout:5000});
+   try{
+    await page.waitForFunction(()=>document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length===48,null,{timeout:5000});
+   }catch(error){
+    const diagnostic=await page.evaluate(()=>({view:window.__NLOBI_QA__?.getState().view,
+     count:document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length,
+     clicks:window.__batchClicks,button:document.querySelector('[data-catalog-more="explore"]')?.outerHTML,
+     message:document.querySelector('#app')?.textContent?.slice(0,240),location:location.hash}));
+    throw Error('WebKit/Explorar expansión: '+JSON.stringify(diagnostic)+'; '+String(error));
+   }
    assert.equal(await explorer.count(),48,'Explorar debe mostrar 48 obras tras ampliar');
    await page.locator('#catalogSearch').fill('Historia QA 065');
    assert.equal(await explorer.count(),1,'Buscar debe encontrar obras fuera del primer lote');
