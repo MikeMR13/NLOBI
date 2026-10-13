@@ -674,9 +674,8 @@ const CATALOG_BATCH_SIZE=24;
 const catalogBatches={explore:{key:'',shown:CATALOG_BATCH_SIZE},library:{key:'',shown:CATALOG_BATCH_SIZE}};
 function visibleCatalogBatch(type,items,filters){
  const batch=catalogBatches[type];
- const first=items[0]?.id||items[0]?.translation_id||'';
- const last=items[items.length-1]?.id||items[items.length-1]?.translation_id||'';
- const key=JSON.stringify([filters,items.length,first,last]);
+ // El refresco asíncrono del catálogo no debe borrar lotes ya desplegados.
+ const key=JSON.stringify(filters);
  if(batch.key!==key){batch.key=key;batch.shown=CATALOG_BATCH_SIZE}
  return items.slice(0,batch.shown);
 }
