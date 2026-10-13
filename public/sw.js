@@ -18,13 +18,22 @@ self.addEventListener('activate',event=>{
   );
 });
 
-async function networkFirst(req,cacheKey=req,cacheMode='no-cache'){
-  const cache=await caches.open(CACHE);
+async function networkFirst(req,cacheKey=req,cacheMode='no-cache',event=null){
+  // Iniciar red y apertura de caché en paralelo: ni la apertura ni la escritura
+  // deben retrasar la primera pintura de una portada pública.
+  const cacheReady=caches.open(CACHE);
   try{
     const fresh=await fetch(req,{cache:cacheMode});
-    if(fresh.ok)await cache.put(cacheKey,fresh.clone());
+    if(fresh.ok){
+      const copy=fresh.clone();
+      const update=cacheReady.then(cache=>cache.put(cacheKey,copy)).catch(()=>{});
+      // waitUntil mantiene viva la actualización sin bloquear respondWith.
+      if(event?.waitUntil)event.waitUntil(update);
+      else await update;
+    }
     return fresh;
   }catch{
+    const cache=await cacheReady;
     return (await cache.match(cacheKey)) || Response.error();
   }
 }
@@ -41,7 +50,7 @@ self.addEventListener('fetch',event=>{
   }
 
   if(url.pathname.startsWith('/media/')){
-    event.respondWith(networkFirst(req,req));
+    event.respondWith(networkFirst(req,req,'no-cache',event));
     return;
   }
   // Las URL versionadas contienen SHA-256 del archivo: no se vuelven a descargar

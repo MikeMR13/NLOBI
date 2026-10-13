@@ -203,7 +203,8 @@ for (const required of [
   "'/assets/styles.css'",
   "'/runtime-config.js'",
   "cacheMode='no-cache'",
-  "networkFirst(req,req)",
+  "networkFirst(req,req,'no-cache',event)",
+  "event.waitUntil(update)",
   "self.skipWaiting()",
   "self.clients.claim()"
 ]) {
