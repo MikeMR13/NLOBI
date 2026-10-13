@@ -49,6 +49,8 @@ jobs:
         run: node scripts/studio-dual-status-check.mjs
       - name: Performance routing, caching and SQL regression
         run: node scripts/performance-regression-check.mjs
+      - name: RLS editorial permissions consolidation and rollback regression
+        run: node scripts/rls-policy-consolidation-check.mjs
       - run: npm run build
       - name: Build fingerprint and lazy asset regression
         run: node scripts/lazy-performance-check.mjs
