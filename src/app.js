@@ -3555,6 +3555,8 @@ async function loadCatalog(earlyRender=false){
  if(S.view==='home')primeHomeCover(featuredNovels(S.catalog)[Math.max(0,Number(S.featuredIndex)||0)%Math.max(1,featuredNovels(S.catalog).length)]||null);
  const enrich=async()=>{
   const [volumeResult,sectionResult,teamResult,collaborationResult]=await (secondaryResults||loadSecondary());
+  // Si la QA inyectó fixtures mientras se diferían solicitudes, no sobrescribirlos.
+  if(CONFIG.qaMode===true&&qaCatalogFixtureActive)return;
   if(volumeResult.status==='fulfilled'){
    const volumes=volumeResult.value||[];
    S.publishedVolumes=[...new Map(volumes.filter(v=>v.status==='published'&&v.published_at).map(v=>[v.id,v])).values()];
