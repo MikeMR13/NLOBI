@@ -5934,7 +5934,7 @@ html[data-site-motion="reduce"] .readerExperience.readerPresentation-editorial .
 .readerPaper.reader-font-mono{--reader-heading-font:Consolas,"Liberation Mono",monospace}
 .readerPaper[class*="reader-font-"] h1,
 .readerPaper[class*="reader-font-"] .readerHeading,
-.readerPaper[class*="reader-font-"] .readerContinuousHeading h2{
+.readerPaper[class*="reader-font-"] :where(.readerContinuousHeading h2){
  font-family:var(--reader-heading-font,Georgia,"Times New Roman",serif);
 }
 /* em depende del tamaño seleccionado para el texto; rem no lo hacía. */
