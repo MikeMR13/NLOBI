@@ -5912,3 +5912,34 @@ html[data-site-motion="reduce"] .adminWorkspace .adminDashboardKpi{
 html[data-site-motion="reduce"] .readerExperience.readerPresentation-editorial .readerPaper{
  scroll-behavior:auto;animation:none!important;transition:none!important;
 }
+
+
+/* READER EPUB HEADING TYPOGRAPHY
+   Los títulos de capítulos, encabezados XHTML y títulos de lectura continua
+   siguen la elección tipográfica del lector, sin cambiar su jerarquía.
+   data-epub-family se mantiene más específico para los estilos originales. */
+.readerPaper.reader-font-original,
+.readerPaper.reader-font-epub{--reader-heading-font:var(--epub-reader-font,Georgia,"Times New Roman",serif)}
+.readerPaper.reader-font-serif{--reader-heading-font:Georgia,"Times New Roman",serif}
+.readerPaper.reader-font-sans{--reader-heading-font:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.readerPaper.reader-font-literata{--reader-heading-font:"Literata",Georgia,serif}
+.readerPaper.reader-font-merriweather{--reader-heading-font:"Merriweather",Georgia,serif}
+.readerPaper.reader-font-lora{--reader-heading-font:"Lora",Georgia,serif}
+.readerPaper.reader-font-garamond{--reader-heading-font:Garamond,"EB Garamond","Times New Roman",serif}
+.readerPaper.reader-font-baskerville{--reader-heading-font:Baskerville,"Libre Baskerville",Georgia,serif}
+.readerPaper.reader-font-palatino{--reader-heading-font:"Palatino Linotype",Palatino,"Book Antiqua",serif}
+.readerPaper.reader-font-verdana{--reader-heading-font:Verdana,Geneva,sans-serif}
+.readerPaper.reader-font-trebuchet{--reader-heading-font:"Trebuchet MS",Arial,sans-serif}
+.readerPaper.reader-font-arial{--reader-heading-font:Arial,Helvetica,sans-serif}
+.readerPaper.reader-font-mono{--reader-heading-font:Consolas,"Liberation Mono",monospace}
+.readerPaper[class*="reader-font-"] h1,
+.readerPaper[class*="reader-font-"] .readerHeading,
+.readerPaper[class*="reader-font-"] .readerContinuousHeading h2{
+ font-family:var(--reader-heading-font,Georgia,"Times New Roman",serif);
+}
+/* em depende del tamaño seleccionado para el texto; rem no lo hacía. */
+.readerExperience .readerPaper h1{font-size:clamp(1.65em,3.7vw,2.55em)}
+.readerExperience .readerPaper .readerContinuousHeading h2{font-size:clamp(1.35em,2.6vw,1.85em)}
+@media(max-width:700px){
+ .readerExperience .readerPaper h1{font-size:clamp(1.55em,7vw,2.2em)}
+}
