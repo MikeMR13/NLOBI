@@ -2628,7 +2628,7 @@ async function uploadEmbeddedEpubFonts(file,descriptors,groupId,volumeId,uploade
    if(!response.ok)throw new Error('No se pudo guardar una fuente EPUB ('+response.status+').');
    uploadedPaths.push(path);url=storagePublicUrl(path);paths.set(descriptor.path,url);
   }
-  out.push({family:descriptor.family,style:descriptor.style,weight:descriptor.weight,url,...(descriptor.primary?{primary:true}:{})});
+  out.push({family:descriptor.family,style:descriptor.style,weight:descriptor.weight,url,...(descriptor.primary?{primary:true}:{}),...(descriptor.obfuscation?{obfuscation:descriptor.obfuscation}:{})});
  }
  return out
 }
@@ -2689,7 +2689,9 @@ async function parseEpubRich(file){
  let detectedCover='',coverSource='';
  const coverItem=Object.values(manifest).find(x=>String(x.properties).split(/\s+/).includes('cover-image'))||Object.entries(manifest).find(([id,x])=>/cover|portada/i.test(id)&&String(x.mediaType).startsWith('image/'))?.[1];
  if(coverItem?.href){const p=epubHrefKey(opfBase,coverItem.href);const z=zip.file(p);if(z){const mime=coverItem.mediaType||'image/jpeg',buf=await z.async('base64');if(/^image\/(?:jpeg|png|webp|gif)$/.test(mime)&&buf.length<2800000){detectedCover=`data:${mime};base64,${buf}`;coverSource='Metadatos del EPUB'}}}
- const fontInfo=await epubEmbeddedFonts(zip,manifest,opfBase,warnings),fonts=fontInfo.fonts;
+ const fontInfo=await epubEmbeddedFonts(zip,manifest,opfBase,warnings),fonts=fontInfo.fonts,encryptedFonts=await epubObfuscatedFonts(zip);
+ for(const font of fonts)if(encryptedFonts.has(font.path))font.obfuscation=encryptedFonts.get(font.path);
+ if(encryptedFonts.size)warnings.push('Se identificaron '+encryptedFonts.size+' fuentes protegidas mediante la ofuscación estándar EPUB; se restaurarán únicamente en memoria al leer.');
  const pages=[];
  for(const p of paths){
   const f=zip.file(p);if(!f)continue;
