@@ -115,6 +115,24 @@ assert.match(richReader,/<em>cursiva<\/em>/,'Reader should render preserved ital
 assert.match(source,/face=new FontFace\('NLOBI-EPUB-'\+index/,'Use a stable unique family index per weight/style variant');
 assert.match(source,/reader-font-original \[data-epub-family/,'Original mode must apply preserved inline styles');
 
+// Netgame stores Alba/Alba Matter as data-epub-family=0 on chapter headings,
+ // while the narrative uses a separate Times New Roman face.
+vm.runInContext(section('function readerEpubTitleFontIndex','function renderReaderBlock'),readerContext);
+const netgameChapter={
+ title:'Prólogo: Solicitud de presupuesto rechazada',
+ content:[
+  {type:'image',url:'https://example.invalid/illustration.jpg'},
+  {type:'heading',text:'Prólogo: Solicitud de presupuesto rechazada',html:'<span data-epub-family="0">Prólogo: Solicitud de presupuesto rechazada</span>'},
+  {type:'paragraph',text:'Texto narrativo',html:'<span data-epub-family="4">Texto narrativo</span>'}
+ ]
+};
+assert.equal(readerContext.readerEpubTitleFontIndex(netgameChapter),0,'Netgame must use its special title family, not body family');
+assert.equal(readerContext.readerEpubTitleAttribute(netgameChapter),' data-epub-family="0"');
+assert.equal(readerContext.readerEpubTitleFontIndex({...netgameChapter,content:[{type:'heading',text:'Otro título',html:'<span data-epub-family="0">Otro título</span>'}]}),null,'An unrelated heading must not rename the chapter font');
+assert.equal(readerContext.readerEpubTitleAttribute({...netgameChapter,content:[{type:'heading',text:netgameChapter.title,html:'<span data-epub-family="99">Título</span>'}]}),'','Out-of-range family IDs must be rejected');
+assert.match(source,/<h1 id="chapterTitle"\$\{readerEpubTitleAttribute\(R\)\}>/,'Main chapter title must restore original heading font');
+assert.match(source,/<h2\$\{readerEpubTitleAttribute\(ch\)\}>/,'Continuous chapter title must restore original heading font');
+
 const studio=fs.readFileSync(new URL('../src/studio-phase7.js',import.meta.url),'utf8');
 const vercel=fs.readFileSync(new URL('../vercel.json',import.meta.url),'utf8');
 assert.match(source,/Promise\.all\(entries\.map/,'All EPUB variants should load concurrently');
