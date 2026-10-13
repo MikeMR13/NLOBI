@@ -5943,3 +5943,78 @@ html[data-site-motion="reduce"] .readerExperience.readerPresentation-editorial .
 @media(max-width:700px){
  .readerExperience .readerPaper h1{font-size:clamp(1.55em,7vw,2.2em)}
 }
+
+
+/* Controles táctiles, retroalimentación y estabilidad visual — octubre 2026.
+   Sin modificar los estilos EPUB, las preferencias del lector ni la densidad de escritorio. */
+:where(button,a[href],summary,[role="button"]){touch-action:manipulation}
+:where(.btn,.studioV3NavItem,.adminSideLink,.mobileNav summary,
+       .readerExperience button,.readerExperience summary,.detailSynopsisToggle):focus-visible{
+ outline:3px solid var(--accent,#ffd400);
+ outline-offset:3px;
+}
+:where(.btn,button)[aria-busy="true"]{
+ position:relative;
+ cursor:progress;
+}
+.btn[aria-busy="true"]{
+ padding-inline-end:max(2.7rem,calc(1rem + 22px));
+}
+.btn[aria-busy="true"]::after{
+ content:"";
+ position:absolute;
+ inset-block-start:calc(50% - 7px);
+ inset-inline-end:12px;
+ width:14px;height:14px;
+ border:2px solid currentColor;
+ border-inline-end-color:transparent;
+ border-radius:50%;
+ animation:obiControlSpinner .8s linear infinite;
+ opacity:.85;
+ pointer-events:none;
+}
+@keyframes obiControlSpinner{to{transform:rotate(360deg)}}
+.toastHost{pointer-events:none}
+.toast{overflow-wrap:anywhere;line-height:1.45}
+@media(max-width:767px){
+ /* El título del primer pantallazo no espera la descarga/sustitución de Literata.
+    El resto del sitio y las fuentes EPUB conservan su tipografía configurada. */
+ .homeEditorial .homeShowcaseCopy h1{
+  font-family:Georgia,"Times New Roman",serif;
+ }
+ :where(.mobileNav button,.mobileNav summary,.studioV3 button,
+        .adminWorkspace button,.readerExperience .readerTop button,
+        .readerExperience .readerReadingActions button,
+        .detailSynopsisToggle,.detailVolumesButton){
+  min-height:44px;
+ }
+ :where(.mobileNav .mobileNavClose,.studioV3 .studioV3ViewSwitch button,
+        .readerExperience .readerTop button,.detailSynopsisToggle){
+  min-width:44px;
+ }
+ .toastHost{
+  inset-inline:12px;
+  right:12px;
+  left:12px;
+  bottom:max(14px,env(safe-area-inset-bottom));
+  max-width:none;
+ }
+}
+@media(hover:none){
+ :where(.btn,.studioV3NavItem,.adminWorkspace button):hover{transform:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .btn[aria-busy="true"]::after{
+  animation:none;
+  border-inline-end-color:currentColor;
+ }
+}
+html[data-site-motion="reduce"] .btn[aria-busy="true"]::after{
+ animation:none;
+ border-inline-end-color:currentColor;
+}
+@media(forced-colors:active){
+ :where(.btn,.studioV3NavItem,.adminSideLink,.mobileNav summary,
+        .readerExperience button):focus-visible{outline-color:Highlight}
+ .btn[aria-busy="true"]::after{border-color:CanvasText;border-inline-end-color:transparent}
+}

@@ -69,13 +69,13 @@ async function withBusyButton(id,workingLabel,operation){
  if(button?.disabled)return;
  pendingUiActions.add(id);
  const before=button?.innerHTML,previousLabel=button?.getAttribute('aria-label');
- if(button){button.disabled=true;button.setAttribute('aria-busy','true');button.textContent=workingLabel}
+ if(button){button.disabled=true;button.setAttribute('aria-busy','true');button.setAttribute('aria-label',workingLabel);button.textContent=workingLabel}
  try{return await operation()}finally{
   pendingUiActions.delete(id);
   if(button){button.disabled=false;button.removeAttribute('aria-busy');if(before!==undefined)button.innerHTML=before;if(previousLabel===null)button.removeAttribute('aria-label');else button.setAttribute('aria-label',previousLabel)}
  }
 }
-let toastTimer,lastToastMessage='',lastToastAt=0;function toast(message,type=''){const host=$('#toastHost');if(!host)return;const msg=String(message||''),now=Date.now();if(msg===lastToastMessage&&now-lastToastAt<5000)return;lastToastMessage=msg;lastToastAt=now;host.replaceChildren();const el=document.createElement('div');el.className='toast '+type;el.textContent=msg;host.appendChild(el);clearTimeout(toastTimer);toastTimer=setTimeout(()=>{host.replaceChildren();if(lastToastMessage===msg)lastToastMessage=''},4200)}
+let toastTimer,lastToastMessage='',lastToastAt=0;function toast(message,type=''){const host=$('#toastHost');if(!host)return;const msg=String(message||''),now=Date.now();if(msg===lastToastMessage&&now-lastToastAt<5000&&host.firstChild)return;host.setAttribute('aria-live',type==='bad'?'assertive':'polite');lastToastMessage=msg;lastToastAt=now;host.replaceChildren();const el=document.createElement('div');el.className='toast '+type;el.textContent=msg;host.appendChild(el);clearTimeout(toastTimer);toastTimer=setTimeout(()=>{host.replaceChildren();if(lastToastMessage===msg)lastToastMessage=''},4200)}
 function setNetworkBadge(){const el=$('#netBadge');if(!el)return;S.online=navigator.onLine;el.hidden=S.online;if(!S.online)el.textContent='Sin conexión · algunas funciones no estarán disponibles'}
 function friendlyError(e,fallback='Ocurrió un error inesperado.'){const m=String(e?.message||'');if(e?.name==='AbortError'||/aborted|timeout/i.test(m))return'La conexión tardó demasiado. Intenta nuevamente.';if(/Failed to fetch|NetworkError/i.test(m))return'No se pudo conectar con el servidor.';return m||fallback}
 

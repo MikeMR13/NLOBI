@@ -117,6 +117,8 @@ jobs:
         run: node scripts/global-action-matrix-check.mjs
       - name: Button async feedback and duplicate-write guard (Chromium + WebKit)
         run: node scripts/button-feedback-check.mjs
+      - name: Mobile touch controls, busy state and stable hero type (Chromium + WebKit)
+        run: node scripts/mobile-control-ux-check.mjs
       - name: Notification bell technical and responsive regression
         run: node scripts/notification-bell-check.mjs
       - name: Studio final volume checkbox and layout visual regression
