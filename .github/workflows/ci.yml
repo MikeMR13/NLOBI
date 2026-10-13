@@ -45,6 +45,8 @@ jobs:
         run: node scripts/studio-status-workflow-check.mjs
       - name: Studio original and translation status filters regression
         run: node scripts/studio-dual-status-check.mjs
+      - name: Performance routing, caching and SQL regression
+        run: node scripts/performance-regression-check.mjs
       - run: npm run build
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs
