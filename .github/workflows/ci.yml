@@ -70,6 +70,8 @@ jobs:
         run: node scripts/lazy-studio-browser-check.mjs
       - name: EPUB title typography across reader font preferences
         run: node scripts/epub-reader-heading-typography-check.mjs
+      - name: Real published Netgame font diagnostics
+        run: node scripts/netgame-live-font-diagnostics.mjs
       - name: Mobile Lighthouse performance report
         id: lighthouse
         continue-on-error: true
