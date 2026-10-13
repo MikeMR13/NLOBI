@@ -56,6 +56,8 @@ jobs:
       - run: npm run build
       - name: Build fingerprint and lazy asset regression
         run: node scripts/lazy-performance-check.mjs
+      - name: Early home LCP cover discovery regression
+        run: node scripts/mobile-lcp-cover-discovery-check.mjs
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs
       - name: Start preview server
