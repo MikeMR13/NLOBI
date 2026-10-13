@@ -11,7 +11,7 @@ assert.ok(html.indexOf(tag[0])>html.indexOf('<head>')&&html.indexOf(tag[0])<html
 assert.ok(html.indexOf(tag[0])<html.indexOf('rel="modulepreload"'));
 assert.ok(html.indexOf(tag[0])<html.indexOf('id="siteStyles"'));
 assert.ok(html.indexOf(tag[0])<html.indexOf('<script type="module" src="/assets/app.js'));
-assert.match(html,/fetchpriority="high"|"homeFeaturedBook"/); // Critical home CSS or HTML
+assert.match(html,/\.homeFeaturedBook/); // Critical geometry for the cover remains present
 assert.doesNotMatch(tag[0],/\bdefer\b|\basync\b/);
 assert.ok(helper.includes("url.origin!==location.origin"),'same-origin preload guard must remain');
 assert.ok(helper.includes("url.pathname.startsWith('/media/')"),'only media paths may preload');
