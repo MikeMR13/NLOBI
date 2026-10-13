@@ -3126,6 +3126,58 @@ async function createStudioProject(){let uploadedCoverPath=null;try{const group_
  const rows=await jreq('/rest/v1/rpc/create_translation_project',{method:'POST',body:JSON.stringify({p_group_id:group_id,p_title:title,p_title_original:title_original,p_author_name:author_name,p_synopsis:synopsis,p_cover_url:cover_url,p_genres:genres,p_tags:tags,p_language_code:language_code})});const t=rows?.[0];if(!t?.translation_id)throw new Error('No se pudo crear el proyecto.');await jreq('/rest/v1/novels?id=eq.'+t.novel_id,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({demography,novel_type})});
  let stateSaveError=null;try{await jreq('/rest/v1/rpc/update_editorial_states',{method:'POST',body:JSON.stringify({p_translation_id:t.translation_id,p_novel_status:novelState,p_translation_status:translationState,p_sequel_status:sequelState})})}catch(e){stateSaveError=e}await loadStudioData();S.studioProject=await loadStudioProject(t.translation_id);go('studio:project:'+t.translation_id);toast(stateSaveError?'Proyecto creado, pero no se guardaron los estados: '+friendlyError(stateSaveError):'Proyecto creado. Solo se mostrarán los estados confirmados.',stateSaveError?'bad':'ok')}catch(e){if(uploadedCoverPath)try{await storageDelete(uploadedCoverPath)}catch{}toast(friendlyError(e),'bad')}}
 async function saveVolumeMeta(){const id=S.studioEditVolumeId;if(!id)return;try{const title=$('#editVolumeTitle')?.value.trim()||null,cover_url=$('#editVolumeCoverUrl')?.value.trim()||null,volume_number=Number($('#editVolumeNumber')?.value);if(!Number.isFinite(volume_number)||volume_number<0){toast('Indica un número de volumen válido.','bad');return}if((S.studioProject?.volumes||[]).some(v=>v.id!==id&&Number(v.volume_number)===volume_number)){toast('Ya existe otro volumen con ese número.','bad');return}if(cover_url&&!/^https:\/\//i.test(cover_url)){toast('La portada debe utilizar una URL HTTPS.','bad');return}await jreq('/rest/v1/volumes?id=eq.'+id,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({title,cover_url,volume_number,...readFinalVolumeForm('editVolume'),updated_at:new Date().toISOString()})});await refreshStudioProject();toast('Volumen actualizado.','ok')}catch(e){toast(friendlyError(e),'bad')}}
+// Repairs already-published EPUB fonts without replacing a single chapter or
+// uploading decoded/licensed font files. The publication identifier stays local.
+async function repairExistingVolumeFonts(){
+ const P=S.studioProject,volumeId=S.studioEditVolumeId;
+ if(!P||!volumeId||!teamCan(P.group_id,'edit'))return toast('No tienes permiso para editar este volumen.','bad');
+ const file=$('#repairVolumeEpubFile')?.files?.[0],button=$('#repairVolumeFonts');
+ if(!file||!/\.epub$/i.test(file.name))return toast('Selecciona el EPUB original correspondiente a este volumen.','bad');
+ if(file.size>MAX_IMPORT_BYTES)return toast('El EPUB supera el límite permitido de 80 MB.','bad');
+ if(button){button.disabled=true;button.textContent='Verificando fuentes…'}
+ try{
+  const zip=await inspectZipSafety(file),protectedFonts=await epubObfuscatedFonts(zip);
+  if(!protectedFonts.size)throw new Error('Este EPUB no declara fuentes ofuscadas. Comprueba que sea el archivo original.');
+  const container=zip.file('META-INF/container.xml'),manifest={};let base='';
+  if(container){
+   const cd=new DOMParser().parseFromString(await container.async('text'),'application/xml');
+   const root=cd.getElementsByTagNameNS('*','rootfile')[0]?.getAttribute('full-path');
+   if(root&&zip.file(root)){
+    base=root.includes('/')?root.slice(0,root.lastIndexOf('/')+1):'';
+    const opf=new DOMParser().parseFromString(await zip.file(root).async('text'),'application/xml');
+    for(const item of opf.getElementsByTagNameNS('*','item')){
+     const id=item.getAttribute('id');if(id)manifest[id]={href:item.getAttribute('href'),mediaType:item.getAttribute('media-type'),properties:item.getAttribute('properties')||''};
+    }
+   }
+  }
+  const original=(await epubEmbeddedFonts(zip,manifest,base,[])).fonts;
+  const rows=await jreq('/rest/v1/volumes?id=eq.'+encodeURIComponent(volumeId)+'&select=epub_fonts&limit=1');
+  const stored=Array.isArray(rows?.[0]?.epub_fonts)?rows[0].epub_fonts:[];
+  if(!stored.length||!original.length)throw new Error('No se encontraron fuentes EPUB para comparar con este volumen.');
+  if(stored.length!==original.length)throw new Error('El EPUB seleccionado tiene un número de fuentes diferente. Selecciona el EPUB con el que se importó este volumen.');
+  const used=new Set(),repaired=[];
+  for(const font of stored){
+   const source=original.find((candidate,index)=>!used.has(index)&&candidate.family===font.family&&candidate.style===font.style&&candidate.weight===font.weight);
+   if(!source)throw new Error('La lista de fuentes no coincide. Utiliza el EPUB original de este volumen.');
+   const index=original.indexOf(source);used.add(index);
+   const key=protectedFonts.get(source.path);
+   const remote=safeUrl(font.url);
+   if(!remote.startsWith(URL+'/storage/v1/object/public/nlobi-media/'))throw new Error('Una fuente no pertenece a la biblioteca segura del equipo.');
+   const response=await fetch(safeMediaUrl(remote));
+   if(!response.ok)throw new Error('No se pudo verificar una fuente guardada ('+response.status+').');
+   const data=new Uint8Array(await response.arrayBuffer());
+   if(!epubValidSfnt(data)){
+    if(!key)throw new Error('Una fuente guardada no es legible y el EPUB no incluye su clave de restauración.');
+    epubDecodeFont(data,key); // Validate the original identifier before modifying metadata.
+   }
+   repaired.push({...font,...(key?{obfuscation:key}:{})});
+  }
+  await jreq('/rest/v1/volumes?id=eq.'+encodeURIComponent(volumeId),{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({epub_fonts:repaired,updated_at:new Date().toISOString()})});
+  await refreshStudioProject();
+  toast('Restauradas '+repaired.length+' fuentes EPUB. Los capítulos, la portada y la publicación permanecen intactos.','ok');
+ }catch(error){toast(friendlyError(error,'No se pudieron restaurar las fuentes EPUB.'),'bad');console.warn('Restauración de fuentes EPUB:',error)}
+ finally{if(button){button.disabled=false;button.textContent='Restaurar fuentes'}}
+}
 async function createStudioVolume(){try{const P=S.studioProject;if(!P)return;const volume_number=Number($('#projectVolumeNumber')?.value||1),title=$('#projectVolumeTitle')?.value.trim()||null;if((P.volumes||[]).some(v=>Number(v.volume_number)===volume_number)){toast('Ese número de volumen ya existe.','bad');return}await jreq('/rest/v1/volumes',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({translation_id:P.id,volume_number,title,status:'draft',...readFinalVolumeForm('newVolume')})});await refreshStudioProject();toast('Volumen creado.','ok')}catch(e){toast(friendlyError(e),'bad')}}
 async function uploadVolumeCover(volumeId,file){try{const P=S.studioProject;if(!P||!file)return;const vol=P.volumes?.find(v=>v.id===volumeId),oldUrl=vol?.cover_url||null,path=`teams/${P.group_id}/volumes/${volumeId}/${mediaStableName('cover',file)}`,url=await storageUpload(file,path,true);await jreq(`/rest/v1/volumes?id=eq.${volumeId}`,{method:'PATCH',headers:{Prefer:'return=minimal'},body:JSON.stringify({cover_url:url,updated_at:new Date().toISOString()})});await refreshStudioProject();if(oldUrl&&oldUrl!==url)await deleteOldMediaIfUnused(oldUrl);toast('Portada del volumen actualizada.','ok')}catch(e){toast(friendlyError(e),'bad')}}
 async function uploadBlockImage(index,file){try{syncEditorInputs();const P=S.studioProject,sec=S.studioProject?.editingSection;if(!P||!sec||!file||!S.blockEditor?.blocks[index])return;const url=await storageUpload(file,`teams/${P.group_id}/illustrations/${sec.id}/${storageName('illustration',file)}`,false);S.blockEditor.blocks[index].url=url;render();toast('Ilustración subida.','ok')}catch(e){toast(friendlyError(e),'bad')}}
