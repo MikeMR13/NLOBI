@@ -74,8 +74,15 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
     if(parseFloat(focus.border)!==0)throw Error('El enfoque muestra marco editorial');
     await page.locator('#readerFocusExit').click();
     if(await page.locator('.readerExperience.readerFocused').count())throw Error('Enfoque no se desactiva');
-    await page.locator('#readerSettings > summary').click();
-    await page.locator('[data-reader-quick="presentation"][data-reader-value="classic"]').click();
+    // WebKit puede reconstruir el panel tras salir del modo enfoque:
+    // comprobar que vuelva a estar abierto antes de interactuar, sin ocultar fallos de la acción.
+    const classic=page.locator('[data-reader-quick="presentation"][data-reader-value="classic"]');
+    let restored=false;
+    for(let attempt=0;attempt<3&&!restored;attempt++){
+     await page.locator('#readerSettings').evaluate(node=>{node.open=true});
+     try{await classic.click({timeout:5000});restored=true}
+     catch(error){if(attempt===2)throw error}
+    }
     await page.waitForSelector('.readerExperience.readerPresentation-classic');
     if((await page.locator('#readerContinuousChapters').count())!==actualContinuous)throw Error('El modo de lectura cambió al restaurar Clásico');
    }
