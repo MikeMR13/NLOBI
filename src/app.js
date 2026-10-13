@@ -2548,7 +2548,7 @@ async function epubObfuscatedFonts(zip){
   idpfKey=[...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');
  }
  const uuid=identifiers.map(n=>String(n.textContent||'')).find(v=>/^(?:urn:uuid:)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v.trim()))||'';
- if(uuid)adobeKey=uuid.replace(/[^0-9a-f]/gi,'').toLowerCase();
+ if(uuid)adobeKey=uuid.split(':').pop().replace(/[^0-9a-f]/gi,'').toLowerCase();
  for(const entry of entries){
   const algorithm=entry.getElementsByTagNameNS('*','EncryptionMethod')[0]?.getAttribute('Algorithm')||'';
   const href=entry.getElementsByTagNameNS('*','CipherReference')[0]?.getAttribute('URI')||'';
