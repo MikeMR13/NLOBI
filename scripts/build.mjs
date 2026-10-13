@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import {createHash} from "node:crypto";
 import { spawnSync } from "node:child_process";
 
 const root = process.cwd();
@@ -19,6 +20,35 @@ for (const file of ["manifest.webmanifest", "sw.js", "icon.svg",
   "icon-192.png", "icon-512.png"]) {
   fs.copyFileSync(path.join(root, "public", file), path.join(dist, file));
 }
+
+// Inmutabilidad por contenido: la URL cambia cuando el asset cambia.
+// Evita recibir CSS/JS obsoleto y permite servir caché directa entre visitas.
+const versionedAssets=["assets/app.js","assets/styles.css","assets/activate-styles.js"];
+const versions=new Map(versionedAssets.map(name=>[
+ name,createHash("sha256").update(fs.readFileSync(path.join(dist,name))).digest("hex").slice(0,12)
+]));
+const manifestVersion=createHash("sha256").update([...versions.values()].join(":")).digest("hex").slice(0,12);
+const indexPath=path.join(dist,"index.html");
+let builtHtml=fs.readFileSync(indexPath,"utf8");
+for(const [file,digest] of versions){
+ const resource="/"+file;
+ const needle=new RegExp(resource.replace(/[.*+?^${}()|[\]\\]/g,"\\const config = spawnSync(")+"(?:\\?v=[A-Za-z0-9_-]+)?(?=[\\"'])","g");
+ builtHtml=builtHtml.replace(needle,resource+"?v="+digest);
+}
+fs.writeFileSync(indexPath,builtHtml);
+const swPath=path.join(dist,"sw.js");
+let builtWorker=fs.readFileSync(swPath,"utf8");
+builtWorker=builtWorker.replace(/const CACHE='([^']+)'/,(_all,name)=>"const CACHE='"+name+"-"+manifestVersion+"'");
+for(const [file,digest] of versions){
+ const resource="/"+file;
+ const quoted="'"+resource+"'";
+ const coreStart=builtWorker.indexOf("const CORE=[");
+ const coreEnd=builtWorker.indexOf("];",coreStart);
+ if(coreStart<0||coreEnd<0)throw new Error("Service Worker CORE no disponible");
+ const first=builtWorker.slice(coreStart,coreEnd).replace(quoted,"'"+resource+"?v="+digest+"'");
+ builtWorker=builtWorker.slice(0,coreStart)+first+builtWorker.slice(coreEnd);
+}
+fs.writeFileSync(swPath,builtWorker);
 
 const config = spawnSync(process.execPath, [path.join(root, "scripts", "generate-config.mjs"), dist], {
   stdio: "inherit",
