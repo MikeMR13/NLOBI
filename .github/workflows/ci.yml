@@ -51,6 +51,8 @@ jobs:
         run: node scripts/performance-regression-check.mjs
       - name: RLS editorial permissions consolidation and rollback regression
         run: node scripts/rls-policy-consolidation-check.mjs
+      - name: RPC phase 2 private implementations and grant regression
+        run: node scripts/rpc-security-phase2-check.mjs
       - run: npm run build
       - name: Build fingerprint and lazy asset regression
         run: node scripts/lazy-performance-check.mjs
