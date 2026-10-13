@@ -12,7 +12,7 @@ for(const [engine,browserType] of [['Chromium',chromium],['WebKit',webkit]]){
   for(const viewport of [{width:390,height:844},{width:1280,height:850}]){
    const page=await browser.newPage({viewport});
    try{
-    await page.goto(base,{waitUntil:'domcontentloaded'});
+    await page.goto(base+'icon.svg',{waitUntil:'domcontentloaded'});
     await page.setContent(`<!doctype html><html lang="es"><head>
       <link rel="stylesheet" href="/assets/styles.css"></head><body>
       <main class="readerExperience readerPresentation-classic">
