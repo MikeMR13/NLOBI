@@ -1427,6 +1427,26 @@ function addEditorBlock(type){if(!S.blockEditor)return;const map={paragraph:{typ
 function moveEditorBlock(i,dir){if(!S.blockEditor)return;const j=i+dir;if(j<0||j>=S.blockEditor.blocks.length)return;[S.blockEditor.blocks[i],S.blockEditor.blocks[j]]=[S.blockEditor.blocks[j],S.blockEditor.blocks[i]];render()}
 function deleteEditorBlock(i){if(!S.blockEditor)return;S.blockEditor.blocks.splice(i,1);render()}
 function syncEditorInputs(){if(!S.blockEditor)return;if($('#studioPagedEditable')){serializePagedChapter();return}S.blockEditor.blocks.forEach((b,i)=>{const paged=document.querySelector(`[data-paged-text="${i}"]`);if(paged&&['paragraph','heading','quote','translator_note'].includes(b.type)){b.text=paged.value;return}if(['paragraph','heading','quote','translator_note'].includes(b.type)){const el=document.querySelector(`[data-block-text="${i}"]`);if(el){if(b.text!==el.value)delete b.html;b.text=el.value}}else if(b.type==='image'){const u=document.querySelector(`[data-block-url="${i}"]`),a=document.querySelector(`[data-block-alt="${i}"]`),c=document.querySelector(`[data-block-caption="${i}"]`);if(u)b.url=u.value;if(a)b.alt=a.value;if(c)b.caption=c.value}else if(b.type==='ruby'){const ba=document.querySelector(`[data-block-base="${i}"]`),r=document.querySelector(`[data-block-reading="${i}"]`);if(ba)b.base=ba.value;if(r)b.reading=r.value}})}
+// Recover the actual XHTML title font already stored in imported EPUB blocks.
+// Chapter metadata keeps only plain text; without this lookup its H1 loses
+// special faces (e.g. Netgame's Alba) even though paragraphs render correctly.
+function readerEpubTitleFontIndex(chapter){
+ const title=String(chapter?.title||'').trim().replace(/\s+/g,' ');
+ if(!title)return null;
+ const blocks=Array.isArray(chapter?.content)?chapter.content:[];
+ for(const block of blocks.slice(0,24)){
+  if(block?.type!=='heading'||String(block.text||'').trim().replace(/\s+/g,' ')!==title)continue;
+  const markup=String(block.html||'');
+  const match=markup.match(/\bdata-epub-family=["']([0-9]{1,2})["']/i);
+  const index=Number.isInteger(block.epubFamily)?block.epubFamily:match?Number(match[1]):null;
+  if(Number.isInteger(index)&&index>=0&&index<32)return index;
+ }
+ return null;
+}
+function readerEpubTitleAttribute(chapter){
+ const index=readerEpubTitleFontIndex(chapter);
+ return index===null?'':' data-epub-family="'+index+'"';
+}
 function renderReaderBlock(b){
  b=normalizeBlock(b);
  const font=Number.isInteger(b.epubFamily)&&b.epubFamily>=0&&b.epubFamily<32?' data-epub-family="'+b.epubFamily+'"':'';
@@ -1927,7 +1947,7 @@ function ensureReaderContinuous(){
 }
 
 function readerContinuousChapterMarkup(ch,first=false){
- return `<section class="readerContinuousChapter" data-reader-chapter-id="${esc(ch.id)}" aria-label="${esc(ch.title||'Capítulo')}">${first?'':`<header class="readerContinuousHeading"><span class="readerChapterIndex">SIGUIENTE CAPÍTULO</span><h2>${esc(ch.title||'Capítulo')}</h2><div class="readerChapterDivider" aria-hidden="true"></div></header>`}${(ch.content||[]).map(renderReaderBlock).join('')}</section>`;
+ return `<section class="readerContinuousChapter" data-reader-chapter-id="${esc(ch.id)}" aria-label="${esc(ch.title||'Capítulo')}">${first?'':`<header class="readerContinuousHeading"><span class="readerChapterIndex">SIGUIENTE CAPÍTULO</span><h2${readerEpubTitleAttribute(ch)}>${esc(ch.title||'Capítulo')}</h2><div class="readerChapterDivider" aria-hidden="true"></div></header>`}${(ch.content||[]).map(renderReaderBlock).join('')}</section>`;
 }
 
 function readerScrollPercentSingle(){
@@ -2152,7 +2172,7 @@ function readerView(){
  </section></details></div></details></div>\n ${(fontFamily==='original'||fontFamily.startsWith('epub:'))&&embedded.length?`<p class="muted readerFontNotice" role="status">Fuentes del EPUB: ${embedded.map(esc).join(', ')} · ${S.epubFontLoaded!==epubFingerprint?'Cargando fuentes originales…':S.epubFontCount?S.epubFontCount+' de '+(R.epub_fonts||[]).length+' variantes cargadas'+(!embeddedReady?' · la variante elegida no está disponible':''):'No se pudieron cargar las fuentes; se utiliza una alternativa de lectura.'}</p>`:''}
  <div class="readerReadingTools"><span class="readerChapterIndex">${i>=0&&ns.length?`CAPÍTULO ${i+1} DE ${ns.length}`:'TU LECTURA'}</span><div class="readerReadingActions"><span id="readerProgressLabel" role="status" aria-live="off">0% leído</span><button type="button" class="btn readerBookmarkButton" id="readerBookmark" title="Guardar la posición actual">♧ Guardar punto</button>${readingPosition&&(readingPosition.percent>5&&readingPosition.percent<98||readingPosition.sectionId&&readingPosition.sectionId!==R.id)?`<button type="button" class="btn readerResumeButton" id="readerResume">↳ Retomar lectura · ${Math.round(readingPosition.percent)}%</button>`:''}</div></div>
  <p class="readerKeyboardHint">${continuous?'Lectura continua · los capítulos siguientes se cargarán conforme avances.':'Atajos: Mayús + ← anterior · Mayús + → siguiente.'} · Esc para salir del modo enfoque</p><button type="button" class="readerFocusExit" id="readerFocusExit" aria-label="Salir del modo de concentración">Salir del modo enfoque ✕</button>
- <article class="readerPaper reader-${esc(theme)} reader-${esc(width)} reader-line-${esc(lineHeight)} reader-font-${esc((fontFamily==='original'||fontFamily.startsWith('epub:'))&&validEpub&&embeddedReady?(fontFamily==='original'?'original':'epub'):fontFamily.startsWith('epub:')?'serif':fontFamily==='original'?'serif':fontFamily)} reader-space-${esc(paragraphSpace)} reader-indent-${esc(S.readerPrefs.indent||"none")} reader-align-${esc(S.readerPrefs.align||"left")} reader-contrast-${esc(S.readerPrefs.contrast||"standard")} reader-images-${esc(S.readerPrefs.images||"show")}" style="font-size:${Number(S.readerPrefs.fontSize||18)}px;--epub-reader-font:${esc(epubFontCss)}" aria-labelledby="chapterTitle"><div class="readerMeta">${esc(R.novel_title||'El Obi del Lector')}${R.volume_number!=null?` · Vol. ${esc(R.volume_number)}`:''}</div><h1 id="chapterTitle">${esc(R.title||'Capítulo')}</h1><div class="readerChapterDivider" aria-hidden="true"></div>${continuous?`<div id="readerContinuousChapters">${continuous.entries.map((entry,j)=>readerContinuousChapterMarkup(entry,j===0)).join('')}</div><div id="readerContinuousMore" role="status" aria-live="polite" ${continuous.ended?'hidden':''}>Desplázate para continuar al siguiente capítulo.</div>`:(R.content||[]).map(renderReaderBlock).join('')}</article>
+ <article class="readerPaper reader-${esc(theme)} reader-${esc(width)} reader-line-${esc(lineHeight)} reader-font-${esc((fontFamily==='original'||fontFamily.startsWith('epub:'))&&validEpub&&embeddedReady?(fontFamily==='original'?'original':'epub'):fontFamily.startsWith('epub:')?'serif':fontFamily==='original'?'serif':fontFamily)} reader-space-${esc(paragraphSpace)} reader-indent-${esc(S.readerPrefs.indent||"none")} reader-align-${esc(S.readerPrefs.align||"left")} reader-contrast-${esc(S.readerPrefs.contrast||"standard")} reader-images-${esc(S.readerPrefs.images||"show")}" style="font-size:${Number(S.readerPrefs.fontSize||18)}px;--epub-reader-font:${esc(epubFontCss)}" aria-labelledby="chapterTitle"><div class="readerMeta">${esc(R.novel_title||'El Obi del Lector')}${R.volume_number!=null?` · Vol. ${esc(R.volume_number)}`:''}</div><h1 id="chapterTitle"${readerEpubTitleAttribute(R)}>${esc(R.title||'Capítulo')}</h1><div class="readerChapterDivider" aria-hidden="true"></div>${continuous?`<div id="readerContinuousChapters">${continuous.entries.map((entry,j)=>readerContinuousChapterMarkup(entry,j===0)).join('')}</div><div id="readerContinuousMore" role="status" aria-live="polite" ${continuous.ended?'hidden':''}>Desplázate para continuar al siguiente capítulo.</div>`:(R.content||[]).map(renderReaderBlock).join('')}</article>
  <nav class="readerBottom" aria-label="Continuar lectura"><button class="btn" id="markReaderDone" type="button">✓ Marcar como leído</button>${continuous?(nextVolume?`<button class="btn primary" id="finishAndNext" data-next-section="${nextVolume.id}" data-translation="${R.translation_id}" ${continuous.ended?'':'disabled'}>Finalizar volumen y leer el siguiente →</button>`:`<button class="btn primary" id="finishAndReturn" data-translation="${R.translation_id}" ${continuous.ended?'':'disabled'}>✓ Terminar volumen y volver a la obra</button>`):(next?`<button class="btn primary" id="finishAndNext" data-next-section="${next.id}" data-translation="${R.translation_id}">Finalizar y leer siguiente →</button>`:`<button class="btn primary" id="finishAndReturn" data-translation="${R.translation_id}">✓ Finalizar capítulo y volver a la obra</button>`)}</nav>
  </div></main>`;
 }
