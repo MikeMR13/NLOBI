@@ -7,7 +7,7 @@ const sw=fs.readFileSync('dist/sw.js','utf8');
 const app=fs.readFileSync('src/app.js','utf8');
 
 assert.doesNotMatch(src,/<script[^>]+src="\/assets\/studio-phase[567]\.js/);
-assert.match(src,/home-cover-hint\\.js/);
+assert.ok(src.includes('home-cover-hint.js'));
 assert.match(src,/nlobi-studio-lazy-assets/);
 assert.match(app,/async function ensureStudioModules\(\)/);
 assert.match(app,/if\(route==='studio'\|\|route\.startsWith\('studio:'\)\)await ensureStudioModules\(\)/);
