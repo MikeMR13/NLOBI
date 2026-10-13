@@ -21,6 +21,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: EPUB OCF obfuscation decoding and Studio repair
+        run: node scripts/epub-obfuscation-check.mjs
       - name: Password recovery and session regression
         run: node scripts/auth-recovery-check.mjs
       - name: Restore team owner and platform administrator regression
