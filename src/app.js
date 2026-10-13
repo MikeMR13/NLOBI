@@ -3543,7 +3543,7 @@ async function boot(isRetry=false){
    const sessionTask=S.token?(async()=>{
     try{
      await ensureFreshSession();await loadUser();render();
-     await safeOptionalLoad('mis valoraciones',loadRatings());render();
+     // Las valoraciones ya se consultan una sola vez durante la tarea diferida de boot().
      await flushProgressQueue();
     }catch(e){
      if(e?.authSessionInvalid||!S.token){clearSession();S.user=S.profile=null;S.groups=[];S.admin=false;console.warn('Sesión no renovable',e)}
