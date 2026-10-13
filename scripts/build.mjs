@@ -32,7 +32,7 @@ const indexPath=path.join(dist,"index.html");
 let builtHtml=fs.readFileSync(indexPath,"utf8");
 for(const [file,digest] of versions){
  const resource="/"+file;
- const needle=new RegExp(resource.replace(/[.*+?^${}()|[\]\\]/g,"\\const config = spawnSync(")+"(?:\\?v=[A-Za-z0-9_-]+)?(?=[\\"'])","g");
+ const needle=new RegExp(resource.replaceAll(".","\\.")+"(?:\\?v=[A-Za-z0-9_-]+)?","g");
  builtHtml=builtHtml.replace(needle,resource+"?v="+digest);
 }
 fs.writeFileSync(indexPath,builtHtml);
