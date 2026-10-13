@@ -15,7 +15,8 @@ assert.ok((app.match(/loadRatings\(\)/g)||[]).length<=3,'Revisar llamadas duplic
 
 // El SW no debe forzar volver a transferir recursos con cache:no-store.
 assert.doesNotMatch(sw,/fetch\(req,\{cache:'no-store'\}\)/);
-assert.match(sw,/networkFirst\(req,req\)/);
+assert.match(sw,/networkFirst\(req,req,'no-cache',event\)/);
+assert.match(sw,/event\.waitUntil\(update\)/);
 assert.match(sw,/cacheMode='no-cache'/);
 assert.match(html,/rel="preconnect" href="https:\/\/hfbpsizgwzvvznrktiuq.supabase.co"/);
 
