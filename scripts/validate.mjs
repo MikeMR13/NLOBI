@@ -202,7 +202,8 @@ for (const required of [
   "'/assets/app.js'",
   "'/assets/styles.css'",
   "'/runtime-config.js'",
-  "cache:'no-store'",
+  "cacheMode='no-cache'",
+  "networkFirst(req,req)",
   "self.skipWaiting()",
   "self.clients.claim()"
 ]) {
