@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
 
-const migration=fs.readFileSync('supabase/migrations/20261013195000_private_security_definer_rpc_phase2.sql','utf8');
-const rollback=fs.readFileSync('supabase/rollbacks/20261013195000_private_security_definer_rpc_phase2.rollback.sql','utf8');
+const migration=fs.readFileSync('supabase/migrations/20261013205819_private_security_definer_rpc_phase2.sql','utf8');
+const rollback=fs.readFileSync('supabase/rollbacks/20261013205819_private_security_definer_rpc_phase2.rollback.sql','utf8');
 const names=[
  'admin_review_purchase_link','admin_review_team_application','create_translation_project',
  'find_team_member_by_email','get_admin_review_reports','get_discoverable_readers',
