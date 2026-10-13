@@ -48,6 +48,8 @@ jobs:
       - name: Performance routing, caching and SQL regression
         run: node scripts/performance-regression-check.mjs
       - run: npm run build
+      - name: Build fingerprint and lazy asset regression
+        run: node scripts/lazy-performance-check.mjs
       - name: PWA cache regression
         run: node scripts/pwa-cache-check.mjs
       - name: Start preview server
@@ -64,6 +66,8 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
           npx playwright install --with-deps chromium firefox webkit
+      - name: Browser Studio lazy loading on public routes
+        run: node scripts/lazy-studio-browser-check.mjs
       - name: Mobile Lighthouse performance report
         id: lighthouse
         continue-on-error: true

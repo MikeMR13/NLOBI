@@ -832,9 +832,25 @@ function auth(){
  return `${nav()}<main class="wrap">${status()}<div class="authShell"><div class="authVisual"><span class="eyebrow">Cuenta El Obi del Lector</span><h2>Una biblioteca que recuerda dónde te quedaste.</h2><p>Para lectores, traductores y equipos que quieren publicar de forma ordenada.</p></div><div class="authPanel"><div class="switch" role="tablist" aria-label="Acceso a El Obi del Lector"><button type="button" role="tab" aria-controls="authPanelFields" id="loginTab" class="${S.authMode==='login'?'active':''}" aria-selected="${S.authMode==='login'?'true':'false'}">Iniciar sesión</button><button type="button" role="tab" aria-controls="authPanelFields" id="signupTab" class="${S.authMode==='signup'?'active':''}" aria-selected="${S.authMode==='signup'?'true':'false'}">Crear cuenta</button></div>${S.authMode==='login'?`<div id="authPanelFields"><h1>Bienvenido de nuevo</h1><div id="authError" class="formError" role="alert" aria-live="assertive" hidden></div><div class="field"><label for="email">Correo</label><input id="email" type="email" autocomplete="email" inputmode="email" required aria-required="true" aria-describedby="authError"></div><div class="field"><label for="pass">Contraseña</label><input id="pass" type="password" autocomplete="current-password" required aria-required="true" aria-describedby="authError"></div><div class="row"><button class="btn primary" id="login">Entrar</button><button class="btn" id="resendVerification" type="button">Reenviar verificación</button></div><div class="row"><button class="btn" id="forgotPassword" type="button">¿Olvidaste tu contraseña?</button></div></div>`:`<div id="authPanelFields"><h1>Crea tu cuenta</h1><div id="authError" class="formError" role="alert" aria-live="assertive" hidden></div><div class="field"><label for="name">Nombre visible</label><input id="name" autocomplete="name" required aria-required="true" aria-describedby="authError"></div><div class="field"><label for="email">Correo</label><input id="email" type="email" autocomplete="email" inputmode="email" required aria-required="true" aria-describedby="authError"></div><div class="field"><label for="pass">Contraseña</label><input id="pass" type="password" autocomplete="new-password" required minlength="8" aria-required="true" aria-describedby="authError"></div><label class="radio"><input type="radio" name="atype" value="reader" checked><span><b>Solo lector</b><br><span class="muted">Biblioteca, seguimiento y lectura.</span></span></label><label class="radio"><input type="radio" name="atype" value="reader_translator"><span><b>Lector y traductor</b><br><span class="muted">Lee y solicita acceso a Studio.</span></span></label><label class="radio"><input type="radio" name="atype" value="translator"><span><b>Solo traductor</b><br><span class="muted">Cuenta enfocada en publicación.</span></span></label><button class="btn primary" id="signup">Crear cuenta</button></div>`}</div></div></main>`
 }
 function application(){return `${nav()}<main class="wrap">${status()}<div class="authShell"><div class="authVisual"><h2>Publica con tu equipo.</h2><p>Las solicitudes se revisan antes de habilitar Studio.</p></div><div class="authPanel"><h1>Alta de equipo traductor</h1><div class="field"><label for="teamName">Nombre del equipo</label><input id="teamName" required aria-required="true"></div><div class="field"><label for="teamDesc">Descripción</label><textarea id="teamDesc" rows="5"></textarea></div><div class="field"><label for="teamWeb">Sitio web</label><input id="teamWeb" type="url" inputmode="url" autocomplete="url" placeholder="https://..."></div><button class="btn primary" id="sendApp">Enviar solicitud</button></div></div></main>`}
-const studioLaunch=window.createStudioPhase7?.({S,esc,$,$,jreq,toast,friendlyError,teamCan,renderReaderBlock,safeMediaUrl,studioVolumeQuality,studioSectionQuality,activateEpubFonts,epubFontFamilyNames,refreshProject:refreshStudioProject,loadCatalog});
-const studioQuality=window.createStudioPhase6?.({S,esc,$,$$,teamCan,editSection:editStudioSection,toast,blocksToPlainText});
-const studioWorkflow=window.createStudioPhase5?.({S,nav,status,context:studioContextNav,esc,jreq,toast,friendlyError,render,$,$$,teamCan,isManager:isCurrentGroupManager,openProject:openStudioProject,roleLabel});
+// Studio no forma parte de la ruta crítica de Inicio/Explorar/Lector.
+// Las tres extensiones conservan su API global y se inicializan una única vez.
+let studioLaunch=null,studioQuality=null,studioWorkflow=null,studioModulesPromise=null;
+async function ensureStudioModules(){
+ if(studioModulesPromise)return studioModulesPromise;
+ studioModulesPromise=Promise.all([
+  import('/assets/studio-phase5.js'),
+  import('/assets/studio-phase6.js'),
+  import('/assets/studio-phase7.js')
+ ]).then(()=>{
+  if(!window.createStudioPhase5||!window.createStudioPhase6||!window.createStudioPhase7)
+   throw new Error('No se pudieron inicializar los módulos de Studio.');
+  studioLaunch=window.createStudioPhase7({S,esc,$,$$,jreq,toast,friendlyError,teamCan,renderReaderBlock,safeMediaUrl,studioVolumeQuality,studioSectionQuality,activateEpubFonts,epubFontFamilyNames,refreshProject:refreshStudioProject,loadCatalog});
+  studioQuality=window.createStudioPhase6({S,esc,$,$$,teamCan,editSection:editStudioSection,toast,blocksToPlainText});
+  studioWorkflow=window.createStudioPhase5({S,nav,status,context:studioContextNav,esc,jreq,toast,friendlyError,render,$,$$,teamCan,isManager:isCurrentGroupManager,openProject:openStudioProject,roleLabel});
+  return true;
+ }).catch(error=>{studioModulesPromise=null;throw error});
+ return studioModulesPromise;
+}
 function studioTeamsManagement(){
  if(!S.user)return `${nav()}<main class="wrap" id="mainContent"><div class="notice">Inicia sesión para gestionar tus equipos.</div><button class="btn" data-v="auth">Entrar</button></main>`;
  const memberships=S.groups.filter(g=>g.translator_groups?.id);
@@ -3472,6 +3488,19 @@ async function loadPublicGroupData(id){
  const published=(volumes||[]).map(v=>{const chapter=latestChapter.get(v.id),volumeDate=Date.parse(v.published_at||''),chapterDate=chapter?Date.parse(chapter.published_at):NaN;if(!Number.isFinite(volumeDate)||volumeDate>Date.now())return null;const updated=Number.isFinite(chapterDate)&&chapterDate>volumeDate;return {type:updated?'chapter':'volume',volume_id:v.id,translation_id:v.translation_id,translation_title:titleOf(own.get(v.translation_id)),volume_number:v.volume_number,title:updated?chapter.title:null,published_at:updated?chapter.published_at:v.published_at}}).filter(Boolean).sort((a,b)=>Date.parse(b.published_at)-Date.parse(a.published_at));
  const memberIds=(publicMembers||[]).map(x=>x.user_id).filter(x=>/^[0-9a-f-]{36}$/i.test(x));const publicProfiles=memberIds.length?await jreq('/rest/v1/profiles?id=in.('+memberIds.join(',')+')&select=id,username,display_name,avatar_url&limit=100'):[];return {...g,translations:translations||[],support_links:support||[],stats:stats?.[0]||{},recent_publications:published,public_members:publicProfiles||[]}
 }
+// El lector no necesita comprar/descargar/comentar al entrar a un capítulo:
+ // cargar únicamente los datos de navegación y la identidad de la traducción.
+const readerTranslationMetaCache=new Map();
+async function loadReaderTranslationMeta(id){
+ const cache=readerTranslationMetaCache.get(id);
+ if(cache&&Date.now()-cache.time<90000)return cache.value;
+ const query='/rest/v1/translations?id=eq.'+encodeURIComponent(id)+
+  '&status=in.(active,complete,paused)&select=id,title,status,novels(id,title),translator_groups(id,name,avatar_url,slug,profile_settings,review_required),volumes!volumes_translation_id_fkey(id,volume_number,title,status,sections(id,title,section_number,status,sort_order))&limit=1';
+ const rows=await jreq(query);
+ const value=rows?.[0]||null;
+ if(value)readerTranslationMetaCache.set(id,{time:Date.now(),value});
+ return value;
+}
 async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}){
  if(!navigator.onLine){
   const cached=readCachedChapter(sectionId);if(!cached)throw new Error('Este capítulo no está disponible sin conexión todavía.');
@@ -3481,7 +3510,7 @@ async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}
  const sec=secRows?.[0];if(!sec)throw new Error('El capítulo no está disponible.');
  const volRows=await jreq(`/rest/v1/volumes?id=eq.${sec.volume_id}&status=eq.published&select=id,translation_id,volume_number,title,epub_font_url,epub_font_family,epub_fonts&limit=1`);
  const vol=volRows?.[0];if(!vol)throw new Error('El volumen no está disponible.');
- const trId=vol.translation_id,tr=await loadTranslationDetail(trId);if(!tr)throw new Error('La obra no está disponible.');
+ const trId=vol.translation_id,tr=await loadReaderTranslationMeta(trId);if(!tr)throw new Error('La obra no está disponible.');
  const navigation=(tr.volumes||[]).filter(v=>v.status==='published').sort((a,b)=>Number(a.volume_number)-Number(b.volume_number)).flatMap(v=>(v.sections||[]).filter(x=>x.status==='published').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(x=>({...x,volume_id:v.id,volume_number:v.volume_number})));
  S.readerSection={...sec,translation_id:trId,volume_number:vol.volume_number,novel_title:tr.novels?.title,translator_groups:tr.translator_groups,navigation,epub_font_url:vol.epub_font_url,epub_font_family:vol.epub_font_family,epub_fonts:vol.epub_fonts?.length?vol.epub_fonts:(vol.epub_font_url?[{url:vol.epub_font_url,family:vol.epub_font_family||'Original',style:'normal',weight:'normal'}]:[])};activateEpubFonts(S.readerSection.epub_fonts);
  cacheReaderChapter(S.readerSection);S.readerContinuous=null;S.readerScrollIntent=false;applyReaderPreferencesForVolume(vol.id);
@@ -3490,6 +3519,7 @@ async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}
 }
 async function resolveDynamicRoute(route=S.view){
  if(!route||!navigator.onLine&& !route.startsWith('reader:'))return;
+ if(route==='studio'||route.startsWith('studio:'))await ensureStudioModules();
  const parts=route.split(':'),kind=parts[0],id=parts.slice(kind==='studio'?2:1).join(':');
  if(route==='collections'){await loadPublicCollections();return}
  if(route==='beta'){if(S.user)await safeOptionalLoad('Beta',loadBetaFeedback());return}
@@ -3626,6 +3656,7 @@ document.addEventListener('visibilitychange',()=>{if(document.visibilityState!==
 window.addEventListener('error',e=>{console.error('[NLOBI global error]',e.error||e.message,e.filename||'',e.lineno||'',e.colno||'')});
 window.addEventListener('unhandledrejection',e=>{console.error('[NLOBI unhandled rejection]',e.reason)});
 if(CONFIG.qaMode===true){
+ void ensureStudioModules().then(()=>{
  window.__NLOBI_QA__={
   setState(patch={}){if(Object.prototype.hasOwnProperty.call(patch,'catalog'))qaCatalogFixtureActive=true;Object.assign(S,patch);render()},
   setView(view){S.view=validRoute(view)?view:'home';history.replaceState(null,'','#'+S.view);render()},
@@ -3634,6 +3665,7 @@ if(CONFIG.qaMode===true){
   mediaUrl(url){return safeMediaUrl(url)},
   detectImportSections(blocks,text=''){return detectSectionsRich(blocks,text)}
  }
+ }).catch(error=>console.error('[NLOBI QA] Studio no disponible',error));
 }
 consumeAuthCallback();
 if(!location.hash)history.replaceState(null,'','#home');
