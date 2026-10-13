@@ -120,6 +120,18 @@ for(const [browserName,type] of browsers){
       await page.locator('#studioResetFiltersEmpty').click();
       assert.equal(await page.locator('#studioProjectSearch').inputValue(),'');
       assert.equal(await page.locator('.studioV3BookCard').count(),1);
+      await page.locator('[data-studio-jump="studioCatalog"]').click();
+      assert.equal(await page.locator('[data-studio-jump="studioCatalog"]').getAttribute('aria-current'),'location');
+      assert.equal(await page.evaluate(()=>document.activeElement?.id),'studioCatalog','Studio catalogue jump transfers focus');
+      await page.locator('[data-studio-jump="studioOverview"]').click();
+      assert.equal(await page.evaluate(()=>document.activeElement?.id),'studioOverview','Studio overview jump transfers focus');
+     }
+     if(scenario.id==='translator-project'){
+      await page.locator('#projectEditorialMode').selectOption('advanced');
+      const saved=page.waitForRequest(req=>req.method()==='PATCH'&&new URL(req.url()).pathname==='/rest/v1/translations');
+      await page.locator('#saveEditorialMode').click();
+      const request=await saved;
+      assert.equal(request.postDataJSON().editorial_mode,true,'Editorial workflow save dispatches the chosen mode');
      }
      if(scenario.id==='guest-home'){
       const toggle=page.locator(width<768?'#themeMobileQuick':'#theme');
