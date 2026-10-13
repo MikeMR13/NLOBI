@@ -10,6 +10,7 @@ const hint=fs.readFileSync('src/home-cover-hint.js','utf8');
 assert.match(src,/function primeHomeCover\(book\)/);
 assert.ok(src.includes('new globalThis.URL(src,location.origin)'),'Usar constructor URL nativo');
 assert.ok(src.includes('const secondaryResults=earlyRender?null:loadSecondary()'),'Catálogo prioritario');
+assert.ok(src.includes('if(CONFIG.qaMode===true&&qaCatalogFixtureActive)return;'),'No sobrescribir fixtures después de diferir consultas');
 assert.ok(src.includes('setTimeout(()=>{void enrich().catch'),'Diferir consultas auxiliares sin bloquear primer render');
 assert.match(src,/existingFeaturedVisual\.querySelector\('a'\)/);
 assert.match(src,/homeFirstPaintDone=S\.view==='home'/);
