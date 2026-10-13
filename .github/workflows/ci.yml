@@ -111,6 +111,8 @@ jobs:
         run: node scripts/mobile-interactions-check.mjs
       - name: Studio account and works visual browser audit
         run: node scripts/studio-visual-browser-audit.mjs
+      - name: Studio reset filter button interactions (Chromium + WebKit)
+        run: node scripts/studio-interactive-reset-check.mjs
       - name: Notification bell technical and responsive regression
         run: node scripts/notification-bell-check.mjs
       - name: Studio final volume checkbox and layout visual regression
