@@ -522,6 +522,23 @@ function releasesView(){
 function featuredNovels(items=visibleCatalog()){
  return items.filter(x=>x.novels?.cover_url&&!x.demo).slice(0,8);
 }
+// Precarga el LCP antes del render definitivo; solo se guarda la ruta pública
+// de la portada destacada (nunca títulos, tokens ni preferencias del lector).
+function primeHomeCover(book){
+ if(S.view!=='home'||CONFIG.qaMode===true)return;
+ const src=book?.novels?.cover_url?safeMediaUrl(book.novels.cover_url):'';
+ const url=src?new URL(src,location.origin):null;
+ const allowed=url?.origin===location.origin&&url.pathname.startsWith('/media/')&&!url.hash;
+ const old=document.querySelector('link[data-home-cover-hint]');
+ if(!allowed){old?.remove();try{localStorage.removeItem('nlobi_home_cover_hint_v1')}catch{};return}
+ if(old?.href!==url.href){
+  old?.remove();
+  const link=document.createElement('link');link.rel='preload';link.as='image';
+  link.href=url.href;link.fetchPriority='high';link.dataset.homeCoverHint='1';
+  document.head.append(link);
+ }
+ try{localStorage.setItem('nlobi_home_cover_hint_v1',JSON.stringify({path:url.pathname+url.search,at:Date.now()}))}catch{}
+}
 function featuredVisualMarkup(book){
  const url=book?.novels?.cover_url?safeMediaUrl(book.novels.cover_url):'';
  return `<a class="homeFeaturedBook homeFeaturedCoverLink" href="#detail:${encodeURIComponent(book.id)}" aria-label="Abrir novela destacada: ${esc(titleOf(book))}">${url?`<img src="${esc(url)}" alt="Portada de ${esc(titleOf(book))}" width="320" height="480" loading="eager" fetchpriority="high" decoding="async">`:`<div class="homeFeaturedFallback"><span>物語</span><strong>${esc(titleOf(book))}</strong></div>`}</a>`;
@@ -2328,11 +2345,20 @@ function render(){
   // Conserva el titular ya pintado cuando la respuesta del catálogo sustituye el esqueleto.
   // Esto evita volver a retrasar el LCP mientras se actualiza solo el contenido editorial.
   const existingHomeCopy=S.view==='home'?app.querySelector('.homeShowcaseCopy'):null;
+  const existingFeaturedVisual=S.view==='home'&&!S.catalogLoading?app.querySelector('.homeFeaturedVisual'):null;
   if(existingHomeCopy&&html.includes('homeShowcaseCopy')){
    const next=document.createElement('template');next.innerHTML=html;
    const freshCopy=next.content.querySelector('.homeShowcaseCopy');
    if(freshCopy&&freshCopy.textContent===existingHomeCopy.textContent){
     freshCopy.replaceWith(existingHomeCopy);
+    // No decodificar ni solicitar de nuevo la misma portada en renders consecutivos.
+    const nextVisual=next.content.querySelector('.homeFeaturedVisual');
+    const oldImage=existingFeaturedVisual?.querySelector('.homeFeaturedBook img');
+    const newImage=nextVisual?.querySelector('.homeFeaturedBook img');
+    if(oldImage&&newImage&&oldImage.getAttribute('src')===newImage.getAttribute('src')&&
+       existingFeaturedVisual.querySelector('a')?.getAttribute('href')===nextVisual.querySelector('a')?.getAttribute('href')){
+      nextVisual.replaceWith(existingFeaturedVisual);
+    }
     app.replaceChildren(next.content);
    }else app.innerHTML=html;
   }else app.innerHTML=html;
@@ -3522,6 +3548,7 @@ async function loadCatalog(earlyRender=false){
  const catalog=await catalogRequest;
  if(CONFIG.qaMode===true&&qaCatalogFixtureActive)return;
  S.catalog=(catalog||[]).map(x=>({...x,latestPublishedVolume:null}));
+ if(S.view==='home')primeHomeCover(featuredNovels(S.catalog)[Math.max(0,Number(S.featuredIndex)||0)%Math.max(1,featuredNovels(S.catalog).length)]||null);
  const enrich=async()=>{
   const [volumeResult,sectionResult,teamResult,collaborationResult]=await secondaryResults;
   if(volumeResult.status==='fulfilled'){
