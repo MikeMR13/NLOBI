@@ -2649,8 +2649,16 @@ async function activateEpubFonts(fonts){
    const weight=/^(normal|bold|[1-9]00)$/.test(item.weight||'')?item.weight:'normal';
    // First try our same-origin media proxy; retry the approved Supabase URL if the proxy fails.
    for(const url of [...new Set([safeMediaUrl(clean),clean])]){
-    const face=new FontFace('NLOBI-EPUB-'+index,'url("'+url.replace(/["\\]/g,'')+'")',{style,weight});
-    try{await face.load();return {index,face}}catch{}
+    try{
+     let src='url("'+url.replace(/["\\]/g,'')+'")';
+     if(item.obfuscation){
+      const response=await fetch(url,{cache:'force-cache'});
+      if(!response.ok)throw new Error('No se pudo recuperar la fuente EPUB ('+response.status+').');
+      src=epubDecodeFont(new Uint8Array(await response.arrayBuffer()),item.obfuscation);
+     }
+     const face=new FontFace('NLOBI-EPUB-'+index,src,{style,weight});
+     await face.load();return {index,face};
+    }catch{}
    }
    return {index,face:null};
   }));
