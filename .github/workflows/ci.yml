@@ -74,6 +74,8 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
           npx playwright install --with-deps chromium firefox webkit
+      - name: Explore and Library progressive catalogs phase 5 (Chromium + WebKit)
+        run: node scripts/catalog-batch-phase5-check.mjs
       - name: Browser Studio lazy loading on public routes
         run: node scripts/lazy-studio-browser-check.mjs
       - name: EPUB title typography across reader font preferences
@@ -149,8 +151,6 @@ jobs:
         run: node scripts/mobile-navigation-phase2-check.mjs
       - name: Explore visual and interaction audit
         run: node scripts/explore-quality-check.mjs
-      - name: Explore and Library progressive catalogs phase 5 (Chromium + WebKit)
-        run: node scripts/catalog-batch-phase5-check.mjs
       - name: Full platform quality pass
         id: full_quality
         continue-on-error: true
