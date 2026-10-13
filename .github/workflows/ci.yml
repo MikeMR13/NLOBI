@@ -149,6 +149,8 @@ jobs:
         run: node scripts/mobile-navigation-phase2-check.mjs
       - name: Explore visual and interaction audit
         run: node scripts/explore-quality-check.mjs
+      - name: Explore and Library progressive catalogs phase 5 (Chromium + WebKit)
+        run: node scripts/catalog-batch-phase5-check.mjs
       - name: Full platform quality pass
         id: full_quality
         continue-on-error: true
