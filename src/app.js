@@ -2521,6 +2521,61 @@ function epubFontCssResolver(fonts,styles){
  resolve.textStyle=textStyle;
  return resolve;
 }
+// EPUB OCF font obfuscation: keep protected bytes in storage and decode only
+// in the reader. Never treat unrelated encrypted EPUB resources as font faces.
+async function epubObfuscatedFonts(zip){
+ const encrypted=zip.file('META-INF/encryption.xml');
+ const mapped=new Map();
+ if(!encrypted)return mapped;
+ const xml=new DOMParser().parseFromString(await encrypted.async('text'),'application/xml');
+ if(xml.querySelector('parsererror'))throw new Error('El manifiesto de ofuscación EPUB no es válido.');
+ const entries=[...xml.getElementsByTagNameNS('*','EncryptedData')];
+ if(!entries.length)return mapped;
+ let opf=null;
+ const container=zip.file('META-INF/container.xml');
+ if(container){
+  const doc=new DOMParser().parseFromString(await container.async('text'),'application/xml');
+  const root=doc.getElementsByTagNameNS('*','rootfile')[0]?.getAttribute('full-path');
+  if(root&&zip.file(root))opf=new DOMParser().parseFromString(await zip.file(root).async('text'),'application/xml');
+ }
+ const identifiers=opf?[...opf.getElementsByTagNameNS('http://purl.org/dc/elements/1.1/','identifier')]:[];
+ const uniqueId=opf?.documentElement?.getAttribute('unique-identifier')||'';
+ const identifier=identifiers.find(n=>uniqueId&&n.getAttribute('id')===uniqueId)?.textContent||identifiers[0]?.textContent||'';
+ const identity=String(identifier).replace(/[ \t\r\n]/g,'');
+ let idpfKey=null,adobeKey=null;
+ if(identity&&globalThis.crypto?.subtle){
+  const hash=await crypto.subtle.digest('SHA-1',new TextEncoder().encode(identity));
+  idpfKey=[...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');
+ }
+ const uuid=identifiers.map(n=>String(n.textContent||'')).find(v=>/^(?:urn:uuid:)?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(v.trim()))||'';
+ if(uuid)adobeKey=uuid.replace(/[^0-9a-f]/gi,'').toLowerCase();
+ for(const entry of entries){
+  const algorithm=entry.getElementsByTagNameNS('*','EncryptionMethod')[0]?.getAttribute('Algorithm')||'';
+  const href=entry.getElementsByTagNameNS('*','CipherReference')[0]?.getAttribute('URI')||'';
+  const path=epubHrefKey('',href);
+  if(!path||!zip.file(path))continue;
+  if(algorithm==='http://www.idpf.org/2008/embedding'&&idpfKey)mapped.set(path,{scheme:'idpf',key:idpfKey});
+  else if(algorithm==='http://ns.adobe.com/pdf/enc#RC'&&adobeKey)mapped.set(path,{scheme:'adobe',key:adobeKey});
+ }
+ return mapped;
+}
+function epubValidSfnt(data){
+ if(!data||data.length<12)return false;
+ const tag=String.fromCharCode(...data.slice(0,4));
+ return(data[0]===0&&data[1]===1&&data[2]===0&&data[3]===0)||['OTTO','true','typ1','wOFF','wOF2'].includes(tag);
+}
+function epubDecodeFont(bytes,obfuscation){
+ const source=bytes instanceof Uint8Array?bytes:new Uint8Array(bytes);
+ if(epubValidSfnt(source))return source.slice().buffer;
+ const scheme=obfuscation?.scheme,keyHex=String(obfuscation?.key||'');
+ const length=scheme==='idpf'?1040:scheme==='adobe'?1024:0;
+ const hexLength=scheme==='idpf'?40:scheme==='adobe'?32:0;
+ if(!length||keyHex.length!==hexLength||!/^[a-f0-9]+$/i.test(keyHex))throw new Error('Falta una clave de ofuscación EPUB válida.');
+ const key=Uint8Array.from(keyHex.match(/.{2}/g),pair=>parseInt(pair,16)),decoded=source.slice();
+ for(let i=0;i<Math.min(length,decoded.length);i++)decoded[i]^=key[i%key.length];
+ if(!epubValidSfnt(decoded))throw new Error('El identificador del EPUB no coincide con la fuente incrustada.');
+ return decoded.buffer;
+}
 async function epubEmbeddedFonts(zip,manifest,opfBase,warnings){
  const declared=Object.values(manifest).filter(x=>/\.css(?:$|[?#])/i.test(x.href||'')||x.mediaType==='text/css').map(x=>epubHrefKey(opfBase,x.href));
  const candidates=[...new Set([...declared,...Object.keys(zip.files).filter(p=>/\.css$/i.test(p))])];
