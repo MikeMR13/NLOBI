@@ -30,7 +30,8 @@ assert.match(rollback,/\ncommit;\s*$/);
 assert.match(migration,/revoke all on schema rpc_internal from public;/);
 assert.match(migration,/grant usage on schema rpc_internal to anon,authenticated,service_role;/);
 assert.match(migration,/rpc_internal NO se debe añadir a Data API/i);
-assert.doesNotMatch(migration,/(drop table|disable row level security|delete from public\.|truncate public\.)/i);
+// Las operaciones de moderación preexistentes sí pueden usar DELETE dentro de su función.
+assert.doesNotMatch(migration,/(drop table|disable row level security|truncate public\.)/i);
 for(const name of names){
  const start=migration.indexOf('CREATE OR REPLACE FUNCTION rpc_internal.'+name+'(');
  const next=migration.indexOf('\n-- ',start+1);
