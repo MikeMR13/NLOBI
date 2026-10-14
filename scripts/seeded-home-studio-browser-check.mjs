@@ -62,7 +62,7 @@ for(const [name,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    // Una ruta protegida debe mostrar su formulario una vez cargadas las vistas diferidas.
    const qaSource=fs.readFileSync('scripts/full-quality-check.mjs','utf8');
    const fixtureSource=qaSource.slice(qaSource.indexOf('const now='),qaSource.indexOf('const viewports='));
-   const {scenarios}=new Function(fixtureSource+'\\nreturn {scenarios};')();
+   const {scenarios}=new Function(fixtureSource+'\nreturn {scenarios};')();
    const project=scenarios.find(([scenario])=>scenario==='creator-project');
    assert.ok(project,'No se encontró el escenario de edición Studio');
    await page.evaluate(data=>{
