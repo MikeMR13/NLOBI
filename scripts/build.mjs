@@ -58,6 +58,14 @@ const config = spawnSync(process.execPath, [path.join(root, "scripts", "generate
 });
 if (config.status !== 0) process.exit(config.status ?? 1);
 
+// La pista pública no es requisito del build ni agrega llamadas al cliente.
+const coverSeed = spawnSync(process.execPath, [path.join(root, "scripts", "seed-home-cover.mjs"), dist], {
+  stdio: "inherit",
+  timeout: 5000,
+  env: process.env,
+});
+if (coverSeed.status !== 0) console.warn("Portada de compilación no disponible; continúa carga normal.");
+
 console.log(`Built NLOBI into ${dist}`);
 
 /* Build output verification */
