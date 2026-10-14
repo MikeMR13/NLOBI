@@ -6106,9 +6106,11 @@ body.dark{
     .sectionHead .muted,.catalogBatchCount){
  letter-spacing:.075em;
 }
-.homeEyebrow::before{
+.homeEditorial .homeEyebrow::before{
  content:"翻訳図書館";
  display:inline-block;vertical-align:baseline;
+ flex:0 0 auto;width:auto;height:auto;
+ border-radius:0;background:none;
  margin-inline-end:.75em;padding-inline-end:.75em;
  border-inline-end:1px solid var(--obi-rule);
  color:var(--accentText);
@@ -6170,7 +6172,7 @@ body.dark{
  border-color:var(--obi-rule);
 }
 @media(max-width:640px){
- .homeEyebrow::before{display:none}
+ .homeEditorial .homeEyebrow::before{display:none}
  .sectionHead{padding-block-end:9px}
  .sectionHead h2::before{width:2px;margin-inline-end:.28em}
  .volumeGalleryHeading{padding-block-end:9px}
