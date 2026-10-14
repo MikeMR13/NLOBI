@@ -74,6 +74,8 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
           npx playwright install --with-deps chromium firefox webkit
+      - name: Reader first text and next chapter prefetch (Chromium + WebKit)
+        run: node scripts/reader-first-text-check.mjs
       - name: Explore and Library progressive catalogs phase 5 (Chromium + WebKit)
         run: node scripts/catalog-batch-phase5-check.mjs
       - name: Browser Studio lazy loading on public routes

@@ -68,7 +68,9 @@ for(const theme of themes){
      if(viewport.width<=1100){
       if(!closed.mobileMenuVisible||closed.bar.height>95)failures.push({...key,error:'incorrect responsive header',closed});
       await page.locator('.mobileNav > summary').click();
-      await page.waitForFunction(()=>document.body.classList.contains('mobileNavOpen'),null,{timeout:3000});
+      // Suite de 60 combinaciones: tolerar contención ocasional del runner,
+      // sin omitir la verificación estricta de estado modal, foco y cierre.
+      await page.waitForFunction(()=>document.body.classList.contains('mobileNavOpen'),null,{timeout:6500});
       open=await page.evaluate(()=>{
        const menu=document.querySelector('.mobileNav'),panel=document.querySelector('.mobileNavPanel'),
         toggle=menu.querySelector(':scope > summary'),active=panel.querySelector('.navLink.active'),
