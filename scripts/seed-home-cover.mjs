@@ -3,6 +3,7 @@
 // Si la red no está disponible, el build continúa con el comportamiento habitual.
 import fs from 'node:fs';
 import path from 'node:path';
+import {seedFeaturedHomeHtml} from './home-seed-html.mjs';
 
 const dir=process.argv[2]||'dist';
 const configFile=path.join(dir,'runtime-config.js');
@@ -13,7 +14,7 @@ try{
  if(!json)throw Error('Runtime config no reconocida');
  const config=JSON.parse(json[1]);
  const endpoint=new URL('/rest/v1/translations',config.supabaseUrl);
- endpoint.searchParams.set('select','id,novels(cover_url)');
+ endpoint.searchParams.set('select','id,novels(title,cover_url)');
  endpoint.searchParams.set('status','in.(active,complete,paused)');
  endpoint.searchParams.set('order','updated_at.desc');
  endpoint.searchParams.set('limit','60');
@@ -23,21 +24,13 @@ try{
  });
  if(!response.ok)throw Error('Estado del catálogo: '+response.status);
  const rows=await response.json();
- const cover=rows.find(row=>row.novels?.cover_url)?.novels.cover_url;
- if(!cover){console.log('Home cover seed: no hay portada pública');process.exit(0)}
- const image=new URL(cover);
- const supabase=new URL(config.supabaseUrl);
- const prefix='/storage/v1/object/public/nlobi-media/';
- if(image.origin!==supabase.origin||!image.pathname.startsWith(prefix))throw Error('Portada sin ruta pública de media');
- const relative='/media/'+image.pathname.slice(prefix.length)+image.search;
- if(/[<>"'\\]/.test(relative))throw Error('Ruta insegura de portada');
- let html=fs.readFileSync(htmlFile,'utf8');
- const anchor='<script src="/assets/home-cover-hint.js';
- const at=html.indexOf(anchor);
- if(at<0)throw Error('No se encontró el script de precarga');
- html=html.slice(0,at)+'<meta name="nlobi-build-cover" content="'+relative+'">\n'+html.slice(at);
+ const book=rows.find(row=>row.novels?.cover_url);
+ if(!book){console.log('Home cover seed: no hay portada pública');process.exit(0)}
+ const before=fs.readFileSync(htmlFile,'utf8');
+ const html=seedFeaturedHomeHtml(before,book,config.supabaseUrl);
+ if(html===before)throw Error('No se pudo inyectar la portada pública en Inicio');
  fs.writeFileSync(htmlFile,html);
- console.log('Home cover seed: portada pública inicial disponible');
+ console.log('Home cover seed: portada pública visible antes de app.js');
 }catch(error){
  console.warn('Home cover seed: omitiendo precarga de compilación ('+String(error?.message||error)+')');
 }
