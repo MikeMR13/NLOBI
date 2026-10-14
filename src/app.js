@@ -4003,5 +4003,8 @@ if(CONFIG.qaMode===true){
 }
 consumeAuthCallback();
 if(!location.hash)history.replaceState(null,'','#home');
-registerPwa();
+// El Service Worker no forma parte de la ruta crítica para pintar Inicio.
+// Se registra en un periodo ocioso, manteniendo soporte PWA y offline.
+if('requestIdleCallback' in window)requestIdleCallback(registerPwa,{timeout:5500});
+else setTimeout(registerPwa,2500);
 boot();
