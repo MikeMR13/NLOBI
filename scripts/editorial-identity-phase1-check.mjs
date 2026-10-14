@@ -5,7 +5,7 @@ import {chromium,webkit} from 'playwright';
 const css=fs.readFileSync('src/styles.css','utf8');
 const app=fs.readFileSync('src/app.js','utf8');
 const html=fs.readFileSync('src/index.html','utf8');
-const phase=css.split('/* OBI EDITORIAL IDENTITY — FASE 1')[1];
+const phase=css.split('/* OBI EDITORIAL IDENTITY — FASE 1')[1]?.split('/* OBI EDITORIAL COLLECTIONS — FASE 2')[0];
 assert.ok(phase,'Falta la identidad editorial de fase 1');
 assert.match(phase,/--obi-display:/);
 assert.match(phase,/--obi-rule:/);
