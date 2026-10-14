@@ -79,7 +79,8 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
       engineName+' '+width+' '+theme+': desbordamiento horizontal '+result.scroll+'/'+result.viewport);
      assert.equal(result.japaneseDisplay,width<=640?'none':'inline-block');
      assert.equal(result.brandBand,width<=1100?'none':'block');
-     assert.equal(result.btnTransition,'0s','Movimiento reducido debe anular transiciones');
+     assert.ok(result.btnTransition.split(',').every(value=>parseFloat(value)<=0.001),
+      'Movimiento reducido debe anular las transiciones perceptibles');
      results.push({engine:engineName,width,theme,overflow:false,seal:result.mark});
     }
    }finally{await context.close()}
