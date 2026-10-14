@@ -3826,7 +3826,7 @@ function registerPwa(){
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;S.pwaInstallReady=true;render()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;S.pwaInstallReady=false;toast('El Obi del Lector quedó instalado.','ok');render()});
 async function boot(isRetry=false){
- let homeFirstPaintDone=false;
+ let homeFirstPaintDone=false,readerFirstPaintDone=false;
  S.catalogLoading=true;
  applySiteAppearance();
  S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();
@@ -3843,6 +3843,21 @@ async function boot(isRetry=false){
      render();
     }
    })():Promise.resolve();
+   // Entrada directa al lector: el catálogo editorial no forma parte de la ruta crítica.
+   if(S.view.startsWith('reader:')){
+    const requestedRoute=S.view;
+    await resolveDynamicRoute(requestedRoute);
+    S.catalogLoading=false;S.err='';
+    if(S.view===requestedRoute){render();readerFirstPaintDone=true}
+    // Sin bloquear ni repintar el capítulo, preparar catálogo para navegación posterior.
+    const warmCatalog=()=>{void loadCatalog(false).then(()=>{S.catalogLoaded=true}).catch(e=>console.warn('[NLOBI] Catálogo diferido',e))};
+    if('requestIdleCallback' in window)requestIdleCallback(warmCatalog,{timeout:4500});
+    else setTimeout(warmCatalog,1800);
+    if(S.token)void sessionTask.then(()=>{
+     if(S.view===requestedRoute&&S.readerSection?.id===requestedRoute.slice(7)&&S.user)
+      afterReaderFirstPaint(S.readerSection,true);
+    });
+   }else{
    try{await loadCatalog(S.view==='home');S.catalogLoaded=true;S.err=''}catch(error){S.err=friendlyError(error,'No se pudo cargar el catálogo.');console.warn('[NLOBI] El catálogo no impide recuperar la cuenta',error)}
    S.catalogLoading=false;
    // El contenido principal y su portada no esperan valoraciones ni información de cuenta.
@@ -3866,9 +3881,10 @@ async function boot(isRetry=false){
    if(S.view!=='home')render();
    // Evitar promesas sin manejar; estas tareas siguen independientemente del primer render.
    void ratingsTask;void sessionTask;
+   }
   }else{await resolveDynamicRoute(S.view);S.err=''}
  }catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}
- finally{S.catalogLoading=false;if(!homeFirstPaintDone||S.view!=='home'||S.err)render()}
+ finally{S.catalogLoading=false;if(!readerFirstPaintDone&&(!homeFirstPaintDone||S.view!=='home'||S.err))render()}
  const notice=sessionStorage.getItem('nlobi_auth_notice');
  if(notice){sessionStorage.removeItem('nlobi_auth_notice');const bad=notice.startsWith('error:'),msg=notice.slice(notice.indexOf(':')+1);toast(bad?'No se pudo confirmar el correo: '+msg:msg,bad?'bad':'ok')}
 }
