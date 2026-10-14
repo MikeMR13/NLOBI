@@ -92,6 +92,8 @@ jobs:
         run: node scripts/reader-first-text-check.mjs
       - name: Home LCP early editorial shell and deferred reader fonts (Chromium + WebKit)
         run: node scripts/home-lcp-early-shell-check.mjs
+      - name: Server-seeded Home cover and lazy Studio (Chromium + WebKit)
+        run: node scripts/seeded-home-studio-browser-check.mjs
       - name: Explore and Library progressive catalogs phase 5 (Chromium + WebKit)
         run: node scripts/catalog-batch-phase5-check.mjs
       - name: Browser Studio lazy loading on public routes
