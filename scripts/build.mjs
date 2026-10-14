@@ -16,6 +16,7 @@ fs.copyFileSync(path.join(root, "src", "studio-phase6.js"), path.join(dist, "ass
 fs.copyFileSync(path.join(root, "src", "studio-phase5.js"), path.join(dist, "assets", "studio-phase5.js"));
 fs.copyFileSync(path.join(root, "src", "activate-styles.js"), path.join(dist, "assets", "activate-styles.js"));
 fs.copyFileSync(path.join(root, "src", "home-cover-hint.js"), path.join(dist, "assets", "home-cover-hint.js"));
+fs.copyFileSync(path.join(root, "src", "initial-home.js"), path.join(dist, "assets", "initial-home.js"));
 
 for (const file of ["manifest.webmanifest", "sw.js", "icon.svg",
   "icon-192.png", "icon-512.png"]) {
@@ -24,7 +25,7 @@ for (const file of ["manifest.webmanifest", "sw.js", "icon.svg",
 
 // Inmutabilidad por contenido: la URL cambia cuando el asset cambia.
 // Evita recibir CSS/JS obsoleto y permite servir caché directa entre visitas.
-const versionedAssets=["assets/app.js","assets/styles.css","assets/activate-styles.js","assets/home-cover-hint.js"];
+const versionedAssets=["assets/app.js","assets/styles.css","assets/activate-styles.js","assets/home-cover-hint.js","assets/initial-home.js"];
 const versions=new Map(versionedAssets.map(name=>[
  name,createHash("sha256").update(fs.readFileSync(path.join(dist,name))).digest("hex").slice(0,12)
 ]));
@@ -57,6 +58,14 @@ const config = spawnSync(process.execPath, [path.join(root, "scripts", "generate
 });
 if (config.status !== 0) process.exit(config.status ?? 1);
 
+// La pista pública no es requisito del build ni agrega llamadas al cliente.
+const coverSeed = spawnSync(process.execPath, [path.join(root, "scripts", "seed-home-cover.mjs"), dist], {
+  stdio: "inherit",
+  timeout: 5000,
+  env: process.env,
+});
+if (coverSeed.status !== 0) console.warn("Portada de compilación no disponible; continúa carga normal.");
+
 console.log(`Built NLOBI into ${dist}`);
 
 /* Build output verification */
@@ -65,6 +74,7 @@ const requiredBuiltFiles = [
   "assets/styles.css",
   "assets/app.js",
   "assets/home-cover-hint.js",
+  "assets/initial-home.js",
   "assets/studio-phase7.js",
   "assets/studio-phase6.js",
   "assets/studio-phase5.js",
@@ -79,7 +89,7 @@ for (const rel of requiredBuiltFiles) {
   if (!fs.existsSync(full)) throw new Error(`Build incompleto: falta dist/${rel}`);
 }
 const builtSw = fs.readFileSync(path.join(dist, "sw.js"), "utf8");
-for (const route of ["/assets/styles.css","/assets/app.js","/assets/home-cover-hint.js","/runtime-config.js","/assets/studio-phase5.js"]) {
+for (const route of ["/assets/styles.css","/assets/app.js","/assets/home-cover-hint.js","/assets/initial-home.js","/runtime-config.js","/assets/studio-phase5.js"]) {
   if (!builtSw.includes(route)) throw new Error(`Service Worker no referencia el asset construido: ${route}`);
 }
 for (const wrong of ["'/styles.css'","'/app.js'"]) {

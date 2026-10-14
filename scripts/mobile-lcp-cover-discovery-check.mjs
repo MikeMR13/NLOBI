@@ -17,10 +17,10 @@ assert.ok(helper.includes("url.origin!==location.origin"),'same-origin preload g
 assert.ok(helper.includes("url.pathname.startsWith('/media/')"),'only media paths may preload');
 assert.ok(helper.includes("12*60*60*1000"),'stale hints expire');
 if(built)assert.match(built,/<script src="\/assets\/home-cover-hint\.js\?v=[a-f0-9]{12}"><\/script>/);
-function run(path,hash='#home',at=1000){
+function run(path,hash='#home',at=1000,buildPath=null){
  const links=[];
  const head={append(link){links.push(link)}};
- const document={head,createElement(tag){assert.equal(tag,'link');return {dataset:{}};}};
+ const document={head,createElement(tag){assert.equal(tag,'link');return {dataset:{}};},querySelector(){return buildPath?{content:buildPath}:null}};
  const localStorage={getItem(){return JSON.stringify({path,at})}};
  const context={location:{hash,origin:'https://nlobi.vercel.app'},document,localStorage,Date:{now:()=>at+1000},URL};
  vm.runInNewContext(helper,context);
@@ -30,4 +30,7 @@ assert.equal(run('/media/teams/demo/covers/cover.png').length,1);
 assert.equal(run('https://example.test/cover.png').length,0);
 assert.equal(run('/favicon.ico').length,0);
 assert.equal(run('/media/demo.png','#detail:1').length,0);
+assert.equal(run(null,'#home',1000,'/media/teams/public/cover.webp').length,1,'Primera visita usa la portada del build');
+assert.equal(run(null,'#home',1000,'https://example.test/cover.webp').length,0,'Sin precarga de terceros');
+assert.equal(run('/media/current.webp','#home',1000,'/media/stale.webp')[0]?.href,'https://nlobi.vercel.app/media/current.webp','La portada visitada prevalece sobre la del build');
 console.log('Mobile LCP discovery: cover hint loads before app/CSS and permits only trusted same-origin media.');

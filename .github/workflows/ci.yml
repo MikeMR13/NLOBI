@@ -76,6 +76,8 @@ jobs:
           npx playwright install --with-deps chromium firefox webkit
       - name: Reader first text and next chapter prefetch (Chromium + WebKit)
         run: node scripts/reader-first-text-check.mjs
+      - name: Home LCP early editorial shell and deferred reader fonts (Chromium + WebKit)
+        run: node scripts/home-lcp-early-shell-check.mjs
       - name: Explore and Library progressive catalogs phase 5 (Chromium + WebKit)
         run: node scripts/catalog-batch-phase5-check.mjs
       - name: Browser Studio lazy loading on public routes
@@ -87,7 +89,12 @@ jobs:
         continue-on-error: true
         run: |
           mkdir -p performance-results
-          npx --yes lighthouse@12 http://127.0.0.1:4173/#home --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --form-factor=mobile --screenEmulation.mobile=true --throttling-method=simulate --only-categories=performance,accessibility --output=json --output-path=performance-results/mobile-home.json --quiet
+          node scripts/ci-media-proxy.mjs >/tmp/nlobi-media-proxy.log 2>&1 &
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4175/ >/dev/null; then break; fi
+            sleep 1
+          done
+          npx --yes lighthouse@12 http://127.0.0.1:4175/#home --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --form-factor=mobile --screenEmulation.mobile=true --throttling-method=simulate --only-categories=performance,accessibility --output=json --output-path=performance-results/mobile-home.json --quiet
           node -e "const r=require('./performance-results/mobile-home.json');const a=r.audits;const m={performance:Math.round(100*r.categories.performance.score),accessibility:Math.round(100*r.categories.accessibility.score),LCP:a['largest-contentful-paint']?.numericValue,CLS:a['cumulative-layout-shift']?.numericValue,TBT:a['total-blocking-time']?.numericValue};console.log('Lighthouse mobile:',JSON.stringify(m));require('node:fs').writeFileSync('performance-results/summary.json',JSON.stringify(m,null,2))"
           node scripts/lcp-diagnostics.mjs
       - name: axe accessibility audit
