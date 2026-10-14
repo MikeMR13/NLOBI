@@ -23,7 +23,7 @@ new Function(split.app.replaceAll('import(\'/assets/', 'import(\'/assets/'));
 assert.ok(split.bytesSaved>80000,'Studio debe quitar más de 80 KB del JS inicial');
 assert.ok(split.module.includes('function studioTeamView(){'));
 assert.ok(split.app.includes("import('/assets/studio-views.js')"));
-assert.ok(split.app.includes('lazyStudioViews=modules[3].createStudioViews'));
+assert.ok(split.app.includes('lazyStudioViews=createLazyStudioViews'), 'Studio se inicializa tras crear sus extensiones');
 assert.ok(split.app.includes('requestIdleCallback(registerPwa'));
 const dist=fs.readFileSync('dist/assets/app.js','utf8');
 assert.ok(dist.length<base.length-80000,'El build debe publicar la versión dividida');
