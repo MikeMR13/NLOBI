@@ -6018,3 +6018,207 @@ html[data-site-motion="reduce"] .btn[aria-busy="true"]::after{
         .readerExperience button):focus-visible{outline-color:Highlight}
  .btn[aria-busy="true"]::after{border-color:CanvasText;border-inline-end-color:transparent}
 }
+
+/* THEOBIPROJECT — adaptación editorial visual (Vercel /theobiproject, 2026-10-13).
+   Fuente de estilo: tinta #0d0c0a, papel #f3ecd9, oro #f2c230, sello y tipografía Mincho.
+   NLOBI mantiene sus flujos, portadas, fuentes EPUB, accesibilidad y temas claro/oscuro. */
+:root{
+  --theobi-ink:#0d0c0a;
+  --theobi-paper:#f3ecd9;
+  --theobi-gold:#f2c230;
+  --theobi-rule:#2f2a20;
+  --theobi-muted:#a89f8a;
+  --theobi-display:"Shippori Mincho B1",Georgia,"Times New Roman",serif;
+  --theobi-sans:"IBM Plex Sans",Inter,ui-sans-serif,system-ui,sans-serif;
+}
+body:not(.dark){
+  --bg:#f6f0e5;--panel:#fffdf7;--panel2:#f1eadc;--panel3:#e8decc;
+  --text:#262019;--muted:#675e50;--line:#d9cbb5;
+  --shadow:0 18px 46px rgba(47,36,18,.11);--shadow2:0 8px 22px rgba(47,36,18,.075);
+}
+body.dark{
+  --bg:#0d0c0a;--panel:#1a1813;--panel2:#252219;--panel3:#302b21;
+  --text:#f3ecd9;--muted:#baaf9b;--line:#4b4436;
+  --shadow:0 18px 46px rgba(0,0,0,.36);--shadow2:0 8px 22px rgba(0,0,0,.28);
+}
+body{font-family:var(--theobi-sans)}
+/* Sello de imprenta y navegación en tinta, fieles a THEOBIPROJECT. */
+.top{
+  background:var(--theobi-ink);
+  border-bottom:2px solid var(--theobi-rule);
+  color:var(--theobi-paper);
+  backdrop-filter:none;
+}
+.top .brand{font-family:var(--theobi-display);font-weight:600;letter-spacing:.02em;color:var(--theobi-paper)}
+.top .brandMark{
+  width:36px;height:36px;border:2px solid var(--theobi-gold);
+  border-radius:2px;background:transparent;color:var(--theobi-gold);
+  box-shadow:none;transform:rotate(-6deg);
+}
+.top .nav :is(button,.navLink),.top .mobileNav>summary,
+.top .mobileNav>button{color:var(--theobi-paper)}
+.top .nav :is(button,.navLink):hover{
+  color:var(--theobi-gold);background:rgba(242,194,48,.12);
+}
+.top .nav :is(button,.navLink).active{
+  border-color:rgba(242,194,48,.45);color:var(--theobi-gold);
+  background:rgba(242,194,48,.14);
+}
+/* Tipografía editorial sin interferir con los documentos ni con fuentes EPUB. */
+:is(.sectionHead,.homeEditorial,.exploreEditorial,.libraryEditorial,
+    .detailEditorialHero,.volumeGallerySection,.readerDirectory,.teamPublicPage,
+    .publicReaderProfile,.studioV3,.studioV5,.adminWorkspace,.notificationsEditorial)
+:is(h1,h2,h3):not(.readerHeading){
+  font-family:var(--theobi-display);font-weight:600;
+  text-wrap:balance;overflow-wrap:anywhere;
+}
+.homeEditorial .homeShowcaseCopy h1{font-family:var(--home-serif,"Literata",Georgia,serif);font-weight:600;letter-spacing:-.028em}
+.homeEditorial .homeShowcase{
+  border:1px solid color-mix(in srgb,var(--theobi-gold) 43%,var(--line));
+  background:radial-gradient(circle at 86% 14%,rgba(242,194,48,.14),transparent 39%),
+    linear-gradient(130deg,var(--panel),var(--panel2));
+  box-shadow:var(--shadow);
+}
+.homeEditorial .homeSectionKicker,.homeEditorial .homeEyebrow,
+.homeEditorial .homeFeaturedLabel{
+  color:color-mix(in srgb,var(--text) 67%,var(--theobi-gold));
+  letter-spacing:.13em;
+}
+/* Las portadas siguen siendo arte: el marco está en las tarjetas, no sobre la imagen. */
+:is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+    .libraryEditorial .libraryShelfCard,.volumeGalleryCard){
+  border:1px solid var(--line);border-top:4px solid var(--theobi-gold);
+  border-radius:12px;background:var(--panel);
+  box-shadow:0 8px 23px rgba(27,19,9,.075);
+}
+:is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+    .libraryEditorial .libraryShelfCard,.volumeGalleryCard):focus-within{
+  outline:2px solid var(--theobi-gold);outline-offset:2px;
+}
+:is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+    .libraryEditorial .libraryShelfCard,.volumeGalleryCard)
+:is(.homeBookCover,.catalogCoverButton,.libraryShelfCover,.volumeGalleryArtwork){
+  border-radius:0;
+}
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial) :is(.homeBookCard,.catalogEditorialCard,.libraryShelfCard)
+:is(h3,strong){overflow-wrap:anywhere}
+.detailHero,.detailEditorialHero{
+  border:1px solid var(--line);border-top:5px solid var(--theobi-gold);
+  background:linear-gradient(145deg,var(--panel),color-mix(in srgb,var(--panel2) 52%,var(--panel)));
+  box-shadow:var(--shadow2);
+}
+.volumeGalleryHeading{border-bottom:2px solid color-mix(in srgb,var(--theobi-gold) 32%,var(--line));padding-bottom:14px}
+:is(.readerDirectory .readerDirectoryCard,.publicReaderProfile .publicReaderBookButton,
+    .teamPublicPage .teamPublicRecentItem,.notificationsEditorial .notificationFeedCard){
+  border-color:var(--line);background-color:var(--panel);
+  box-shadow:0 6px 20px rgba(27,19,9,.055);
+}
+:is(.readerDirectory .readerDirectoryCard,.teamPublicPage .teamPublicRecentItem,
+    .notificationsEditorial .notificationFeedCard){
+  border-top:3px solid color-mix(in srgb,var(--theobi-gold) 66%,var(--line));
+}
+:is(.studioV3 .studioV3Sidebar,.studioV3 .studioV3Stat,.studioV3 .studioV3Insight,
+    .studioV3 .studioV3BookCard,.studioV5 .studioV5Panel,.adminWorkspace .adminDashboardPanel,
+    .adminWorkspace .adminDashboardKpi){
+  border-color:var(--line);
+  background-image:linear-gradient(155deg,color-mix(in srgb,var(--theobi-gold) 4%,var(--panel)),var(--panel) 65%);
+}
+.studioV3 .studioV3PageHeading,
+.adminWorkspace .adminWorkspaceHeader{
+  border-bottom:2px solid color-mix(in srgb,var(--theobi-gold) 45%,var(--line));
+}
+:is(.studioV3 .studioV3NavItem.active,.adminWorkspace .adminSideLink.isActive){
+  box-shadow:inset 3px 0 0 var(--theobi-gold);
+}
+/* Movimiento editorial suave, sin activar animaciones en lectores táctiles o con reducción. */
+@media(hover:hover) and (pointer:fine) and (prefers-reduced-motion:no-preference){
+ html:not([data-site-motion="reduce"]) :is(
+   .homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+   .libraryEditorial .libraryShelfCard,.volumeGalleryCard):hover{
+   transform:translateY(-4px);
+   box-shadow:0 15px 29px rgba(27,19,9,.15);
+ }
+}
+@media(max-width:767px){
+ .top .brand{font-size:clamp(.89rem,3.8vw,1.06rem)}
+ .top .brandMark{width:33px;height:33px;flex-shrink:0}
+ /* Mantener fuente de respaldo de primer fotograma para no penalizar LCP móvil. */
+ .homeEditorial .homeShowcaseCopy h1{font-family:Georgia,"Times New Roman",serif}
+}
+@media(max-width:320px){
+ .top .brand{min-width:0;font-size:.85rem}
+ .top .brandMark{width:30px;height:30px}
+}
+@media(hover:none){
+ :is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+   .libraryEditorial .libraryShelfCard,.volumeGalleryCard):hover{transform:none}
+}
+@media(forced-colors:active){
+ .top{background:Canvas;color:CanvasText;border-bottom-color:CanvasText}
+ .top .brand,.top .nav :is(button,.navLink){color:CanvasText}
+ .top .brandMark{color:CanvasText;border-color:CanvasText}
+ :is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+     .libraryEditorial .libraryShelfCard,.volumeGalleryCard){border-color:CanvasText;box-shadow:none}
+}
+@media(prefers-reduced-motion:reduce){
+ :is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+     .libraryEditorial .libraryShelfCard,.volumeGalleryCard){animation:none!important;transition:none!important;transform:none!important}
+}
+html[data-site-motion="reduce"] :is(.homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+    .libraryEditorial .libraryShelfCard,.volumeGalleryCard){
+ animation:none!important;transition:none!important;transform:none!important;
+}
+
+/* Conservar la forma de las tarjetas elegida desde Preferencias del sitio. */
+html[data-site-corners="square"] :is(
+ .homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+ .libraryEditorial .libraryShelfCard,.volumeGalleryCard,
+ .detailHero,.detailEditorialHero){border-radius:3px}
+html[data-site-corners="soft"] :is(
+ .homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+ .libraryEditorial .libraryShelfCard,.volumeGalleryCard,
+ .detailHero,.detailEditorialHero){border-radius:25px}
+
+
+/* Contraste AA del menú de cuenta sobre la cabecera tinta (axe/CI). */
+.top .accountDropdown>summary{
+ color:var(--theobi-paper);
+ background:rgba(243,236,217,.06);
+ border-color:rgba(242,194,48,.42);
+}
+.top .accountDropdown>summary .accountName{color:var(--theobi-paper)}
+.top .accountDropdown[open]>summary,
+.top .accountDropdown>summary:hover{color:var(--theobi-paper);background:rgba(242,194,48,.16)}
+.top .navMore>summary{color:var(--theobi-paper);border-color:rgba(242,194,48,.42)}
+@media(forced-colors:active){
+ .top .accountDropdown>summary,.top .accountDropdown>summary .accountName,
+ .top .navMore>summary{background:Canvas;color:CanvasText;border-color:CanvasText}
+}
+
+
+/* Las pruebas de catálogo/biblioteca requieren profundidad de papel visible. */
+:is(.exploreEditorial .catalogEditorialCard,.libraryEditorial .libraryShelfCard,
+    .homeEditorial .homeBookCard,.volumeGalleryCard){
+ background-image:linear-gradient(155deg,
+   color-mix(in srgb,var(--theobi-gold) 5%,var(--panel)),
+   var(--panel) 62%);
+}
+
+/* El disparador del menú móvil conserva tinta de fondo bajo las seis paletas.
+   El panel desplegado mantiene su tema de usuario independiente. */
+.top .mobileNav>summary,
+.top .mobileNav[open]>summary{
+  color:var(--theobi-paper);
+  background:var(--theobi-rule);
+  border-color:color-mix(in srgb,var(--theobi-gold) 60%,var(--theobi-rule));
+}
+.top .mobileNav>summary:hover,
+.top .mobileNav>summary:focus-visible{
+  background:#393224;
+  color:var(--theobi-paper);
+}
+@media(forced-colors:active){
+  .top .mobileNav>summary,.top .mobileNav[open]>summary{
+    background:Canvas;color:CanvasText;border-color:CanvasText;
+  }
+}
