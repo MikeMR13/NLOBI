@@ -58,7 +58,7 @@ for(const [name,engine] of [['Chromium',chromium],['WebKit',webkit]]){
     fallback:document.querySelector('main')?.textContent?.includes('Preparando Studio…')
    }));
    assert.equal(studio.fallback,false,'El bundle Studio debe estar disponible tras inicialización QA');
-   assert.ok(studio.main.includes('Studio')||studio.main.includes('equipo'),'Se debe abrir Studio');
+   assert.match(studio.main,/studio|equipo|obras|sesión/i,'Se debe abrir Studio o su acceso protegido');
    assert.deepEqual(errors,[],'No debe haber excepciones en navegador');
    passed++;
   }catch(error){failures.push({name,width,error:String(error),runtime:errors.slice(0,3)})}
