@@ -46,7 +46,10 @@ export function splitStudioViews(source){
  const deps=referenced.map(name=>name+':'+name).join(',');
  const section="import('/assets/studio-phase7.js')\n ]).then(()=>{";
  if(!reduced.includes(section))throw new Error('No se puede conectar la importación de vistas Studio');
- reduced=reduced.replace(section,"import('/assets/studio-phase7.js'),\n  import('/assets/studio-views.js')\n ]).then((modules)=>{\n  lazyStudioViews=modules[3].createStudioViews({"+deps+"});");
+ reduced=reduced.replace(section,"import('/assets/studio-phase7.js'),\n  import('/assets/studio-views.js')\n ]).then((modules)=>{\n  const createLazyStudioViews=modules[3].createStudioViews;");
+ const finishStudio='  return true;\\n }).catch(error=>{studioModulesPromise=null;throw error});';
+ if(!reduced.includes(finishStudio))throw new Error('No se encontró el final del inicializador Studio');
+ reduced=reduced.replace(finishStudio,'  lazyStudioViews=createLazyStudioViews({'+deps+'});\\n'+finishStudio);
  return {app:reduced,module,bytesSaved:source.length-reduced.length,dependencies:referenced};
 }
 const dir=process.argv[2];
