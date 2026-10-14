@@ -2375,7 +2375,14 @@ function render(){
   // Esto evita volver a retrasar el LCP mientras se actualiza solo el contenido editorial.
   const existingHomeCopy=S.view==='home'?app.querySelector('.homeShowcaseCopy'):null;
   const existingFeaturedVisual=S.view==='home'?app.querySelector('.homeFeaturedVisual'):null;
-  if(existingHomeCopy&&html.includes('homeShowcaseCopy')){
+  const earlySeededImage=S.catalogLoading&&existingFeaturedVisual?.querySelector('img[data-early-featured-cover]');
+  if(earlySeededImage){
+   // El titular y los botones pueden cambiar al recuperar sesión; la portada
+   // inicial permanece en el DOM, incluso si cambia el texto de la cabecera.
+   const next=document.createElement('template');next.innerHTML=html;
+   next.content.querySelector('.homeFeaturedVisual')?.replaceWith(existingFeaturedVisual);
+   app.replaceChildren(next.content);
+  }else if(existingHomeCopy&&html.includes('homeShowcaseCopy')){
    const next=document.createElement('template');next.innerHTML=html;
    const freshCopy=next.content.querySelector('.homeShowcaseCopy');
    if(freshCopy&&freshCopy.textContent===existingHomeCopy.textContent){
