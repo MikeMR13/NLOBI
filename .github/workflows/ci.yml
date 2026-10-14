@@ -21,6 +21,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Lighthouse mobile report statistics regression
+        run: node scripts/lighthouse-mobile-metrics-check.mjs
       - name: EPUB OCF obfuscation decoding and Studio repair
         run: node scripts/epub-obfuscation-check.mjs
       - name: Password recovery and session regression
@@ -104,8 +106,7 @@ jobs:
             if curl -fsS http://127.0.0.1:4175/ >/dev/null; then break; fi
             sleep 1
           done
-          npx --yes lighthouse@12 http://127.0.0.1:4175/#home --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --form-factor=mobile --screenEmulation.mobile=true --throttling-method=simulate --only-categories=performance,accessibility --output=json --output-path=performance-results/mobile-home.json --quiet
-          node -e "const r=require('./performance-results/mobile-home.json');const a=r.audits;const m={performance:Math.round(100*r.categories.performance.score),accessibility:Math.round(100*r.categories.accessibility.score),LCP:a['largest-contentful-paint']?.numericValue,CLS:a['cumulative-layout-shift']?.numericValue,TBT:a['total-blocking-time']?.numericValue};console.log('Lighthouse mobile:',JSON.stringify(m));require('node:fs').writeFileSync('performance-results/summary.json',JSON.stringify(m,null,2))"
+          node scripts/lighthouse-mobile-batch.mjs
           node scripts/lcp-diagnostics.mjs
       - name: axe accessibility audit
         id: axe
