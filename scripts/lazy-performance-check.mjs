@@ -12,7 +12,10 @@ assert.match(src,/nlobi-studio-lazy-assets/);
 assert.match(app,/async function ensureStudioModules\(\)/);
 assert.match(app,/if\(route==='studio'\|\|route\.startsWith\('studio:'\)\)await ensureStudioModules\(\)/);
 assert.match(app,/async function loadReaderTranslationMeta\(id\)/);
-assert.match(app,/const trId=vol\.translation_id,tr=await loadReaderTranslationMeta\(trId\)/);
+assert.match(app,/const trId=vol\\.translation_id/);
+assert.match(app,/metaTask\\|\\|loadReaderTranslationMeta\\(trId\\)/);
+assert.match(app,/fetchPublishedReaderSection\\(sectionId\\)/);
+assert.match(app,/if\\(S.view.startsWith\\('reader:'\\)\\)/);
 
 for(const file of ['app.js','styles.css','activate-styles.js','home-cover-hint.js']){
  const pattern=new RegExp('/assets/'+file.replaceAll('.','\\.')+'\\?v=([a-f0-9]{12})');
