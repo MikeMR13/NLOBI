@@ -6049,3 +6049,142 @@ html[data-site-motion="reduce"] .btn[aria-busy="true"]::after{
  content-visibility:visible;
  contain-intrinsic-size:auto;
 }
+
+
+/* OBI EDITORIAL IDENTITY — FASE 1
+   Inspiración: prototipo v12 (sello japonés, bandas y reglas de imprenta).
+   Sin fuentes remotas ni cambios de diseño del papel/EPUB del lector. */
+:root{
+ --obi-display:Georgia,"Yu Mincho","Hiragino Mincho ProN","Times New Roman",serif;
+ --obi-japanese:"Yu Mincho","Hiragino Mincho ProN","Noto Serif CJK JP",serif;
+ --obi-caption:ui-monospace,"SFMono-Regular",Consolas,"Liberation Mono",monospace;
+ --obi-rule:color-mix(in srgb,var(--line) 82%,var(--accent) 18%);
+ --obi-warm-paper:#f3ecd9;
+ --obi-warm-ink:#17140d;
+}
+body.dark{
+ --obi-rule:color-mix(in srgb,var(--line) 75%,var(--accent) 25%);
+}
+/* El sello es la banda 帯 (obi); conservar el enlace de inicio y su aria-label. */
+.top .brandMark{
+ display:grid;place-items:center;flex:none;
+ background:var(--obi-warm-ink);color:var(--accent);
+ border-radius:7px;
+ border:1px solid var(--accent);
+ box-shadow:inset 0 0 0 2px var(--obi-warm-ink),inset 0 0 0 3px var(--accent);
+ font-family:var(--obi-japanese);font-weight:800;
+ font-size:1.3rem;line-height:1;
+ transform:rotate(-4deg);
+}
+.top .brandFull{
+ font-family:var(--obi-display);font-weight:700;
+ letter-spacing:-.025em;line-height:1.13;
+}
+@media(min-width:1101px){
+ .top .brandFull::after{
+  content:"帯 · NOVELAS EN ESPAÑOL";
+  display:block;width:max-content;max-width:100%;
+  margin-top:3px;padding:2px 5px 1px;
+  background:var(--accent);color:#14110a;
+  font:700 .55rem/1.2 var(--obi-caption);
+  letter-spacing:.095em;white-space:nowrap;
+ }
+}
+@media(max-width:1100px){
+ .top .brandMark{transform:none}
+ .top .brandFull::after{display:none}
+}
+/* Uso editorial en títulos de interfaz. Nunca estilizar la tipografía EPUB. */
+:is(.homeShowcaseCopy h1,.sectionHead h2,.volumeGalleryHeading h2,
+    .detailEditorialHero h1,.detailInfo h1,.authVisual h2,
+    .profileHero h1,.publicGroupHero h1,
+    .studioV3 h1,.studioV3 h2){
+ font-family:var(--obi-display);
+ text-wrap:balance;
+}
+:is(.homeEyebrow,.detailEditorialEyebrow,.volumeGalleryEyebrow,
+    .sectionHead .muted,.catalogBatchCount){
+ letter-spacing:.075em;
+}
+.homeEditorial .homeEyebrow::before{
+ content:"翻訳図書館";
+ display:inline-block;vertical-align:baseline;
+ flex:0 0 auto;width:auto;height:auto;
+ border-radius:0;background:none;
+ margin-inline-end:.75em;padding-inline-end:.75em;
+ border-inline-end:1px solid var(--obi-rule);
+ color:var(--accentText);
+ font:700 .88em/1.25 var(--obi-japanese);
+ white-space:nowrap;
+}
+/* Fila de sección como cabeza de capítulo, sin añadir nodos interactivos. */
+.sectionHead{
+ position:relative;
+ padding-block-end:12px;
+ border-bottom:1px solid var(--obi-rule);
+}
+.sectionHead::after{
+ content:"";position:absolute;inset-inline-start:0;bottom:-1px;
+ width:min(60px,18%);height:2px;background:var(--accent);
+ pointer-events:none;
+}
+.sectionHead h2{
+ line-height:1.18;letter-spacing:-.023em;
+}
+.sectionHead h2::before{
+ content:"";display:inline-block;
+ width:3px;height:.78em;
+ vertical-align:-.045em;margin-inline-end:.42em;
+ border-radius:1px;background:var(--accent);
+}
+.volumeGalleryHeading{
+ position:relative;padding-block-end:12px;
+ border-bottom:1px solid var(--obi-rule);
+}
+.volumeGalleryHeading::after{
+ content:"";position:absolute;inset-inline-start:0;bottom:-1px;
+ width:58px;height:2px;background:var(--accent);pointer-events:none;
+}
+/* Botones y navegación se integran al lenguaje de imprenta; no alterar estados. */
+.btn:not(.danger){
+ border-radius:10px;
+ transition:background-color .18s ease,border-color .18s ease,
+  box-shadow .18s ease,transform .18s ease;
+}
+.btn.primary{
+ color:#101010;
+ border-color:color-mix(in srgb,var(--accent) 78%,#13110d);
+ box-shadow:0 5px 16px color-mix(in srgb,var(--accent) 20%,transparent);
+}
+.btn.primary:hover:not(:disabled){
+ box-shadow:0 8px 18px color-mix(in srgb,var(--accent) 29%,transparent);
+}
+.top .navLink.active,
+.top .nav button.active{
+ box-shadow:inset 0 -2px var(--accent);
+}
+:where(.top .brand,.btn,.sectionHead a,.volumeGalleryHeading a):focus-visible{
+ outline:3px solid var(--accent);
+ outline-offset:3px;
+}
+/* Delimitaciones sobrias en tarjetas de interfaz; no tocar ilustraciones/portadas. */
+:is(.panelCard,.notice,.studioV3Card){
+ border-color:var(--obi-rule);
+}
+@media(max-width:640px){
+ .homeEditorial .homeEyebrow::before{display:none}
+ .sectionHead{padding-block-end:9px}
+ .sectionHead h2::before{width:2px;margin-inline-end:.28em}
+ .volumeGalleryHeading{padding-block-end:9px}
+}
+@media(prefers-reduced-motion:reduce){
+ .top .brandMark{transform:none}
+ .btn:not(.danger){transition:none}
+}
+@media(forced-colors:active){
+ .top .brandMark{border:2px solid CanvasText;box-shadow:none;transform:none}
+ .sectionHead,.volumeGalleryHeading{border-bottom:1px solid CanvasText}
+ .sectionHead::after,.volumeGalleryHeading::after,.sectionHead h2::before{
+  background:CanvasText;
+ }
+}

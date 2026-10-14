@@ -74,6 +74,8 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
           npx playwright install --with-deps chromium firefox webkit
+      - name: OBI editorial visual identity phase 1 (Chromium + WebKit)
+        run: node scripts/editorial-identity-phase1-check.mjs
       - name: Reader first text and next chapter prefetch (Chromium + WebKit)
         run: node scripts/reader-first-text-check.mjs
       - name: Home LCP early editorial shell and deferred reader fonts (Chromium + WebKit)

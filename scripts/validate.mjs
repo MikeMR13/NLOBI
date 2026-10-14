@@ -254,7 +254,7 @@ const manifest = fs.readFileSync("public/manifest.webmanifest","utf8");
 const iconSvg = fs.readFileSync("public/icon.svg","utf8");
 for (const required of [
   'href="/icon.svg"',
-  '<span class="brandMark" aria-hidden="true">オ</span>'
+  '<span class="brandMark" aria-hidden="true">帯</span>'
 ]) {
   const source = required.startsWith('href=') ? indexHtml : app;
   if (!source.includes(required)) throw new Error(`Brand icon: falta ${required}`);

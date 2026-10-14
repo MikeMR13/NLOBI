@@ -457,7 +457,7 @@ function nav(){
  const unread=S.notes.filter(x=>!x.read_at).length;
  const isActive=v=>S.view===v||S.view.startsWith(v+':');
  const link=(v,label)=>`<a class="navLink ${isActive(v)?'active':''}" href="#${v}" data-v="${v}"${isActive(v)?' aria-current="page"':''}>${label}</a>`;
- return `<header class="top"><div class="bar"><a class="brand" href="#home" data-v="home" aria-label="El Obi del Lector, ir al inicio"><span class="brandMark" aria-hidden="true">オ</span><span class="brandFull">El Obi del Lector</span><span class="brandCompact" aria-hidden="true">El Obi</span></a><nav class="nav" aria-label="Navegación principal">
+ return `<header class="top"><div class="bar"><a class="brand" href="#home" data-v="home" aria-label="El Obi del Lector, ir al inicio"><span class="brandMark" aria-hidden="true">帯</span><span class="brandFull">El Obi del Lector</span><span class="brandCompact" aria-hidden="true">El Obi</span></a><nav class="nav" aria-label="Navegación principal">
  ${siteAppearance.navOrder.filter(v=>!siteAppearance.hiddenNav.includes(v)).map(v=>link(v,SITE_NAV_LABELS[v])).join('')}${siteAppearance.hiddenNav.length?`<details class="navMore"><summary>Más ▾</summary><div class="navMorePanel">${siteAppearance.navOrder.filter(v=>siteAppearance.hiddenNav.includes(v)).map(v=>link(v,SITE_NAV_LABELS[v])).join('')}</div></details>`:''}
  ${S.user?link('beta','Beta'):''}
  ${S.admin?link('admin','Admin'):''}
