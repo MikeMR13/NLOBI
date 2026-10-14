@@ -64,11 +64,14 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    await page.evaluate(()=>window.__NLOBI_QA__.setState({notificationBellOpen:''}));
    assert.equal(await explorer.count(),24,'Los handlers deben mantenerse tras render');
    await page.evaluate(()=>{
-    window.__batchClicks=[];
-    document.addEventListener('click',event=>{
-     const target=event.target.closest?.('[data-catalog-more]');
-     if(target)window.__batchClicks.push({type:target.dataset.catalogMore,view:window.__NLOBI_QA__?.getState().view});
-    },{capture:true});
+    window.__batchClicks=[];window.__batchEvents=[];
+    for(const type of ['pointerdown','pointerup','mousedown','mouseup','click']){
+     document.addEventListener(type,event=>{
+      const target=event.target.closest?.('[data-catalog-more]');
+      if(target)window.__batchClicks.push({type:target.dataset.catalogMore,view:window.__NLOBI_QA__?.getState().view,event:type});
+      window.__batchEvents.push({event:type,node:event.target?.tagName,element:event.target?.outerHTML?.slice(0,130),x:event.clientX,y:event.clientY});
+     },{capture:true});
+    }
    });
    await page.locator('[data-catalog-more="explore"]').click();
    try{
@@ -76,9 +79,13 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    }catch(error){
     const diagnostic=await page.evaluate(()=>({view:window.__NLOBI_QA__?.getState().view,
      count:document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length,
-     clicks:window.__batchClicks,button:document.querySelector('[data-catalog-more="explore"]')?.outerHTML,
+     clicks:window.__batchClicks,events:window.__batchEvents?.slice(-12),
+     button:document.querySelector('[data-catalog-more="explore"]')?.outerHTML,
+     target:(()=>{const b=document.querySelector('[data-catalog-more="explore"]');if(!b)return null;const r=b.getBoundingClientRect();return {rect:[r.left,r.top,r.width,r.height],elementAtCenter:document.elementFromPoint(r.left+r.width/2,r.top+r.height/2)?.outerHTML?.slice(0,180),hasHandler:typeof b.onclick}})(),
      message:document.querySelector('#app')?.textContent?.slice(0,240),location:location.hash}));
-    throw Error('WebKit/Explorar expansión: '+JSON.stringify(diagnostic)+'; '+String(error));
+    await page.locator('[data-catalog-more="explore"]').dispatchEvent('click');
+    const directClickCards=await explorer.count();
+    throw Error('WebKit/Explorar expansión: '+JSON.stringify({...diagnostic,directClickCards})+'; '+String(error));
    }
    assert.equal(await explorer.count(),48,'Explorar debe mostrar 48 obras tras ampliar');
    await page.locator('#catalogSearch').fill('Historia QA 065');
