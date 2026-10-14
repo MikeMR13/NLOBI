@@ -6188,3 +6188,257 @@ body.dark{
   background:CanvasText;
  }
 }
+
+
+/* OBI EDITORIAL COLLECTIONS — FASE 2
+   Adapta de v12 la rotulación 新着/人気/完結, las bandas de libro y el
+   contraste tinta/papel. Solo Home, Explorar y Biblioteca.
+   Sin fuentes de red ni cambios al tamaño o descubrimiento de portadas LCP. */
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial){
+ --obi-catalog-edge:color-mix(in srgb,var(--line) 83%,var(--accent) 17%);
+ --obi-catalog-paper:color-mix(in srgb,var(--panel) 93%,#e9d7af 7%);
+ --obi-catalog-quiet:var(--muted);
+ --obi-catalog-spine:rgba(17,14,9,.30);
+}
+body.dark :is(.homeEditorial,.exploreEditorial,.libraryEditorial){
+ --obi-catalog-edge:color-mix(in srgb,var(--line) 66%,var(--accent) 34%);
+ --obi-catalog-paper:color-mix(in srgb,var(--panel) 94%,#6a5535 6%);
+ --obi-catalog-spine:rgba(0,0,0,.47);
+}
+/* Home: las secciones se leen como titulares de una revista de novelas. */
+.homeEditorial .homeSectionKicker{
+ font-family:var(--obi-caption);font-weight:700;
+ letter-spacing:.115em;line-height:1.45;
+}
+.homeEditorial .discoverShelfHead{
+ position:relative;min-width:0;
+ padding:0 0 13px 47px;
+ border-bottom:1px solid var(--obi-catalog-edge);
+}
+.homeEditorial .discoverShelfHead::before{
+ content:"書架";display:grid;place-items:center;
+ position:absolute;top:0;left:0;z-index:0;
+ width:32px;height:45px;pointer-events:none;
+ background:var(--accent);color:#16120a;
+ font:800 13px/1.15 var(--obi-japanese);
+ writing-mode:vertical-rl;letter-spacing:.12em;
+ border-radius:2px;box-shadow:3px 3px 0 var(--obi-catalog-edge);
+}
+.homeEditorial .obiShelf-recent .discoverShelfHead::before{content:"新着"}
+.homeEditorial .obiShelf-popular .discoverShelfHead::before{content:"人気"}
+.homeEditorial .obiShelf-complete .discoverShelfHead::before{content:"完結"}
+.homeEditorial .discoverShelfHead::after{
+ content:"";position:absolute;bottom:-1px;left:47px;
+ width:clamp(36px,10%,82px);height:2px;
+ background:var(--accent);pointer-events:none;
+}
+.homeEditorial :is(.discoverShelfHead h2,.homeEditorialSection .sectionHead h2,
+ .homeGenres .sectionHead h2,.homeClosing h2){
+ font-family:var(--obi-display);
+ font-weight:700;letter-spacing:-.024em;text-wrap:balance;
+}
+.homeEditorial .discoverShelfTrack{
+ scroll-padding-inline:6px;
+ scrollbar-color:var(--obi-catalog-edge) transparent;
+}
+.homeEditorial .homeShowcase{
+ border-color:var(--obi-catalog-edge);
+}
+.homeEditorial .homeBookCard{
+ border-color:var(--obi-catalog-edge);
+ background:var(--obi-catalog-paper);
+ box-shadow:0 7px 20px rgba(19,15,8,.05);
+}
+.homeEditorial .homeBookDetails{
+ border-top:2px solid color-mix(in srgb,var(--accent) 72%,transparent);
+}
+.homeEditorial .homeBookDetails h3{
+ font-family:var(--obi-display);font-size:clamp(.93rem,1.1vw,1.06rem);
+}
+.homeEditorial .homeBookCover{
+ position:relative;isolation:isolate;
+}
+.homeEditorial .homeBookCover::after{
+ content:"";position:absolute;inset:0 auto 0 0;
+ width:clamp(5px,5%,11px);z-index:2;pointer-events:none;
+ background:linear-gradient(90deg,
+  var(--obi-catalog-spine),
+  rgba(255,255,255,.22) 60%,
+  transparent);
+ box-shadow:1px 0 2px rgba(0,0,0,.08);
+}
+.homeEditorial .discoverShelf .catalogEditorialCard{
+ border-color:var(--obi-catalog-edge);
+ box-shadow:0 8px 20px rgba(19,15,8,.05);
+}
+.homeEditorial .homeQuickLinks button{
+ border-color:var(--obi-catalog-edge);
+}
+/* Explorar: encabezado de tinta, sello 探 y fichas de catálogo. */
+.exploreEditorial .exploreShowcase{
+ background:linear-gradient(115deg,#12100d 0%,#221c12 57%,#10100e 100%);
+ border-color:color-mix(in srgb,var(--accent) 38%,#382e1e);
+ box-shadow:0 12px 32px rgba(13,10,5,.14);
+}
+.exploreEditorial .exploreKanji{
+ display:grid;place-items:center;flex:none;
+ width:48px;height:48px;
+ border:1px solid var(--accent);border-radius:4px;
+ font-family:var(--obi-japanese);font-size:1.65rem;
+ background:var(--accent);color:#16120a;
+ transform:rotate(-5deg);
+}
+.exploreEditorial .exploreShowcase h1{
+ font-family:var(--obi-display);
+ letter-spacing:-.035em;line-height:1.1;
+}
+.exploreEditorial .exploreEyebrow{
+ font-family:var(--obi-caption);
+ font-weight:700;letter-spacing:.09em;
+ min-width:0;overflow-wrap:anywhere;
+}
+.exploreEditorial .exploreFilters{
+ border-color:var(--obi-catalog-edge);
+ box-shadow:0 6px 20px rgba(19,15,8,.045);
+}
+.exploreEditorial .exploreResultsBar{
+ border-bottom:1px solid var(--obi-catalog-edge);
+}
+.exploreEditorial .exploreNovelGrid>.catalogEditorialCard{
+ background:var(--obi-catalog-paper);
+ border-color:var(--obi-catalog-edge);
+}
+.exploreEditorial .exploreNovelGrid>.catalogEditorialCard:is(:hover,:focus-within){
+ border-color:var(--accent);
+ box-shadow:0 12px 25px rgba(18,14,7,.12);
+}
+.exploreEditorial .catalogCardContent{
+ border-top:2px solid color-mix(in srgb,var(--accent) 78%,transparent);
+}
+.exploreEditorial .catalogEditorialCard h3{
+ font-family:var(--obi-display);
+ font-weight:700;
+}
+.exploreEditorial .catalogStatusTag{color:var(--accentText)}
+body.dark .exploreEditorial .catalogStatusTag{color:var(--accent)}
+.exploreEditorial .exploreGenreQuick.active{
+ border-color:var(--accent);box-shadow:inset 0 -2px rgba(0,0,0,.15);
+}
+.exploreEditorial :is(.exploreActiveChip,.catalogGenres span){
+ border-color:var(--obi-catalog-edge);
+}
+/* Bandas de lomo no interactivas: nunca colocar títulos sobre la portada real. */
+.exploreEditorial .catalogCoverButton,
+.homeEditorial .discoverShelf .catalogCoverButton,
+.libraryEditorial .libraryShelfCover{
+ position:relative;isolation:isolate;
+}
+.exploreEditorial .catalogCoverButton::before,
+.homeEditorial .discoverShelf .catalogCoverButton::before,
+.libraryEditorial .libraryShelfCover::after{
+ content:"";position:absolute;top:0;bottom:0;left:0;z-index:2;
+ pointer-events:none;width:clamp(5px,5%,10px);
+ background:linear-gradient(90deg,
+  var(--obi-catalog-spine),
+  rgba(255,255,255,.24) 65%,
+  transparent);
+}
+.exploreEditorial .catalogBookArt img,
+.homeEditorial .discoverShelf .catalogBookArt img,
+.libraryEditorial .libraryShelfCover img{
+ object-fit:cover;
+}
+/* Biblioteca personal: estantería entintada con portada y progreso intactos. */
+.libraryEditorial .libraryShowcase{
+ background:linear-gradient(110deg,#13110e 0%,#221b10 62%,#10100f 100%);
+ border-color:color-mix(in srgb,var(--accent) 35%,#352c1b);
+ box-shadow:inset 0 0 0 1px rgba(255,212,0,.10);
+}
+.libraryEditorial .libraryShowcase h1{
+ font-family:var(--obi-display);letter-spacing:-.026em;
+}
+.libraryEditorial .libraryMark{
+ display:grid;place-items:center;flex:none;
+ width:48px;height:48px;
+ font-family:var(--obi-japanese);
+ font-size:1.55rem;
+ background:var(--accent);color:#14100a;
+ border:1px solid rgba(0,0,0,.2);
+ border-radius:3px;transform:rotate(-5deg);
+}
+.libraryEditorial :is(.librarySectionKicker,.libraryEyebrow,.libraryContinueEyebrow){
+ font-family:var(--obi-caption);
+ font-weight:700;letter-spacing:.08em;
+}
+.libraryEditorial .libraryContinueCard,
+.libraryEditorial .libraryShelfCard{
+ border-color:var(--obi-catalog-edge);
+ background:var(--obi-catalog-paper);
+ box-shadow:0 8px 22px rgba(19,15,8,.045);
+}
+.libraryEditorial .libraryShelfCard:focus-within{
+ border-color:var(--accent);
+}
+.libraryEditorial .libraryContinueInfo,
+.libraryEditorial .libraryShelfInfo{
+ border-top:2px solid color-mix(in srgb,var(--accent) 72%,transparent);
+}
+.libraryEditorial :is(.libraryShelfInfo h3,.libraryContinueInfo h3){
+ font-family:var(--obi-display);
+}
+.libraryEditorial .libraryTabs{
+ border-color:var(--obi-catalog-edge);
+}
+.libraryEditorial .libraryTabs button.active{
+ box-shadow:inset 0 -2px rgba(0,0,0,.16);
+}
+.libraryEditorial .libraryShelfTools :is(input,select){
+ border-color:var(--obi-catalog-edge);
+}
+/* Responsive y movimiento: preservar las dimensiones originales del hero/LCP. */
+@media(max-width:640px){
+ .homeEditorial .discoverShelfHead{
+  padding-left:38px;padding-bottom:10px;
+ }
+ .homeEditorial .discoverShelfHead::before{
+  width:27px;height:37px;font-size:11px;
+ }
+ .homeEditorial .discoverShelfHead::after{left:38px}
+ .exploreEditorial .exploreKanji,
+ .libraryEditorial .libraryMark{
+  width:39px;height:39px;
+  font-size:1.3rem;transform:none;
+ }
+ .exploreEditorial .exploreShowcase,
+ .libraryEditorial .libraryShowcase{
+  box-shadow:none;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .exploreEditorial .exploreKanji,
+ .libraryEditorial .libraryMark{transform:none}
+ .homeEditorial :is(.homeBookCard,.catalogEditorialCard),
+ .exploreEditorial .catalogEditorialCard,
+ .libraryEditorial .libraryShelfCard{transition:none}
+}
+html[data-site-motion="reduce"]
+:is(.homeEditorial,.exploreEditorial,.libraryEditorial)
+:is(.catalogEditorialCard,.homeBookCard,.libraryShelfCard){
+ transform:none!important;animation:none!important;transition:none!important;
+}
+@media(forced-colors:active){
+ .homeEditorial .discoverShelfHead::before,
+ .exploreEditorial .exploreKanji,
+ .libraryEditorial .libraryMark{
+  color:CanvasText;background:Canvas;
+  border:2px solid CanvasText;box-shadow:none;
+ }
+ .homeEditorial .discoverShelfHead,
+ .exploreEditorial .exploreResultsBar,
+ .libraryEditorial .libraryTabs{
+  border-bottom:1px solid CanvasText;
+ }
+ .homeEditorial .discoverShelfHead::after{
+  background:CanvasText;
+ }
+}
