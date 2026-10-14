@@ -26,16 +26,17 @@
 <link rel="dns-prefetch" href="//fonts.googleapis.com">
 <link rel="dns-prefetch" href="//fonts.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,500&family=Lora:wght@400;500&family=Merriweather:wght@400;700&display=swap" rel="stylesheet" media="print" id="readerFonts">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Shippori+Mincho+B1:wght@500;600&display=swap" rel="stylesheet" media="print" id="theobiFonts">
 <!-- El preload de la portada guardada debe descubrirse ANTES de app.js y de los estilos completos. -->
 <script src="/assets/home-cover-hint.js?v=home-lcp-phase3"></script>
 <link rel="modulepreload" href="/assets/app.js?v=home-lcp-ci-20261012">
 <style id="criticalHomeCss">
-:root{--bg:#f5f5f3;--panel:#fff;--panel2:#f0f0ed;--line:#d9d9d2;--text:#101010;--muted:#676767;--accent:#ffd400}
+:root{--bg:#f6f0e5;--panel:#fffdf7;--panel2:#f1eadc;--line:#d9cbb5;--text:#262019;--muted:#675e50;--accent:#ffd400}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;line-height:1.5}
-body.dark{--bg:#080808;--panel:#111;--panel2:#1a1a1a;--line:#3b3b3b;--text:#f7f7f2;--muted:#a9a9a2}
-.top{position:sticky;top:0;z-index:30;background:var(--panel);border-bottom:1px solid var(--line)}
-.bar{max-width:1240px;margin:auto;padding:12px 20px;display:flex;align-items:center;gap:18px}.brand{display:flex;align-items:center;gap:10px;margin-right:auto;font-weight:900;text-decoration:none}.brandMark{display:grid;place-items:center;width:36px;height:36px;border-radius:10px;background:#111;color:#ffd400}
-.wrap{max-width:1240px;margin:auto;padding:28px 20px 84px}.homeShowcase{display:grid;grid-template-columns:1fr 1fr;gap:24px}.homeShowcase h1{font-family:Georgia,serif}.homeFeatured img{max-width:100%;height:auto}.nav{display:flex;gap:6px;flex-wrap:wrap}.mobileNav{display:none}
+body.dark{--bg:#0d0c0a;--panel:#1a1813;--panel2:#252219;--line:#4b4436;--text:#f3ecd9;--muted:#baaf9b}
+.top{position:sticky;top:0;z-index:30;background:#0d0c0a;color:#f3ecd9;border-bottom:2px solid #2f2a20}
+.bar{max-width:1240px;margin:auto;padding:12px 20px;display:flex;align-items:center;gap:18px}.brand{display:flex;align-items:center;gap:10px;margin-right:auto;font-family:Georgia,serif;font-weight:600;letter-spacing:.02em;color:#f3ecd9;text-decoration:none}.brandMark{display:grid;place-items:center;width:36px;height:36px;border:2px solid #f2c230;border-radius:2px;background:transparent;color:#f2c230;transform:rotate(-6deg)}
+.wrap{max-width:1240px;margin:auto;padding:28px 20px 84px}.homeShowcase{display:grid;grid-template-columns:1fr 1fr;gap:24px}.homeShowcase h1{font-family:Georgia,serif}.homeFeatured img{max-width:100%;height:auto}.nav{display:flex;gap:6px;flex-wrap:wrap}.top .nav button{color:#f3ecd9}.mobileNav{display:none}
 @media(max-width:767px){.bar{padding:9px 12px}.nav{display:none}.mobileNav{display:block}.wrap{padding:18px 12px 48px}.homeShowcase{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:640px){.homeEditorial .homeShowcase{min-height:0;gap:9px;padding:12px 14px 15px}.homeEditorial .homeShowcaseCopy h1{font-size:clamp(1.66rem,6.6vw,2rem);line-height:1.08;margin:6px 0 7px}.homeEditorial .homeFeatured{display:grid;grid-template-columns:minmax(0,39%) minmax(0,61%);align-items:stretch;min-height:332px;overflow:hidden}.homeEditorial .homeFeaturedVisual{display:grid;place-items:center;min-height:332px;padding:10px 7px}.homeEditorial .homeFeaturedBook{width:min(84%,118px);max-width:118px;aspect-ratio:2/3}.homeEditorial .homeFeaturedBook img{width:100%;height:100%;object-fit:cover}.homeEditorial .homeFeaturedInfo{min-width:0;padding:13px 10px 12px}}
 @media(max-width:370px){.homeEditorial .homeFeatured{grid-template-columns:minmax(0,38%) minmax(0,62%);min-height:390px}.homeEditorial .homeFeaturedVisual{min-height:390px}.homeEditorial .homeFeaturedBook{width:min(83%,101px)}.homeEditorial .homeFeaturedInfo{min-height:390px}}
