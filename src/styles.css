@@ -6039,3 +6039,13 @@ html[data-site-motion="reduce"] .btn[aria-busy="true"]::after{
  .catalogBatchActions{flex-direction:column;gap:10px}
  .catalogBatchActions .btn{width:100%}
 }
+
+
+/* En Explorar, las 24 tarjetas del lote ya están limitadas por JS.
+   content-visibility:auto + altura intrínseca fija desplaza la cuadrícula
+   cuando WebKit revela portadas durante el scroll al botón Mostrar más.
+   Evitar el salto mejora la estabilidad del objetivo táctil y el CLS. */
+.exploreEditorial .exploreNovelGrid > .catalogEditorialCard{
+ content-visibility:visible;
+ contain-intrinsic-size:auto;
+}
