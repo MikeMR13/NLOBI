@@ -3606,7 +3606,20 @@ async function loadCatalog(earlyRender=false){
   const credits=collaborationResult.status==='fulfilled'?collaborationResult.value||[]:[];const byTranslation=new Map();for(const credit of credits){const group=(S.translatorDirectory||[]).find(g=>g.id===credit.invited_group_id);if(group){if(!byTranslation.has(credit.translation_id))byTranslation.set(credit.translation_id,[]);byTranslation.get(credit.translation_id).push(group)}}S.catalog=S.catalog.map(t=>({...t,collaboration_groups:byTranslation.get(t.id)||[]}));
   if(earlyRender&&['home','releases','explore','translators'].includes(S.view))render();
  };
- if(earlyRender){setTimeout(()=>{void enrich().catch(e=>console.warn('[NLOBI] Error de datos secundarios',e))},80);return}
+ if(earlyRender){
+  // Las consultas secundarias no deben competir con el primer render ni el LCP.
+  // Esperamos a que exista un intervalo ocioso; el timeout evita postergarlas
+  // indefinidamente en equipos lentos o con animaciones activas.
+  const startSecondary=()=>{
+   if(CONFIG.qaMode===true&&qaCatalogFixtureActive)return;
+   void enrich().catch(e=>console.warn('[NLOBI] Error de datos secundarios',e));
+  };
+  setTimeout(()=>{
+   if('requestIdleCallback' in window)requestIdleCallback(startSecondary,{timeout:2400});
+   else setTimeout(startSecondary,1200);
+  },250);
+  return
+ }
  await enrich();
 }
 async function safeOptionalLoad(label,promise){try{return await promise}catch(e){console.warn('[NLOBI] No se pudo cargar '+label,e);return null}}
