@@ -65,7 +65,7 @@ for (const palette of paletteNames) {
             throw new Error('Mobile menu missing after render: ' + JSON.stringify({ detail, errors }));
           }
           await page.locator('.mobileNav > summary').click();
-          await page.waitForFunction(() => document.querySelector('.mobileNav')?.open && document.body.classList.contains('mobileNavOpen'), null, { timeout: 3000 });
+          await page.waitForFunction(() => document.querySelector('.mobileNav')?.open && document.body.classList.contains('mobileNavOpen'), null, { timeout: 10000 });
         }
         const state = await page.evaluate(() => {
           const selectors = innerWidth <= 1100

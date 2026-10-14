@@ -6018,3 +6018,34 @@ html[data-site-motion="reduce"] .btn[aria-busy="true"]::after{
         .readerExperience button):focus-visible{outline-color:Highlight}
  .btn[aria-busy="true"]::after{border-color:CanvasText;border-inline-end-color:transparent}
 }
+
+
+/* Fase 5 · Navegación progresiva de catálogos: no altera el lector EPUB. */
+.catalogBatchActions{
+ display:flex;
+ flex-wrap:wrap;
+ justify-content:center;
+ align-items:center;
+ gap:12px 18px;
+ margin:22px auto 4px;
+ padding:18px 12px;
+ border-top:1px solid var(--line);
+ color:var(--muted);
+ text-align:center;
+}
+.catalogBatchActions .catalogBatchCount{font-size:.9rem;line-height:1.5}
+.catalogBatchActions .btn{min-height:44px;max-width:100%;white-space:normal}
+@media(max-width:480px){
+ .catalogBatchActions{flex-direction:column;gap:10px}
+ .catalogBatchActions .btn{width:100%}
+}
+
+
+/* En Explorar, las 24 tarjetas del lote ya están limitadas por JS.
+   content-visibility:auto + altura intrínseca fija desplaza la cuadrícula
+   cuando WebKit revela portadas durante el scroll al botón Mostrar más.
+   Evitar el salto mejora la estabilidad del objetivo táctil y el CLS. */
+.exploreEditorial .exploreNovelGrid > .catalogEditorialCard{
+ content-visibility:visible;
+ contain-intrinsic-size:auto;
+}

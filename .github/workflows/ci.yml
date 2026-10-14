@@ -76,6 +76,8 @@ jobs:
           npx playwright install --with-deps chromium firefox webkit
       - name: Reader first text and next chapter prefetch (Chromium + WebKit)
         run: node scripts/reader-first-text-check.mjs
+      - name: Explore and Library progressive catalogs phase 5 (Chromium + WebKit)
+        run: node scripts/catalog-batch-phase5-check.mjs
       - name: Browser Studio lazy loading on public routes
         run: node scripts/lazy-studio-browser-check.mjs
       - name: EPUB title typography across reader font preferences
