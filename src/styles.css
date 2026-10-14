@@ -6203,3 +6203,22 @@ html[data-site-corners="soft"] :is(
    color-mix(in srgb,var(--theobi-gold) 5%,var(--panel)),
    var(--panel) 62%);
 }
+
+/* El disparador del menú móvil conserva tinta de fondo bajo las seis paletas.
+   El panel desplegado mantiene su tema de usuario independiente. */
+.top .mobileNav>summary,
+.top .mobileNav[open]>summary{
+  color:var(--theobi-paper);
+  background:var(--theobi-rule);
+  border-color:color-mix(in srgb,var(--theobi-gold) 60%,var(--theobi-rule));
+}
+.top .mobileNav>summary:hover,
+.top .mobileNav>summary:focus-visible{
+  background:#393224;
+  color:var(--theobi-paper);
+}
+@media(forced-colors:active){
+  .top .mobileNav>summary,.top .mobileNav[open]>summary{
+    background:Canvas;color:CanvasText;border-color:CanvasText;
+  }
+}
