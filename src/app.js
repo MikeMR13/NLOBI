@@ -3694,11 +3694,14 @@ async function loadPublicGroupData(id){
 const readerTranslationMetaCache=new Map();
 // A lo sumo un capítulo anticipado por lectura; no se escribe historial al precargar.
 const readerPrefetchCache=new Map(),READER_PREFETCH_TTL=45000;
+const recordedReaderVisits=new WeakSet();
 async function fetchPublishedReaderSection(sectionId){
  const cached=readerPrefetchCache.get(sectionId);
  if(cached&&Date.now()-cached.at<READER_PREFETCH_TTL){
   readerPrefetchCache.delete(sectionId);
-  return cached.promise?await cached.promise:cached.section;
+  const resolved=cached.promise?await cached.promise:cached.section;
+  if(resolved)return resolved;
+  // Una precarga fallida nunca debe impedir reintentar el capítulo real.
  }
  readerPrefetchCache.delete(sectionId);
  const rows=await jreq(`/rest/v1/sections?id=eq.${encodeURIComponent(sectionId)}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`);
@@ -3730,7 +3733,8 @@ function afterReaderFirstPaint(section,record=true){
   if(S.readerSection?.id!==section.id)return;
   cacheReaderChapter(section);
   prefetchNextReaderSection(section);
-  if(record&&S.user){
+  if(record&&S.user&&!recordedReaderVisits.has(section)){
+   recordedReaderVisits.add(section);
    void Promise.allSettled([
     recordReadingHistory(section.id,section.translation_id),
     saveReaderProgress(nonRegressingPercent(currentReaderPercent(false)),false,null,{refreshUser:false})
@@ -3759,7 +3763,7 @@ async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}
  const detail=S.currentDetail?.id===translationId?S.currentDetail:null;
  const knownVolume=detail?.volumes?.find(v=>v.status==='published'&&v.sections?.some(x=>x.id===sectionId&&x.status==='published'));
  const metaCached=translationId?readerTranslationMetaCache.get(translationId):null;
- const metaTask=!knownVolume&&translationId&&!metaCached?loadReaderTranslationMeta(translationId):null;
+ const metaTask=!knownVolume&&translationId&&!metaCached?loadReaderTranslationMeta(translationId).catch(()=>null):null;
  const sec=await fetchPublishedReaderSection(sectionId);
  if(!sec)throw new Error('El capítulo no está disponible.');
  const useDetail=knownVolume?.id===sec.volume_id&&Array.isArray(knownVolume.epub_fonts);
