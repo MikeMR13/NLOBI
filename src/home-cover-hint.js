@@ -4,9 +4,13 @@
  try{
   if(location.hash&&location.hash!=='#home')return;
   const hint=JSON.parse(localStorage.getItem('nlobi_home_cover_hint_v1')||'null');
-  if(!hint||typeof hint.path!=='string'||!Number.isFinite(hint.at)||
-     Date.now()-hint.at>12*60*60*1000||Date.now()<hint.at)return;
-  const url=new URL(hint.path,location.origin);
+  const fresh=hint&&typeof hint.path==='string'&&Number.isFinite(hint.at)&&
+     Date.now()-hint.at<=12*60*60*1000&&Date.now()>=hint.at;
+  // Visitas recurrentes usan la portada vista; la primera visita usa la pista
+  // pública generada durante el despliegue (sin solicitudes extra del cliente).
+  const path=fresh?hint.path:document.querySelector?.('meta[name="nlobi-build-cover"]')?.content;
+  if(!path)return;
+  const url=new URL(path,location.origin);
   if(url.origin!==location.origin||!url.pathname.startsWith('/media/')||
      url.pathname.includes('..')||url.hash)return;
   const link=document.createElement('link');
