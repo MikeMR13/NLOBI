@@ -24,6 +24,8 @@ assert.ok(split.bytesSaved>80000,'Studio debe quitar más de 80 KB del JS inicia
 assert.ok(split.module.includes('function studioTeamView(){'));
 assert.ok(split.app.includes("import('/assets/studio-views.js')"));
 assert.ok(split.app.includes('lazyStudioViews=createLazyStudioViews'), 'Studio se inicializa tras crear sus extensiones');
+assert.ok(split.dependencies.includes('safeMediaUrl'), 'Las portadas de Studio requieren el helper safeMediaUrl en el módulo diferido');
+assert.ok(split.module.includes('safeMediaUrl'), 'Studio diferido debe poder mostrar portadas');
 assert.ok(split.app.includes('requestIdleCallback(registerPwa'));
 const dist=fs.readFileSync('dist/assets/app.js','utf8');
 assert.ok(dist.length<base.length-80000,'El build debe publicar la versión dividida');
