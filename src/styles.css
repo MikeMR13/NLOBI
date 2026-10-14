@@ -6168,3 +6168,13 @@ html[data-site-motion="reduce"] :is(.homeEditorial .homeBookCard,.exploreEditori
     .libraryEditorial .libraryShelfCard,.volumeGalleryCard){
  animation:none!important;transition:none!important;transform:none!important;
 }
+
+/* Conservar la forma de las tarjetas elegida desde Preferencias del sitio. */
+html[data-site-corners="square"] :is(
+ .homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+ .libraryEditorial .libraryShelfCard,.volumeGalleryCard,
+ .detailHero,.detailEditorialHero){border-radius:3px}
+html[data-site-corners="soft"] :is(
+ .homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
+ .libraryEditorial .libraryShelfCard,.volumeGalleryCard,
+ .detailHero,.detailEditorialHero){border-radius:25px}
