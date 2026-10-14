@@ -2374,7 +2374,7 @@ function render(){
   // Conserva el titular ya pintado cuando la respuesta del catálogo sustituye el esqueleto.
   // Esto evita volver a retrasar el LCP mientras se actualiza solo el contenido editorial.
   const existingHomeCopy=S.view==='home'?app.querySelector('.homeShowcaseCopy'):null;
-  const existingFeaturedVisual=S.view==='home'&&!S.catalogLoading?app.querySelector('.homeFeaturedVisual'):null;
+  const existingFeaturedVisual=S.view==='home'?app.querySelector('.homeFeaturedVisual'):null;
   if(existingHomeCopy&&html.includes('homeShowcaseCopy')){
    const next=document.createElement('template');next.innerHTML=html;
    const freshCopy=next.content.querySelector('.homeShowcaseCopy');
@@ -2384,7 +2384,11 @@ function render(){
     const nextVisual=next.content.querySelector('.homeFeaturedVisual');
     const oldImage=existingFeaturedVisual?.querySelector('.homeFeaturedBook img');
     const newImage=nextVisual?.querySelector('.homeFeaturedBook img');
-    if(oldImage&&newImage&&oldImage.getAttribute('src')===newImage.getAttribute('src')&&
+    // Preservar la imagen ya pintada desde el HTML mientras se resuelve el catálogo.
+    // Cuando llegue la obra real, únicamente se reutiliza si URL y enlace coinciden.
+    if(S.catalogLoading&&existingFeaturedVisual?.querySelector('img[data-early-featured-cover]')){
+      nextVisual?.replaceWith(existingFeaturedVisual);
+    }else if(oldImage&&newImage&&oldImage.getAttribute('src')===newImage.getAttribute('src')&&
        existingFeaturedVisual.querySelector('a')?.getAttribute('href')===nextVisual.querySelector('a')?.getAttribute('href')){
       nextVisual.replaceWith(existingFeaturedVisual);
     }
