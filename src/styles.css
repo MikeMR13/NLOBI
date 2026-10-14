@@ -6178,3 +6178,19 @@ html[data-site-corners="soft"] :is(
  .homeEditorial .homeBookCard,.exploreEditorial .catalogEditorialCard,
  .libraryEditorial .libraryShelfCard,.volumeGalleryCard,
  .detailHero,.detailEditorialHero){border-radius:25px}
+
+
+/* Contraste AA del menú de cuenta sobre la cabecera tinta (axe/CI). */
+.top .accountDropdown>summary{
+ color:var(--theobi-paper);
+ background:rgba(243,236,217,.06);
+ border-color:rgba(242,194,48,.42);
+}
+.top .accountDropdown>summary .accountName{color:var(--theobi-paper)}
+.top .accountDropdown[open]>summary,
+.top .accountDropdown>summary:hover{color:var(--theobi-paper);background:rgba(242,194,48,.16)}
+.top .navMore>summary{color:var(--theobi-paper);border-color:rgba(242,194,48,.42)}
+@media(forced-colors:active){
+ .top .accountDropdown>summary,.top .accountDropdown>summary .accountName,
+ .top .navMore>summary{background:Canvas;color:CanvasText;border-color:CanvasText}
+}
