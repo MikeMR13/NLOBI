@@ -33,8 +33,7 @@ export function splitStudioViews(source){
   'export function createStudioViews(deps){\n const {'+referenced.join(',')+'}=deps;\n'+
   moved+'\n return {'+targets.join(',')+'};\n}\n';
  let reduced=source;
- for(const name of targets.slice().reverse()){
-  const fn=methods.get(name);
+ for(const [name,fn] of [...methods.entries()].sort((a,b)=>b[1].start-a[1].start)){
   // Reemplazar por índices en orden descendente para conservar posiciones.
   reduced=reduced.slice(0,fn.start)+
    'function '+name+'(...args){return lazyStudioViews?.'+name+
