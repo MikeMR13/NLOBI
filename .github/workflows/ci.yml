@@ -74,6 +74,8 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
           npx playwright install --with-deps chromium firefox webkit
+      - name: Studio rows, volume synopsis and Home emphasis (Chromium + WebKit)
+        run: node scripts/studio-volume-home-fix-check.mjs
       - name: OBI editorial workspaces phase 4 (Chromium + WebKit)
         run: node scripts/editorial-workspaces-phase4-check.mjs
       - name: OBI editorial book details phase 3 (Chromium + WebKit)
