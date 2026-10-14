@@ -6072,7 +6072,7 @@ body{font-family:var(--theobi-sans)}
   font-family:var(--theobi-display);font-weight:600;
   text-wrap:balance;overflow-wrap:anywhere;
 }
-.homeEditorial .homeShowcaseCopy h1{font-family:var(--theobi-display);font-weight:600;letter-spacing:-.028em}
+.homeEditorial .homeShowcaseCopy h1{font-family:Georgia,"Times New Roman",serif;font-weight:600;letter-spacing:-.028em}
 .homeEditorial .homeShowcase{
   border:1px solid color-mix(in srgb,var(--theobi-gold) 43%,var(--line));
   background:radial-gradient(circle at 86% 14%,rgba(242,194,48,.14),transparent 39%),
