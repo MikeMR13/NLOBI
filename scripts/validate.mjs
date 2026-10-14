@@ -423,7 +423,7 @@ for(const marker of [
 (function validateAdvancedReader(){
  const start=app.indexOf('const READER_DEFAULTS='),stop=app.indexOf('let readerScrollFrame=0',start);
  if(start<0||stop<start)throw new Error('Lector 7–9: faltan preferencias y estado.');
- for(const marker of ['data-preference-tab="reading"','data-preference-panel="reading"','readerVolumePreferencesPanel(chosen)','data-reader-continue=','id="readerContinuousChapters"','function loadNextContinuousChapter(){','function persistReaderPosition(','function recordContinuousBoundary(','function resumeReaderVolume(','nlobi_reader_settings_','async function saveReaderProgress(percent=100,announce=true,sectionOverride=null)']){
+ for(const marker of ['data-preference-tab="reading"','data-preference-panel="reading"','readerVolumePreferencesPanel(chosen)','data-reader-continue=','id="readerContinuousChapters"','function loadNextContinuousChapter(){','function persistReaderPosition(','function recordContinuousBoundary(','function resumeReaderVolume(','nlobi_reader_settings_','async function saveReaderProgress(percent=100,announce=true,sectionOverride=null']){
   if(!app.includes(marker))throw new Error('Lector 7–9: falta '+marker);
  }
  for(const marker of ['.readerVolumeOptions{','.readerScopedFields{','.readerContinuousChapter{','#readerContinuousMore{']){
