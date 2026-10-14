@@ -77,7 +77,8 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
      assert.equal(result.focusLabel,'El Obi del Lector, ir al inicio');
      assert.ok(result.scroll<=result.viewport+1,
       engineName+' '+width+' '+theme+': desbordamiento horizontal '+result.scroll+'/'+result.viewport);
-     assert.equal(result.japaneseDisplay,width<=640?'none':'inline-block');
+     assert.ok(width<=640?result.japaneseDisplay==='none':result.japaneseDisplay!=='none',
+      'La etiqueta japonesa debe ocultarse solo en móviles compactos');
      assert.equal(result.brandBand,width<=1100?'none':'block');
      assert.ok(result.btnTransition.split(',').every(value=>parseFloat(value)<=0.001),
       'Movimiento reducido debe anular las transiciones perceptibles');
