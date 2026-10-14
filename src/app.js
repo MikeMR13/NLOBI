@@ -2335,6 +2335,9 @@ function setupHomeReadingMotion(){
 function render(){
  const app=document.getElementById('app');
  if(!app)return;
+ // El HTML editorial del Home se descubre antes del JS; en rutas privadas se activa aquí.
+ if(app.hidden)app.hidden=false;
+ window.__nlobiActivateReaderFonts?.(S.view);
  try{
   let html=S.view==='home'?home():'';
   if(S.view==='explore')html=explore();
