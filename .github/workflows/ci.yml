@@ -21,6 +21,8 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check
+      - name: Lighthouse mobile report statistics regression
+        run: node scripts/lighthouse-mobile-metrics-check.mjs
       - name: EPUB OCF obfuscation decoding and Studio repair
         run: node scripts/epub-obfuscation-check.mjs
       - name: Password recovery and session regression
@@ -54,6 +56,8 @@ jobs:
       - name: RPC phase 2 private implementations and grant regression
         run: node scripts/rpc-security-phase2-check.mjs
       - run: npm run build
+      - name: HTML-first LCP and Studio route-split regression
+        run: node scripts/home-first-cover-route-split-check.mjs
       - name: Build fingerprint and lazy asset regression
         run: node scripts/lazy-performance-check.mjs
       - name: Early home LCP cover discovery regression
@@ -74,6 +78,8 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
           npx playwright install --with-deps chromium firefox webkit
+      - name: Studio rows, volume synopsis and Home emphasis (Chromium + WebKit)
+        run: node scripts/studio-volume-home-fix-check.mjs
       - name: OBI editorial workspaces phase 4 (Chromium + WebKit)
         run: node scripts/editorial-workspaces-phase4-check.mjs
       - name: OBI editorial book details phase 3 (Chromium + WebKit)
@@ -86,6 +92,8 @@ jobs:
         run: node scripts/reader-first-text-check.mjs
       - name: Home LCP early editorial shell and deferred reader fonts (Chromium + WebKit)
         run: node scripts/home-lcp-early-shell-check.mjs
+      - name: Server-seeded Home cover and lazy Studio (Chromium + WebKit)
+        run: node scripts/seeded-home-studio-browser-check.mjs
       - name: Explore and Library progressive catalogs phase 5 (Chromium + WebKit)
         run: node scripts/catalog-batch-phase5-check.mjs
       - name: Browser Studio lazy loading on public routes
@@ -102,8 +110,7 @@ jobs:
             if curl -fsS http://127.0.0.1:4175/ >/dev/null; then break; fi
             sleep 1
           done
-          npx --yes lighthouse@12 http://127.0.0.1:4175/#home --chrome-flags="--headless --no-sandbox --disable-dev-shm-usage" --form-factor=mobile --screenEmulation.mobile=true --throttling-method=simulate --only-categories=performance,accessibility --output=json --output-path=performance-results/mobile-home.json --quiet
-          node -e "const r=require('./performance-results/mobile-home.json');const a=r.audits;const m={performance:Math.round(100*r.categories.performance.score),accessibility:Math.round(100*r.categories.accessibility.score),LCP:a['largest-contentful-paint']?.numericValue,CLS:a['cumulative-layout-shift']?.numericValue,TBT:a['total-blocking-time']?.numericValue};console.log('Lighthouse mobile:',JSON.stringify(m));require('node:fs').writeFileSync('performance-results/summary.json',JSON.stringify(m,null,2))"
+          node scripts/lighthouse-mobile-batch.mjs
           node scripts/lcp-diagnostics.mjs
       - name: axe accessibility audit
         id: axe

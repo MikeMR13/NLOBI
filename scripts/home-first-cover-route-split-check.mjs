@@ -1,0 +1,34 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {seedFeaturedHomeHtml} from './home-seed-html.mjs';
+import {splitStudioViews} from './split-studio-views.mjs';
+
+const source=fs.readFileSync('src/index.html','utf8');
+const origin='https://qa.supabase.local';
+const book={id:'qa-cover-1',novels:{title:'Una novela con título y & letras',
+ cover_url:origin+'/storage/v1/object/public/nlobi-media/teams/qa/covers/cover.webp'}};
+const html=seedFeaturedHomeHtml(source,book,origin);
+assert.match(html,/<meta name="nlobi-build-cover" content="\/media\/teams\/qa\/covers\/cover\.webp">/);
+assert.match(html,/<img src="\/media\/teams\/qa\/covers\/cover\.webp"[^>]+data-early-featured-cover>/);
+assert.match(html,/<a class="homeFeaturedBook homeFeaturedCoverLink" href="#detail:qa-cover-1"/);
+assert.ok(html.indexOf('data-early-featured-cover')>html.indexOf('<body>'));
+assert.ok(html.indexOf('data-early-featured-cover')<html.indexOf('src="/assets/app.js'));
+assert.ok(html.includes('Una novela con título y &amp; letras'));
+assert.equal(seedFeaturedHomeHtml(source,{...book,novels:{cover_url:'https://evil.test/img.webp'}},origin),source);
+assert.equal(seedFeaturedHomeHtml(source,{...book,id:'bad\\\"<script>'},origin),source);
+assert.equal(seedFeaturedHomeHtml(html,book,origin),html,'No duplicar portadas en el HTML');
+const base=fs.readFileSync('src/app.js','utf8');
+const split=splitStudioViews(base);
+new Function(split.app.replaceAll('import(\'/assets/', 'import(\'/assets/'));
+assert.ok(split.bytesSaved>80000,'Studio debe quitar más de 80 KB del JS inicial');
+assert.ok(split.module.includes('function studioTeamView(){'));
+assert.ok(split.app.includes("import('/assets/studio-views.js')"));
+assert.ok(split.app.includes('lazyStudioViews=createLazyStudioViews'), 'Studio se inicializa tras crear sus extensiones');
+assert.ok(split.dependencies.includes('safeMediaUrl'), 'Las portadas de Studio requieren el helper safeMediaUrl en el módulo diferido');
+assert.ok(split.module.includes('safeMediaUrl'), 'Studio diferido debe poder mostrar portadas');
+assert.ok(split.app.includes('requestIdleCallback(registerPwa'));
+const dist=fs.readFileSync('dist/assets/app.js','utf8');
+assert.ok(dist.length<base.length-80000,'El build debe publicar la versión dividida');
+assert.ok(fs.existsSync('dist/assets/studio-views.js'),'Falta módulo Studio generado');
+assert.match(fs.readFileSync('dist/index.html','utf8'),/\.homeFeaturedBook/);
+console.log('HTML-first LCP + Studio lazy route split: OK',JSON.stringify({bytesSaved:split.bytesSaved}));

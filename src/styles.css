@@ -6886,3 +6886,178 @@ html[data-site-motion="reduce"]
   background:CanvasText;
  }
 }
+
+
+/* STUDIO + VOLUMES + HOME / 2026-10-14
+   A) filas legibles B) reducción de pintura fuera de pantalla
+   C) sinopsis por volumen D) protagonismo de portadas, sin alterar caja LCP */
+.studioVolumeGrid{grid-template-columns:minmax(0,1fr);gap:18px}
+.studioVolumeGrid>.studioVolumeCard{
+ grid-template-columns:clamp(100px,13vw,145px) minmax(0,1fr);
+ gap:clamp(13px,2vw,24px);min-width:0;
+}
+.studioVolumeCard .studioVolumeContent{min-width:0}
+.studioVolumeCard .studioVolumeContent>.row:first-child>div:first-child{
+ min-width:0;max-width:100%;
+}
+.studioVolumeCard .studioVolumeContent>.row:first-child>div:first-child h3{
+ overflow-wrap:break-word;line-height:1.25;
+ font-family:var(--obi-display);
+}
+.studioVolumeCard .studioSectionRow{
+ display:grid;grid-template-columns:minmax(0,1fr);
+ align-items:start;gap:11px;
+ min-width:0;
+ padding:17px 0;
+ border-bottom:1px solid var(--obi-work-edge,var(--line));
+ content-visibility:auto;
+ contain-intrinsic-size:auto 210px;
+}
+.studioVolumeCard .studioSectionIdentity{
+ min-width:0;width:100%;max-width:100%;
+ display:flex;flex-direction:column;gap:7px;
+}
+.studioVolumeCard .studioSectionBadges{gap:7px;flex-wrap:wrap}
+.studioVolumeCard .studioSectionTitle{
+ display:block;max-width:100%;
+ font-family:var(--obi-display);
+ font-weight:750;font-size:clamp(1rem,1.5vw,1.17rem);
+ line-height:1.42;
+ overflow-wrap:break-word;
+ word-break:normal;
+}
+.studioVolumeCard .studioSectionIdentity>.muted{
+ font-size:.81rem;line-height:1.5;
+ white-space:normal;overflow-wrap:break-word;
+}
+.studioVolumeCard .studioSectionActions{
+ min-width:0;width:100%;
+ display:flex;flex-wrap:wrap;align-items:center;
+ justify-content:flex-start;gap:7px;
+}
+.studioVolumeCard .studioSectionActions>.btn,
+.studioVolumeCard .studioSectionActions>.sectionSort .btn{
+ flex:0 0 auto;min-width:0;
+ font-size:.79rem;white-space:normal;overflow-wrap:normal;
+}
+.studioVolumeCard .studioSectionActions .sectionSort{
+ display:flex;gap:6px;flex-shrink:0;
+}
+/* Keep chapter order controls comfortably touchable in every Studio viewport. */
+.studioVolumeCard .studioSectionActions>.sectionSort .btn{
+ box-sizing:border-box;
+ flex:0 0 44px;
+ min-width:44px;
+ min-height:44px;
+ padding-inline:0;
+}
+.studioVolumeCard .studioSectionRow>.studioReviewPanel{
+ grid-column:1/-1;width:100%;min-width:0;margin:2px 0 0;
+}
+.studioVolumeCard .studioReviewPanel summary strong{
+ overflow-wrap:normal;word-break:normal;
+}
+.studioVolumeCard .studioScheduleBox,
+.studioVolumeCard .studioQualityPanel{
+ min-width:0;overflow-wrap:break-word;
+}
+.studioVolumeCard .studioVolumeContent>.row:first-child>.row{
+ gap:8px;flex-wrap:wrap;
+}
+.studioVolumeCard .studioVolumeContent>.row:first-child>.row .btn,
+.studioVolumeCard .studioVolumeContent>.row:first-child>.row label.btn{
+ flex:0 1 auto;min-width:fit-content;
+}
+.homeEditorial .homeFeaturedSlideInfo h2{
+ font-family:var(--obi-display);
+ font-weight:800;letter-spacing:-.035em;
+ line-height:1.15;text-wrap:balance;
+}
+.homeEditorial .homeFeaturedTitleLink,
+.homeEditorial .homeBookTitleLink{
+ text-decoration-thickness:2px;text-underline-offset:4px;
+}
+.homeEditorial .homeFeaturedTitleLink:focus-visible,
+.homeEditorial .homeBookTitleLink:focus-visible,
+.homeEditorial .homeBookCoverLink:focus-visible{
+ outline:3px solid var(--accent);outline-offset:4px;
+}
+.homeEditorial .homeFeaturedVisual .homeFeaturedBook{
+ border:1px solid color-mix(in srgb,var(--accent) 40%,var(--line));
+ box-shadow:0 13px 28px rgba(0,0,0,.20),6px 0 0 rgba(0,0,0,.07);
+}
+.homeEditorial .homeBookCard{
+ border-color:color-mix(in srgb,var(--accent) 32%,var(--obi-catalog-edge,var(--line)));
+}
+.homeEditorial .homeBookCover{
+ border-bottom:2px solid var(--accent);
+}
+.homeEditorial .homeBookCover img{object-fit:contain}
+.homeEditorial .homeBookDetails h3{
+ font-size:clamp(1rem,1.25vw,1.17rem);
+ line-height:1.33;font-weight:800;
+ min-height:0;max-height:4em;
+}
+.homeEditorial .homeBookTitleLink{font-weight:800}
+.homeEditorial .homeBookDetails{gap:7px}
+.homeEditorial .homeBookDetails>p{font-size:.79rem}
+.volumeOpenedSynopsis{
+ margin:7px 0 17px;padding:13px 15px;
+ border-left:3px solid var(--accent);
+ background:color-mix(in srgb,var(--panel) 92%,var(--accent) 8%);
+ border-radius:0 10px 10px 0;
+ max-width:65ch;
+}
+.volumeOpenedSynopsis strong{
+ display:block;font:.8rem/1.4 var(--obi-caption);
+ letter-spacing:.04em;
+}
+.volumeOpenedSynopsis p{
+ margin:6px 0 0!important;font-size:.94rem;
+ line-height:1.7!important;
+ white-space:pre-line;overflow-wrap:break-word;
+}
+.volumeGallerySynopsis{
+ display:-webkit-box;
+ -webkit-box-orient:vertical;-webkit-line-clamp:2;
+ overflow:hidden;min-width:0;
+ color:var(--muted);font-size:.77rem;line-height:1.48;
+}
+@media(min-width:901px){
+ .homeEditorial .homeFeaturedSlideInfo h2{
+  font-size:clamp(1.45rem,2vw,2.08rem);
+ }
+}
+@media(min-width:641px) and (max-width:900px){
+ .homeEditorial .homeFeaturedSlideInfo h2{
+  font-size:clamp(1.15rem,2.3vw,1.65rem);
+ }
+}
+@media(max-width:640px){
+ .studioVolumeGrid>.studioVolumeCard{
+  grid-template-columns:minmax(0,1fr);
+ }
+ .studioVolumeGrid .studioVolumeVisual{
+  width:min(130px,42vw);max-width:100%;aspect-ratio:3/4;
+ }
+ .studioVolumeCard .studioSectionActions>.btn{min-height:42px}
+ .homeEditorial .homeFeaturedSlideInfo h2{
+  font-size:clamp(1.04rem,4vw,1.35rem);line-height:1.23;
+ }
+ .homeEditorial .homeBookDetails h3{
+  font-size:clamp(.99rem,3.5vw,1.13rem);
+ }
+ .volumeOpenedSynopsis{padding:11px 12px}
+}
+@media(max-width:370px){
+ .homeEditorial .homeFeaturedSlideInfo h2{font-size:1.01rem}
+ .homeEditorial .homeBookDetails h3{font-size:.98rem}
+}
+@media(prefers-reduced-motion:reduce){
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{transition:none}
+}
+@media(forced-colors:active){
+ .studioVolumeCard .studioSectionRow{border-bottom:1px solid CanvasText}
+ .homeEditorial .homeFeaturedVisual .homeFeaturedBook{border:1px solid CanvasText;box-shadow:none}
+ .volumeOpenedSynopsis{border-left:3px solid CanvasText;background:Canvas}
+}
