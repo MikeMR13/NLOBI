@@ -13,6 +13,8 @@ assert.match(editorial,/\.libraryEditorial\s+\.libraryShelfCard/);
 assert.match(editorial,/\.exploreEditorial\s+\.exploreShowcase/);
 assert.match(editorial,/prefers-reduced-motion:reduce/);
 assert.match(editorial,/forced-colors:active/);
+assert.doesNotMatch(editorial,/object-fit\s*:\s*cover/i,
+ 'No recortar portadas: prevalece object-fit:contain del sistema literario compartido');
 assert.doesNotMatch(editorial,/@import|url\(\s*['"]?https?:/i);
 assert.ok(app.includes('class="discoverShelf obiShelf-${slug}"'), 'Faltan etiquetas de sección en Home');
 // Conservación funcional: no reemplazar tarjetas ni eliminar la carga progresiva.
@@ -52,6 +54,8 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
        homePaper:style('.homeBookCard').backgroundColor,
        catalogPaper:style('.exploreNovelGrid .catalogEditorialCard').backgroundColor,
        libraryPaper:style('.libraryShelfCard').backgroundColor,
+       exploreGradient:style('.exploreNovelGrid .catalogEditorialCard').backgroundImage,
+       libraryGradient:style('.libraryShelfCard').backgroundImage,
        bookSpine:pseudo('.exploreNovelGrid .catalogCoverButton','::before').content,
        libSpine:pseudo('.libraryShelfCover','::after').content,
        coverPointer:style('.catalogCoverButton').cursor,
@@ -68,6 +72,8 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
      assert.equal(data.librarySeal,'本');
      assert.equal(data.bookSpine,'""');
      assert.equal(data.libSpine,'""');
+     assert.match(data.exploreGradient,/gradient/,'Explorar: conservar fondo editorial');
+     assert.match(data.libraryGradient,/gradient/,'Biblioteca: conservar fondo editorial');
      assert.equal(data.coverPointer,'pointer');
      assert.equal(data.coverLabel,'Abrir novela de ejemplo');
      assert.equal(data.searchLabel,'Buscar novelas');

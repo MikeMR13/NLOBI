@@ -6246,7 +6246,7 @@ body.dark :is(.homeEditorial,.exploreEditorial,.libraryEditorial){
 }
 .homeEditorial .homeBookCard{
  border-color:var(--obi-catalog-edge);
- background:var(--obi-catalog-paper);
+ background:linear-gradient(160deg,var(--obi-catalog-paper),var(--panel));
  box-shadow:0 7px 20px rgba(19,15,8,.05);
 }
 .homeEditorial .homeBookDetails{
@@ -6305,7 +6305,7 @@ body.dark :is(.homeEditorial,.exploreEditorial,.libraryEditorial){
  border-bottom:1px solid var(--obi-catalog-edge);
 }
 .exploreEditorial .exploreNovelGrid>.catalogEditorialCard{
- background:var(--obi-catalog-paper);
+ background:linear-gradient(160deg,var(--obi-catalog-paper),var(--panel));
  border-color:var(--obi-catalog-edge);
 }
 .exploreEditorial .exploreNovelGrid>.catalogEditorialCard:is(:hover,:focus-within){
@@ -6343,11 +6343,6 @@ body.dark .exploreEditorial .catalogStatusTag{color:var(--accent)}
   rgba(255,255,255,.24) 65%,
   transparent);
 }
-.exploreEditorial .catalogBookArt img,
-.homeEditorial .discoverShelf .catalogBookArt img,
-.libraryEditorial .libraryShelfCover img{
- object-fit:cover;
-}
 /* Biblioteca personal: estantería entintada con portada y progreso intactos. */
 .libraryEditorial .libraryShowcase{
  background:linear-gradient(110deg,#13110e 0%,#221b10 62%,#10100f 100%);
@@ -6373,7 +6368,7 @@ body.dark .exploreEditorial .catalogStatusTag{color:var(--accent)}
 .libraryEditorial .libraryContinueCard,
 .libraryEditorial .libraryShelfCard{
  border-color:var(--obi-catalog-edge);
- background:var(--obi-catalog-paper);
+ background:linear-gradient(160deg,var(--obi-catalog-paper),var(--panel));
  box-shadow:0 8px 22px rgba(19,15,8,.045);
 }
 .libraryEditorial .libraryShelfCard:focus-within{
