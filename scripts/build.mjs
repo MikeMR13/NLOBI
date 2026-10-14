@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {splitStudioViews} from "./split-studio-views.mjs";
+import {optimizeCss} from "./optimize-css-build.mjs";
 import {createHash} from "node:crypto";
 import { spawnSync } from "node:child_process";
 
@@ -11,6 +12,9 @@ fs.mkdirSync(path.join(dist, "assets"), { recursive: true });
 
 fs.copyFileSync(path.join(root, "src", "index.html"), path.join(dist, "index.html"));
 fs.copyFileSync(path.join(root, "src", "styles.css"), path.join(dist, "assets", "styles.css"));
+// La hoja global sigue siendo asíncrona; reducir bytes sin alterar su cascada.
+const cssPath=path.join(dist,"assets","styles.css");
+fs.writeFileSync(cssPath,optimizeCss(fs.readFileSync(cssPath,"utf8")));
 fs.copyFileSync(path.join(root, "src", "app.js"), path.join(dist, "assets", "app.js"));
 // Solo el paquete construido difiere las vistas pesadas de Studio.
 const studioSplit=splitStudioViews(fs.readFileSync(path.join(dist,"assets","app.js"),"utf8"));
