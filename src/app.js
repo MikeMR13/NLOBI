@@ -2375,32 +2375,31 @@ function render(){
   // Esto evita volver a retrasar el LCP mientras se actualiza solo el contenido editorial.
   const existingHomeCopy=S.view==='home'?app.querySelector('.homeShowcaseCopy'):null;
   const existingFeaturedVisual=S.view==='home'?app.querySelector('.homeFeaturedVisual'):null;
-  const earlySeededImage=S.catalogLoading&&existingFeaturedVisual?.querySelector('img[data-early-featured-cover]');
-  if(earlySeededImage){
-   // El titular y los botones pueden cambiar al recuperar sesión; la portada
-   // inicial permanece en el DOM, incluso si cambia el texto de la cabecera.
-   const next=document.createElement('template');next.innerHTML=html;
-   next.content.querySelector('.homeFeaturedVisual')?.replaceWith(existingFeaturedVisual);
-   app.replaceChildren(next.content);
-  }else if(existingHomeCopy&&html.includes('homeShowcaseCopy')){
+  if(existingHomeCopy&&html.includes('homeShowcaseCopy')){
    const next=document.createElement('template');next.innerHTML=html;
    const freshCopy=next.content.querySelector('.homeShowcaseCopy');
-   if(freshCopy&&freshCopy.textContent===existingHomeCopy.textContent){
+   if(freshCopy?.textContent===existingHomeCopy.textContent){
+    // La misma cabecera del HTML inicial conserva identidad y foco.
     freshCopy.replaceWith(existingHomeCopy);
-    // No decodificar ni solicitar de nuevo la misma portada en renders consecutivos.
-    const nextVisual=next.content.querySelector('.homeFeaturedVisual');
-    const oldImage=existingFeaturedVisual?.querySelector('.homeFeaturedBook img');
-    const newImage=nextVisual?.querySelector('.homeFeaturedBook img');
-    // Preservar la imagen ya pintada desde el HTML mientras se resuelve el catálogo.
-    // Cuando llegue la obra real, únicamente se reutiliza si URL y enlace coinciden.
-    if(S.catalogLoading&&existingFeaturedVisual?.querySelector('img[data-early-featured-cover]')){
-      nextVisual?.replaceWith(existingFeaturedVisual);
-    }else if(oldImage&&newImage&&oldImage.getAttribute('src')===newImage.getAttribute('src')&&
-       existingFeaturedVisual.querySelector('a')?.getAttribute('href')===nextVisual.querySelector('a')?.getAttribute('href')){
-      nextVisual.replaceWith(existingFeaturedVisual);
-    }
-    app.replaceChildren(next.content);
-   }else app.innerHTML=html;
+   }else{
+    // La cuenta puede cambiar sus botones, pero nunca se debe recrear el h1
+    // cuando sigue siendo la misma portada editorial.
+    const oldHeading=existingHomeCopy.querySelector('h1');
+    const newHeading=freshCopy?.querySelector('h1');
+    if(oldHeading&&newHeading&&oldHeading.textContent===newHeading.textContent)
+     newHeading.replaceWith(oldHeading);
+   }
+   const nextVisual=next.content.querySelector('.homeFeaturedVisual');
+   const oldImage=existingFeaturedVisual?.querySelector('.homeFeaturedBook img');
+   const newImage=nextVisual?.querySelector('.homeFeaturedBook img');
+   if(S.catalogLoading&&existingFeaturedVisual?.querySelector('img[data-early-featured-cover]')){
+    nextVisual?.replaceWith(existingFeaturedVisual);
+   }else if(oldImage&&newImage&&oldImage.getAttribute('src')===newImage.getAttribute('src')&&
+      existingFeaturedVisual.querySelector('a')?.getAttribute('href')===nextVisual.querySelector('a')?.getAttribute('href')){
+    // No solicitar ni decodificar otra vez la portada ya pintada.
+    nextVisual.replaceWith(existingFeaturedVisual);
+   }
+   app.replaceChildren(next.content);
   }else app.innerHTML=html;
   if(preserveMobileNav){
    const replacement=app.querySelector('.mobileNav');
