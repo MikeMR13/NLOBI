@@ -24,7 +24,10 @@ export function splitStudioViews(source){
  const moved=[...methods.values()].map(x=>x.code).join('\n');
  const functions=funcs.map(x=>x.name);
  const globals=[...source.matchAll(/^(?:const|let|var)\s+([A-Za-z_$][\w$]*)/gm)].map(m=>m[1]);
- const symbols=[...new Set([...functions,...globals,'$$','studioQuality','studioWorkflow'])];
+ // En app.js los ayudantes de URL están definidos en la misma línea:
+ // const safeUrl=...;const safeMediaUrl=...;const safeCssUrl=...
+ // El análisis por ^const no detectaba las declaraciones segunda y tercera.
+ const symbols=[...new Set([...functions,...globals,'safeMediaUrl','safeCssUrl','$','studioQuality','studioWorkflow'])];
  const referenced=symbols.filter(name=>!methods.has(name)&&
   new RegExp('\\b'+name.replaceAll('$','\\$')+'\\b').test(moved));
  // $ es un selector léxico válido y no se comporta como palabra en regexp.
