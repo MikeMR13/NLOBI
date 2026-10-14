@@ -6634,3 +6634,255 @@ body.dark{
 html[data-site-motion="reduce"] .volumeGallerySection .volumeEditorialCard{
  animation:none!important;transform:none!important;
 }
+
+
+/* OBI EDITORIAL WORKSPACES — FASE 4
+   Continuidad con el prototipo v12: mesa editorial, perfiles y panel global.
+   No modifica permisos, datos, botones, lectores EPUB o colores de equipo propios. */
+:root{
+ --obi-work-paper:color-mix(in srgb,var(--panel) 95%,#ead6a8 5%);
+ --obi-work-edge:color-mix(in srgb,var(--line) 78%,var(--accent) 22%);
+ --obi-work-rule:color-mix(in srgb,var(--line) 68%,var(--accent) 32%);
+ --obi-work-shadow:0 7px 21px rgba(16,12,5,.05);
+}
+body.dark{
+ --obi-work-paper:color-mix(in srgb,var(--panel) 95%,#715b32 5%);
+ --obi-work-edge:color-mix(in srgb,var(--line) 72%,var(--accent) 28%);
+ --obi-work-rule:color-mix(in srgb,var(--line) 65%,var(--accent) 35%);
+ --obi-work-shadow:0 7px 21px rgba(0,0,0,.18);
+}
+/* Studio: sello de imprenta, paneles y encabezados de trabajo. */
+.studioV3 .studioV3PageHeading{
+ position:relative;min-width:0;
+ padding-block-end:16px;border-block-end:1px solid var(--obi-work-rule);
+}
+.studioV3 .studioV3PageHeading::after,
+.studioV3 .studioV3OverviewHeader::after,
+.adminWorkspace .adminWorkspaceHeader::after{
+ content:"";position:absolute;inset-inline-start:0;inset-block-end:-1px;
+ width:clamp(42px,10%,90px);height:2px;background:var(--accent);
+ pointer-events:none;
+}
+.studioV3 :is(.studioV3PageHeading h1,.studioV3OverviewHeader h2,.studioV3SmallHead h2){
+ font-family:var(--obi-display);
+ letter-spacing:-.027em;text-wrap:balance;
+}
+.studioV3 :is(.studioV3Kicker,.studioV3SectionEyebrow),
+.adminWorkspace .adminWorkspaceEyebrow,
+.readerProfileTopline,
+.publicReaderKicker{
+ font-family:var(--obi-caption);letter-spacing:.105em;
+}
+.studioV3 .studioV3OverviewHeader{
+ position:relative;
+ padding-block-end:11px;border-block-end:1px solid var(--obi-work-rule);
+}
+.studioV3 .studioV3Sidebar{
+ border-color:var(--obi-work-edge);
+ background:var(--obi-work-paper);
+ box-shadow:var(--obi-work-shadow);
+}
+.studioV3 .studioV3BrandMark,
+.adminWorkspace .adminSidebarLogo,
+.readerProfileMark{
+ font-family:var(--obi-japanese);font-weight:800;
+}
+.studioV3 .studioV3BrandMark,
+.adminWorkspace .adminSidebarLogo{
+ border-radius:5px;border:1px solid var(--accent);
+ box-shadow:inset 0 0 0 2px #17140c,inset 0 0 0 3px var(--accent);
+ transform:rotate(-3deg);
+}
+.studioV3 .studioV3NavItem{
+ border-radius:9px;min-height:44px;
+}
+.studioV3 .studioV3NavItem:is(.active,[aria-current="page"]){
+ box-shadow:inset 3px 0 0 var(--accent);
+}
+.studioV3 :is(.studioV3Stat,.studioV3Insight,.studioV3BookCard){
+ border-color:var(--obi-work-edge);
+ background:var(--obi-work-paper);
+ box-shadow:var(--obi-work-shadow);
+}
+.studioV3 .studioV3Stat{border-block-start:3px solid var(--accent)}
+.studioV3 .studioV3Stat strong{font-family:var(--obi-display)}
+.studioV3 .studioV3Stat>span:last-child{line-height:1.5}
+.studioV3 .studioV3SectionEyebrow::before{
+ content:"編集";margin-inline-end:.65em;
+ font:800 1em/1.1 var(--obi-japanese);
+ color:var(--accentText);
+}
+.studioV3 .studioV3BookCard:focus-within{
+ outline:2px solid var(--accent);outline-offset:2px;
+}
+/* Perfil de lector: encabezado de libro y tarjetas de edición discretas. */
+.readerProfileHero,
+.publicReaderHero{
+ position:relative;isolation:isolate;
+ border-color:color-mix(in srgb,#ffd400 32%,#39332a);
+ box-shadow:0 12px 28px rgba(0,0,0,.10);
+}
+.readerProfileHero::before,
+.publicReaderHero::before{
+ content:"";position:absolute;inset:0 0 auto 0;
+ height:3px;background:linear-gradient(90deg,#ffd400,#caa034,transparent);
+ pointer-events:none;z-index:1;
+}
+.readerProfileMark{
+ display:grid;place-items:center;flex:none;
+ width:37px;height:37px;
+ font-size:1.2rem;line-height:1;color:#ffd400;
+ border:1px solid #d7b431;border-radius:4px;
+ transform:rotate(-4deg);
+}
+.readerProfileInfo h1,
+.publicReaderIdentity h1{
+ font-family:var(--obi-display);text-wrap:balance;
+}
+.readerProfileNav{
+ border-color:var(--obi-work-rule);
+}
+.readerProfileNavItem[aria-current="page"],
+.readerProfileNavItem.active{
+ box-shadow:inset 0 -2px var(--accent);
+}
+.readerEditCard,
+.readerEditAside,
+.publicReaderStats>div,
+.publicReaderBookButton,
+.publicReaderFavorite{
+ border-color:var(--obi-work-edge);
+}
+.readerEditCard{
+ background:var(--obi-work-paper);box-shadow:var(--obi-work-shadow);
+}
+.readerEditCard h3,
+.publicReaderSectionHeader h2{
+ font-family:var(--obi-display);text-wrap:balance;
+}
+.readerEditStep::before{
+ content:"栞";display:inline-block;margin-inline-end:8px;
+ font:800 1em/1.1 var(--obi-japanese);
+ color:var(--accentText);
+}
+.publicReaderStats>div{
+ border-block-start:3px solid var(--accent);
+}
+.publicReaderBookButton{
+ box-shadow:var(--obi-work-shadow);
+}
+.publicReaderBookButton:focus-visible,
+.publicReaderFavorite:focus-visible{
+ outline:3px solid var(--accent);outline-offset:3px;
+}
+/* Perfil público del equipo: respetar su banner, sus logos y sus colores. */
+.teamPublicPage .teamPublicNav{
+ border-color:var(--obi-work-rule);
+}
+.teamPublicPage .teamPublicNav a{
+ border-color:var(--obi-work-edge);
+ min-height:44px;
+}
+.teamPublicPage .teamPublicNav a:focus-visible,
+.teamPublicPage .teamPublicLink:focus-visible{
+ outline:3px solid var(--accent);outline-offset:3px;
+}
+.teamPublicPage :is(.teamPublicStat,.teamPublicIntro,.teamPublicLink){
+ border-color:var(--obi-work-edge);
+ box-shadow:var(--obi-work-shadow);
+}
+.teamPublicPage .teamPublicSection .sectionHead h2{
+ font-family:var(--obi-display);
+}
+.teamPublicPage .teamPublicStat{
+ border-block-start:3px solid var(--accent);
+}
+.teamSettingsNav{
+ border-color:var(--obi-work-edge);
+ background:var(--obi-work-paper);
+}
+.teamSettingsTab.active,
+.teamSettingsTab[aria-selected="true"]{
+ box-shadow:inset 0 -3px var(--accent);
+}
+.teamSettingsTab:focus-visible{
+ outline:3px solid var(--accent);outline-offset:2px;
+}
+/* Administración global: claridad jerárquica, no confundir con Studio. */
+.adminWorkspace .adminWorkspaceHeader{
+ position:relative;border-color:var(--obi-work-rule);
+}
+.adminWorkspace .adminWorkspaceHeader h1,
+.adminWorkspace .adminCurrentHead h2{
+ font-family:var(--obi-display);letter-spacing:-.025em;
+ text-wrap:balance;
+}
+.adminWorkspace .adminWorkspaceSidebar{
+ border-color:var(--obi-work-edge);
+ background:var(--obi-work-paper);
+ box-shadow:var(--obi-work-shadow);
+}
+.adminWorkspace .adminSidebarTitle{
+ border-color:var(--obi-work-rule);
+}
+.adminWorkspace .adminSideLink{
+ min-height:44px;
+}
+.adminWorkspace .adminSideLink:is(.isActive,[aria-current="page"]){
+ box-shadow:inset 3px 0 0 var(--accent);
+}
+.adminWorkspace .adminCurrentHead{
+ border-color:var(--obi-work-rule);
+}
+.adminWorkspace .adminAccessMark{
+ border-color:var(--obi-work-edge);
+ box-shadow:inset 0 -2px var(--accent);
+}
+.adminWorkspace :is(.adminDashboardKpi,.adminGrid>.panel,.adminGrid>.card){
+ border-color:var(--obi-work-edge);
+}
+.adminWorkspace :is(input,select,textarea):focus-visible,
+.studioV3 :is(button,input,select,textarea):focus-visible,
+.readerEditCard :is(input,textarea,select,button):focus-visible{
+ outline:3px solid var(--accent);outline-offset:2px;
+}
+/* El diseño móvil conserva navegación desplazable e índices existentes. */
+@media(max-width:740px){
+ .studioV3 .studioV3PageHeading{padding-block-end:12px}
+ .studioV3 .studioV3Sidebar{box-shadow:none}
+ .readerProfileMark{transform:none;width:32px;height:32px}
+ .adminWorkspace .adminWorkspaceHeader{padding-block-end:16px}
+ .adminWorkspace .adminWorkspaceSidebar{box-shadow:none}
+}
+@media(max-width:390px){
+ .studioV3 .studioV3BrandMark,
+ .adminWorkspace .adminSidebarLogo{transform:none}
+ .publicReaderHero,.readerProfileHero{box-shadow:none}
+ .teamPublicPage .teamPublicNav a{
+  min-width:0;white-space:normal;overflow-wrap:anywhere;
+ }
+}
+@media(prefers-reduced-motion:reduce){
+ .studioV3 .studioV3BrandMark,
+ .adminWorkspace .adminSidebarLogo,
+ .readerProfileMark{transform:none}
+}
+html[data-site-motion="reduce"]
+:is(.studioV3 .studioV3BrandMark,.adminWorkspace .adminSidebarLogo,.readerProfileMark){
+ transform:none;
+}
+@media(forced-colors:active){
+ .studioV3 .studioV3BrandMark,.adminWorkspace .adminSidebarLogo,.readerProfileMark{
+  border:2px solid CanvasText;box-shadow:none;
+ }
+ .studioV3 :is(.studioV3Stat,.studioV3Insight,.studioV3BookCard),
+ .adminWorkspace .adminWorkspaceSidebar,
+ .teamPublicPage :is(.teamPublicStat,.teamPublicIntro){
+  border:1px solid CanvasText;box-shadow:none;
+ }
+ .studioV3 .studioV3PageHeading::after,
+ .studioV3 .studioV3OverviewHeader::after,
+ .adminWorkspace .adminWorkspaceHeader::after{
+  background:CanvasText;
+ }
+}
