@@ -22,7 +22,7 @@ for(const [name,engine] of [['Chromium',chromium],['WebKit',webkit]]){
   await page.route('**/runtime-config.js',route=>route.fulfill({status:200,contentType:'application/javascript',
    body:"window.__NLOBI_CONFIG__={supabaseUrl:'https://qa.supabase.local',supabasePublishableKey:'qa',qaMode:true};"}));
   await page.route('https://qa.supabase.local/**',route=>{
-   const url=new URL(route.request().url);
+   const url=new URL(route.request().url());
    const response=url.pathname==='/rest/v1/translations'?[book]:[];
    return route.fulfill({status:200,contentType:'application/json',body:JSON.stringify(response)});
   });
