@@ -59,6 +59,22 @@ for(const [name,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    }));
    assert.equal(studio.fallback,false,'El bundle Studio debe estar disponible tras inicialización QA');
    assert.match(studio.main,/studio|equipo|obras|sesión/i,'Se debe abrir Studio o su acceso protegido');
+   // Una ruta protegida debe mostrar su formulario una vez cargadas las vistas diferidas.
+   const qaSource=fs.readFileSync('scripts/full-quality-check.mjs','utf8');
+   const fixtureSource=qaSource.slice(qaSource.indexOf('const now='),qaSource.indexOf('const viewports='));
+   const {scenarios}=new Function(fixtureSource+'\\nreturn {scenarios};')();
+   const project=scenarios.find(([scenario])=>scenario==='creator-project');
+   assert.ok(project,'No se encontró el escenario de edición Studio');
+   await page.evaluate(data=>{
+    window.__NLOBI_QA__.setState(data);
+    window.__NLOBI_QA__.setView('studio:project:project-1');
+   },project[2]);
+   const projectRender=await page.evaluate(()=>({
+    present:!!document.querySelector('#projectTitle'),
+    main:document.querySelector('main')?.textContent?.slice(0,800),
+    errors:document.querySelector('#app')?.textContent?.slice(0,800)
+   }));
+   assert.ok(projectRender.present,'El formulario de proyecto no se renderizó: '+JSON.stringify({projectRender,errors}));
    assert.deepEqual(errors,[],'No debe haber excepciones en navegador');
    passed++;
   }catch(error){failures.push({name,width,error:String(error),runtime:errors.slice(0,3)})}
