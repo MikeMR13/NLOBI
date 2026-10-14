@@ -2995,7 +2995,7 @@ async function reportComment(id){if(!S.user){go('auth');return}const reason=prom
 function detailFallbackRoute(){const r=S.detailBackRoute;return r&&validRoute(r)&&!r.startsWith('detail:')&&!r.startsWith('reader:')?r:'explore'}
 function goBackFromDetail(){go(detailFallbackRoute())}
 async function openDetail(id){if(S.detailVolumeTranslationId!==id){S.detailVolumeId=null;S.volumeCommentsId=null}S.detailVolumeTranslationId=id;if(!S.view.startsWith('detail:')&&!S.view.startsWith('reader:'))S.detailBackRoute=S.view;try{S.currentDetail=await loadTranslationDetail(id);go('detail:'+id)}catch(e){toast(friendlyError(e),'bad')}}
-async function loadTranslationDetail(id){const base=`/rest/v1/translations?id=eq.${id}&select=id,title,status,language_code,popularity_score,updated_at,novels(id,title,synopsis,cover_url,author_name,genres,tags,demography,novel_type,status,sequel_status),translator_groups(id,name,avatar_url,slug,profile_settings,review_required),volumes!volumes_translation_id_fkey(id,volume_number,title,status,cover_url,epub_fonts,sections(id,title,section_type,section_number,status,sort_order),download_links(id,format,provider,url))&limit=1`;let rows;try{rows=await jreq(base.replace('cover_url,epub_fonts,sections(', 'cover_url,epub_fonts,is_final_volume,sections('))}catch(e){if(!/is_final_volume|42703|PGRST204|schema cache|column .*does not exist/i.test(String(e?.message||e)))throw e;rows=await jreq(base)}const x=rows?.[0]||null;if(!x||!['active','complete','paused'].includes(x.status))return null;const publicVolumeIds=new Set((x.volumes||[]).filter(v=>v.status==='published').map(v=>v.id));const [purchase,support,downloads,credits]=await Promise.all([jreq(`/rest/v1/purchase_links?novel_id=eq.${x.novels?.id}&is_verified=eq.true&select=id,volume_number,store_name,region,language_code,format,url&order=volume_number.asc`),x.translator_groups?.id?jreq(`/rest/v1/support_links?group_id=eq.${x.translator_groups.id}&select=id,label,url&order=created_at.asc`):Promise.resolve([]),publicVolumeIds.size?jreq(`/rest/v1/download_links?volume_id=in.(${[...publicVolumeIds].join(',')})&select=id,volume_id,format,provider,url&order=created_at.asc`):Promise.resolve([]),jreq(`/rest/v1/translation_collaborations?translation_id=eq.${id}&status=eq.accepted&select=invited_group_id`).catch(()=>[])]);const ids=[...new Set((credits||[]).map(c=>c.invited_group_id))];x.collaboration_groups=ids.length?await jreq(`/rest/v1/translator_groups?id=in.(${ids.join(',')})&select=id,name,avatar_url`):[];x.links={purchase:purchase||[],support:support||[],downloads:(downloads||[]).filter(l=>publicVolumeIds.has(l.volume_id))};return x}
+async function loadTranslationDetail(id){const base=`/rest/v1/translations?id=eq.${id}&select=id,title,status,language_code,popularity_score,updated_at,novels(id,title,synopsis,cover_url,author_name,genres,tags,demography,novel_type,status,sequel_status),translator_groups(id,name,avatar_url,slug,profile_settings,review_required),volumes!volumes_translation_id_fkey(id,volume_number,title,status,cover_url,epub_fonts,epub_font_url,epub_font_family,sections(id,title,section_type,section_number,status,sort_order),download_links(id,format,provider,url))&limit=1`;let rows;try{rows=await jreq(base.replace('cover_url,epub_fonts,epub_font_url,epub_font_family,sections(', 'cover_url,epub_fonts,epub_font_url,epub_font_family,is_final_volume,sections('))}catch(e){if(!/is_final_volume|42703|PGRST204|schema cache|column .*does not exist/i.test(String(e?.message||e)))throw e;rows=await jreq(base)}const x=rows?.[0]||null;if(!x||!['active','complete','paused'].includes(x.status))return null;const publicVolumeIds=new Set((x.volumes||[]).filter(v=>v.status==='published').map(v=>v.id));const [purchase,support,downloads,credits]=await Promise.all([jreq(`/rest/v1/purchase_links?novel_id=eq.${x.novels?.id}&is_verified=eq.true&select=id,volume_number,store_name,region,language_code,format,url&order=volume_number.asc`),x.translator_groups?.id?jreq(`/rest/v1/support_links?group_id=eq.${x.translator_groups.id}&select=id,label,url&order=created_at.asc`):Promise.resolve([]),publicVolumeIds.size?jreq(`/rest/v1/download_links?volume_id=in.(${[...publicVolumeIds].join(',')})&select=id,volume_id,format,provider,url&order=created_at.asc`):Promise.resolve([]),jreq(`/rest/v1/translation_collaborations?translation_id=eq.${id}&status=eq.accepted&select=invited_group_id`).catch(()=>[])]);const ids=[...new Set((credits||[]).map(c=>c.invited_group_id))];x.collaboration_groups=ids.length?await jreq(`/rest/v1/translator_groups?id=in.(${ids.join(',')})&select=id,name,avatar_url`):[];x.links={purchase:purchase||[],support:support||[],downloads:(downloads||[]).filter(l=>publicVolumeIds.has(l.volume_id))};return x}
 
 async function uploadPersonalBanner(e){try{const file=e.target.files?.[0];if(!file||!S.user)return;const url=await storageUpload(file,`users/${S.user.id}/banner/${mediaStableName('banner',file)}`,true);const input=$('#profileBannerUrl');if(input)input.value=url;const preview=$('#readerBannerPreview');if(preview)preview.style.backgroundImage='url("'+safeCssUrl(url)+'")';toast('Banner subido. Guarda el perfil para aplicarlo.','ok')}catch(error){toast(friendlyError(error),'bad')}}
 async function uploadPersonalAvatar(e){try{const file=e.target.files?.[0];if(!file||!S.user)return;const url=await storageUpload(file,`users/${S.user.id}/avatar/${mediaStableName('avatar',file)}`,true);const input=$('#profileAvatarUrl');if(input)input.value=url;toast('Avatar subido. Guarda el perfil para aplicarlo.','ok')}catch(err){toast(friendlyError(err),'bad')}}
@@ -3523,7 +3523,7 @@ function readCachedChapter(id){try{return JSON.parse(localStorage.getItem(chapte
 function queueProgress(payload){try{const q=JSON.parse(localStorage.getItem('nlobi_progress_queue')||'[]');const filtered=q.filter(x=>!(x.user_id===payload.user_id&&x.translation_id===payload.translation_id));filtered.push(payload);localStorage.setItem('nlobi_progress_queue',JSON.stringify(filtered))}catch(e){console.warn(e)}}
 async function flushProgressQueue(){if(!navigator.onLine||!S.token)return;let q=[];try{q=JSON.parse(localStorage.getItem('nlobi_progress_queue')||'[]')}catch{}if(!q.length)return;const left=[];for(const p of q){try{await jreq('/rest/v1/reading_progress?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(p.progress)});await jreq('/rest/v1/library_entries?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(p.library)})}catch(e){left.push(p)}}localStorage.setItem('nlobi_progress_queue',JSON.stringify(left));if(q.length&&!left.length)toast('Progreso offline sincronizado.','ok')}
 async function openReader(sectionId,translationId){try{await loadReaderRouteData(sectionId,translationId,{record:true});go('reader:'+sectionId)}catch(e){const cached=readCachedChapter(sectionId);if(cached){S.readerSection=cached;S.readerComments=[];S.readerContinuous=null;S.readerScrollIntent=false;applyReaderPreferencesForVolume(cached.volume_id);go('reader:'+sectionId);toast('Mostrando la copia guardada sin conexión.','ok')}else toast(friendlyError(e),'bad')}}
-async function saveReaderProgress(percent=100,announce=true,sectionOverride=null){try{if(!S.user||!S.readerSection)return;const R=S.readerSection,progress={user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:sectionOverride||R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},currentLib=S.library.find(x=>x.translation_id===R.translation_id),library={user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(currentLib?.status)?currentLib.status:'reading',is_favorite:!!currentLib?.is_favorite};if(!navigator.onLine){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress,library});if(announce)toast('Progreso guardado en este dispositivo. Se sincronizará al volver la conexión.','ok');return}await jreq('/rest/v1/reading_progress?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(progress)});await jreq('/rest/v1/library_entries?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(library)});await loadUser();if(announce)toast(percent>=100?'Lectura marcada como completada.':'Progreso guardado.','ok')}catch(e){const R=S.readerSection;if(S.user&&R){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress:{user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:sectionOverride||R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},library:{user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(S.library.find(x=>x.translation_id===R.translation_id)?.status)?S.library.find(x=>x.translation_id===R.translation_id).status:'reading',is_favorite:!!S.library.find(x=>x.translation_id===R.translation_id)?.is_favorite}});if(announce)toast('No se pudo sincronizar; el progreso quedó guardado localmente.','ok')}else if(announce)toast(friendlyError(e),'bad')}}
+async function saveReaderProgress(percent=100,announce=true,sectionOverride=null,{refreshUser=true}={}){try{if(!S.user||!S.readerSection)return;const R=S.readerSection,progress={user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:sectionOverride||R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},currentLib=S.library.find(x=>x.translation_id===R.translation_id),library={user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(currentLib?.status)?currentLib.status:'reading',is_favorite:!!currentLib?.is_favorite};if(!navigator.onLine){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress,library});if(announce)toast('Progreso guardado en este dispositivo. Se sincronizará al volver la conexión.','ok');return}await jreq('/rest/v1/reading_progress?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(progress)});await jreq('/rest/v1/library_entries?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(library)});if(refreshUser)await loadUser();else{S.readingProgress=[progress,...(S.readingProgress||[]).filter(x=>x.translation_id!==R.translation_id)];const index=S.library.findIndex(x=>x.translation_id===R.translation_id);if(index>=0)S.library[index]={...S.library[index],...library};}if(announce)toast(percent>=100?'Lectura marcada como completada.':'Progreso guardado.','ok')}catch(e){const R=S.readerSection;if(S.user&&R){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress:{user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:sectionOverride||R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},library:{user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(S.library.find(x=>x.translation_id===R.translation_id)?.status)?S.library.find(x=>x.translation_id===R.translation_id).status:'reading',is_favorite:!!S.library.find(x=>x.translation_id===R.translation_id)?.is_favorite}});if(announce)toast('No se pudo sincronizar; el progreso quedó guardado localmente.','ok')}else if(announce)toast(friendlyError(e),'bad')}}
 function setAuthError(message){
  const box=document.getElementById('authError');if(!box)return;
  box.hidden=!message;box.textContent=message||'';
@@ -3725,6 +3725,63 @@ async function loadPublicGroupData(id){
 // El lector no necesita comprar/descargar/comentar al entrar a un capítulo:
  // cargar únicamente los datos de navegación y la identidad de la traducción.
 const readerTranslationMetaCache=new Map();
+// A lo sumo un capítulo anticipado por lectura; no se escribe historial al precargar.
+const readerPrefetchCache=new Map(),READER_PREFETCH_TTL=45000;
+const recordedReaderVisits=new WeakSet();
+async function fetchPublishedReaderSection(sectionId){
+ const cached=readerPrefetchCache.get(sectionId);
+ if(cached&&Date.now()-cached.at<READER_PREFETCH_TTL){
+  readerPrefetchCache.delete(sectionId);
+  const resolved=cached.promise?await cached.promise:cached.section;
+  if(resolved)return resolved;
+  // Una precarga fallida nunca debe impedir reintentar el capítulo real.
+ }
+ readerPrefetchCache.delete(sectionId);
+ const rows=await jreq(`/rest/v1/sections?id=eq.${encodeURIComponent(sectionId)}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`);
+ return rows?.[0]||null;
+}
+function prefetchNextReaderSection(section){
+ const nav=section?.navigation||[],i=nav.findIndex(x=>x.id===section.id),next=nav[i+1];
+ if(!navigator.onLine||navigator.connection?.saveData||document.hidden||!next||
+    next.volume_id!==section.volume_id||readerPrefetchCache.has(next.id))return;
+ const start=()=>{
+  if(!navigator.onLine||document.hidden||S.readerSection?.id!==section.id||readerPrefetchCache.has(next.id))return;
+  const path=`/rest/v1/sections?id=eq.${encodeURIComponent(next.id)}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`;
+  const promise=req(path).then(async r=>r.ok?(await r.json())?.[0]||null:null).catch(()=>null);
+  readerPrefetchCache.set(next.id,{at:Date.now(),promise});
+  void promise.then(found=>{
+   if(readerPrefetchCache.get(next.id)?.promise!==promise)return;
+   if(!found||found.volume_id!==section.volume_id){readerPrefetchCache.delete(next.id);return}
+   readerPrefetchCache.set(next.id,{at:Date.now(),section:found});
+   if(readerPrefetchCache.size>2)readerPrefetchCache.delete(readerPrefetchCache.keys().next().value);
+  });
+ };
+ setTimeout(()=>{
+  if('requestIdleCallback' in window)requestIdleCallback(start,{timeout:1800});
+  else setTimeout(start,650);
+ },300);
+}
+function afterReaderFirstPaint(section,record=true){
+ const run=(attempt=0)=>{
+  if(S.readerSection?.id!==section.id)return;
+  // El primer paint del lector debe preceder al guardado offline pesado.
+  if((!S.view.startsWith('reader:')||!document.querySelector('.readerPaper'))&&attempt<8){
+   setTimeout(()=>run(attempt+1),70);return;
+  }
+  if(!S.view.startsWith('reader:'))return;
+  cacheReaderChapter(section);
+  prefetchNextReaderSection(section);
+  if(record&&S.user&&!recordedReaderVisits.has(section)){
+   recordedReaderVisits.add(section);
+   void Promise.allSettled([
+    recordReadingHistory(section.id,section.translation_id),
+    saveReaderProgress(nonRegressingPercent(currentReaderPercent(false)),false,null,{refreshUser:false})
+   ]);
+  }
+ };
+ if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>setTimeout(run,0));
+ else setTimeout(run,0);
+}
 async function loadReaderTranslationMeta(id){
  const cache=readerTranslationMetaCache.get(id);
  if(cache&&Date.now()-cache.time<90000)return cache.value;
@@ -3740,15 +3797,25 @@ async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}
   const cached=readCachedChapter(sectionId);if(!cached)throw new Error('Este capítulo no está disponible sin conexión todavía.');
   S.readerSection=cached;S.readerComments=[];S.readerScrollIntent=false;applyReaderPreferencesForVolume(cached.volume_id);activateEpubFonts(cached.epub_fonts||[]);return cached
  }
- const secRows=await jreq(`/rest/v1/sections?id=eq.${sectionId}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`);
- const sec=secRows?.[0];if(!sec)throw new Error('El capítulo no está disponible.');
- const volRows=await jreq(`/rest/v1/volumes?id=eq.${sec.volume_id}&status=eq.published&select=id,translation_id,volume_number,title,epub_font_url,epub_font_family,epub_fonts&limit=1`);
- const vol=volRows?.[0];if(!vol)throw new Error('El volumen no está disponible.');
- const trId=vol.translation_id,tr=await loadReaderTranslationMeta(trId);if(!tr)throw new Error('La obra no está disponible.');
+ // Reutiliza la ficha editorial ya cargada, sin descargarla otra vez.
+ const detail=S.currentDetail?.id===translationId?S.currentDetail:null;
+ const knownVolume=detail?.volumes?.find(v=>v.status==='published'&&v.sections?.some(x=>x.id===sectionId&&x.status==='published'));
+ const metaCached=translationId?readerTranslationMetaCache.get(translationId):null;
+ const metaTask=!knownVolume&&translationId&&!metaCached?loadReaderTranslationMeta(translationId).catch(()=>null):null;
+ const sec=await fetchPublishedReaderSection(sectionId);
+ if(!sec)throw new Error('El capítulo no está disponible.');
+ const useDetail=knownVolume?.id===sec.volume_id&&Array.isArray(knownVolume.epub_fonts);
+ const vol=useDetail?{...knownVolume,translation_id:translationId}:
+  (await jreq(`/rest/v1/volumes?id=eq.${encodeURIComponent(sec.volume_id)}&status=eq.published&select=id,translation_id,volume_number,title,epub_font_url,epub_font_family,epub_fonts&limit=1`))?.[0];
+ if(!vol)throw new Error('El volumen no está disponible.');
+ const trId=vol.translation_id;
+ const tr=detail&&trId===detail.id?detail:
+  (metaCached&&Date.now()-metaCached.time<90000?metaCached.value:await(metaTask||loadReaderTranslationMeta(trId)));
+ if(!tr)throw new Error('La obra no está disponible.');
  const navigation=(tr.volumes||[]).filter(v=>v.status==='published').sort((a,b)=>Number(a.volume_number)-Number(b.volume_number)).flatMap(v=>(v.sections||[]).filter(x=>x.status==='published').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(x=>({...x,volume_id:v.id,volume_number:v.volume_number})));
  S.readerSection={...sec,translation_id:trId,volume_number:vol.volume_number,novel_title:tr.novels?.title,translator_groups:tr.translator_groups,navigation,epub_font_url:vol.epub_font_url,epub_font_family:vol.epub_font_family,epub_fonts:vol.epub_fonts?.length?vol.epub_fonts:(vol.epub_font_url?[{url:vol.epub_font_url,family:vol.epub_font_family||'Original',style:'normal',weight:'normal'}]:[])};activateEpubFonts(S.readerSection.epub_fonts);
- cacheReaderChapter(S.readerSection);S.readerContinuous=null;S.readerScrollIntent=false;applyReaderPreferencesForVolume(vol.id);
- if(record&&S.user){await recordReadingHistory(sectionId,trId);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(false)),false)}
+ S.readerSectionCached=false;S.readerContinuous=null;S.readerScrollIntent=false;applyReaderPreferencesForVolume(vol.id);
+ afterReaderFirstPaint(S.readerSection,record);
  return S.readerSection
 }
 async function resolveDynamicRoute(route=S.view){
@@ -3773,7 +3840,7 @@ async function resolveDynamicRoute(route=S.view){
   const c=matches?.[0]||null;S.sharedCollection=c?{...c,reader_collection_items:(c.reader_collection_items||[]).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0))}:null;
   await loadCollectionSocial();
  }else if(kind==='reader'){
-  if(S.readerSection?.id!==id)await loadReaderRouteData(id,null,{record:true});
+  if(S.readerSection?.id!==id||S.readerSectionCached===true)await loadReaderRouteData(id,null,{record:true});
  }else if(route.startsWith('studio:project:')){
   if(!S.user)throw new Error('Inicia sesión para abrir Studio.');
   if(S.studioProject?.id!==id)S.studioProject=await loadStudioProject(id);
@@ -3788,7 +3855,7 @@ async function resolveDynamicRoute(route=S.view){
   try{S.mediaFiles=await storageWalk(`teams/${id}`);await loadMediaUsage(S.mediaFiles.map(x=>x.path))}finally{S.mediaLoading=false}
  }
 }
-function restoreReaderRouteFromCache(){if(!S.view.startsWith('reader:')||S.readerSection)return;const id=S.view.split(':')[1],cached=readCachedChapter(id);if(cached){S.readerSection=cached;S.readerComments=[]}}
+function restoreReaderRouteFromCache(){if(!S.view.startsWith('reader:')||S.readerSection)return;const id=S.view.split(':')[1],cached=readCachedChapter(id);if(cached){S.readerSection=cached;S.readerSectionCached=true;S.readerComments=[]}}
 function registerPwa(){
  if(!('serviceWorker'in navigator)||!location.protocol.startsWith('http'))return;
  let refreshing=false;
@@ -3801,7 +3868,7 @@ function registerPwa(){
 window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstallPrompt=e;S.pwaInstallReady=true;render()});
 window.addEventListener('appinstalled',()=>{deferredInstallPrompt=null;S.pwaInstallReady=false;toast('El Obi del Lector quedó instalado.','ok');render()});
 async function boot(isRetry=false){
- let homeFirstPaintDone=false;
+ let homeFirstPaintDone=false,readerFirstPaintDone=false;
  S.catalogLoading=true;
  applySiteAppearance();
  S.view=routeFromHash();restoreReaderRouteFromCache();setNetworkBadge();render();
@@ -3818,6 +3885,21 @@ async function boot(isRetry=false){
      render();
     }
    })():Promise.resolve();
+   // Entrada directa al lector: el catálogo editorial no forma parte de la ruta crítica.
+   if(S.view.startsWith('reader:')){
+    const requestedRoute=S.view;
+    await resolveDynamicRoute(requestedRoute);
+    S.catalogLoading=false;S.err='';
+    if(S.view===requestedRoute){render();readerFirstPaintDone=true}
+    // Sin bloquear ni repintar el capítulo, preparar catálogo para navegación posterior.
+    const warmCatalog=()=>{void loadCatalog(false).then(()=>{S.catalogLoaded=true}).catch(e=>console.warn('[NLOBI] Catálogo diferido',e))};
+    if('requestIdleCallback' in window)requestIdleCallback(warmCatalog,{timeout:4500});
+    else setTimeout(warmCatalog,1800);
+    if(S.token)void sessionTask.then(()=>{
+     if(S.view===requestedRoute&&S.readerSection?.id===requestedRoute.slice(7)&&S.user)
+      afterReaderFirstPaint(S.readerSection,true);
+    });
+   }else{
    try{await loadCatalog(S.view==='home');S.catalogLoaded=true;S.err=''}catch(error){S.err=friendlyError(error,'No se pudo cargar el catálogo.');console.warn('[NLOBI] El catálogo no impide recuperar la cuenta',error)}
    S.catalogLoading=false;
    // El contenido principal y su portada no esperan valoraciones ni información de cuenta.
@@ -3841,9 +3923,10 @@ async function boot(isRetry=false){
    if(S.view!=='home')render();
    // Evitar promesas sin manejar; estas tareas siguen independientemente del primer render.
    void ratingsTask;void sessionTask;
+   }
   }else{await resolveDynamicRoute(S.view);S.err=''}
  }catch(e){S.err=friendlyError(e,'No se pudo cargar la información en este momento.');console.error(e)}
- finally{S.catalogLoading=false;if(!homeFirstPaintDone||S.view!=='home'||S.err)render()}
+ finally{S.catalogLoading=false;if(!readerFirstPaintDone&&(!homeFirstPaintDone||S.view!=='home'||S.err))render()}
  const notice=sessionStorage.getItem('nlobi_auth_notice');
  if(notice){sessionStorage.removeItem('nlobi_auth_notice');const bad=notice.startsWith('error:'),msg=notice.slice(notice.indexOf(':')+1);toast(bad?'No se pudo confirmar el correo: '+msg:msg,bad?'bad':'ok')}
 }
