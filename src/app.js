@@ -3490,7 +3490,7 @@ function readCachedChapter(id){try{return JSON.parse(localStorage.getItem(chapte
 function queueProgress(payload){try{const q=JSON.parse(localStorage.getItem('nlobi_progress_queue')||'[]');const filtered=q.filter(x=>!(x.user_id===payload.user_id&&x.translation_id===payload.translation_id));filtered.push(payload);localStorage.setItem('nlobi_progress_queue',JSON.stringify(filtered))}catch(e){console.warn(e)}}
 async function flushProgressQueue(){if(!navigator.onLine||!S.token)return;let q=[];try{q=JSON.parse(localStorage.getItem('nlobi_progress_queue')||'[]')}catch{}if(!q.length)return;const left=[];for(const p of q){try{await jreq('/rest/v1/reading_progress?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(p.progress)});await jreq('/rest/v1/library_entries?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(p.library)})}catch(e){left.push(p)}}localStorage.setItem('nlobi_progress_queue',JSON.stringify(left));if(q.length&&!left.length)toast('Progreso offline sincronizado.','ok')}
 async function openReader(sectionId,translationId){try{await loadReaderRouteData(sectionId,translationId,{record:true});go('reader:'+sectionId)}catch(e){const cached=readCachedChapter(sectionId);if(cached){S.readerSection=cached;S.readerComments=[];S.readerContinuous=null;S.readerScrollIntent=false;applyReaderPreferencesForVolume(cached.volume_id);go('reader:'+sectionId);toast('Mostrando la copia guardada sin conexión.','ok')}else toast(friendlyError(e),'bad')}}
-async function saveReaderProgress(percent=100,announce=true,sectionOverride=null){try{if(!S.user||!S.readerSection)return;const R=S.readerSection,progress={user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:sectionOverride||R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},currentLib=S.library.find(x=>x.translation_id===R.translation_id),library={user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(currentLib?.status)?currentLib.status:'reading',is_favorite:!!currentLib?.is_favorite};if(!navigator.onLine){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress,library});if(announce)toast('Progreso guardado en este dispositivo. Se sincronizará al volver la conexión.','ok');return}await jreq('/rest/v1/reading_progress?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(progress)});await jreq('/rest/v1/library_entries?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(library)});await loadUser();if(announce)toast(percent>=100?'Lectura marcada como completada.':'Progreso guardado.','ok')}catch(e){const R=S.readerSection;if(S.user&&R){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress:{user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:sectionOverride||R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},library:{user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(S.library.find(x=>x.translation_id===R.translation_id)?.status)?S.library.find(x=>x.translation_id===R.translation_id).status:'reading',is_favorite:!!S.library.find(x=>x.translation_id===R.translation_id)?.is_favorite}});if(announce)toast('No se pudo sincronizar; el progreso quedó guardado localmente.','ok')}else if(announce)toast(friendlyError(e),'bad')}}
+async function saveReaderProgress(percent=100,announce=true,sectionOverride=null,{refreshUser=true}={}){try{if(!S.user||!S.readerSection)return;const R=S.readerSection,progress={user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:sectionOverride||R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},currentLib=S.library.find(x=>x.translation_id===R.translation_id),library={user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(currentLib?.status)?currentLib.status:'reading',is_favorite:!!currentLib?.is_favorite};if(!navigator.onLine){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress,library});if(announce)toast('Progreso guardado en este dispositivo. Se sincronizará al volver la conexión.','ok');return}await jreq('/rest/v1/reading_progress?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(progress)});await jreq('/rest/v1/library_entries?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(library)});if(refreshUser)await loadUser();else{S.readingProgress=[progress,...(S.readingProgress||[]).filter(x=>x.translation_id!==R.translation_id)];const index=S.library.findIndex(x=>x.translation_id===R.translation_id);if(index>=0)S.library[index]={...S.library[index],...library};}if(announce)toast(percent>=100?'Lectura marcada como completada.':'Progreso guardado.','ok')}catch(e){const R=S.readerSection;if(S.user&&R){queueProgress({user_id:S.user.id,translation_id:R.translation_id,progress:{user_id:S.user.id,translation_id:R.translation_id,volume_id:R.volume_id,section_id:sectionOverride||R.id,progress_percent:percent,anchor:percent>=100?'end':'b:0',updated_at:new Date().toISOString()},library:{user_id:S.user.id,translation_id:R.translation_id,status:['completed','paused','dropped'].includes(S.library.find(x=>x.translation_id===R.translation_id)?.status)?S.library.find(x=>x.translation_id===R.translation_id).status:'reading',is_favorite:!!S.library.find(x=>x.translation_id===R.translation_id)?.is_favorite}});if(announce)toast('No se pudo sincronizar; el progreso quedó guardado localmente.','ok')}else if(announce)toast(friendlyError(e),'bad')}}
 function setAuthError(message){
  const box=document.getElementById('authError');if(!box)return;
  box.hidden=!message;box.textContent=message||'';
@@ -3692,6 +3692,54 @@ async function loadPublicGroupData(id){
 // El lector no necesita comprar/descargar/comentar al entrar a un capítulo:
  // cargar únicamente los datos de navegación y la identidad de la traducción.
 const readerTranslationMetaCache=new Map();
+// A lo sumo un capítulo anticipado por lectura; no se escribe historial al precargar.
+const readerPrefetchCache=new Map(),READER_PREFETCH_TTL=45000;
+async function fetchPublishedReaderSection(sectionId){
+ const cached=readerPrefetchCache.get(sectionId);
+ if(cached&&Date.now()-cached.at<READER_PREFETCH_TTL){
+  readerPrefetchCache.delete(sectionId);
+  return cached.promise?await cached.promise:cached.section;
+ }
+ readerPrefetchCache.delete(sectionId);
+ const rows=await jreq(`/rest/v1/sections?id=eq.${encodeURIComponent(sectionId)}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`);
+ return rows?.[0]||null;
+}
+function prefetchNextReaderSection(section){
+ const nav=section?.navigation||[],i=nav.findIndex(x=>x.id===section.id),next=nav[i+1];
+ if(!navigator.onLine||navigator.connection?.saveData||document.hidden||!next||
+    next.volume_id!==section.volume_id||readerPrefetchCache.has(next.id))return;
+ const start=()=>{
+  if(!navigator.onLine||document.hidden||S.readerSection?.id!==section.id||readerPrefetchCache.has(next.id))return;
+  const path=`/rest/v1/sections?id=eq.${encodeURIComponent(next.id)}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`;
+  const promise=req(path).then(async r=>r.ok?(await r.json())?.[0]||null:null).catch(()=>null);
+  readerPrefetchCache.set(next.id,{at:Date.now(),promise});
+  void promise.then(found=>{
+   if(readerPrefetchCache.get(next.id)?.promise!==promise)return;
+   if(!found||found.volume_id!==section.volume_id){readerPrefetchCache.delete(next.id);return}
+   readerPrefetchCache.set(next.id,{at:Date.now(),section:found});
+   if(readerPrefetchCache.size>2)readerPrefetchCache.delete(readerPrefetchCache.keys().next().value);
+  });
+ };
+ setTimeout(()=>{
+  if('requestIdleCallback' in window)requestIdleCallback(start,{timeout:1800});
+  else setTimeout(start,650);
+ },300);
+}
+function afterReaderFirstPaint(section,record=true){
+ const run=()=>{
+  if(S.readerSection?.id!==section.id)return;
+  cacheReaderChapter(section);
+  prefetchNextReaderSection(section);
+  if(record&&S.user){
+   void Promise.allSettled([
+    recordReadingHistory(section.id,section.translation_id),
+    saveReaderProgress(nonRegressingPercent(currentReaderPercent(false)),false,null,{refreshUser:false})
+   ]);
+  }
+ };
+ if(typeof requestAnimationFrame==='function')requestAnimationFrame(()=>setTimeout(run,0));
+ else setTimeout(run,0);
+}
 async function loadReaderTranslationMeta(id){
  const cache=readerTranslationMetaCache.get(id);
  if(cache&&Date.now()-cache.time<90000)return cache.value;
@@ -3707,15 +3755,25 @@ async function loadReaderRouteData(sectionId,translationId=null,{record=true}={}
   const cached=readCachedChapter(sectionId);if(!cached)throw new Error('Este capítulo no está disponible sin conexión todavía.');
   S.readerSection=cached;S.readerComments=[];S.readerScrollIntent=false;applyReaderPreferencesForVolume(cached.volume_id);activateEpubFonts(cached.epub_fonts||[]);return cached
  }
- const secRows=await jreq(`/rest/v1/sections?id=eq.${sectionId}&status=eq.published&select=id,volume_id,title,section_type,section_number,content&limit=1`);
- const sec=secRows?.[0];if(!sec)throw new Error('El capítulo no está disponible.');
- const volRows=await jreq(`/rest/v1/volumes?id=eq.${sec.volume_id}&status=eq.published&select=id,translation_id,volume_number,title,epub_font_url,epub_font_family,epub_fonts&limit=1`);
- const vol=volRows?.[0];if(!vol)throw new Error('El volumen no está disponible.');
- const trId=vol.translation_id,tr=await loadReaderTranslationMeta(trId);if(!tr)throw new Error('La obra no está disponible.');
+ // Reutiliza la ficha editorial ya cargada, sin descargarla otra vez.
+ const detail=S.currentDetail?.id===translationId?S.currentDetail:null;
+ const knownVolume=detail?.volumes?.find(v=>v.status==='published'&&v.sections?.some(x=>x.id===sectionId&&x.status==='published'));
+ const metaCached=translationId?readerTranslationMetaCache.get(translationId):null;
+ const metaTask=!knownVolume&&translationId&&!metaCached?loadReaderTranslationMeta(translationId):null;
+ const sec=await fetchPublishedReaderSection(sectionId);
+ if(!sec)throw new Error('El capítulo no está disponible.');
+ const useDetail=knownVolume?.id===sec.volume_id&&Array.isArray(knownVolume.epub_fonts)&&knownVolume.epub_fonts.length>0;
+ const vol=useDetail?{...knownVolume,translation_id:translationId}:
+  (await jreq(`/rest/v1/volumes?id=eq.${encodeURIComponent(sec.volume_id)}&status=eq.published&select=id,translation_id,volume_number,title,epub_font_url,epub_font_family,epub_fonts&limit=1`))?.[0];
+ if(!vol)throw new Error('El volumen no está disponible.');
+ const trId=vol.translation_id;
+ const tr=detail&&trId===detail.id?detail:
+  (metaCached&&Date.now()-metaCached.time<90000?metaCached.value:await(metaTask||loadReaderTranslationMeta(trId)));
+ if(!tr)throw new Error('La obra no está disponible.');
  const navigation=(tr.volumes||[]).filter(v=>v.status==='published').sort((a,b)=>Number(a.volume_number)-Number(b.volume_number)).flatMap(v=>(v.sections||[]).filter(x=>x.status==='published').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(x=>({...x,volume_id:v.id,volume_number:v.volume_number})));
  S.readerSection={...sec,translation_id:trId,volume_number:vol.volume_number,novel_title:tr.novels?.title,translator_groups:tr.translator_groups,navigation,epub_font_url:vol.epub_font_url,epub_font_family:vol.epub_font_family,epub_fonts:vol.epub_fonts?.length?vol.epub_fonts:(vol.epub_font_url?[{url:vol.epub_font_url,family:vol.epub_font_family||'Original',style:'normal',weight:'normal'}]:[])};activateEpubFonts(S.readerSection.epub_fonts);
- cacheReaderChapter(S.readerSection);S.readerContinuous=null;S.readerScrollIntent=false;applyReaderPreferencesForVolume(vol.id);
- if(record&&S.user){await recordReadingHistory(sectionId,trId);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(false)),false)}
+ S.readerSectionCached=false;S.readerContinuous=null;S.readerScrollIntent=false;applyReaderPreferencesForVolume(vol.id);
+ afterReaderFirstPaint(S.readerSection,record);
  return S.readerSection
 }
 async function resolveDynamicRoute(route=S.view){
@@ -3740,7 +3798,7 @@ async function resolveDynamicRoute(route=S.view){
   const c=matches?.[0]||null;S.sharedCollection=c?{...c,reader_collection_items:(c.reader_collection_items||[]).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0))}:null;
   await loadCollectionSocial();
  }else if(kind==='reader'){
-  if(S.readerSection?.id!==id)await loadReaderRouteData(id,null,{record:true});
+  if(S.readerSection?.id!==id||S.readerSectionCached===true)await loadReaderRouteData(id,null,{record:true});
  }else if(route.startsWith('studio:project:')){
   if(!S.user)throw new Error('Inicia sesión para abrir Studio.');
   if(S.studioProject?.id!==id)S.studioProject=await loadStudioProject(id);
@@ -3755,7 +3813,7 @@ async function resolveDynamicRoute(route=S.view){
   try{S.mediaFiles=await storageWalk(`teams/${id}`);await loadMediaUsage(S.mediaFiles.map(x=>x.path))}finally{S.mediaLoading=false}
  }
 }
-function restoreReaderRouteFromCache(){if(!S.view.startsWith('reader:')||S.readerSection)return;const id=S.view.split(':')[1],cached=readCachedChapter(id);if(cached){S.readerSection=cached;S.readerComments=[]}}
+function restoreReaderRouteFromCache(){if(!S.view.startsWith('reader:')||S.readerSection)return;const id=S.view.split(':')[1],cached=readCachedChapter(id);if(cached){S.readerSection=cached;S.readerSectionCached=true;S.readerComments=[]}}
 function registerPwa(){
  if(!('serviceWorker'in navigator)||!location.protocol.startsWith('http'))return;
  let refreshing=false;
