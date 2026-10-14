@@ -74,6 +74,8 @@ jobs:
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
           npx playwright install --with-deps chromium firefox webkit
+      - name: OBI editorial book details phase 3 (Chromium + WebKit)
+        run: node scripts/editorial-books-phase3-check.mjs
       - name: OBI editorial collections phase 2 (Chromium + WebKit)
         run: node scripts/editorial-collections-phase2-check.mjs
       - name: OBI editorial visual identity phase 1 (Chromium + WebKit)
