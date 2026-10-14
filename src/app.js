@@ -3729,8 +3729,13 @@ function prefetchNextReaderSection(section){
  },300);
 }
 function afterReaderFirstPaint(section,record=true){
- const run=()=>{
+ const run=(attempt=0)=>{
   if(S.readerSection?.id!==section.id)return;
+  // El primer paint del lector debe preceder al guardado offline pesado.
+  if((!S.view.startsWith('reader:')||!document.querySelector('.readerPaper'))&&attempt<8){
+   setTimeout(()=>run(attempt+1),70);return;
+  }
+  if(!S.view.startsWith('reader:'))return;
   cacheReaderChapter(section);
   prefetchNextReaderSection(section);
   if(record&&S.user&&!recordedReaderVisits.has(section)){
