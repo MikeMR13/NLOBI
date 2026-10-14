@@ -6943,6 +6943,14 @@ html[data-site-motion="reduce"]
 .studioVolumeCard .studioSectionActions .sectionSort{
  display:flex;gap:6px;flex-shrink:0;
 }
+/* Keep chapter order controls comfortably touchable in every Studio viewport. */
+.studioVolumeCard .studioSectionActions>.sectionSort .btn{
+ box-sizing:border-box;
+ flex:0 0 44px;
+ min-width:44px;
+ min-height:44px;
+ padding-inline:0;
+}
 .studioVolumeCard .studioSectionRow>.studioReviewPanel{
  grid-column:1/-1;width:100%;min-width:0;margin:2px 0 0;
 }
