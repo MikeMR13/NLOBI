@@ -3994,16 +3994,26 @@ function featuredBannerReducedMotion(){
 }
 function syncFeaturedBannerControls(root){
  if(!root)return;
- const progress=Math.max(0,Math.min(1,featuredBannerElapsed/FEATURED_BANNER_PERIOD_MS));
- root.style.setProperty('--featured-progress',String(progress));
+ const progress=String(Math.max(0,Math.min(1,featuredBannerElapsed/FEATURED_BANNER_PERIOD_MS)));
+ if(root.style.getPropertyValue('--featured-progress')!==progress)
+  root.style.setProperty('--featured-progress',progress);
  const toggle=root.querySelector('[data-featured-toggle]');
  if(!toggle)return;
  const reduced=featuredBannerReducedMotion();
- toggle.disabled=reduced;
- toggle.textContent=featuredBannerPaused?'▶':'Ⅱ';
- toggle.setAttribute('aria-label',(featuredBannerPaused?'Reanudar':'Pausar')+' rotación automática');
- toggle.setAttribute('aria-pressed',String(featuredBannerPaused));
- toggle.title=reduced?'Movimiento reducido: navegación manual':(featuredBannerPaused?'Reanudar':'Pausar')+' banner automático';
+ if(toggle.disabled!==reduced)toggle.disabled=reduced;
+ const glyph=featuredBannerPaused?'▶':'Ⅱ';
+ if(toggle.textContent!==glyph)toggle.textContent=glyph;
+ const label=(featuredBannerPaused?'Reanudar':'Pausar')+' rotación automática';
+ if(toggle.getAttribute('aria-label')!==label)toggle.setAttribute('aria-label',label);
+ const pressed=String(featuredBannerPaused);
+ if(toggle.getAttribute('aria-pressed')!==pressed)toggle.setAttribute('aria-pressed',pressed);
+ const title=reduced?'Movimiento reducido: navegación manual':(featuredBannerPaused?'Reanudar':'Pausar')+' banner automático';
+ if(toggle.title!==title)toggle.title=title;
+ const kicker=root.querySelector('.featuredBannerAutoLabel');
+ if(kicker){
+  const caption=reduced?'MANUAL':(featuredBannerPaused?'EN PAUSA':'AUTO · 8 S');
+  if(kicker.textContent!==caption)kicker.textContent=caption;
+ }
 }
 function tickFeaturedBanner(){
  const now=Date.now(),elapsed=Math.max(0,Math.min(500,now-featuredBannerLastTick));
@@ -4015,7 +4025,7 @@ function tickFeaturedBanner(){
  const isActive=!document.hidden&&!featuredBannerPaused&&!featuredBannerReducedMotion()&&
    (!root.matches(':hover')||featuredBannerExplicitPlay)&&
    (!root.contains(document.activeElement)||document.activeElement===root.querySelector('[data-featured-toggle]'))&&
-   rect.bottom>0&&rect.top<window.innerHeight&&featuredNovels().length>1;
+   rect.bottom>0&&rect.top<window.innerHeight&&root.querySelectorAll('[data-featured-index]').length>1;
  if(isActive){
   featuredBannerElapsed+=elapsed;
   if(featuredBannerElapsed>=FEATURED_BANNER_PERIOD_MS){
