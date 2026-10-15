@@ -12,7 +12,7 @@ const catalog=[
  {id:'t1',title:'Obra uno',novels:{title:'Obra uno'},translator_groups:{id:'g1',name:'Equipo A'}},
  {id:'t2',title:'Obra dos',novels:{title:'Obra dos'},translator_groups:{id:'g2',name:'Equipo B'}}
 ];
-const S={user:{id:'reader1'},follows:[{target_type:'translation',target_id:'t1'}],readSections:['c1'],
+const S={user:{id:'reader1'},follows:[{target_type:'translation',target_id:'t1'}],readSections:['c2'],
  publishedVolumes:[{id:'v1',translation_id:'t1',title:'Libro primero',volume_number:1,published_at:now,status:'published'},{id:'v2',translation_id:'t2',title:'Libro segundo',volume_number:1,published_at:now,status:'published'}],
  publishedSections:[{id:'c1',volume_id:'v1',title:'Capítulo uno',published_at:now,status:'published'},{id:'c2',volume_id:'v2',title:'Capítulo dos',published_at:now,status:'published'}]};
 const component=win.createReleasesPhase2({S,nav:()=>'<nav></nav>',status:()=>'',esc:v=>String(v),visibleCatalog:()=>catalog,titleOf:t=>t.novels?.title||t.title,safeMediaUrl:()=>'',volumeReleaseDate:()=>'',render:()=>{}});
@@ -26,8 +26,10 @@ assert.ok(page.includes('Silenciar'),'La vista permite silenciar obras');
 store.set('nlobi:releases:v2:reader1',JSON.stringify({grouping:'chapter',mode:'calendar',onlyFollowing:true,hideRead:true,compact:true,muted:[]}));
 const secondS={...S};
 const filtered=win.createReleasesPhase2({S:secondS,nav:()=>'',status:()=>'',esc:v=>String(v),visibleCatalog:()=>catalog,titleOf:t=>t.title,safeMediaUrl:()=>'',volumeReleaseDate:()=>'',render:()=>{}});
-assert.equal(filtered.prepared().length,1,'El filtro personal no oculta capítulos de otra cuenta ni los no leídos seguidos');
-assert.equal(filtered.prepared()[0].type,'volume');
+assert.equal(filtered.prepared().length,2,'Conservar publicaciones no leídas de obras seguidas');
+assert.ok(filtered.prepared().every(e=>e.translation.id==='t1'),'Solo mostrar las obras seguidas');
+secondS.readSections=['c1'];
+assert.equal(filtered.prepared().length,0,'Ocultar un volumen que ya tiene todos sus capítulos leídos');
 const other={...S,user:{id:'reader2'}};
 const isolated=win.createReleasesPhase2({S:other,nav:()=>'',status:()=>'',esc:v=>String(v),visibleCatalog:()=>catalog,titleOf:t=>t.title,safeMediaUrl:()=>'',volumeReleaseDate:()=>'',render:()=>{}});
 assert.equal(isolated.prepared().length,2,'Las preferencias son individuales por usuario');
