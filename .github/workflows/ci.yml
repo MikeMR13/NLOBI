@@ -47,6 +47,8 @@ jobs:
         run: node scripts/studio-phase7-check.mjs
       - name: OX-MR glossary phase 1 regression
         run: node scripts/glossary-phase1-check.mjs
+      - name: OX-MR launches phase 2 regression
+        run: node scripts/releases-phase2-check.mjs
       - name: Studio editorial workflow regression
         run: node scripts/studio-status-workflow-check.mjs
       - name: Studio original and translation status filters regression
@@ -82,6 +84,8 @@ jobs:
           npx playwright install --with-deps chromium firefox webkit
       - name: Contextual glossary reader (Chromium + WebKit)
         run: node scripts/glossary-phase1-browser-check.mjs
+      - name: Advanced launches phase 2 (Chromium + WebKit)
+        run: node scripts/releases-phase2-browser-check.mjs
       - name: Studio rows, volume synopsis and Home emphasis (Chromium + WebKit)
         run: node scripts/studio-volume-home-fix-check.mjs
       - name: OBI editorial workspaces phase 4 (Chromium + WebKit)
