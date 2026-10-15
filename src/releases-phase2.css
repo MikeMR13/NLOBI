@@ -34,6 +34,7 @@
 .releaseV2Calendar>.muted{margin-top:18px;line-height:1.6}
 .studioV7Calendar{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin:16px 0}
 .studioV7CalendarHead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.studioV7CalendarHead .btn{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
 .studioV7CalendarHead strong{text-transform:capitalize;font:700 1.1rem Georgia,serif}
 .studioV7CalendarHead p{margin:5px 0;color:var(--muted);font-size:.83rem}
 .studioV7CalendarGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin:10px 0}
