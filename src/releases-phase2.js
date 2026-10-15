@@ -115,7 +115,7 @@ window.createReleasesPhase2=function createReleasePhase2(ctx){
   <p class="muted">Las fechas futuras programadas por un equipo son privadas en Studio hasta que se publiquen. Este calendario nunca revela borradores.</p></section>`;
  }
  function view(){
-  hydrate();const source=dataset(),entries=prepared(),pageSize=Math.max(30,Math.min(300,Number(S.releaseShown)||30));
+  hydrate();const source=dataset(),entries=prepared(),pageSize=Math.max(30,Number(S.releaseShown)||30);
   const groups=[...new Map(source.map(e=>[groupId(e),{id:groupId(e),name:e.translation.translator_groups?.name||'Equipo traductor'}])).values()].filter(g=>g.id).sort((a,b)=>a.name.localeCompare(b.name,'es'));
   const list=entries.slice(0,pageSize),muted=preferences.muted.map(id=>{const found=source.find(e=>e.translation.id===id);return found?.translation||null}).filter(Boolean);
   const type=S.releaseType||'all',group=S.releaseTeam||'all';
@@ -158,7 +158,7 @@ window.createReleasesPhase2=function createReleasePhase2(ctx){
   });
   attach('[data-rel-unmute]',b=>{preferences.muted=preferences.muted.filter(x=>x!==b.dataset.relUnmute);save();render()});
   attach('[data-rel-unmute-panel]',()=>{S.releaseShowMuted=!S.releaseShowMuted;render()});
-  attach('[data-rel-more]',()=>{S.releaseShown=Math.min(300,(S.releaseShown||30)+30);render()});
+  attach('[data-rel-more]',()=>{S.releaseShown=(S.releaseShown||30)+30;render()});
   attach('[data-rel-month]',b=>{
    const step=Number(b.dataset.relMonth)||0;S.releaseMonthOffset=step===0?0:Math.max(-48,Math.min(12,(S.releaseMonthOffset||0)+step));render();
   });
