@@ -89,6 +89,11 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
       await teamLink.getAttribute('href')!=='#group:qa-equipo'||
       await teamLink.locator('img.homeFeaturedTeamImage').getAttribute('src')!=='https://example.test/team-logo.png')
     failures.push({engineName,label:test.label,error:'el logo PNG no enlaza al equipo traductor correcto'});
+   if(await teamLink.count()===1){
+    const target=await teamLink.boundingBox();
+    if(!target||target.height<43||target.width<43)
+     failures.push({engineName,label:test.label,error:'enlace PNG inferior al objetivo táctil de 44px',target});
+   }
    if(engineName==='Chromium'&&(test.width===390||test.width===1185)){
     await page.locator('[data-home-featured]').screenshot({path:'visual-results/home-featured/'+test.label+'.png',animations:'disabled'});
    }
