@@ -45,6 +45,9 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
     const info=root?.querySelector('.homeFeaturedInfo');
     const r=el=>{const b=el?.getBoundingClientRect();return b&&{x:b.left,y:b.top,w:b.width,h:b.height,right:b.right,bottom:b.bottom}};
     return {card:r(root),cover:r(book),visual:r(cover),info:r(info),title:r(title),
+      synopsis:root?.querySelector('.homeFeaturedSynopsis p')?.textContent||'',
+      synopsisVisible:!!root?.querySelector('.homeFeaturedSynopsis p')&&
+       getComputedStyle(root.querySelector('.homeFeaturedSynopsis p')).display!=='none',
       fullTitle:title?.textContent||'',titleClipped:!!title&&title.scrollHeight>title.clientHeight+2,
       overflow:document.documentElement.scrollWidth-document.documentElement.clientWidth,
       arrows:[...root.querySelectorAll('[data-featured-step]')].map(x=>r(x)),
@@ -56,12 +59,17 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    if(before.overflow>2)failures.push({engineName,label:test.label,error:'desbordamiento',before});
    if(before.titleClipped)failures.push({engineName,label:test.label,error:'título recortado',before});
    if(!before.cover||!before.title||!before.card||!before.visual)failures.push({engineName,label:test.label,error:'falta contenido',before});
+   if(!before.synopsisVisible||!before.synopsis.includes('Sinopsis extensa'))
+    failures.push({engineName,label:test.label,error:'sinopsis destacada oculta o no enlazada a la obra',before});
    if(before.cover?.right>before.visual?.right+2||before.cover?.bottom>before.visual?.bottom+2)
     failures.push({engineName,label:test.label,error:'portada cortada',before});
-   if(desktop&&!(before.visual.right<=before.info.x+2&&before.card.h<=530&&before.cover.w<=198))
-    failures.push({engineName,label:test.label,error:'escritorio sin dos columnas o tamaños excesivos',before});
-   if(!desktop&&!(before.visual.right<=before.info.x+2&&before.card.h<=410&&before.cover.w<=125))
-    failures.push({engineName,label:test.label,error:'móvil no compacto en dos columnas',before});
+   const minCover=test.width===320?105:test.width===390?132:test.width===768?170:205;
+   if(desktop&&!(before.visual.right<=before.info.x+2&&before.card.h<=525&&
+      before.cover.w>=minCover&&before.cover.w<=270))
+    failures.push({engineName,label:test.label,error:'portada destacada insuficiente o desbordada en escritorio',before,minCover});
+   if(!desktop&&!(before.visual.right<=before.info.x+2&&before.card.h<=485&&
+      before.cover.w>=minCover&&before.cover.w<=180))
+    failures.push({engineName,label:test.label,error:'portada destacada insuficiente o desbordada en móvil',before,minCover});
    if(before.arrows.some(x=>!x||x.h<43||x.w<43))
     failures.push({engineName,label:test.label,error:'controles pequeños',before});
    if(engineName==='Chromium'&&(test.width===390||test.width===1185)){
