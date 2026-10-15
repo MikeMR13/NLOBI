@@ -72,6 +72,13 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
     failures.push({engineName,label:test.label,error:'portada destacada insuficiente o desbordada en móvil',before,minCover});
    if(before.arrows.some(x=>!x||x.h<43||x.w<43))
     failures.push({engineName,label:test.label,error:'controles pequeños',before});
+   const autoplayToggle=page.locator('[data-featured-toggle]'),meter=page.locator('.featuredBannerMeterFill');
+   if(await autoplayToggle.count()!==1||await meter.count()!==1)
+    failures.push({engineName,label:test.label,error:'faltan control de reproducción o indicador de progreso'});
+   else if(test.motion==='reduce'&&!(await autoplayToggle.isDisabled()))
+    failures.push({engineName,label:test.label,error:'movimiento reducido debe desactivar autoplay'});
+   else if(test.motion!=='reduce'&&(await autoplayToggle.isDisabled()))
+    failures.push({engineName,label:test.label,error:'autoplay desactivado sin preferencia de movimiento reducido'});
    if(engineName==='Chromium'&&(test.width===390||test.width===1185)){
     await page.locator('[data-home-featured]').screenshot({path:'visual-results/home-featured/'+test.label+'.png',animations:'disabled'});
    }
@@ -82,6 +89,30 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    await page.locator('[data-featured-step="-1"]').click();
    const restored=await measure();
    if(restored.fullTitle!==before.fullTitle)failures.push({engineName,label:test.label,error:'la flecha anterior no restaura novela'});
+   // Se verifica el avance REAL del banner, y que Play lo reactive sin exigir perder el foco.
+   if(engineName==='Chromium'&&test.width===390){
+    await autoplayToggle.click();
+    if(await autoplayToggle.getAttribute('aria-pressed')!=='true')
+     failures.push({engineName,label:test.label,error:'Pausar no detiene el banner'});
+    await page.mouse.move(1,1);
+    await page.waitForTimeout(1100);
+    if((await measure()).fullTitle!==before.fullTitle)
+     failures.push({engineName,label:test.label,error:'avance no autorizado mientras está pausado'});
+    await autoplayToggle.click();
+    if(await autoplayToggle.getAttribute('aria-pressed')!=='false')
+     failures.push({engineName,label:test.label,error:'Reanudar no activa el banner'});
+    // El puntero ya no está encima de la sinopsis: el foco permanece en Play.
+    await page.mouse.move(1,1);
+    try{
+     await page.waitForFunction(previous=>document.querySelector('.homeFeaturedSlideInfo h2')?.textContent!==previous,
+      before.fullTitle,{timeout:11000});
+    }catch{
+     failures.push({engineName,label:test.label,error:'no se realizó el avance automático después de reanudar'});
+    }
+    const automatic=await measure();
+    if(automatic.titleClipped||automatic.overflow>2||automatic.card.h!==before.card.h)
+     failures.push({engineName,label:test.label,error:'el avance automático alteró la maqueta',automatic});
+   }
    if(errors.length)failures.push({engineName,label:test.label,error:'errores JS',errors});
    results.push({engine:engineName,width:test.width,cardHeight:before.card?.h,coverWidth:before.cover?.w,coverHeight:before.cover?.h,titleClipped:before.titleClipped});
   }catch(error){failures.push({engineName,label:test.label,error:String(error)})}

@@ -7224,3 +7224,111 @@ html[data-site-motion="reduce"]
  .homeEditorial .homeFeatured{border:1px solid CanvasText;background:Canvas}
  .homeEditorial .homeFeaturedSynopsis{border-left-color:CanvasText}
 }
+
+
+/* HOME — Banner automático de novelas. Los controles flotan dentro del panel:
+   no modifican su altura ni el elemento LCP. */
+.homeEditorial .homeFeatured{isolation:isolate}
+.homeEditorial .featuredBannerToggle{
+ position:absolute;
+ z-index:5;
+ top:10px;
+ left:10px;
+ display:grid;
+ place-items:center;
+ width:44px;
+ height:44px;
+ min-width:44px;
+ min-height:44px;
+ padding:0;
+ border:1px solid color-mix(in srgb,var(--accent) 55%,var(--line));
+ border-radius:10px;
+ background:var(--panel);
+ color:var(--text);
+ box-shadow:0 3px 12px rgba(0,0,0,.16);
+ font-size:1rem;
+ font-weight:900;
+ line-height:1;
+ cursor:pointer;
+}
+.homeEditorial .featuredBannerToggle:is(:hover,:focus-visible){
+ background:var(--accent);
+ color:#111;
+}
+.homeEditorial .featuredBannerToggle:focus-visible{
+ outline:3px solid var(--accent);
+ outline-offset:3px;
+}
+.homeEditorial .featuredBannerToggle:disabled{
+ opacity:.65;
+ cursor:not-allowed;
+}
+.homeEditorial .featuredBannerAutoLabel{
+ position:absolute;
+ z-index:3;
+ top:17px;
+ left:60px;
+ padding:4px 6px;
+ border-radius:5px;
+ background:var(--panel);
+ color:var(--text);
+ font-size:.62rem;
+ font-weight:850;
+ letter-spacing:.06em;
+ line-height:1.1;
+ pointer-events:none;
+}
+.homeEditorial .featuredBannerMeter{
+ position:absolute;
+ z-index:4;
+ left:0;
+ right:0;
+ bottom:0;
+ height:4px;
+ background:color-mix(in srgb,var(--accent) 20%,var(--panel2));
+ pointer-events:none;
+ overflow:hidden;
+}
+.homeEditorial .featuredBannerMeterFill{
+ display:block;
+ width:100%;
+ height:100%;
+ background:var(--accent);
+ transform:scaleX(var(--featured-progress,0));
+ transform-origin:left center;
+ transition:transform .26s linear;
+}
+@keyframes obiFeaturedAmbient{
+ from{opacity:.62;transform:rotate(3deg) scale(.98)}
+ to{opacity:1;transform:rotate(3deg) scale(1.035)}
+}
+@media(prefers-reduced-motion:no-preference){
+ html:not([data-site-motion="reduce"]) .homeEditorial .homeFeaturedVisual::before{
+  animation:obiFeaturedAmbient 7s ease-in-out infinite alternate;
+ }
+}
+@media(max-width:370px){
+ .homeEditorial .featuredBannerAutoLabel{
+  top:16px;
+  left:56px;
+  padding:3px 4px;
+  font-size:.56rem;
+  letter-spacing:.02em;
+ }
+ .homeEditorial .featuredBannerToggle{left:7px;top:8px;width:44px;height:44px;min-width:44px;min-height:44px}
+}
+@media(prefers-reduced-motion:reduce){
+ .homeEditorial .homeFeaturedVisual::before{animation:none!important}
+ .homeEditorial .featuredBannerMeterFill{transition:none!important}
+}
+html[data-site-motion="reduce"] .homeEditorial .homeFeaturedVisual::before{
+ animation:none!important;
+}
+html[data-site-motion="reduce"] .homeEditorial .featuredBannerMeterFill{
+ transition:none!important;
+}
+@media(forced-colors:active){
+ .homeEditorial .featuredBannerToggle{border:1px solid ButtonText;background:ButtonFace;color:ButtonText;box-shadow:none}
+ .homeEditorial .featuredBannerMeter{border-top:1px solid CanvasText}
+ .homeEditorial .featuredBannerMeterFill{background:Highlight}
+}

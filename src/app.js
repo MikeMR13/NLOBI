@@ -569,22 +569,25 @@ function rotateFeaturedBook(nextIndex,manual=false){
  });
  const count=root.querySelector('[data-featured-count]');
  if(count)count.textContent=(index+1)+' de '+books.length;
- if(manual)featuredPauseUntil=Date.now()+15000;
+ featuredBannerElapsed=0;
+ featuredBannerLastTick=Date.now();
+ if(manual)featuredBannerExplicitPlay=false;
+ syncFeaturedBannerControls(root);
  // La diapositiva cambia inmediatamente (sin bloquear links ni el teclado).
  // Solo su contenido visual recibe animación; las dimensiones son constantes.
  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&document.documentElement.dataset.siteMotion!=='reduce'){
   const cover=visual.querySelector('.homeFeaturedBook');
   if(cover&&typeof cover.animate==='function'){
    cover.animate([
-    {opacity:.35,transform:'perspective(850px) rotate(-2deg) rotateY(12deg) translateY(8px)'},
+    {opacity:.12,transform:'perspective(950px) rotate(-5deg) rotateY(10deg) translate3d(15px,8px,0) scale(.95)'},
     {opacity:1,transform:'rotate(-2deg)'}
-   ],{duration:360,easing:'cubic-bezier(.22,.8,.24,1)'});
+   ],{duration:560,easing:'cubic-bezier(.2,.75,.25,1)'});
   }
   if(typeof info.animate==='function'){
    info.animate([
-    {opacity:.35,transform:'translate3d(0,7px,0)'},
+    {opacity:.12,transform:'translate3d(0,11px,0)'},
     {opacity:1,transform:'translate3d(0,0,0)'}
-   ],{duration:300,easing:'cubic-bezier(.2,.72,.25,1)'});
+   ],{duration:490,easing:'cubic-bezier(.2,.72,.25,1)'});
   }
  }
 }
@@ -596,7 +599,7 @@ function home(){
  const genreLinks=[...new Set(items.flatMap(x=>x.novels?.genres||[]).filter(Boolean))].slice(0,6);
  return `${nav()}<main class="wrap homeEditorial">${status()}
  <section class="homeShowcase" aria-label="Bienvenida y obra destacada"><div class="homeShowcaseCopy"><span class="homeEyebrow">EL OBI DEL LECTOR <span aria-hidden="true">—</span> BIBLIOTECA DE NOVELAS LIGERAS</span><h1>Abre un libro.<br><em>Entra en otra historia.</em></h1><p>Tu rincón para descubrir novelas ligeras, seguir traducciones y disfrutar cada capítulo a tu ritmo.</p><div class="homeShowcaseActions"><button class="btn primary" data-v="explore">Explorar novelas <span aria-hidden="true">→</span></button><button class="btn" data-v="${S.user?'library':'auth'}">${S.user?'Mi biblioteca':'Crear cuenta'}</button></div><div class="homeShowcaseNote"><span aria-hidden="true">✦</span> Nuevas historias, un capítulo a la vez.</div></div>
- <div class="homeFeatured" data-home-featured aria-label="${real?'Novela destacada':'Vista previa de la biblioteca'}">${spotlight?`<div class="homeFeaturedVisual">${featuredVisualMarkup(spotlight)}</div><div class="homeFeaturedInfo"><div class="homeFeaturedSlideInfo" aria-live="off">${featuredInfoMarkup(spotlight,real)}</div>${featured.length>1?`<div class="featuredCarouselControls" aria-label="Controles de la galería de libros"><button type="button" class="featuredCarouselArrow" data-featured-step="-1" aria-label="Libro anterior">‹</button><div class="featuredCarouselDots" aria-label="Progreso de la galería">${featured.map((book,i)=>`<span class="featuredCarouselDot ${spotlight.id===book.id?'active':''}" data-featured-index="${i}" aria-hidden="true"></span>`).join('')}<span class="featuredCarouselCount" data-featured-count aria-live="off">${((S.featuredIndex||0)%featured.length)+1} de ${featured.length}</span></div><button type="button" class="featuredCarouselArrow" data-featured-step="1" aria-label="Libro siguiente">›</button></div>`:''}</div>`:'<div class="homeFeaturedEmpty"><span>物語</span><strong>Tu próxima historia te espera.</strong></div>'}</div></section>
+ <div class="homeFeatured" data-home-featured aria-label="${real?'Novela destacada':'Vista previa de la biblioteca'}">${spotlight?`<div class="homeFeaturedVisual">${featuredVisualMarkup(spotlight)}</div><div class="homeFeaturedInfo"><div class="homeFeaturedSlideInfo" aria-live="off">${featuredInfoMarkup(spotlight,real)}</div>${featured.length>1?`<div class="featuredCarouselControls" aria-label="Controles de la galería de libros"><button type="button" class="featuredCarouselArrow" data-featured-step="-1" aria-label="Libro anterior">‹</button><div class="featuredCarouselDots" aria-label="Progreso de la galería">${featured.map((book,i)=>`<span class="featuredCarouselDot ${spotlight.id===book.id?'active':''}" data-featured-index="${i}" aria-hidden="true"></span>`).join('')}<span class="featuredCarouselCount" data-featured-count aria-live="off">${((S.featuredIndex||0)%featured.length)+1} de ${featured.length}</span></div><button type="button" class="featuredCarouselArrow" data-featured-step="1" aria-label="Libro siguiente">›</button></div>`:''}</div>${featured.length>1?`<button type="button" class="featuredBannerToggle" data-featured-toggle aria-label="${featuredBannerPaused?'Reanudar':'Pausar'} rotación automática" aria-pressed="${featuredBannerPaused?'true':'false'}" title="${featuredBannerReducedMotion()?'Movimiento reducido: navegación manual':(featuredBannerPaused?'Reanudar':'Pausar')+' banner automático'}" ${featuredBannerReducedMotion()?'disabled':''}>${featuredBannerPaused?'▶':'Ⅱ'}</button><span class="featuredBannerAutoLabel" aria-hidden="true">AUTO · 8 S</span><span class="featuredBannerMeter" aria-hidden="true"><span class="featuredBannerMeterFill"></span></span>`:''}`:'<div class="homeFeaturedEmpty"><span>物語</span><strong>Tu próxima historia te espera.</strong></div>'}</div></section>
  ${homeReadingProgress()}${homePersonalRecommendations(items)}
  ${newVolumes.length&&!publishedVolumeReleases(items).length?`<section class="newVolumeAnnouncement" aria-label="Aviso de nuevos lanzamientos"><div><strong>¡NUEVOS VOLÚMENES!</strong><p>${newVolumes.length===1?"Un volumen nuevo acaba de llegar a la biblioteca.":`${newVolumes.length} obras tienen volúmenes recién publicados.`}</p></div><button class="btn primary" data-v="releases">Ver todos los lanzamientos →</button></section>`:""}
  ${homeNewVolumeReleases(items)}
@@ -2463,7 +2466,7 @@ document.querySelectorAll('[data-studio-project-jump]').forEach(b=>b.onclick=()=
  if(a==='teams'){go('studio:teams');return}
  });
  $$('[data-account-team]').forEach(b=>b.onclick=()=>openStudioTeam(b.dataset.accountTeam));
- $$('[data-featured-step]').forEach(b=>b.onclick=()=>rotateFeaturedBook((S.featuredIndex||0)+Number(b.dataset.featuredStep),true));$$('[data-home-genre]').forEach(b=>b.onclick=()=>{S.searchGenre=b.dataset.homeGenre;go('explore')});$$('[data-shelf-scroll]').forEach(b=>b.onclick=()=>{const track=document.getElementById(b.getAttribute('aria-controls'));if(!track||b.disabled)return;const tile=track.querySelector(':scope > article');const cardWidth=tile?.getBoundingClientRect().width||220;const gap=parseFloat(getComputedStyle(track).columnGap)||0;const step=Math.max(cardWidth+gap,Math.min(track.clientWidth*.92,(cardWidth+gap)*2));track.scrollBy({left:Number(b.dataset.direction)*step,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});const retry=$('#retryBackend');if(retry)retry.onclick=()=>boot(true);const toggleSiteMode=()=>{siteAppearance.mode=document.body.classList.contains('dark')?'light':'dark';localStorage.setItem('nlobi_dark',siteAppearance.mode==='dark'?'1':'0');saveSiteAppearance();render()};
+ $$('[data-featured-step]').forEach(b=>b.onclick=()=>rotateFeaturedBook((S.featuredIndex||0)+Number(b.dataset.featuredStep),true));$$('[data-featured-toggle]').forEach(b=>b.onclick=()=>{featuredBannerPaused=!featuredBannerPaused;featuredBannerExplicitPlay=!featuredBannerPaused;featuredBannerElapsed=0;featuredBannerLastTick=Date.now();syncFeaturedBannerControls(b.closest('[data-home-featured]'));});$$('[data-home-genre]').forEach(b=>b.onclick=()=>{S.searchGenre=b.dataset.homeGenre;go('explore')});$$('[data-shelf-scroll]').forEach(b=>b.onclick=()=>{const track=document.getElementById(b.getAttribute('aria-controls'));if(!track||b.disabled)return;const tile=track.querySelector(':scope > article');const cardWidth=tile?.getBoundingClientRect().width||220;const gap=parseFloat(getComputedStyle(track).columnGap)||0;const step=Math.max(cardWidth+gap,Math.min(track.clientWidth*.92,(cardWidth+gap)*2));track.scrollBy({left:Number(b.dataset.direction)*step,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});const retry=$('#retryBackend');if(retry)retry.onclick=()=>boot(true);const toggleSiteMode=()=>{siteAppearance.mode=document.body.classList.contains('dark')?'light':'dark';localStorage.setItem('nlobi_dark',siteAppearance.mode==='dark'?'1':'0');saveSiteAppearance();render()};
 const th=$('#theme');if(th)th.onclick=toggleSiteMode;
 const thQuick=$('#themeMobileQuick');if(thQuick)thQuick.onclick=toggleSiteMode;
 const thMobile=$('#themeMobile');if(thMobile)thMobile.onclick=toggleSiteMode;
@@ -3981,19 +3984,59 @@ async function refreshPublicReleases(force=false){
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)refreshPublicReleases(true)});
 window.addEventListener('focus',()=>refreshPublicReleases());
 window.setInterval(()=>refreshPublicReleases(),60000);
-let featuredPauseUntil=0;
-window.setInterval(()=>{
- if(S.view!=='home'||document.hidden||Date.now()<featuredPauseUntil||
-    window.matchMedia('(prefers-reduced-motion: reduce)').matches||
-    document.documentElement.dataset.siteMotion==='reduce')return;
+// Rotación editorial discreta: solo avanza si el banner es visible y no se está leyendo.
+// El temporizador guarda tiempo ACTIVO, evitando cambios bruscos al regresar a la pestaña.
+const FEATURED_BANNER_PERIOD_MS=8000;
+let featuredBannerPaused=false,featuredBannerExplicitPlay=false,featuredBannerElapsed=0,featuredBannerLastTick=Date.now();
+function featuredBannerReducedMotion(){
+ return window.matchMedia('(prefers-reduced-motion: reduce)').matches||
+   document.documentElement.dataset.siteMotion==='reduce';
+}
+function syncFeaturedBannerControls(root){
+ if(!root)return;
+ const progress=String(Math.max(0,Math.min(1,featuredBannerElapsed/FEATURED_BANNER_PERIOD_MS)));
+ if(root.style.getPropertyValue('--featured-progress')!==progress)
+  root.style.setProperty('--featured-progress',progress);
+ const toggle=root.querySelector('[data-featured-toggle]');
+ if(!toggle)return;
+ const reduced=featuredBannerReducedMotion();
+ if(toggle.disabled!==reduced)toggle.disabled=reduced;
+ const glyph=featuredBannerPaused?'▶':'Ⅱ';
+ if(toggle.textContent!==glyph)toggle.textContent=glyph;
+ const label=(featuredBannerPaused?'Reanudar':'Pausar')+' rotación automática';
+ if(toggle.getAttribute('aria-label')!==label)toggle.setAttribute('aria-label',label);
+ const pressed=String(featuredBannerPaused);
+ if(toggle.getAttribute('aria-pressed')!==pressed)toggle.setAttribute('aria-pressed',pressed);
+ const title=reduced?'Movimiento reducido: navegación manual':(featuredBannerPaused?'Reanudar':'Pausar')+' banner automático';
+ if(toggle.title!==title)toggle.title=title;
+ const kicker=root.querySelector('.featuredBannerAutoLabel');
+ if(kicker){
+  const caption=reduced?'MANUAL':(featuredBannerPaused?'EN PAUSA':'AUTO · 8 S');
+  if(kicker.textContent!==caption)kicker.textContent=caption;
+ }
+}
+function tickFeaturedBanner(){
+ const now=Date.now(),elapsed=Math.max(0,Math.min(500,now-featuredBannerLastTick));
+ featuredBannerLastTick=now;
+ if(S.view!=='home'){featuredBannerElapsed=0;return}
  const root=document.querySelector('[data-home-featured]');
- if(!root||root.matches(':hover')||root.contains(document.activeElement))return;
- const box=root.getBoundingClientRect();
- if(box.bottom<=0||box.top>=window.innerHeight)return;
- const n=featuredNovels().length;
- if(n<2)return;
- rotateFeaturedBook((S.featuredIndex||0)+1);
-},6500);
+ if(!root){featuredBannerElapsed=0;return}
+ const rect=root.getBoundingClientRect();
+ const isActive=!document.hidden&&!featuredBannerPaused&&!featuredBannerReducedMotion()&&
+   (!root.matches(':hover')||featuredBannerExplicitPlay)&&
+   (!root.contains(document.activeElement)||document.activeElement===root.querySelector('[data-featured-toggle]'))&&
+   rect.bottom>0&&rect.top<window.innerHeight&&root.querySelectorAll('[data-featured-index]').length>1;
+ if(isActive){
+  featuredBannerElapsed+=elapsed;
+  if(featuredBannerElapsed>=FEATURED_BANNER_PERIOD_MS){
+   featuredBannerElapsed=0;
+   rotateFeaturedBook((S.featuredIndex||0)+1);
+  }
+ }
+ root.classList.toggle('featuredBannerInactive',!isActive);
+ syncFeaturedBannerControls(root);
+}
+window.setInterval(tickFeaturedBanner,250);
 window.addEventListener('hashchange',async()=>{const previous=S.view,route=routeFromHash(),snapshot=S.detailScrollReturn,restore=previous.startsWith('reader:')&&route.startsWith('detail:')&&snapshot?.translationId===route.slice(7),done=startPageBusy('Abriendo página…');S.notificationBellOpen='';pendingRouteFocus=true;if(restore&&snapshot.volumeId)S.detailVolumeId=snapshot.volumeId;S.view=route;render();if(!restore)window.scrollTo({top:0,behavior:'smooth'});try{await resolveDynamicRoute(route);if(S.view===route)S.err=''}catch(e){if(S.view===route)S.err=friendlyError(e,'No se pudo abrir esta vista.');console.error(e)}finally{done();if(S.view===route){render();if(restore)requestAnimationFrame(()=>{window.scrollTo({top:snapshot.y,behavior:'instant'});if(S.detailScrollReturn===snapshot)S.detailScrollReturn=null})}}});
 window.addEventListener('online',async()=>{S.online=true;setNetworkBadge();toast('Conexión restablecida.','ok');await flushProgressQueue();boot(true)});
 window.addEventListener('offline',()=>{S.online=false;setNetworkBadge();render();toast('Sin conexión. Los capítulos guardados siguen disponibles.','bad')});
