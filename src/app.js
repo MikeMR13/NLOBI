@@ -547,7 +547,9 @@ function featuredInfoMarkup(book,real){
  // Solo la sinopsis real de la obra; no inventar resúmenes editoriales.
  const synopsis=String(book?.novels?.synopsis||book?.synopsis||'').trim();
  const excerpt=synopsis.length>360?synopsis.slice(0,360).replace(/\s+\S*$/,'').trimEnd()+'…':synopsis;
- return `<span class="homeFeaturedLabel">${real?'EN NUESTRA BIBLIOTECA':'VISTA PREVIA'}</span><h2><a class="homeFeaturedTitleLink" href="#detail:${encodeURIComponent(book.id)}">${esc(titleOf(book))}</a></h2><div class="homeFeaturedSynopsis"><span class="homeFeaturedSynopsisKicker">SINOPSIS</span><p>${esc(excerpt||'Sinopsis aún no disponible.')}</p></div><a class="homeFeaturedLink" href="#detail:${encodeURIComponent(book.id)}">Descubrir novela <span aria-hidden="true">↗</span></a>`;
+ const team=book?.translator_groups;
+ const translatorLink=team?.id?`<a class="homeFeaturedTeamLink" href="#group:${encodeURIComponent(team.slug||team.id)}" aria-label="Ver perfil del equipo traductor ${esc(team.name||'Traductor')}">${teamBrandLinkContent(team,'featured')}</a>`:'';
+ return `<span class="homeFeaturedLabel">${real?'EN NUESTRA BIBLIOTECA':'VISTA PREVIA'}</span><h2><a class="homeFeaturedTitleLink" href="#detail:${encodeURIComponent(book.id)}">${esc(titleOf(book))}</a></h2><div class="homeFeaturedSynopsis"><span class="homeFeaturedSynopsisKicker">SINOPSIS</span><p>${esc(excerpt||'Sinopsis aún no disponible.')}</p></div><a class="homeFeaturedLink" href="#detail:${encodeURIComponent(book.id)}">Descubrir novela <span aria-hidden="true">↗</span></a>${translatorLink}`;
 }
 // Solo reemplaza el contenido de la tarjeta, nunca reconstruye la página ni sus controles.
 function rotateFeaturedBook(nextIndex,manual=false){
@@ -571,8 +573,7 @@ function rotateFeaturedBook(nextIndex,manual=false){
  if(count)count.textContent=(index+1)+' de '+books.length;
  featuredBannerElapsed=0;
  featuredBannerLastTick=Date.now();
- if(manual)featuredBannerExplicitPlay=false;
- syncFeaturedBannerControls(root);
+ syncFeaturedBannerProgress(root);
  // La diapositiva cambia inmediatamente (sin bloquear links ni el teclado).
  // Solo su contenido visual recibe animación; las dimensiones son constantes.
  if(!window.matchMedia('(prefers-reduced-motion: reduce)').matches&&document.documentElement.dataset.siteMotion!=='reduce'){
@@ -599,7 +600,7 @@ function home(){
  const genreLinks=[...new Set(items.flatMap(x=>x.novels?.genres||[]).filter(Boolean))].slice(0,6);
  return `${nav()}<main class="wrap homeEditorial">${status()}
  <section class="homeShowcase" aria-label="Bienvenida y obra destacada"><div class="homeShowcaseCopy"><span class="homeEyebrow">EL OBI DEL LECTOR <span aria-hidden="true">—</span> BIBLIOTECA DE NOVELAS LIGERAS</span><h1>Abre un libro.<br><em>Entra en otra historia.</em></h1><p>Tu rincón para descubrir novelas ligeras, seguir traducciones y disfrutar cada capítulo a tu ritmo.</p><div class="homeShowcaseActions"><button class="btn primary" data-v="explore">Explorar novelas <span aria-hidden="true">→</span></button><button class="btn" data-v="${S.user?'library':'auth'}">${S.user?'Mi biblioteca':'Crear cuenta'}</button></div><div class="homeShowcaseNote"><span aria-hidden="true">✦</span> Nuevas historias, un capítulo a la vez.</div></div>
- <div class="homeFeatured" data-home-featured aria-label="${real?'Novela destacada':'Vista previa de la biblioteca'}">${spotlight?`<div class="homeFeaturedVisual">${featuredVisualMarkup(spotlight)}</div><div class="homeFeaturedInfo"><div class="homeFeaturedSlideInfo" aria-live="off">${featuredInfoMarkup(spotlight,real)}</div>${featured.length>1?`<div class="featuredCarouselControls" aria-label="Controles de la galería de libros"><button type="button" class="featuredCarouselArrow" data-featured-step="-1" aria-label="Libro anterior">‹</button><div class="featuredCarouselDots" aria-label="Progreso de la galería">${featured.map((book,i)=>`<span class="featuredCarouselDot ${spotlight.id===book.id?'active':''}" data-featured-index="${i}" aria-hidden="true"></span>`).join('')}<span class="featuredCarouselCount" data-featured-count aria-live="off">${((S.featuredIndex||0)%featured.length)+1} de ${featured.length}</span></div><button type="button" class="featuredCarouselArrow" data-featured-step="1" aria-label="Libro siguiente">›</button></div>`:''}</div>${featured.length>1?`<button type="button" class="featuredBannerToggle" data-featured-toggle aria-label="${featuredBannerPaused?'Reanudar':'Pausar'} rotación automática" aria-pressed="${featuredBannerPaused?'true':'false'}" title="${featuredBannerReducedMotion()?'Movimiento reducido: navegación manual':(featuredBannerPaused?'Reanudar':'Pausar')+' banner automático'}" ${featuredBannerReducedMotion()?'disabled':''}>${featuredBannerPaused?'▶':'Ⅱ'}</button><span class="featuredBannerAutoLabel" aria-hidden="true">AUTO · 8 S</span><span class="featuredBannerMeter" aria-hidden="true"><span class="featuredBannerMeterFill"></span></span>`:''}`:'<div class="homeFeaturedEmpty"><span>物語</span><strong>Tu próxima historia te espera.</strong></div>'}</div></section>
+ <div class="homeFeatured" data-home-featured aria-label="${real?'Novela destacada':'Vista previa de la biblioteca'}">${spotlight?`<div class="homeFeaturedVisual">${featuredVisualMarkup(spotlight)}</div><div class="homeFeaturedInfo"><div class="homeFeaturedSlideInfo" aria-live="off">${featuredInfoMarkup(spotlight,real)}</div>${featured.length>1?`<div class="featuredCarouselControls" aria-label="Controles de la galería de libros"><button type="button" class="featuredCarouselArrow" data-featured-step="-1" aria-label="Libro anterior">‹</button><div class="featuredCarouselDots" aria-label="Progreso de la galería">${featured.map((book,i)=>`<span class="featuredCarouselDot ${spotlight.id===book.id?'active':''}" data-featured-index="${i}" aria-hidden="true"></span>`).join('')}<span class="featuredCarouselCount" data-featured-count aria-live="off">${((S.featuredIndex||0)%featured.length)+1} de ${featured.length}</span></div><button type="button" class="featuredCarouselArrow" data-featured-step="1" aria-label="Libro siguiente">›</button></div>`:''}</div>${featured.length>1?`<span class="featuredBannerMeter" aria-hidden="true"><span class="featuredBannerMeterFill"></span></span>`:''}`:'<div class="homeFeaturedEmpty"><span>物語</span><strong>Tu próxima historia te espera.</strong></div>'}</div></section>
  ${homeReadingProgress()}${homePersonalRecommendations(items)}
  ${newVolumes.length&&!publishedVolumeReleases(items).length?`<section class="newVolumeAnnouncement" aria-label="Aviso de nuevos lanzamientos"><div><strong>¡NUEVOS VOLÚMENES!</strong><p>${newVolumes.length===1?"Un volumen nuevo acaba de llegar a la biblioteca.":`${newVolumes.length} obras tienen volúmenes recién publicados.`}</p></div><button class="btn primary" data-v="releases">Ver todos los lanzamientos →</button></section>`:""}
  ${homeNewVolumeReleases(items)}
@@ -1665,7 +1666,21 @@ function adminAudit(){return `<section class="adminModeration" data-admin-modera
 function admin(){if(!S.user||!S.admin)return `${nav()}<main class="wrap"><div class="empty"><div class="emptyArt">🔒</div><strong>Acceso restringido</strong><div>Esta sección requiere permisos de administración global.</div></div></main>`;const title=({overview:'Resumen general',applications:'Solicitudes',users:'Usuarios',teams:'Equipos',reports:'Reportes',content:'Contenido',links:'Enlaces oficiales',beta:'Centro Beta',audit:'Auditoría'})[S.adminTab]||'Resumen general';const body=S.adminTab==='applications'?adminApplications():S.adminTab==='users'?adminUsers():S.adminTab==='teams'?adminTeams():S.adminTab==='reports'?adminReports():S.adminTab==='content'?adminContent():S.adminTab==='links'?adminLinks():S.adminTab==='beta'?adminBeta():S.adminTab==='audit'?adminAudit():adminOverview();return `${nav()}<main class="wrap adminWorkspace">${status()}<header class="adminWorkspaceHeader"><div><span class="adminWorkspaceEyebrow">EL OBI DEL LECTOR / ADMINISTRACIÓN GLOBAL</span><h1>Panel de administración</h1><p>Supervisión y gestión exclusiva de la plataforma.</p></div><span class="adminAccessMark">Acceso global</span></header><div class="adminWorkspaceLayout"><aside class="adminWorkspaceSidebar"><div class="adminSidebarTitle"><span class="adminSidebarLogo" aria-hidden="true">帯</span><div><strong>Consola global</strong><small>Gestión de plataforma</small></div></div>${adminTabs()}</aside><section class="adminWorkspaceMain" aria-labelledby="adminCurrentTitle"><div class="adminMobileNav"><label for="adminMobileSection">Sección administrativa</label><select id="adminMobileSection" aria-label="Seleccionar sección administrativa">${[['overview','Resumen'],['applications','Solicitudes'],['users','Usuarios'],['teams','Equipos'],['reports','Reportes'],['content','Contenido'],['links','Enlaces oficiales'],['beta','Beta'],['audit','Auditoría']].map(([key,label])=>`<option value="${key}" ${S.adminTab===key?'selected':''}>${label}</option>`).join('')}</select></div><div class="adminCurrentHead"><div><span class="librarySectionKicker">ADMINISTRACIÓN / ${esc(title.toUpperCase())}</span><h2 id="adminCurrentTitle">${esc(title)}</h2></div></div><div class="adminWorkspaceContent">${body}</div></section></div></main>`}
 
 function renderVolumeComments(){const comments=S.readerComments||[],roots=comments.filter(x=>!x.parent_id);const renderComment=c=>`<article class="comment ${c.parent_id?'reply':''}"><div class="row"><strong>${esc(c.profiles?.display_name||c.profiles?.username||'Usuario')}</strong><span class="muted">${esc((c.created_at||'').slice(0,10))}</span></div>${c.is_spoiler?`<button type="button" class="spoiler spoilerButton" data-reveal-spoiler aria-expanded="false">${esc(c.body||'')}</button>`:`<p>${esc(c.body||'')}</p>`}<div class="row"><button class="btn" data-like-comment="${c.id}">♥ ${c.like_count||0}</button>${S.user?`<button class="btn" data-reply-comment="${c.id}">Responder</button><button class="btn danger" data-report-comment="${c.id}">Reportar</button>`:''}</div></article>`;return `<section class="commentBox" aria-label="Comentarios del volumen"><h3>Comentarios del volumen</h3><p class="muted">Comenta sobre el volumen completo. Los mensajes anteriores de sus capítulos se conservan.</p>${S.user?`<div class="field"><label for="newCommentBody">Tu comentario</label><textarea id="newCommentBody" rows="3"></textarea></div><label><input type="checkbox" id="newCommentSpoiler"> Contiene spoilers</label><button class="btn primary" id="postComment">Publicar comentario</button>`:'<p class="muted">Inicia sesión para comentar.</p>'}${roots.length?roots.map(c=>renderComment(c)+comments.filter(x=>x.parent_id===c.id).map(renderComment).join('')).join(''):'<p class="muted">Todavía no hay comentarios.</p>'}</section>`}
-function teamLinkedLogo(group,context){if(!group||!group.id)return '';const cfg=teamSettings(group),reader=context==='reader',key=reader?'show_reader_logo':'show_novel_logo';if(cfg[key]===false)return '';const source=reader?(cfg.reader_logo_url||group.avatar_url):group.avatar_url;if(!source)return '';const url=safeMediaUrl(source);if(!url||url==='#')return '';const size=reader?Math.max(48,Math.min(240,Number(cfg.reader_logo_width)||128)):27;return '<img class="teamContextLogo'+(reader?' teamReaderBrandImage':'')+'" style="'+(reader?'--reader-team-logo-width:'+size+'px':'')+'" loading="lazy" src="'+esc(url)+'" data-team-fallback="'+esc(group.name||'Traductor')+'" alt="" aria-hidden="true">'}
+// La misma imagen de identidad personalizada se utiliza en el lector y los banners.
+// Si el equipo no tiene PNG, reutilizamos su avatar; sin imagen, mostramos el nombre.
+function teamLinkedLogo(group,context){
+ if(!group?.id)return '';
+ const cfg=teamSettings(group),reader=context==='reader',featured=context==='featured';
+ const useReaderIdentity=reader||featured;
+ if(cfg[useReaderIdentity?'show_reader_logo':'show_novel_logo']===false)return '';
+ const source=useReaderIdentity?(cfg.reader_logo_url||group.avatar_url):group.avatar_url;
+ const url=source?safeMediaUrl(source):'';
+ if(!url||url==='#')return '';
+ const size=Math.max(48,Math.min(240,Number(cfg.reader_logo_width)||128));
+ const className='teamContextLogo'+(reader?' teamReaderBrandImage':'')+(featured?' homeFeaturedTeamImage':'');
+ const dimension=useReaderIdentity?'--reader-team-logo-width:'+size+'px':'';
+ return '<img class="'+className+'" style="'+dimension+'" loading="lazy" decoding="async" src="'+esc(url)+'" data-team-fallback="'+esc(group.name||'Traductor')+'" alt="" aria-hidden="true">';
+}
 function teamBrandLinkContent(group,context){const logo=teamLinkedLogo(group,context);return logo||'<span>Equipo: '+esc(group?.name||'Traductor')+'</span>'}
 function detailReadingEntry(D,vols){
  const available=vols.flatMap(v=>(v.sections||[]).filter(sec=>sec.status==='published').sort((a,b)=>(a.sort_order||0)-(b.sort_order||0)).map(section=>({volume:v,section})));
@@ -2466,7 +2481,7 @@ document.querySelectorAll('[data-studio-project-jump]').forEach(b=>b.onclick=()=
  if(a==='teams'){go('studio:teams');return}
  });
  $$('[data-account-team]').forEach(b=>b.onclick=()=>openStudioTeam(b.dataset.accountTeam));
- $$('[data-featured-step]').forEach(b=>b.onclick=()=>rotateFeaturedBook((S.featuredIndex||0)+Number(b.dataset.featuredStep),true));$$('[data-featured-toggle]').forEach(b=>b.onclick=()=>{featuredBannerPaused=!featuredBannerPaused;featuredBannerExplicitPlay=!featuredBannerPaused;featuredBannerElapsed=0;featuredBannerLastTick=Date.now();syncFeaturedBannerControls(b.closest('[data-home-featured]'));});$$('[data-home-genre]').forEach(b=>b.onclick=()=>{S.searchGenre=b.dataset.homeGenre;go('explore')});$$('[data-shelf-scroll]').forEach(b=>b.onclick=()=>{const track=document.getElementById(b.getAttribute('aria-controls'));if(!track||b.disabled)return;const tile=track.querySelector(':scope > article');const cardWidth=tile?.getBoundingClientRect().width||220;const gap=parseFloat(getComputedStyle(track).columnGap)||0;const step=Math.max(cardWidth+gap,Math.min(track.clientWidth*.92,(cardWidth+gap)*2));track.scrollBy({left:Number(b.dataset.direction)*step,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});const retry=$('#retryBackend');if(retry)retry.onclick=()=>boot(true);const toggleSiteMode=()=>{siteAppearance.mode=document.body.classList.contains('dark')?'light':'dark';localStorage.setItem('nlobi_dark',siteAppearance.mode==='dark'?'1':'0');saveSiteAppearance();render()};
+ $$('[data-featured-step]').forEach(b=>b.onclick=()=>rotateFeaturedBook((S.featuredIndex||0)+Number(b.dataset.featuredStep),true));$$('[data-home-genre]').forEach(b=>b.onclick=()=>{S.searchGenre=b.dataset.homeGenre;go('explore')});$$('[data-shelf-scroll]').forEach(b=>b.onclick=()=>{const track=document.getElementById(b.getAttribute('aria-controls'));if(!track||b.disabled)return;const tile=track.querySelector(':scope > article');const cardWidth=tile?.getBoundingClientRect().width||220;const gap=parseFloat(getComputedStyle(track).columnGap)||0;const step=Math.max(cardWidth+gap,Math.min(track.clientWidth*.92,(cardWidth+gap)*2));track.scrollBy({left:Number(b.dataset.direction)*step,behavior:matchMedia('(prefers-reduced-motion: reduce)').matches?'instant':'smooth'});});const retry=$('#retryBackend');if(retry)retry.onclick=()=>boot(true);const toggleSiteMode=()=>{siteAppearance.mode=document.body.classList.contains('dark')?'light':'dark';localStorage.setItem('nlobi_dark',siteAppearance.mode==='dark'?'1':'0');saveSiteAppearance();render()};
 const th=$('#theme');if(th)th.onclick=toggleSiteMode;
 const thQuick=$('#themeMobileQuick');if(thQuick)thQuick.onclick=toggleSiteMode;
 const thMobile=$('#themeMobile');if(thMobile)thMobile.onclick=toggleSiteMode;
@@ -3987,33 +4002,16 @@ window.setInterval(()=>refreshPublicReleases(),60000);
 // Rotación editorial discreta: solo avanza si el banner es visible y no se está leyendo.
 // El temporizador guarda tiempo ACTIVO, evitando cambios bruscos al regresar a la pestaña.
 const FEATURED_BANNER_PERIOD_MS=8000;
-let featuredBannerPaused=false,featuredBannerExplicitPlay=false,featuredBannerElapsed=0,featuredBannerLastTick=Date.now();
+let featuredBannerElapsed=0,featuredBannerLastTick=Date.now();
 function featuredBannerReducedMotion(){
  return window.matchMedia('(prefers-reduced-motion: reduce)').matches||
    document.documentElement.dataset.siteMotion==='reduce';
 }
-function syncFeaturedBannerControls(root){
+function syncFeaturedBannerProgress(root){
  if(!root)return;
  const progress=String(Math.max(0,Math.min(1,featuredBannerElapsed/FEATURED_BANNER_PERIOD_MS)));
  if(root.style.getPropertyValue('--featured-progress')!==progress)
   root.style.setProperty('--featured-progress',progress);
- const toggle=root.querySelector('[data-featured-toggle]');
- if(!toggle)return;
- const reduced=featuredBannerReducedMotion();
- if(toggle.disabled!==reduced)toggle.disabled=reduced;
- const glyph=featuredBannerPaused?'▶':'Ⅱ';
- if(toggle.textContent!==glyph)toggle.textContent=glyph;
- const label=(featuredBannerPaused?'Reanudar':'Pausar')+' rotación automática';
- if(toggle.getAttribute('aria-label')!==label)toggle.setAttribute('aria-label',label);
- const pressed=String(featuredBannerPaused);
- if(toggle.getAttribute('aria-pressed')!==pressed)toggle.setAttribute('aria-pressed',pressed);
- const title=reduced?'Movimiento reducido: navegación manual':(featuredBannerPaused?'Reanudar':'Pausar')+' banner automático';
- if(toggle.title!==title)toggle.title=title;
- const kicker=root.querySelector('.featuredBannerAutoLabel');
- if(kicker){
-  const caption=reduced?'MANUAL':(featuredBannerPaused?'EN PAUSA':'AUTO · 8 S');
-  if(kicker.textContent!==caption)kicker.textContent=caption;
- }
 }
 function tickFeaturedBanner(){
  const now=Date.now(),elapsed=Math.max(0,Math.min(500,now-featuredBannerLastTick));
@@ -4022,9 +4020,10 @@ function tickFeaturedBanner(){
  const root=document.querySelector('[data-home-featured]');
  if(!root){featuredBannerElapsed=0;return}
  const rect=root.getBoundingClientRect();
- const isActive=!document.hidden&&!featuredBannerPaused&&!featuredBannerReducedMotion()&&
-   (!root.matches(':hover')||featuredBannerExplicitPlay)&&
-   (!root.contains(document.activeElement)||document.activeElement===root.querySelector('[data-featured-toggle]'))&&
+ // Sin control de pausa; detener temporalmente solo al leer, cambiar de pestaña
+ // o activar movimiento reducido por accesibilidad.
+ const isActive=!document.hidden&&!featuredBannerReducedMotion()&&
+   !root.matches(':hover')&&!root.contains(document.activeElement)&&
    rect.bottom>0&&rect.top<window.innerHeight&&root.querySelectorAll('[data-featured-index]').length>1;
  if(isActive){
   featuredBannerElapsed+=elapsed;
@@ -4033,8 +4032,7 @@ function tickFeaturedBanner(){
    rotateFeaturedBook((S.featuredIndex||0)+1);
   }
  }
- root.classList.toggle('featuredBannerInactive',!isActive);
- syncFeaturedBannerControls(root);
+ syncFeaturedBannerProgress(root);
 }
 window.setInterval(tickFeaturedBanner,250);
 window.addEventListener('hashchange',async()=>{const previous=S.view,route=routeFromHash(),snapshot=S.detailScrollReturn,restore=previous.startsWith('reader:')&&route.startsWith('detail:')&&snapshot?.translationId===route.slice(7),done=startPageBusy('Abriendo página…');S.notificationBellOpen='';pendingRouteFocus=true;if(restore&&snapshot.volumeId)S.detailVolumeId=snapshot.volumeId;S.view=route;render();if(!restore)window.scrollTo({top:0,behavior:'smooth'});try{await resolveDynamicRoute(route);if(S.view===route)S.err=''}catch(e){if(S.view===route)S.err=friendlyError(e,'No se pudo abrir esta vista.');console.error(e)}finally{done();if(S.view===route){render();if(restore)requestAnimationFrame(()=>{window.scrollTo({top:snapshot.y,behavior:'instant'});if(S.detailScrollReturn===snapshot)S.detailScrollReturn=null})}}});
