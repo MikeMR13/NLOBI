@@ -44,6 +44,45 @@ window.createStudioPhase7=function({
   return {v,section,errors:[...new Set(errors)],warnings:[...new Set(warnings)],allowed:!errors.length};
  }
  function statusBadge(value){return ({published:'Publicado',draft:'Borrador',hidden:'Oculto',pending:'Pendiente',failed:'Fallida',cancelled:'Cancelada'})[value]||value||'Borrador'}
+
+ function publicationCalendar(P){
+  const schedules=(P?.publication_schedules||[]).filter(item=>['pending','failed'].includes(item.status)&&validDate(item.scheduled_at));
+  const diff=Math.min(12,Math.max(-12,Number(S.studioCalendarOffset)||0)),today=new Date();
+  const current=new Date(today.getFullYear(),today.getMonth()+diff,1);
+  const year=current.getFullYear(),month=current.getMonth();
+  const first=(current.getDay()+6)%7,days=new Date(year,month+1,0).getDate();
+  const buckets=new Map();
+  for(const schedule of schedules){
+   const date=validDate(schedule.scheduled_at);
+   if(date.getFullYear()!==year||date.getMonth()!==month)continue;
+   const day=date.getDate();
+   if(!buckets.has(day))buckets.set(day,[]);
+   buckets.get(day).push(schedule);
+  }
+  const weekdays=['L','M','M','J','V','S','D'].map((text,i)=>'<span class="studioV7CalWeekday" aria-label="'+['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'][i]+'">'+text+'</span>').join('');
+  const daysHtml=Array.from({length:Math.ceil((days+first)/7)*7},(_,index)=>{
+   const day=index-first+1;if(day<1||day>days)return '<span aria-hidden="true"></span>';
+   const events=buckets.get(day)||[];
+   return '<span class="'+(events.length?'studioV7CalBusy':'')+'"><strong>'+day+'</strong>'+(events.length?'<span class="studioV7CalCount">'+events.length+' '+(events.length===1?'entrega':'entregas')+'</span>':'')+'</span>';
+  }).join('');
+  const currentEvents=[...buckets.values()].flat().sort((a,b)=>Date.parse(a.scheduled_at)-Date.parse(b.scheduled_at));
+  return '<section class="studioV7Calendar" id="studioV7Calendar" aria-labelledby="studioV7CalendarTitle">'
+   +'<header class="studioV7CalendarHead"><div><h3 id="studioV7CalendarTitle">Calendario editorial privado</h3><strong>'+esc(current.toLocaleDateString('es-MX',{month:'long',year:'numeric'}))+'</strong><p>Programaciones pendientes y fallidas visibles únicamente a tu equipo. No publica avisos.</p></div>'
+   +'<div class="row"><button class="btn" type="button" data-studio-v7-calendar="-1" '+(diff<=-12?'disabled':'')+' aria-label="Mes anterior">←</button><button class="btn" type="button" data-studio-v7-calendar="0">Hoy</button><button class="btn" type="button" data-studio-v7-calendar="1" '+(diff>=12?'disabled':'')+' aria-label="Mes siguiente">→</button></div></header>'
+   +'<div class="studioV7CalendarGrid">'+weekdays+daysHtml+'</div>'
+   +'<div class="studioV7CalendarEvents">'+(currentEvents.length?currentEvents.map(item=>{
+      const vol=projectVolume(P,item.volume_id);
+      return '<article><div><strong>Vol. '+esc(vol?.volume_number??'—')+' · '+esc(vol?.title||'Sin título')+'</strong><time datetime="'+esc(item.scheduled_at)+'">'+esc(dateLabel(item.scheduled_at))+'</time></div><span class="badge">'+esc(statusBadge(item.status))+'</span></article>';
+    }).join(''):'<p class="muted">Sin entregas previstas o fallidas para este mes.</p>')+'</div></section>';
+ }
+ function bindPublicationCalendar(){
+  selectAll('[data-studio-v7-calendar]').forEach(button=>button.onclick=()=>{
+   const step=Number(button.dataset.studioV7Calendar)||0;
+   S.studioCalendarOffset=step===0?0:Math.max(-12,Math.min(12,(S.studioCalendarOffset||0)+step));
+   const old=document.getElementById('studioV7Calendar');
+   if(old&&S.studioProject){old.outerHTML=publicationCalendar(S.studioProject);bindPublicationCalendar();}
+  });
+ }
  function summary(P){
   if(!P)return '';
   const counts=publicationStats(P),schedules=(P.publication_schedules||[]).filter(x=>x.status==='pending'||x.status==='failed')
@@ -58,6 +97,7 @@ window.createStudioPhase7=function({
     <div><strong>${counts.pending}</strong><span>Programados</span></div>
     <div><strong>${counts.failed}</strong><span>Fallidos</span></div>
    </div>
+   ${publicationCalendar(P)}
    <div class="studioV7Actions">${(P.volumes||[]).length?`<label for="studioV7PreviewVolume">Vista previa del lector</label><select id="studioV7PreviewVolume">${(P.volumes||[]).map(v=>`<option value="${esc(v.id)}">Vol. ${esc(v.volume_number)} · ${esc(v.title||'Sin título')}</option>`).join('')}</select><button class="btn primary" data-studio-v7-preview="selected" type="button">Abrir vista previa</button>`:'<p class="muted">Crea un volumen para habilitar la vista previa.</p>'}</div>
    <div class="studioV7Cols">
     <section class="studioV7Panel" aria-labelledby="studioV7Queue"><h3 id="studioV7Queue">Cola de publicaciones</h3><p class="muted">Las fechas se muestran en el horario local del dispositivo. Solo se permite una programación pendiente por volumen.</p>
@@ -195,6 +235,7 @@ window.createStudioPhase7=function({
  function bind(){
   selectAll('[data-studio-v7-preview]').forEach(b=>b.onclick=()=>openPreview(b.dataset.studioV7Preview==='selected'?$('#studioV7PreviewVolume')?.value:b.dataset.studioV7Preview));
   selectAll('[data-studio-v7-reschedule]').forEach(b=>b.onclick=()=>reschedule(b.dataset.studioV7Reschedule));
+  bindPublicationCalendar();
  }
  return {summary,readiness,review,openPreview,reschedule,bind,publicationStats};
 };
