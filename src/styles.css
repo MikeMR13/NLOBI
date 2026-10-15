@@ -7154,13 +7154,13 @@ html[data-site-motion="reduce"]
  .homeEditorial .homeFeatured,
  .homeEditorial .homeFeaturedVisual,
  .homeEditorial .homeFeaturedInfo{
-  height:410px;
-  min-height:410px;
-  max-height:410px;
+  height:470px;
+  min-height:470px;
+  max-height:470px;
  }
  .homeEditorial .homeFeatured{grid-template-columns:minmax(0,44%) minmax(0,56%)}
  .homeEditorial .homeFeaturedVisual .homeFeaturedBook{width:min(88%,242px);max-width:242px}
- .homeEditorial .homeFeaturedSlideInfo h2{font-size:clamp(1.37rem,2.65vw,1.85rem)}
+ .homeEditorial .homeFeaturedSlideInfo h2{font-size:clamp(1.37rem,2.65vw,1.85rem);flex-shrink:0;max-height:none;overflow:visible;-webkit-line-clamp:unset}
  .homeEditorial .homeFeaturedSynopsis p{-webkit-line-clamp:4;font-size:.89rem}
 }
 @media(max-width:640px){
