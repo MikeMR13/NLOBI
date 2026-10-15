@@ -6,7 +6,15 @@ const begin=source.indexOf('const now='),end=source.indexOf('const viewports=');
 if(begin<0||end<=begin)throw Error('Faltan datos QA de novelas');
 const {scenarios}=new Function(source.slice(begin,end)+'\nreturn {scenarios};')();
 const scenario=scenarios.find(row=>row[0]==='public-home-carousel');
-if(!scenario)throw Error('Falta escenario de carrusel destacado');
+const readerScenario=scenarios.find(row=>row[0]==='public-reader');
+if(!scenario||!readerScenario)throw Error('Faltan escenarios de portada o lector');
+const fixtureTeam={...scenario[2].catalog[0].translator_groups,slug:'qa-equipo',
+ avatar_url:'https://example.test/team-avatar.png',
+ profile_settings:{reader_logo_url:'https://example.test/team-logo.png',reader_logo_width:128,show_reader_logo:true}};
+const bannerFixture={...scenario[2],
+ catalog:scenario[2].catalog.map(row=>({...row,translator_groups:fixtureTeam}))};
+const readerFixture={...readerScenario[2],
+ readerSection:{...readerScenario[2].readerSection,translator_groups:fixtureTeam}};
 const cases=[
  {width:320,height:812,label:'320',motion:'reduce'},
  {width:390,height:844,label:'390',motion:'system'},
@@ -36,7 +44,7 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    await page.evaluate(data=>{
     window.__NLOBI_QA__.setState(data);
     window.__NLOBI_QA__.setView('home');
-   },scenario[2]);
+   },bannerFixture);
    const measure=()=>page.evaluate(()=>{
     const root=document.querySelector('[data-home-featured]');
     const book=root?.querySelector('.homeFeaturedBook');
@@ -72,13 +80,15 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
     failures.push({engineName,label:test.label,error:'portada destacada insuficiente o desbordada en móvil',before,minCover});
    if(before.arrows.some(x=>!x||x.h<43||x.w<43))
     failures.push({engineName,label:test.label,error:'controles pequeños',before});
-   const autoplayToggle=page.locator('[data-featured-toggle]'),meter=page.locator('.featuredBannerMeterFill');
-   if(await autoplayToggle.count()!==1||await meter.count()!==1)
-    failures.push({engineName,label:test.label,error:'faltan control de reproducción o indicador de progreso'});
-   else if(test.motion==='reduce'&&!(await autoplayToggle.isDisabled()))
-    failures.push({engineName,label:test.label,error:'movimiento reducido debe desactivar autoplay'});
-   else if(test.motion!=='reduce'&&(await autoplayToggle.isDisabled()))
-    failures.push({engineName,label:test.label,error:'autoplay desactivado sin preferencia de movimiento reducido'});
+   if(await page.locator('[data-featured-toggle],.featuredBannerToggle,.featuredBannerAutoLabel').count())
+    failures.push({engineName,label:test.label,error:'el banner conserva un botón o etiqueta de pausa'});
+   if(await page.locator('.featuredBannerMeterFill').count()!==1)
+    failures.push({engineName,label:test.label,error:'falta el indicador de progreso'});
+   const teamLink=page.locator('.homeFeaturedTeamLink');
+   if(await teamLink.count()!==1||
+      await teamLink.getAttribute('href')!=='#group:qa-equipo'||
+      await teamLink.locator('img.homeFeaturedTeamImage').getAttribute('src')!=='https://example.test/team-logo.png')
+    failures.push({engineName,label:test.label,error:'el logo PNG no enlaza al equipo traductor correcto'});
    if(engineName==='Chromium'&&(test.width===390||test.width===1185)){
     await page.locator('[data-home-featured]').screenshot({path:'visual-results/home-featured/'+test.label+'.png',animations:'disabled'});
    }
@@ -89,29 +99,29 @@ for(const [engineName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    await page.locator('[data-featured-step="-1"]').click();
    const restored=await measure();
    if(restored.fullTitle!==before.fullTitle)failures.push({engineName,label:test.label,error:'la flecha anterior no restaura novela'});
-   // Se verifica el avance REAL del banner, y que Play lo reactive sin exigir perder el foco.
+   // La rotación debe continuar sin un botón de pausa, al abandonar el foco de las flechas.
    if(engineName==='Chromium'&&test.width===390){
-    await autoplayToggle.click();
-    if(await autoplayToggle.getAttribute('aria-pressed')!=='true')
-     failures.push({engineName,label:test.label,error:'Pausar no detiene el banner'});
-    await page.mouse.move(1,1);
-    await page.waitForTimeout(1100);
-    if((await measure()).fullTitle!==before.fullTitle)
-     failures.push({engineName,label:test.label,error:'avance no autorizado mientras está pausado'});
-    await autoplayToggle.click();
-    if(await autoplayToggle.getAttribute('aria-pressed')!=='false')
-     failures.push({engineName,label:test.label,error:'Reanudar no activa el banner'});
-    // El puntero ya no está encima de la sinopsis: el foco permanece en Play.
+    await page.evaluate(()=>document.activeElement?.blur());
     await page.mouse.move(1,1);
     try{
      await page.waitForFunction(previous=>document.querySelector('.homeFeaturedSlideInfo h2')?.textContent!==previous,
       before.fullTitle,{timeout:11000});
     }catch{
-     failures.push({engineName,label:test.label,error:'no se realizó el avance automático después de reanudar'});
+     failures.push({engineName,label:test.label,error:'el banner no avanzó automáticamente tras ocho segundos'});
     }
     const automatic=await measure();
     if(automatic.titleClipped||automatic.overflow>2||automatic.card.h!==before.card.h)
      failures.push({engineName,label:test.label,error:'el avance automático alteró la maqueta',automatic});
+    // La identidad en el lector usa exactamente el mismo logo y apunta al mismo perfil.
+    await page.evaluate(data=>{
+     window.__NLOBI_QA__.setState(data);
+     window.__NLOBI_QA__.setView('reader:section-1');
+    },readerFixture);
+    const readerLink=page.locator('.readerTeamLink');
+    if(await readerLink.count()!==1||
+       await readerLink.getAttribute('href')!=='#group:qa-equipo'||
+       await readerLink.locator('img.teamReaderBrandImage').getAttribute('src')!=='https://example.test/team-logo.png')
+     failures.push({engineName,label:test.label,error:'el lector no reutiliza el PNG enlazado al perfil del traductor'});
    }
    if(errors.length)failures.push({engineName,label:test.label,error:'errores JS',errors});
    results.push({engine:engineName,width:test.width,cardHeight:before.card?.h,coverWidth:before.cover?.w,coverHeight:before.cover?.h,titleClipped:before.titleClipped});
