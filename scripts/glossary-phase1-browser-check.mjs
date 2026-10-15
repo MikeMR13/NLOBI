@@ -28,6 +28,7 @@ for(const [name,engine] of [['Chromium',chromium],['WebKit',webkit]]){
   await page.waitForSelector('dialog.nlobiGlossaryDialog[open]');
   assert.equal(await page.locator('dialog.nlobiGlossaryDialog p').innerText(),'Protagonista, sin spoilers.');
   await page.keyboard.press('Escape');
+  await page.waitForFunction(()=>!document.querySelector('dialog.nlobiGlossaryDialog'),null,{timeout:2500});
   assert.equal(await page.locator('dialog.nlobiGlossaryDialog').count(),0,name+' debe cerrar con Escape');
   await page.evaluate(()=>{
    document.querySelector('.readerPaper').innerHTML='<div id="readerContinuousChapters"><section class="readerContinuousChapter"><p>Alicia vuelve en lectura continua.</p></section></div>';
