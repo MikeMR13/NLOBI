@@ -8,7 +8,7 @@ window.createStudioPhase7=function({
 }){
  const selectAll=selector=>[...document.querySelectorAll(selector)];
  // Estilos diferidos: este CSS solo se carga al abrir Studio o Lanzamientos.
- if(document.head&&!document.getElementById?.('nlobi-release-v2-css')){
+ if(typeof document!=='undefined'&&document.head&&!document.getElementById?.('nlobi-release-v2-css')){
   const link=document.createElement('link');link.id='nlobi-release-v2-css';
   link.rel='stylesheet';link.href='/assets/releases-phase2.css';document.head.appendChild(link);
  }
