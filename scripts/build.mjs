@@ -26,6 +26,8 @@ fs.copyFileSync(path.join(root, "src", "studio-phase6.js"), path.join(dist, "ass
 fs.copyFileSync(path.join(root, "src", "studio-phase5.js"), path.join(dist, "assets", "studio-phase5.js"));
 fs.copyFileSync(path.join(root, "src", "glossary-phase1.js"), path.join(dist, "assets", "glossary-phase1.js"));
 fs.copyFileSync(path.join(root, "src", "glossary-phase1.css"), path.join(dist, "assets", "glossary-phase1.css"));
+fs.copyFileSync(path.join(root, "src", "releases-phase2.js"), path.join(dist, "assets", "releases-phase2.js"));
+fs.copyFileSync(path.join(root, "src", "releases-phase2.css"), path.join(dist, "assets", "releases-phase2.css"));
 fs.copyFileSync(path.join(root, "src", "activate-styles.js"), path.join(dist, "assets", "activate-styles.js"));
 fs.copyFileSync(path.join(root, "src", "home-cover-hint.js"), path.join(dist, "assets", "home-cover-hint.js"));
 fs.copyFileSync(path.join(root, "src", "initial-home.js"), path.join(dist, "assets", "initial-home.js"));
@@ -93,6 +95,8 @@ const requiredBuiltFiles = [
   "assets/studio-phase5.js",
   "assets/glossary-phase1.js",
   "assets/glossary-phase1.css",
+  "assets/releases-phase2.js",
+  "assets/releases-phase2.css",
   "runtime-config.js",
   "sw.js",
   "manifest.webmanifest",
