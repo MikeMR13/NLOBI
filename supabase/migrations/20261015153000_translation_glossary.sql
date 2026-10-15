@@ -25,20 +25,20 @@ grant delete on public.translation_glossary_terms to authenticated;
 
 -- El público solo ve glosarios de traducciones con capítulos publicados.
 -- Miembros con permisos de edición también pueden consultar obras en borrador.
-create policy translation_glossary_select
+create policy translation_glossary_public_select
 on public.translation_glossary_terms for select to anon, authenticated
-using (
-  exists (
-    select 1 from public.translations t
-    join public.volumes v on v.translation_id=t.id
-    join public.sections s on s.volume_id=v.id
-    where t.id=translation_id and v.status='published' and s.status='published'
-  )
-  or exists (
-    select 1 from public.translations t
-    where t.id=translation_id and private.team_action_allowed(t.group_id,'edit')
-  )
-);
+using (exists (
+  select 1 from public.translations t
+  join public.volumes v on v.translation_id=t.id
+  join public.sections s on s.volume_id=v.id
+  where t.id=translation_id and v.status='published' and s.status='published'
+));
+create policy translation_glossary_team_select
+on public.translation_glossary_terms for select to authenticated
+using (exists (
+  select 1 from public.translations t
+  where t.id=translation_id and private.team_action_allowed(t.group_id,'edit')
+));
 create policy translation_glossary_insert
 on public.translation_glossary_terms for insert to authenticated
 with check (
