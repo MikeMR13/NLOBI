@@ -544,8 +544,10 @@ function featuredVisualMarkup(book){
  return `<a class="homeFeaturedBook homeFeaturedCoverLink" href="#detail:${encodeURIComponent(book.id)}" aria-label="Abrir novela destacada: ${esc(titleOf(book))}">${url?`<img src="${esc(url)}" alt="Portada de ${esc(titleOf(book))}" width="320" height="480" loading="eager" fetchpriority="high" decoding="async">`:`<div class="homeFeaturedFallback"><span>物語</span><strong>${esc(titleOf(book))}</strong></div>`}</a>`;
 }
 function featuredInfoMarkup(book,real){
- const synopsis=String(book?.novels?.synopsis||book?.synopsis||'Historias para descubrir, leer y guardar en tu biblioteca.');
- return `<span class="homeFeaturedLabel">${real?'EN NUESTRA BIBLIOTECA':'VISTA PREVIA'}</span><h2><a class="homeFeaturedTitleLink" href="#detail:${encodeURIComponent(book.id)}">${esc(titleOf(book))}</a></h2><p>${esc(synopsis.slice(0,205))}${synopsis.length>205?'…':''}</p><a class="homeFeaturedLink" href="#detail:${encodeURIComponent(book.id)}">Descubrir novela <span aria-hidden="true">↗</span></a>`;
+ // Solo la sinopsis real de la obra; no inventar resúmenes editoriales.
+ const synopsis=String(book?.novels?.synopsis||book?.synopsis||'').trim();
+ const excerpt=synopsis.length>360?synopsis.slice(0,360).replace(/\s+\S*$/,'').trimEnd()+'…':synopsis;
+ return `<span class="homeFeaturedLabel">${real?'EN NUESTRA BIBLIOTECA':'VISTA PREVIA'}</span><h2><a class="homeFeaturedTitleLink" href="#detail:${encodeURIComponent(book.id)}">${esc(titleOf(book))}</a></h2><div class="homeFeaturedSynopsis"><span class="homeFeaturedSynopsisKicker">SINOPSIS</span><p>${esc(excerpt||'Sinopsis aún no disponible.')}</p></div><a class="homeFeaturedLink" href="#detail:${encodeURIComponent(book.id)}">Descubrir novela <span aria-hidden="true">↗</span></a>`;
 }
 // Solo reemplaza el contenido de la tarjeta, nunca reconstruye la página ni sus controles.
 function rotateFeaturedBook(nextIndex,manual=false){

@@ -39,6 +39,16 @@ body.dark{--bg:#080808;--panel:#111;--panel2:#1a1a1a;--line:#3b3b3b;--text:#f7f7
 @media(max-width:767px){.bar{padding:9px 12px}.nav{display:none}.mobileNav{display:block}.wrap{padding:18px 12px 48px}.homeShowcase{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:640px){.homeEditorial .homeShowcase{min-height:0;gap:9px;padding:12px 14px 15px}.homeEditorial .homeShowcaseCopy h1{font-size:clamp(1.66rem,6.6vw,2rem);line-height:1.08;margin:6px 0 7px}.homeEditorial .homeFeatured{display:grid;grid-template-columns:minmax(0,39%) minmax(0,61%);align-items:stretch;min-height:332px;overflow:hidden}.homeEditorial .homeFeaturedVisual{display:grid;place-items:center;min-height:332px;padding:10px 7px}.homeEditorial .homeFeaturedBook{width:min(84%,118px);max-width:118px;aspect-ratio:2/3}.homeEditorial .homeFeaturedBook img{width:100%;height:100%;object-fit:cover}.homeEditorial .homeFeaturedInfo{min-width:0;padding:13px 10px 12px}}
 @media(max-width:370px){.homeEditorial .homeFeatured{grid-template-columns:minmax(0,38%) minmax(0,62%);min-height:390px}.homeEditorial .homeFeaturedVisual{min-height:390px}.homeEditorial .homeFeaturedBook{width:min(83%,101px)}.homeEditorial .homeFeaturedInfo{min-height:390px}}
+
+/* La portada insertada en el HTML de producción mantiene su geometría antes del CSS completo. */
+.homeEditorial .homeShowcase{grid-template-columns:minmax(0,.73fr) minmax(0,1.27fr)}
+.homeEditorial .homeFeatured{display:grid;grid-template-columns:minmax(0,44%) minmax(0,56%);height:500px;min-height:500px;max-height:500px}
+.homeEditorial .homeFeaturedVisual{height:500px;min-height:500px;max-height:500px;padding:17px 14px}
+.homeEditorial .homeFeaturedBook{width:min(94%,260px);max-width:260px}
+.homeEditorial .homeFeaturedInfo{height:500px;min-height:0;max-height:500px}
+@media(min-width:641px) and (max-width:1050px){.homeEditorial .homeShowcase{grid-template-columns:1fr}.homeEditorial .homeFeatured,.homeEditorial .homeFeaturedVisual,.homeEditorial .homeFeaturedInfo{height:470px;min-height:470px;max-height:470px}.homeEditorial .homeFeaturedBook{width:min(88%,242px);max-width:242px}}
+@media(max-width:640px){.homeEditorial .homeShowcase{grid-template-columns:1fr}.homeEditorial .homeFeatured{grid-template-columns:minmax(0,47%) minmax(0,53%);height:455px;min-height:455px;max-height:455px}.homeEditorial .homeFeaturedVisual{height:455px;min-height:455px;max-height:455px;padding:10px 6px}.homeEditorial .homeFeaturedBook{width:min(100%,170px);max-width:170px}.homeEditorial .homeFeaturedInfo{height:455px;min-height:455px;max-height:455px;padding:13px 9px 11px}}
+@media(max-width:370px){.homeEditorial .homeFeatured,.homeEditorial .homeFeaturedVisual,.homeEditorial .homeFeaturedInfo{height:475px;min-height:475px;max-height:475px}}
 </style>
 <link rel="stylesheet" href="/assets/styles.css?v=home-lcp-ci-20261012" media="print" id="siteStyles">
 <noscript><link rel="stylesheet" href="/assets/styles.css?v=home-lcp-ci-20261012"></noscript>
