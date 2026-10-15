@@ -7,6 +7,11 @@ window.createStudioPhase7=function({
  safeMediaUrl,studioVolumeQuality,studioSectionQuality,activateEpubFonts,epubFontFamilyNames,refreshProject,loadCatalog
 }){
  const selectAll=selector=>[...document.querySelectorAll(selector)];
+ // Estilos diferidos: este CSS solo se carga al abrir Studio o Lanzamientos.
+ if(document.head&&!document.getElementById?.('nlobi-release-v2-css')){
+  const link=document.createElement('link');link.id='nlobi-release-v2-css';
+  link.rel='stylesheet';link.href='/assets/releases-phase2.css';document.head.appendChild(link);
+ }
  const publicationStatusLabel={active:'Activa',paused:'En pausa',abandoned:'Abandonada',complete:'Finalizada',awaiting_sequel:'En espera de secuela',no_sequel_confirmed:'Sin secuela confirmada'};
  const eventsLabels={volume_published:'Volumen publicado',volume_hidden:'Volumen ocultado',volume_updated:'Volumen actualizado',
   section_published:'Capítulo publicado',section_hidden:'Capítulo ocultado',section_updated:'Capítulo actualizado',
