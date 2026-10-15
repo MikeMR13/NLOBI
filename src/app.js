@@ -546,7 +546,7 @@ function featuredVisualMarkup(book){
 function featuredInfoMarkup(book,real){
  // Solo la sinopsis real de la obra; no inventar resúmenes editoriales.
  const synopsis=String(book?.novels?.synopsis||book?.synopsis||'').trim();
- const excerpt=synopsis.length>360?synopsis.slice(0,360).replace(/\\s+\\S*$/,'').trimEnd()+'…':synopsis;
+ const excerpt=synopsis.length>360?synopsis.slice(0,360).replace(/\s+\S*$/,'').trimEnd()+'…':synopsis;
  return `<span class="homeFeaturedLabel">${real?'EN NUESTRA BIBLIOTECA':'VISTA PREVIA'}</span><h2><a class="homeFeaturedTitleLink" href="#detail:${encodeURIComponent(book.id)}">${esc(titleOf(book))}</a></h2><div class="homeFeaturedSynopsis"><span class="homeFeaturedSynopsisKicker">SINOPSIS</span><p>${esc(excerpt||'Sinopsis aún no disponible.')}</p></div><a class="homeFeaturedLink" href="#detail:${encodeURIComponent(book.id)}">Descubrir novela <span aria-hidden="true">↗</span></a>`;
 }
 // Solo reemplaza el contenido de la tarjeta, nunca reconstruye la página ni sus controles.
