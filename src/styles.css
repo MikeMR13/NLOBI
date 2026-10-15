@@ -7266,7 +7266,7 @@ html[data-site-motion="reduce"]
  align-items:center;
  justify-content:flex-start;
  align-self:flex-start;
- min-width:0;
+ min-width:44px;
  max-width:100%;
  min-height:44px;
  max-height:none;
