@@ -1,0 +1,30 @@
+
+/* OX-MR fase 1: glosario. No altera el estilo base del contenido EPUB. */
+.nlobiGlossaryPanel{margin:22px 0;border:1px solid var(--line);border-radius:15px;background:var(--panel);overflow:hidden}
+.nlobiGlossaryPanel>summary{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:18px 20px;cursor:pointer;list-style:none}
+.nlobiGlossaryPanel>summary::-webkit-details-marker{display:none}
+.nlobiGlossaryPanel>summary span:first-child{display:grid;gap:4px}
+.nlobiGlossaryPanel>summary strong{font-family:Georgia,serif;font-size:1.12rem}
+.nlobiGlossaryPanel>summary small{color:var(--muted)}
+.nlobiGlossaryBody{border-top:1px solid var(--line);padding:17px 20px}
+.nlobiGlossaryFields{display:grid;grid-template-columns:minmax(150px,1fr) minmax(140px,.65fr) minmax(240px,1.5fr);gap:12px;margin:16px 0}
+.nlobiGlossaryFields label,.nlobiGlossaryTools label{display:grid;gap:6px;font-weight:600}
+.nlobiGlossaryFields input,.nlobiGlossaryFields select,.nlobiGlossaryFields textarea,.nlobiGlossaryTools input{width:100%;min-width:0;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--panel);color:var(--text);font:inherit}
+.nlobiGlossaryTools{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:20px 0 10px}
+.nlobiGlossaryTools label{flex:1;max-width:400px}
+.nlobiGlossaryItems{display:grid;gap:9px}
+.nlobiGlossaryItem{display:flex;justify-content:space-between;align-items:start;gap:16px;background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:13px 15px;overflow-wrap:anywhere}
+.nlobiGlossaryItem strong{display:block}.nlobiGlossaryItem small{color:var(--muted)}
+.nlobiGlossaryItem p{margin:6px 0 0}
+.nlobiGlossaryAudit{border-top:1px solid var(--line);margin-top:20px;padding-top:12px}
+.nlobiGlossaryIssue{margin:8px 0;padding:9px 12px;border-inline-start:3px solid var(--accent);background:var(--panel2);overflow-wrap:anywhere}
+.readerPaper .nlobiGlossaryTerm{font:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;background:transparent;border:0;border-bottom:1px dotted currentColor;padding:0;margin:0;display:inline;cursor:help;text-align:inherit;text-decoration:underline;text-decoration-style:dotted;text-underline-offset:.18em}
+.readerPaper .nlobiGlossaryTerm:hover{background:color-mix(in srgb,var(--accent) 22%,transparent)}
+.readerPaper .nlobiGlossaryTerm:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.nlobiGlossaryDialog{max-width:min(520px,calc(100vw - 28px));max-height:min(85vh,620px);border:1px solid var(--line);border-radius:15px;padding:24px;background:var(--panel);color:var(--text);box-shadow:0 16px 54px #0006}
+.nlobiGlossaryDialog::backdrop{background:#0009}
+.nlobiGlossaryDialog small{color:var(--muted);font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.nlobiGlossaryDialog h2{font-family:Georgia,serif;font-size:clamp(1.3rem,3vw,1.9rem);margin:10px 0}
+.nlobiGlossaryDialog p{white-space:pre-wrap;line-height:1.65;overflow-wrap:anywhere}
+@media(max-width:780px){.nlobiGlossaryFields{grid-template-columns:1fr}.nlobiGlossaryPanel>summary{padding:14px}.nlobiGlossaryBody{padding:14px}.nlobiGlossaryItem{flex-direction:column;align-items:stretch}.nlobiGlossaryItem .row{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.readerPaper .nlobiGlossaryTerm{transition:none}}
