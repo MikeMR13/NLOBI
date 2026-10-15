@@ -7306,6 +7306,21 @@ html[data-site-motion="reduce"]
  text-overflow:ellipsis;
  white-space:nowrap;
 }
+/* Dar prioridad al título completo cuando aparece la firma del traductor.
+   Reducir únicamente la sinopsis visible, nunca recortar la identidad ni el título. */
+@media(min-width:1051px){
+ .homeEditorial .homeFeaturedSlideInfo{gap:7px}
+ .homeEditorial .homeFeaturedSlideInfo h2{
+  flex:0 0 auto;
+  min-height:0;
+  max-height:none;
+  overflow:visible;
+  -webkit-line-clamp:unset;
+ }
+ .homeEditorial .homeFeaturedSynopsis p{-webkit-line-clamp:4}
+ .homeEditorial .homeFeaturedTeamLink{min-height:30px;max-height:39px}
+ .homeEditorial .homeFeaturedTeamLink .homeFeaturedTeamImage{max-height:35px}
+}
 @media(max-width:640px){
  .homeEditorial .homeFeaturedTeamLink{
   min-height:30px;
