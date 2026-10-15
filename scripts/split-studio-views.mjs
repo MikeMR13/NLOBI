@@ -47,9 +47,9 @@ export function splitStudioViews(source){
  if(!reduced.includes(marker))throw new Error('Falta punto de entrada de Studio');
  reduced=reduced.replace(marker,'let lazyStudioViews=null;\n'+marker);
  const deps=referenced.map(name=>name+':'+name).join(',');
- const section="import('/assets/studio-phase7.js')\n ]).then(()=>{";
+ const section="import('/assets/studio-phase7.js'),\n  loadGlossaryPhase1().catch(error=>{console.warn('[Glosario opcional]',error);return null})\n ]).then(()=>{";
  if(!reduced.includes(section))throw new Error('No se puede conectar la importación de vistas Studio');
- reduced=reduced.replace(section,"import('/assets/studio-phase7.js'),\n  import('/assets/studio-views.js')\n ]).then((modules)=>{\n  const createLazyStudioViews=modules[3].createStudioViews;");
+ reduced=reduced.replace(section,"import('/assets/studio-phase7.js'),\n  loadGlossaryPhase1().catch(error=>{console.warn('[Glosario opcional]',error);return null}),\n  import('/assets/studio-views.js')\n ]).then((modules)=>{\n  const createLazyStudioViews=modules[4].createStudioViews;");
  const finishStudio='  return true;\n }).catch(error=>{studioModulesPromise=null;throw error});';
  if(!reduced.includes(finishStudio))throw new Error('No se encontró el final del inicializador Studio');
  reduced=reduced.replace(finishStudio,'  lazyStudioViews=createLazyStudioViews({'+deps+'});\n'+finishStudio);
