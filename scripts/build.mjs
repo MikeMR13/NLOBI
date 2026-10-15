@@ -24,6 +24,8 @@ console.log("Route-split Studio:",studioSplit.bytesSaved,"bytes excluded from in
 fs.copyFileSync(path.join(root, "src", "studio-phase7.js"), path.join(dist, "assets", "studio-phase7.js"));
 fs.copyFileSync(path.join(root, "src", "studio-phase6.js"), path.join(dist, "assets", "studio-phase6.js"));
 fs.copyFileSync(path.join(root, "src", "studio-phase5.js"), path.join(dist, "assets", "studio-phase5.js"));
+fs.copyFileSync(path.join(root, "src", "glossary-phase1.js"), path.join(dist, "assets", "glossary-phase1.js"));
+fs.copyFileSync(path.join(root, "src", "glossary-phase1.css"), path.join(dist, "assets", "glossary-phase1.css"));
 fs.copyFileSync(path.join(root, "src", "activate-styles.js"), path.join(dist, "assets", "activate-styles.js"));
 fs.copyFileSync(path.join(root, "src", "home-cover-hint.js"), path.join(dist, "assets", "home-cover-hint.js"));
 fs.copyFileSync(path.join(root, "src", "initial-home.js"), path.join(dist, "assets", "initial-home.js"));
@@ -89,6 +91,8 @@ const requiredBuiltFiles = [
   "assets/studio-phase7.js",
   "assets/studio-phase6.js",
   "assets/studio-phase5.js",
+  "assets/glossary-phase1.js",
+  "assets/glossary-phase1.css",
   "runtime-config.js",
   "sw.js",
   "manifest.webmanifest",
