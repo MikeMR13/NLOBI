@@ -29,7 +29,7 @@ assert.match(glossary.panel(project),/data-glossary-form/);
 const readonly=sandbox.window.createGlossaryPhase1({S:state,jreq:async()=>[],esc:s=>String(s),toast:()=>{},teamCan:()=>false});
 assert.doesNotMatch(readonly.panel(project),/data-glossary-form/);
 
-const sql=fs.readFileSync('supabase/migrations/20261015153000_translation_glossary.sql','utf8');
+const sql=fs.readFileSync('supabase/migrations/20261015224848_translation_glossary_phase1.sql','utf8');
 for(const part of ['enable row level security','translation_glossary_public_select','translation_glossary_team_select','translation_glossary_insert','translation_glossary_update','translation_glossary_delete'])assert.ok(sql.includes(part),part);
 const app=fs.readFileSync('src/app.js','utf8');
 assert.ok(app.includes('loadGlossaryPhase1()'));
