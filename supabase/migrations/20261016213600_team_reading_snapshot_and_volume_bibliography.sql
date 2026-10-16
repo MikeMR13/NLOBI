@@ -40,8 +40,8 @@ BEGIN
   RAISE EXCEPTION 'No autorizado para consultar métricas agregadas'
     USING ERRCODE='42501';
  END IF;
- IF p_days NOT BETWEEN 7 AND 90 THEN
-  RAISE EXCEPTION 'Intervalo fuera del rango permitido'
+ IF p_days IS DISTINCT FROM 30 THEN
+  RAISE EXCEPTION 'Solo se permite la ventana fija de 30 días'
     USING ERRCODE='22023';
  END IF;
 
