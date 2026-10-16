@@ -49,12 +49,22 @@ for(const [name,engine] of [['Chromium',chromium],['WebKit',webkit]]){
   try{
    await page.goto('http://127.0.0.1:4173/#home',{waitUntil:'domcontentloaded'});
    const warm=await page.evaluate(()=>{
-    const link=document.querySelector('link[data-home-cover-hint]');
-    return {href:link?.getAttribute('href'),priority:link?.fetchPriority,as:link?.as};
+    const seeded=document.querySelector('link[data-home-cover-seed]');
+    const hinted=document.querySelector('link[data-home-cover-hint]');
+    const link=seeded||hinted;
+    return {href:link?.getAttribute('href'),priority:link?.fetchPriority,as:link?.as,
+      seeded:!!seeded,hinted:!!hinted,
+      seedPath:document.querySelector('meta[name="nlobi-build-cover"]')?.content};
    });
-   assert.ok(warm.href?.endsWith('/media/test-phase3-cover.webp'),'Warm visit should preload public cover');
+   assert.ok(warm.href?.startsWith('/media/')||warm.href?.includes('/media/'),'Warm visit must preload a public image');
    assert.equal(warm.as,'image');
    assert.equal(warm.priority,'high');
+   if(warm.seeded){
+    assert.equal(warm.href,warm.seedPath,'Build seed must be the image request discovered in HEAD');
+    assert.equal(warm.hinted,false,'Do not preload a second locally cached cover');
+   }else{
+    assert.ok(warm.href.endsWith('/media/test-phase3-cover.webp'),'Warm visit without build seed must use local hint');
+   }
    await page.waitForFunction(()=>!!window.__NLOBI_QA__,undefined,{timeout:16000});
    await page.evaluate(data=>{
     window.__NLOBI_QA__.setState(data);
