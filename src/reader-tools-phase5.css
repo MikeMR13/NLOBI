@@ -1,16 +1,16 @@
 /* OX-MR Fase 5 · controles personales sin alterar la tipografía del capítulo. */
-.readerPhase5Tools{border:1px solid var(--border,#d6c7a7);border-radius:14px;background:var(--card,#fffaf0);margin:0 0 1rem;overflow:hidden;box-shadow:0 5px 18px rgba(0,0,0,.05)}
+.readerPhase5Tools{border:1px solid var(--line);border-radius:14px;background:var(--panel);margin:0 0 1rem;overflow:hidden;box-shadow:0 5px 18px rgba(0,0,0,.05)}
 .readerPhase5Tools>summary{cursor:pointer;list-style-position:inside;font-weight:750;padding:1rem 1.2rem;min-height:44px}
 .readerPhase5Tools>summary:focus-visible,.readerPhase5Tools button:focus-visible{outline:3px solid var(--accent,#dfb434);outline-offset:2px}
 .readerP5Body{padding:0 1.2rem 1.2rem;display:grid;gap:.8rem}
-.readerP5Body>section{display:grid;gap:.55rem;border-top:1px solid var(--border,#d8c7a9);padding-top:1rem}
+.readerP5Body>section{display:grid;gap:.55rem;border-top:1px solid var(--line);padding-top:1rem}
 .readerP5Body h3{margin:.4rem 0;font-size:1.05rem}
 .readerP5Body label{font-weight:650}
-.readerP5Body textarea{box-sizing:border-box;display:block;width:100%;border:1px solid var(--border,#c6b697);border-radius:9px;background:var(--surface,#fff);color:var(--text,#151515);font:inherit;min-height:64px;padding:.7rem;resize:vertical}
+.readerP5Body textarea{box-sizing:border-box;display:block;width:100%;border:1px solid var(--line);border-radius:9px;background:var(--panel2);color:var(--text,#151515);font:inherit;min-height:64px;padding:.7rem;resize:vertical}
 .readerP5Body .readerP5Actions{display:flex;gap:.5rem;flex-wrap:wrap;align-items:center}
 .readerP5Body .readerP5Actions button{min-height:44px}
 .readerP5List{display:grid;gap:.7rem}
-.readerP5Entry{padding:.9rem;border:1px solid var(--border,#c6b697);border-radius:10px;background:var(--surface,#fff);overflow-wrap:anywhere}
+.readerP5Entry{padding:.9rem;border:1px solid var(--line);border-radius:10px;background:var(--panel2);overflow-wrap:anywhere}
 .readerP5EntryMeta{display:flex;justify-content:space-between;gap:1rem;flex-wrap:wrap}
 .readerP5Entry blockquote{padding:.55rem .8rem;margin:.6rem 0;border-left:3px solid var(--accent,#d4a518)}
 .readerP5Entry p{white-space:pre-wrap;margin:.6rem 0}
