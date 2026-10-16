@@ -124,7 +124,7 @@ window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toas
  }
  function mount(){
   const key=scope();
-  if(key!==state.scope){state.scope=key;state.rows=[];state.draft='';state.quote='';state.anchor=null;state.loaded=false;state.loading=false;state.error='';state.open=false}
+  if(key!==state.scope){state.scope=key;state.rows=[];state.draft='';state.quote='';state.anchor=null;state.loaded=false;state.loading=false;state.error='';state.open=false;host()?.replaceChildren()}
   if(!host())return;
   paint();
   if(S.user?.id&&navigator.onLine&&!state.loaded&&!state.loading)void load();
