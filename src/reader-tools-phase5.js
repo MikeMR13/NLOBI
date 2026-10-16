@@ -2,7 +2,7 @@
    Anotaciones privadas en la tabla existente; nada se publica ni se añade al catálogo. */
 window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toast,cacheReaderChapter,safeMediaUrl,go}){
  if(!document.getElementById('reader-phase5-styles')){const link=document.createElement('link');link.id='reader-phase5-styles';link.rel='stylesheet';link.href='/assets/reader-tools-phase5.css';document.head.append(link)}
- const state={scope:'',rows:[],loaded:false,loading:false,error:'',open:false,draft:'',quote:''};
+ const state={scope:'',rows:[],loaded:false,loading:false,error:'',open:false,draft:'',quote:'',anchor:null};
  const host=()=>document.getElementById('readerPhase5Tools');
  const current=()=>S.view.startsWith('reader:')?S.readerSection:null;
  const scope=()=>String(S.user?.id||'guest')+':'+String(current()?.id||'');
@@ -14,7 +14,24 @@ window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toas
   if(!paper.contains(range.commonAncestorContainer))return '';
   const chapter=range.commonAncestorContainer.nodeType===1?range.commonAncestorContainer.closest?.('[data-reader-chapter-id]'):range.commonAncestorContainer.parentElement?.closest?.('[data-reader-chapter-id]');
   if(chapter&&chapter.dataset.readerChapterId!==r.id)return '';
-  return String(sel.toString()).trim().slice(0,1200);
+  const excerpt=String(sel.toString()).trim().slice(0,1200);
+  state.anchor=null;
+  // Localizar el bloque de lectura sin introducir wrappers ni tocar HTML del EPUB.
+  const root=chapter||paper;
+  const blocks=[...root.children].filter(el=>root===paper?
+    ['P','H2','BLOCKQUOTE','ASIDE','FIGURE','HR'].includes(el.tagName)&&el.id!=='chapterTitle':
+    el.tagName!=='HEADER');
+  const top=node=>{let el=node.nodeType===1?node:node.parentElement;while(el&&el.parentElement!==root)el=el.parentElement;return el};
+  const first=blocks.indexOf(top(range.startContainer)),last=blocks.indexOf(top(range.endContainer));
+  if(first>=0&&last>=first){
+   try{
+    const before=document.createRange();before.selectNodeContents(blocks[first]);before.setEnd(range.startContainer,range.startOffset);
+    const after=document.createRange();after.selectNodeContents(blocks[last]);after.setEnd(range.endContainer,range.endOffset);
+    const a=before.toString().length,b=after.toString().length;
+    if(last>first||b>a)state.anchor={anchor_mode:'text',start_block:first,start_offset:a,end_block:last,end_offset:b};
+   }catch{state.anchor=null}
+  }
+  return excerpt;
  }
  async function warmOfflineMedia(r){
   // Solo medios públicos servidos por el proxy propio, con límite para cuidar datos y espacio.
@@ -84,10 +101,10 @@ window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toas
   const btn=h?.querySelector('[data-reader-p5-save]');if(btn)btn.disabled=true;
   try{
    await jreq('/rest/v1/reader_annotations',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({
-    user_id:uid,translation_id:r.translation_id,section_id:r.id,kind:note?'note':'highlight',anchor_mode:'block',
-    start_block:0,start_offset:0,excerpt,note,color:'amber'
+    user_id:uid,translation_id:r.translation_id,section_id:r.id,kind:note?'note':'highlight',
+    ...(excerpt&&state.anchor?state.anchor:{anchor_mode:'block',start_block:0,start_offset:0}),excerpt,note,color:'amber'
    })});
-   if(oldScope!==scope())return;state.draft='';state.quote='';await load();toast('Anotación guardada de forma privada.','ok');
+   if(oldScope!==scope())return;state.draft='';state.quote='';state.anchor=null;await load();toast('Anotación guardada de forma privada.','ok');
   }catch(e){toast('No se pudo guardar la nota. Verifica tu conexión y vuelve a intentar.','bad');if(btn?.isConnected)btn.disabled=false}
  }
  async function remove(id){
@@ -107,7 +124,7 @@ window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toas
  }
  function mount(){
   const key=scope();
-  if(key!==state.scope){state.scope=key;state.rows=[];state.draft='';state.quote='';state.loaded=false;state.loading=false;state.error='';state.open=false}
+  if(key!==state.scope){state.scope=key;state.rows=[];state.draft='';state.quote='';state.anchor=null;state.loaded=false;state.loading=false;state.error='';state.open=false}
   if(!host())return;
   paint();
   if(S.user?.id&&navigator.onLine&&!state.loaded&&!state.loading)void load();
