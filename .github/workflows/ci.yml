@@ -94,6 +94,8 @@ jobs:
         run: node scripts/releases-phase2-browser-check.mjs
       - name: OX-MR private errata reader phase 4 (Chromium + WebKit)
         run: node scripts/editorial-insights-phase4-browser-check.mjs
+      - name: OX-MR private notes and offline phase 5 (Chromium + WebKit)
+        run: node scripts/reader-tools-phase5-browser-check.mjs
       - name: Studio rows, volume synopsis and Home emphasis (Chromium + WebKit)
         run: node scripts/studio-volume-home-fix-check.mjs
       - name: OBI editorial workspaces phase 4 (Chromium + WebKit)
