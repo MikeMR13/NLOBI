@@ -1,6 +1,6 @@
 /* OX-MR Fase 5: herramientas optativas del lector, cargadas solo en rutas de lectura.
    Anotaciones privadas en la tabla existente; nada se publica ni se añade al catálogo. */
-window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toast,cacheReaderChapter,go}){
+window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toast,cacheReaderChapter,safeMediaUrl,go}){
  if(!document.getElementById('reader-phase5-styles')){const link=document.createElement('link');link.id='reader-phase5-styles';link.rel='stylesheet';link.href='/assets/reader-tools-phase5.css';document.head.append(link)}
  const state={scope:'',rows:[],loaded:false,loading:false,error:'',open:false,draft:'',quote:''};
  const host=()=>document.getElementById('readerPhase5Tools');
@@ -16,6 +16,21 @@ window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toas
   if(chapter&&chapter.dataset.readerChapterId!==r.id)return '';
   return String(sel.toString()).trim().slice(0,1200);
  }
+ async function warmOfflineMedia(r){
+  // Solo medios públicos servidos por el proxy propio, con límite para cuidar datos y espacio.
+  if(!navigator.onLine||!('serviceWorker' in navigator))return 0;
+  const raws=[...(r.content||[]).filter(b=>b?.type==='image'&&b.url).map(b=>b.url),...(r.epub_fonts||[]).filter(x=>x?.url).map(x=>x.url)];
+  const urls=[...new Set(raws.map(raw=>{
+   try{const url=new globalThis.URL(safeMediaUrl(raw),location.origin);return url.origin===location.origin&&url.pathname.startsWith('/media/')?url.href:null}
+   catch{return null}
+  }).filter(Boolean))].slice(0,16);
+  let saved=0;
+  for(let i=0;i<urls.length;i+=3){
+   const responses=await Promise.allSettled(urls.slice(i,i+3).map(url=>fetch(url,{cache:'force-cache'})));
+   saved+=responses.filter(x=>x.status==='fulfilled'&&x.value.ok).length;
+  }
+  return saved;
+ }
  function markup(){
   const r=current();if(!r)return'';
   const signedIn=!!S.user?.id;
@@ -29,10 +44,15 @@ window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toas
   if(details){state.open=details.open;state.draft=h.querySelector('#readerP5Note')?.value||state.draft;state.quote=h.querySelector('#readerP5Quote')?.value||state.quote}
   h.innerHTML=markup();
   const d=h.querySelector('details');if(d)d.addEventListener('toggle',()=>{state.open=d.open});
-  h.querySelector('[data-reader-p5-offline]')?.addEventListener('click',()=>{
-   const r=current();if(!r)return;
-   try{if(cacheReaderChapter(r))toast('Capítulo guardado. Disponible en Biblioteca → Sin conexión.','ok');else toast('No se pudo guardar: comprueba el almacenamiento disponible.','bad')}
-   catch{toast('No se pudo guardar el capítulo. Comprueba el espacio disponible.','bad')}
+  h.querySelector('[data-reader-p5-offline]')?.addEventListener('click',async event=>{
+   const r=current(),button=event.currentTarget;if(!r||button.disabled)return;
+   button.disabled=true;
+   try{
+    if(!cacheReaderChapter(r)){toast('No se pudo guardar: comprueba el almacenamiento disponible.','bad');return}
+    const media=await warmOfflineMedia(r);
+    toast('Capítulo guardado sin conexión'+(media?' · '+media+' recursos multimedia preparados':'')+'.','ok');
+   }catch{toast('El capítulo se guardó, pero algunos recursos multimedia no están disponibles.','bad')}
+   finally{if(button.isConnected)button.disabled=false}
   });
   h.querySelector('[data-reader-p5-downloads]')?.addEventListener('click',()=>{
    const r=current();if(r)go('detail:'+r.translation_id);
