@@ -1387,11 +1387,12 @@ async function teamCustomLoadFullPreview(){
  }catch(error){console.warn('[NLOBI] Perfil público completo no disponible:',error);toast('La vista completa muestra contenido de muestra porque no se pudo consultar el perfil público.','bad')}
 }
 
+let teamFullPreviewDebounce=null;
 function teamCustomPreview(){
  const target=document.getElementById('teamCustomPreview'),G=S.studioTeam;
  if(!target||!G)return;
  const p=teamReadCustom(),virtual={...G,profile_settings:p,name:document.getElementById('teamEditName')?.value||G.name};
- if(S.teamDesignPreviewMode==='full'){teamCustomFullPreview(target,virtual,p);return;}
+ if(S.teamDesignPreviewMode==='full'){clearTimeout(teamFullPreviewDebounce);teamFullPreviewDebounce=setTimeout(()=>{if(target.isConnected&&S.teamDesignPreviewMode==='full'&&S.studioTeam?.id===G.id)teamCustomFullPreview(target,virtual,p)},220);return;}
  const list=(S.catalog||[]).filter(w=>w.translator_groups?.id===G.id&&w.status!=='draft').slice(0,3);
  const books=list.length?list.map((w,i)=>'<div class="teamPreviewBook"><div class="teamPreviewCover" aria-hidden="true">'+(i+1)+'</div><strong>'+esc(titleOf(w))+'</strong></div>').join(''):
   '<div class="teamPreviewBook"><div class="teamPreviewCover" aria-hidden="true">本</div><strong>Tu próxima novela</strong></div>';
