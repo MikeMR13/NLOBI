@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
+import {composeEditorialCss} from './compose-editorial-css-phase6.mjs';
 import {chromium,webkit} from 'playwright';
 
-const css=fs.readFileSync('src/styles.css','utf8');
+const css=composeEditorialCss(fs.readFileSync('src/styles.css','utf8'),name=>fs.readFileSync('src/styles/'+name+'.css','utf8'));
 const app=fs.readFileSync('src/app.js','utf8');
 const editorial=css.split('/* OBI EDITORIAL COLLECTIONS — FASE 2')[1];
 assert.ok(editorial,'Falta el sistema de colecciones editoriales fase 2');
