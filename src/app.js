@@ -2477,6 +2477,10 @@ function render(){
   else if(S.view.startsWith('studio:project:'))html=studioProjectView();
   else if(S.view.startsWith('studio:team:'))html=studioTeamView();
   else if(S.view.startsWith('studio:media:'))html=studioMediaView();
+  // Preservar foco cuando una actualización de datos reconstruye la cabecera
+  // tras cerrar el menú con Escape, también en WebKit móvil.
+  const restoreClosedMobileMenuFocus=!!app.querySelector('.mobileNav:not([open]) > summary')&&
+   document.activeElement===app.querySelector('.mobileNav > summary')&&window.innerWidth<=1100;
   // El evento nativo toggle es asíncrono: conservar una apertura reciente aunque
   // todavía no se haya fijado mobileNavLockedScroll al llegar un render de datos.
   const preserveMobileNav=window.innerWidth<=1100&&!!app.querySelector('.mobileNav[open]')&&
@@ -2535,6 +2539,7 @@ function render(){
   observeShelves();
   setupHomeReadingMotion();
   if(preserveMobileNav)app.querySelector('.mobileNavClose')?.focus({preventScroll:true});
+  else if(restoreClosedMobileMenuFocus)app.querySelector('.mobileNav > summary')?.focus({preventScroll:true});
   applyStudioActionAccess();
   setNetworkBadge();
  }catch(e){
