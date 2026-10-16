@@ -3,7 +3,7 @@ import fs from 'node:fs';
 const src=fs.readFileSync('src/editorial-insights-phase4.js','utf8');
 const app=fs.readFileSync('src/app.js','utf8');
 const studio=fs.readFileSync('src/studio-phase5.js','utf8');
-const sql=fs.readFileSync('supabase/migrations/20261016030000_editorial_insights_errata_phase4.sql','utf8');
+const sql=fs.readFileSync('supabase/migrations/20261016025130_editorial_insights_errata_phase4.sql','utf8');
 const css=fs.readFileSync('src/editorial-insights-phase4.css','utf8');
 const build=fs.readFileSync('scripts/build.mjs','utf8');
 const sw=fs.readFileSync('public/sw.js','utf8');
