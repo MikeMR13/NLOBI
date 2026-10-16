@@ -18,7 +18,7 @@ assert.ok(app.includes('metaTask||loadReaderTranslationMeta(trId)'));
 assert.ok(app.includes('fetchPublishedReaderSection(sectionId)'));
 assert.ok(app.includes("if(S.view.startsWith('reader:'))"));
 
-for(const file of ['app.js','styles.css','activate-styles.js','home-cover-hint.js','initial-home.js']){
+for(const file of ['app.js','styles.css','activate-styles.js','home-cover-hint.js','initial-home.js','app-bootstrap.js']){
  const pattern=new RegExp('/assets/'+file.replaceAll('.','\\.')+'\\?v=([a-f0-9]{12})');
  const match=html.match(pattern);
  assert.ok(match,'Falta versión de /assets/'+file);
