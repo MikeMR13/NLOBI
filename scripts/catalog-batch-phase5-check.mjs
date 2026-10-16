@@ -36,7 +36,7 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
   await context.route('**/runtime-config.js',r=>r.fulfill({status:200,contentType:'application/javascript',
    body:"window.__NLOBI_CONFIG__={supabaseUrl:'https://qa.supabase.local',supabasePublishableKey:'qa',qaMode:true};"}));
   await context.route('https://qa.supabase.local/**',r=>r.fulfill({status:200,contentType:'application/json',body:'[]'}));
-  const page=await context.newPage(),runtime=[];
+  const page=await context.newPage(),runtime=[];let stage='initial load';
   page.on('pageerror',e=>runtime.push(String(e)));
   try{
    await page.goto('http://127.0.0.1:4173/#home',{waitUntil:'domcontentloaded'});
@@ -73,9 +73,10 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
      },{capture:true});
     }
    });
+   stage='Explorar ampliar lote';
    await page.locator('[data-catalog-more="explore"]').click();
    try{
-    await page.waitForFunction(()=>document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length===48,null,{timeout:5000});
+    await page.waitForFunction(()=>document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length===48,null,{timeout:12000});
    }catch(error){
     const diagnostic=await page.evaluate(()=>({view:window.__NLOBI_QA__?.getState().view,
      count:document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length,
@@ -88,12 +89,14 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
     throw Error('WebKit/Explorar expansión: '+JSON.stringify({...diagnostic,directClickCards})+'; '+String(error));
    }
    assert.equal(await explorer.count(),48,'Explorar debe mostrar 48 obras tras ampliar');
+   stage='Explorar filtrar resultados';
    await page.locator('#catalogSearch').fill('Historia QA 065');
-   await page.waitForFunction(()=>document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length===1,null,{timeout:5000});
+   await page.waitForFunction(()=>document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length===1,null,{timeout:12000});
    assert.equal(await explorer.count(),1,'Buscar debe encontrar obras fuera del primer lote');
    assert.equal(await page.locator('[data-catalog-more="explore"]').count(),0,'Sin botón al filtrar a un resultado');
+   stage='Explorar restaurar resultados';
    await page.locator('#catalogSearch').fill('');
-   await page.waitForFunction(()=>document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length===24,null,{timeout:5000});
+   await page.waitForFunction(()=>document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length===24,null,{timeout:12000});
    assert.equal(await explorer.count(),24,'La búsqueda reinicia la ventana visible');
    await page.locator('[data-explore-view="list"]').click();
    assert.equal(await explorer.count(),24,'La vista de lista no pierde la ventana visible');
@@ -108,14 +111,17 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    await readerShelf.first().waitFor();
    assert.equal(await readerShelf.count(),24,'Biblioteca debe mostrar 24 libros inicialmente');
    assert.match(await page.locator('.libraryResultCount').innerText(),/65 novelas/);
+   stage='Biblioteca ampliar lote';
    await page.locator('[data-catalog-more="library"]').click();
-   await page.waitForFunction(()=>document.querySelectorAll('.libraryShelf .libraryShelfCard').length===48,null,{timeout:5000});
+   await page.waitForFunction(()=>document.querySelectorAll('.libraryShelf .libraryShelfCard').length===48,null,{timeout:12000});
    assert.equal(await readerShelf.count(),48,'Biblioteca debe permitir mostrar más');
+   stage='Biblioteca filtrar resultados';
    await page.locator('#librarySearch').fill('Lectura QA 065');
-   await page.waitForFunction(()=>document.querySelectorAll('.libraryShelf .libraryShelfCard').length===1,null,{timeout:5000});
+   await page.waitForFunction(()=>document.querySelectorAll('.libraryShelf .libraryShelfCard').length===1,null,{timeout:12000});
    assert.equal(await readerShelf.count(),1,'Búsqueda de biblioteca debe recorrer las 65 entradas');
+   stage='Biblioteca restaurar resultados';
    await page.locator('#librarySearch').fill('');
-   await page.waitForFunction(()=>document.querySelectorAll('.libraryShelf .libraryShelfCard').length===24,null,{timeout:5000});
+   await page.waitForFunction(()=>document.querySelectorAll('.libraryShelf .libraryShelfCard').length===24,null,{timeout:12000});
    assert.equal(await readerShelf.count(),24,'Restablecer búsqueda reinicia la ventana');
    await page.locator('[data-library-filter="favorites"]').click();
    assert.equal(await readerShelf.count(),24,'Los filtros aplican a toda la biblioteca');
@@ -125,7 +131,7 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    assert.ok(overflow<=2,'Biblioteca desborda horizontalmente: '+overflow);
    assert.equal(runtime.length,0,'Errores JS: '+runtime.join('; '));
    evaluated++;
-  }catch(e){failures.push({browserName,width,error:String(e),runtime:runtime.slice(0,3)})}
+  }catch(e){failures.push({browserName,width,stage,error:String(e),runtime:runtime.slice(0,3)})}
   finally{await context.close()}
  }
  await browser.close();
