@@ -91,7 +91,9 @@ jobs:
       - name: Install accessibility test browser
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
-          npx playwright install --with-deps chromium firefox webkit
+          # Las imágenes ubuntu-latest ya contienen bibliotecas compartidas habituales;
+          # evitar apt install-deps que ocasionalmente se bloquea en los mirrors.
+          npx playwright install chromium firefox webkit
       - name: Contextual glossary reader (Chromium + WebKit)
         run: node scripts/glossary-phase1-browser-check.mjs
       - name: Advanced launches phase 2 (Chromium + WebKit)
