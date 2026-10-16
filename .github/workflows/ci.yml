@@ -71,6 +71,8 @@ jobs:
       - name: RPC phase 2 private implementations and grant regression
         run: node scripts/rpc-security-phase2-check.mjs
       - run: npm run build
+      - name: Home first paint bootstrap and direct-route regression
+        run: node scripts/home-bootstrap-first-paint-check.mjs
       - name: Auditoría — deduplicación de avisos, acceso glosarios y portada LCP
         run: node scripts/audit-hardening-20261016-check.mjs
       - name: OX-MR Fase 6 editorial CSS modularization and visual polish
