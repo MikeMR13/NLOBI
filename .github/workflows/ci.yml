@@ -41,6 +41,8 @@ jobs:
         run: node scripts/studio-phase4-check.mjs
       - name: Studio phase 5 regression
         run: node scripts/studio-phase5-check.mjs
+      - name: OX-MR editorial board phase 3 regression
+        run: node scripts/studio-board-phase3-check.mjs
       - name: Studio phase 6 regression
         run: node scripts/studio-phase6-check.mjs
       - name: Studio phase 7 regression
