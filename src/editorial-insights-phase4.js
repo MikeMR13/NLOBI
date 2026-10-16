@@ -45,7 +45,7 @@ window.createEditorialInsightsPhase4=function createEditorialInsightsPhase4({S,j
   const sections=all.flatMap(p=>(p.volumes||[]).flatMap(v=>v.sections||[]));
   const pub=sections.filter(s=>s.status==='published').length;
   const D=getWorkData()||{};
-  const task=(D.tasks||[]).filter(t=>all.some(p=>p.group_id===t.group_id)&&
+  const task=(D.tasks||[]).filter(t=>teamIds().has(t.group_id)&&
     (getTeamFilter()==='all'||t.group_id===getTeamFilter())&&!['done','cancelled'].includes(t.status));
   const reviews=(D.reviews||[]).filter(r=>getTeamFilter()==='all'||r.group_id===getTeamFilter()).filter(r=>r.status==='pending');
   const eventLast30=(D.events||[]).filter(e=>ids.has(e.translation_id)&&stamp(e.created_at)>=now()-30*86400000);
