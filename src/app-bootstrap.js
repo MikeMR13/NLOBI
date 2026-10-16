@@ -29,6 +29,9 @@
   // Dos fotogramas permiten pintar la imagen decodificada antes de rehidratar.
   requestAnimationFrame(()=>requestAnimationFrame(launch));
  }
+ // El modo de fixtures automatizados nunca espera por imágenes de red: así se
+ // mantienen deterministas las acciones del lector sin afectar producción.
+ if(window.__NLOBI_CONFIG__?.qaMode===true){launch();return;}
  const home=!location.hash||location.hash==='#home'||location.hash==='#home%20';
  const cover=home?document.querySelector('img[data-early-featured-cover]'):null;
  if(!cover){launch();return;}
