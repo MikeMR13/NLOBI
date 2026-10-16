@@ -1,5 +1,8 @@
 /* Studio Fase 5. Scoped to the authenticated editorial workspace. */
 window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendlyError,render,$,$$,teamCan,isManager,openProject,roleLabel}){
+ if(typeof document!=='undefined'&&document.head&&!document.getElementById?.('nlobi-studio-board-v3-css')){
+  const sheet=document.createElement('link');sheet.id='nlobi-studio-board-v3-css';sheet.rel='stylesheet';sheet.href='/assets/studio-board-phase3.css';document.head.appendChild(sheet);
+ }
  const STATES=[['todo','Por hacer'],['in_progress','En curso'],['blocked','Bloqueada'],['done','Terminada'],['cancelled','Cancelada']];
  const PRIORITIES=[['normal','Normal'],['high','Alta'],['urgent','Urgente']];
  const label=(list,id)=>list.find(x=>x[0]===id)?.[1]||id||'—';
