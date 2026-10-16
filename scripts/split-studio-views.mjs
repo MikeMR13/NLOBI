@@ -49,8 +49,7 @@ export function splitStudioViews(source){
  const deps=referenced.map(name=>name+':'+name).join(',');
  const section="import('/assets/studio-phase7.js'),\n  loadGlossaryPhase1().catch(error=>{console.warn('[Glosario opcional]',error);return null})\n ]).then(()=>{";
  if(!reduced.includes(section))throw new Error('No se puede conectar la importación de vistas Studio');
- reduced=reduced.replace(section,"import('/assets/studio-phase7.js'),\n  loadGlossaryPhase1().catch(error=>{console.warn('[Glosario opcional]',error);return null}),\n  import('/assets/studio-views.js')\n ]).then((modules)=>{\n  const createLazyStudioViews=modules.find(module=>typeof module?.createStudioViews==='function')?.createStudioViews;
-  if(typeof createLazyStudioViews!=='function')throw new Error('No se pudo inicializar el módulo de vistas diferidas de Studio.');");
+ reduced=reduced.replace(section,"import('/assets/studio-phase7.js'),\n  loadGlossaryPhase1().catch(error=>{console.warn('[Glosario opcional]',error);return null}),\n  import('/assets/studio-views.js')\n ]).then((modules)=>{\n  const createLazyStudioViews=modules.find(module=>typeof module?.createStudioViews==='function')?.createStudioViews;\n  if(typeof createLazyStudioViews!=='function')throw new Error('No se pudo inicializar el módulo de vistas diferidas de Studio.');");
  const finishStudio='  return true;\n }).catch(error=>{studioModulesPromise=null;throw error});';
  if(!reduced.includes(finishStudio))throw new Error('No se encontró el final del inicializador Studio');
  reduced=reduced.replace(finishStudio,'  lazyStudioViews=createLazyStudioViews({'+deps+'});\n'+finishStudio);
