@@ -19,6 +19,11 @@ export function seedFeaturedHomeHtml(html,book,supabaseOrigin){
  const at=html.indexOf(hint),placeholder=html.indexOf(anchor);
  if(at<0||placeholder<at||html.includes('name="nlobi-build-cover"'))return html;
  // Metadatos visibles antes del JS, sin exponer información privada ni claves.
- html=html.slice(0,at)+'<meta name="nlobi-build-cover" content="'+escapeAttribute(relative)+'">\n'+html.slice(at);
+ // El navegador descubre la portada desde HEAD sin depender de ejecutar JavaScript.
+ // Precarga idéntica al src de la portada incrustada: no crea una segunda descarga.
+ // Solo se genera cuando el build consigue una portada pública validada.
+ const head='<link rel="preload" as="image" href="'+escapeAttribute(relative)+'" fetchpriority="high" data-home-cover-seed>\\n'
+  +'<meta name="nlobi-build-cover" content="'+escapeAttribute(relative)+'">\\n';
+ html=html.slice(0,at)+head+html.slice(at);
  return html.replace(anchor,image);
 }
