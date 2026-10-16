@@ -128,9 +128,8 @@ jobs:
         run: node scripts/lazy-studio-browser-check.mjs
       - name: EPUB title typography across reader font preferences
         run: node scripts/epub-reader-heading-typography-check.mjs
-      - name: Mobile Lighthouse performance report
+      - name: Mobile Lighthouse performance report (5 valid samples required)
         id: lighthouse
-        continue-on-error: true
         run: |
           mkdir -p performance-results
           node scripts/ci-media-proxy.mjs >/tmp/nlobi-media-proxy.log 2>&1 &
@@ -138,7 +137,12 @@ jobs:
             if curl -fsS http://127.0.0.1:4175/ >/dev/null; then break; fi
             sleep 1
           done
-          node scripts/lighthouse-mobile-batch.mjs
+          if ! node scripts/lighthouse-mobile-batch.mjs; then
+            echo "::error::Lighthouse requiere cinco muestras válidas."
+            tail -n 80 /tmp/nlobi-media-proxy.log || true
+            tail -n 50 /tmp/nlobi-serve.log || true
+            exit 1
+          fi
           node scripts/lcp-diagnostics.mjs
       - name: axe accessibility audit
         id: axe
