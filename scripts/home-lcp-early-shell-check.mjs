@@ -7,7 +7,7 @@ const js=fs.readFileSync('src/app.js','utf8');
 const built=fs.readFileSync('dist/index.html','utf8');
 assert.match(html,/<div id="app" hidden>/,'El HTML debe incluir una presentación oculta hasta conocer la ruta');
 assert.match(html,/<h1>Abre un libro\.<br><em>Entra en otra historia\.<\/em><\/h1>/);
-assert.ok(html.indexOf('data-initial-home')<html.indexOf('type="module" src="/assets/app.js'));
+assert.ok(html.indexOf('data-initial-home')<html.indexOf('defer src="/assets/app-bootstrap.js'));
 assert.match(built,/\/assets\/initial-home\.js\?v=[a-f0-9]{12}/);
 assert.match(js,/if\(app\.hidden\)app\.hidden=false/);
 assert.match(html,/data-reader-href="https:\/\/fonts\.googleapis\.com/);
