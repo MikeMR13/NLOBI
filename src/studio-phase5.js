@@ -3,6 +3,9 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
  if(typeof document!=='undefined'&&document.head&&!document.getElementById?.('nlobi-studio-board-v3-css')){
   const sheet=document.createElement('link');sheet.id='nlobi-studio-board-v3-css';sheet.rel='stylesheet';sheet.href='/assets/studio-board-phase3.css';document.head.appendChild(sheet);
  }
+ if(typeof document!=='undefined'&&document.head&&!document.getElementById?.('nlobi-editorial-insights-v4-css')){
+  const sheet=document.createElement('link');sheet.id='nlobi-editorial-insights-v4-css';sheet.rel='stylesheet';sheet.href='/assets/editorial-insights-phase4.css';document.head.appendChild(sheet);
+ }
  const STATES=[['todo','Por hacer'],['in_progress','En curso'],['blocked','Bloqueada'],['done','Terminada'],['cancelled','Cancelada']];
  const PRIORITIES=[['normal','Normal'],['high','Alta'],['urgent','Urgente']];
  const label=(list,id)=>list.find(x=>x[0]===id)?.[1]||id||'—';
