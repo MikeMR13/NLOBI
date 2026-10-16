@@ -2299,7 +2299,7 @@ function mountReaderToolsPhase5(){
   .then(()=>{
    readerToolsPhase5Loading=false;
    if(!S.view.startsWith('reader:')||!S.readerSection)return;
-   readerToolsPhase5=window.createReaderToolsPhase5({S,jreq,esc,toast,cacheReaderChapter,go});
+   readerToolsPhase5=window.createReaderToolsPhase5({S,jreq,esc,toast,cacheReaderChapter,safeMediaUrl,go});
    readerToolsPhase5.mount();
   }).catch(error=>{readerToolsPhase5Loading=false;console.warn('[Lector fase 5]',error)});
 }
