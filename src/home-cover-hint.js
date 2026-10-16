@@ -3,6 +3,9 @@
 (function(){
  try{
   if(location.hash&&location.hash!=='#home')return;
+  // La portada pública del build ya dispone de preload declarativo en HEAD.
+  // No precargar también la pista local: evitar dos imágenes compitiendo por LCP.
+  if(document.querySelector?.('link[data-home-cover-seed]')?.getAttribute?.('href'))return;
   const hint=JSON.parse(localStorage.getItem('nlobi_home_cover_hint_v1')||'null');
   const fresh=hint&&typeof hint.path==='string'&&Number.isFinite(hint.at)&&
      Date.now()-hint.at<=12*60*60*1000&&Date.now()>=hint.at;
