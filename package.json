@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "check": "node scripts/validate.mjs && node scripts/epub-font-check.mjs && node scripts/team-appearance-phase-a-check.mjs",
+    "check": "node scripts/validate.mjs && node scripts/epub-font-check.mjs && node scripts/team-appearance-phase-a-check.mjs && node scripts/team-appearance-phase-b-check.mjs",
     "build": "node scripts/validate.mjs && node scripts/build.mjs",
     "test": "npm run check"
   },
