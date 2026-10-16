@@ -2978,14 +2978,14 @@ function textBlocksPreserveImportedMedia(body,previous=[]){
 async function loadStudioData(){
  const ids=S.groups.map(g=>g.translator_groups?.id).filter(Boolean);
  if(!ids.length){S.studioTranslations=[];S.studioCollaborationInvites=[];S.studioLoadError='';return}
- const ownedRequest=jreqAllRows(`/rest/v1/translations?group_id=in.(${ids.join(',')})&select=id,title,status,updated_at,language_code,group_id,editorial_mode,novels(id,title,title_original,author_name,cover_url,status,sequel_status,novel_type,genres),volumes!volumes_translation_id_fkey(id,status,sections(id,status)),translator_groups(id,name)&order=updated_at.desc`);
+ const ownedRequest=jreqAllRows(`/rest/v1/translations?group_id=in.(${ids.join(',')})&select=id,title,status,updated_at,language_code,group_id,editorial_mode,novels(id,title,title_original,author_name,cover_url,status,sequel_status,novel_type,genres),volumes!volumes_translation_id_fkey(id,volume_number,title,status,sections(id,title,section_number,status,updated_at)),translator_groups(id,name)&order=updated_at.desc`);
  const inviteRequest=jreqAllRows(`/rest/v1/translation_collaborations?or=(inviter_group_id.in.(${ids.join(',')}),invited_group_id.in.(${ids.join(',')}))&select=id,translation_id,inviter_group_id,invited_group_id,status,created_at,decided_at&order=created_at.desc`).catch(e=>{console.warn('[NLOBI] Colaboraciones aún no disponibles',e);return []});
  let owned;try{owned=await ownedRequest;S.studioLoadError=''}catch(error){S.studioLoadError=friendlyError(error,'No se pudieron consultar las obras de tu equipo.');console.warn('[NLOBI] Falló la carga de obras de Studio',error);throw error}const invites=await inviteRequest;
  S.studioCollaborationInvites=invites||[];
  const originalIds=new Set((owned||[]).map(p=>p.id));
  const accepted=[...new Set((invites||[]).filter(c=>c.status==='accepted'&&ids.includes(c.invited_group_id)&&!originalIds.has(c.translation_id)).map(c=>c.translation_id))];
  let shared=[];
- if(accepted.length)try{shared=await jreqAllRows(`/rest/v1/translations?id=in.(${accepted.join(',')})&select=id,title,status,updated_at,language_code,group_id,editorial_mode,novels(id,title,title_original,author_name,cover_url,status,sequel_status,novel_type,genres),volumes!volumes_translation_id_fkey(id,status,sections(id,status)),translator_groups(id,name)&order=updated_at.desc`)||[]}catch(e){console.warn('[NLOBI] No se pudo consultar un proyecto colaborativo',e)}
+ if(accepted.length)try{shared=await jreqAllRows(`/rest/v1/translations?id=in.(${accepted.join(',')})&select=id,title,status,updated_at,language_code,group_id,editorial_mode,novels(id,title,title_original,author_name,cover_url,status,sequel_status,novel_type,genres),volumes!volumes_translation_id_fkey(id,volume_number,title,status,sections(id,title,section_number,status,updated_at)),translator_groups(id,name)&order=updated_at.desc`)||[]}catch(e){console.warn('[NLOBI] No se pudo consultar un proyecto colaborativo',e)}
  S.studioTranslations=[...(owned||[]),...shared.filter(p=>!originalIds.has(p.id))];
 }
 function importCanonicalText(v){return normalizeImportedText(String(v||'')).normalize('NFKC').toLowerCase().replace(/\s+/g,' ').trim()}
