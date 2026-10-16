@@ -7350,3 +7350,13 @@ html[data-site-motion="reduce"] .homeEditorial .featuredBannerMeterFill{transiti
  .homeEditorial .featuredBannerMeter{border-top:1px solid CanvasText}
  .homeEditorial .featuredBannerMeterFill{background:Highlight}
 }
+
+
+/* Fase 4 — formulario discreto para reportar erratas desde el lector. */
+.readerErrataPhase4{max-width:680px;margin:22px auto 8px;border:1px solid var(--line);border-radius:12px;padding:12px;background:var(--panel)}
+.readerErrataPhase4>summary{cursor:pointer;padding:8px 4px;min-height:44px;display:flex;align-items:center;font-weight:700}
+.readerErrataPhase4 p{font-size:.85rem;line-height:1.5}
+.readerErrataPhase4 label{display:grid;gap:6px;margin:11px 0;font-size:.88rem}
+.readerErrataPhase4 input,.readerErrataPhase4 textarea{width:100%;max-width:100%;font:inherit}
+.readerErrataPhase4 button{min-height:44px}
+@media(forced-colors:active){.readerErrataPhase4{border:1px solid CanvasText}}
