@@ -78,6 +78,18 @@ with check (
     )
  )
 );
+create or replace function private.touch_translation_errata()
+returns trigger language plpgsql set search_path='' as $function$
+begin
+ new.updated_at := clock_timestamp();
+ return new;
+end;
+$function$;
+drop trigger if exists translation_errata_updated_at_guard on public.translation_errata;
+create trigger translation_errata_updated_at_guard
+before update on public.translation_errata
+for each row execute function private.touch_translation_errata();
+
 -- Los lectores nunca pueden modificar el reporte; los equipos solo cambian
 -- estado y nota, por grants a nivel de columna. No hay DELETE de usuario.
 comment on table public.translation_errata is
