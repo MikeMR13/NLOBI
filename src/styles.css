@@ -6563,3 +6563,85 @@ html[data-site-motion="reduce"] .homeEditorial .featuredBannerMeterFill{transiti
 .teamPreviewCanvas.teamTemplate-revista .teamIdentityMain{margin:-14px 7px 0}
 @media(max-width:650px){.teamPublicPage.teamTemplate-editorial .teamIdentityHero{grid-template-columns:1fr}.teamPublicPage.teamTemplate-editorial .teamIdentityBanner{grid-column:1;grid-row:1;min-height:150px}.teamPublicPage.teamTemplate-editorial .teamIdentityMain{grid-column:1;grid-row:2}.teamPublicPage.teamTemplate-revista .teamIdentityMain{margin:-18px 7px 0}}
 @media(prefers-reduced-motion:reduce){.teamPublicPage[class*="teamTemplate-"] *, .teamPreviewCanvas *{animation:none!important;transition:none!important}}
+
+
+/* OX-MR → NLOBI Fase B: texturas, tipografías y libros solo en perfiles de equipos. */
+.teamBOptions select,.teamBLibrary select,.teamBLibrary input{width:100%;min-height:44px}
+.teamBOptions input[type="range"]{width:100%;accent-color:var(--accent)}
+.teamBOptions output{font-variant-numeric:tabular-nums}
+.teamBOrderItem{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 2px;border-bottom:1px solid var(--line)}
+.teamBOrderActions{display:flex;gap:5px;flex:none}
+.teamBOrderActions .btn{min-width:44px;min-height:44px;padding:0 9px}
+.teamBOrderActions .btn:disabled{opacity:.4;cursor:not-allowed}
+.teamBButtons{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}
+.teamBButtons .btn{min-height:44px}
+.teamBLibrary textarea{width:100%;min-height:100px;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;overflow-wrap:anywhere;word-break:break-word}
+.teamBLibrary #teamBMessage{min-height:24px;overflow-wrap:anywhere}
+.teamPublicPage:not(.teamPattern-none){position:relative;isolation:isolate}
+.teamPublicPage:not(.teamPattern-none)::before{
+ content:"";position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
+ opacity:var(--team-pattern-opacity,.1);background-repeat:repeat;color:var(--team-profile-accent,var(--accent))
+}
+.teamPublicPage:not(.teamPattern-none)>*{position:relative;z-index:1}
+.teamPublicPage.teamPattern-seigaiha::before{
+ background-image:radial-gradient(circle at 50% 100%,transparent 13px,currentColor 13.5px,transparent 14.5px),
+ radial-gradient(circle at 0 100%,transparent 13px,currentColor 13.5px,transparent 14.5px);
+ background-size:32px 24px;background-position:0 0,16px 12px
+}
+.teamPublicPage.teamPattern-asanoha::before{
+ background-image:repeating-linear-gradient(60deg,transparent 0 18px,currentColor 18px 19px,transparent 19px 36px),
+ repeating-linear-gradient(-60deg,transparent 0 18px,currentColor 18px 19px,transparent 19px 36px),
+ repeating-linear-gradient(0deg,transparent 0 31px,currentColor 31px 32px,transparent 32px 63px)
+}
+.teamPublicPage.teamPattern-sakura::before{
+ background-image:radial-gradient(ellipse 4px 9px at 20px 18px,currentColor 97%,transparent 100%),
+ radial-gradient(ellipse 4px 9px at 26px 26px,currentColor 97%,transparent 100%),
+ radial-gradient(circle 2px at 18px 45px,currentColor 97%,transparent 100%);
+ background-size:78px 78px
+}
+.teamPublicPage.teamPattern-washi::before{
+ background-image:repeating-linear-gradient(98deg,transparent 0 8px,currentColor 8px 8.5px,transparent 9px 21px),
+ repeating-linear-gradient(176deg,transparent 0 18px,currentColor 18px 18.6px,transparent 19px 43px);
+ background-size:80px 80px
+}
+.teamPublicPage.teamFont-literaria .teamIdentityCopy h1,
+.teamPublicPage.teamFont-literaria .teamPublicSection h2{font-family:Georgia,"Times New Roman",serif}
+.teamPublicPage.teamFont-clasica .teamIdentityCopy h1,
+.teamPublicPage.teamFont-clasica .teamPublicSection h2{font-family:"Palatino Linotype",Palatino,"Book Antiqua",serif}
+.teamPublicPage.teamFont-moderna .teamIdentityCopy h1,
+.teamPublicPage.teamFont-moderna .teamPublicSection h2{font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.teamPublicPage.teamFont-japonesa .teamIdentityCopy h1,
+.teamPublicPage.teamFont-japonesa .teamPublicSection h2{font-family:"Noto Serif CJK JP","Yu Mincho","Hiragino Mincho ProN",Georgia,serif}
+.teamPublicPage.teamCover-bolsillo .teamWorkCard .catalogCoverButton,
+.teamPublicPage.teamCover-obi .teamWorkCard .catalogCoverButton{
+ border-radius:3px 7px 7px 3px;
+ box-shadow:3px 1px 0 #e9e1ce,5px 1px 0 #c9c0ad,7px 5px 14px rgba(0,0,0,.18)
+}
+.teamPublicPage:is(.teamCover-bolsillo,.teamCover-obi) .teamWorkCard .catalogBookArt{position:relative}
+.teamPublicPage:is(.teamCover-bolsillo,.teamCover-obi) .teamWorkCard .catalogBookArt::before{
+ content:"";position:absolute;z-index:2;left:0;top:0;bottom:0;width:8%;
+ background:linear-gradient(90deg,rgba(0,0,0,.36),rgba(255,255,255,.14) 60%,rgba(0,0,0,.1));pointer-events:none
+}
+.teamPublicPage.teamCover-obi .teamWorkCard .catalogBookArt::after{
+ content:"EL OBI DEL LECTOR";position:absolute;z-index:2;left:0;right:0;bottom:9%;
+ height:23%;display:grid;place-items:center;background:#181818;color:#fff;
+ border-top:3px solid var(--team-profile-accent,var(--accent));font:700 clamp(.55rem,1vw,.75rem)/1.2 system-ui,sans-serif;
+ letter-spacing:.06em;text-align:center;pointer-events:none
+}
+.teamPreviewCanvas.teamCover-bolsillo .teamPreviewCover,
+.teamPreviewCanvas.teamCover-obi .teamPreviewCover{
+ border-radius:3px 7px 7px 3px;box-shadow:3px 0 0 #eee7d8,5px 1px 0 #c8bdab,7px 6px 13px rgba(0,0,0,.18)
+}
+.teamPreviewCanvas.teamCover-obi .teamPreviewCover{position:relative;overflow:hidden}
+.teamPreviewCanvas.teamCover-obi .teamPreviewCover::after{
+ content:"OBI";position:absolute;bottom:8%;left:0;right:0;height:20%;
+ background:#181818;color:#fff;border-top:2px solid var(--team-profile-accent,var(--accent));
+ display:grid;place-items:center;font:700 .7rem system-ui,sans-serif
+}
+@media(max-width:550px){
+ .teamBOrderItem{font-size:.85rem}
+ .teamBButtons .btn{flex:1 1 135px}
+}
+@media(prefers-reduced-motion:reduce){
+ .teamPublicPage[class*="teamCover-"] .catalogBookArt>img{transition:none!important;transform:none!important}
+}
