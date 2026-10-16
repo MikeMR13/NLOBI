@@ -2,7 +2,7 @@
  * Este módulo se importa únicamente desde la configuración de equipos.
  * Nunca ejecuta consultas a Supabase ni publica cambios por su cuenta.
  */
-export const APPEARANCE_KEYS=['team_template','team_palette','team_pattern','team_pattern_intensity','team_font','team_cover_style','team_season','team_season_motion','team_season_density','accent_color','background_color','theme','header_style','avatar_shape'];
+export const APPEARANCE_KEYS=['team_template','team_palette','team_pattern','team_pattern_intensity','team_font','team_cover_style','team_season','team_season_motion','team_season_density','team_season_mode','team_season_start','team_season_end','team_season_message','accent_color','background_color','theme','header_style','avatar_shape'];
 const OPTIONS={
  team_template:['original','revista','clasica','editorial'],
  team_palette:['original','tinta','sakura','biblioteca','washi','neon','noche'],
@@ -12,6 +12,7 @@ const OPTIONS={
  team_season:['none','sakura','nieve','momiji','matsuri'],
  team_season_motion:['static','animated'],
  team_season_density:['suave','normal'],
+ team_season_mode:['manual','scheduled'],
  theme:['automatico','claro','oscuro'],
  header_style:['banner','minimalista','degradado','centrado'],
  avatar_shape:['circular','redondeado']
@@ -37,8 +38,26 @@ export function sanitizeTeamAppearance(raw){
    const n=Number(value);if(!Number.isFinite(n)||n<0||n>24)throw Error('Intensidad fuera de rango');
    clean[key]=String(n);continue;
   }
+  if(key==='team_season_start'||key==='team_season_end'){
+   if(typeof value!=='string'||(value!==''&&!/^(20\d{2})-(\d{2})-(\d{2})$/.test(value)))throw Error('Fecha de temporada inválida');
+   if(value){
+    const day=Date.parse(value+'T00:00:00.000Z');
+    if(!Number.isFinite(day)||new Date(day).toISOString().slice(0,10)!==value)throw Error('Fecha de temporada inválida');
+   }
+   clean[key]=value;continue;
+  }
+  if(key==='team_season_message'){
+   if(typeof value!=='string'||value.length>160||/[\u0000-\u0008\u000e-\u001f]/.test(value))throw Error('Mensaje de temporada inválido');
+   clean[key]=value;continue;
+  }
   if(typeof value!=='string'||!OPTIONS[key].includes(value))throw Error('Opción de tema inválida: '+key);
   clean[key]=value;
+ }
+ if(clean.team_season_mode==='scheduled'){
+  if(clean.team_season==='none')throw Error('Una programación necesita una temporada');
+  if(!clean.team_season_start||!clean.team_season_end||clean.team_season_start>clean.team_season_end)throw Error('Rango de temporada inválido');
+  const length=(Date.parse(clean.team_season_end+'T00:00:00.000Z')-Date.parse(clean.team_season_start+'T00:00:00.000Z'))/86400000;
+  if(length>366)throw Error('La programación excede el máximo permitido');
  }
  return clean;
 }
