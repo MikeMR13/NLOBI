@@ -38,6 +38,7 @@ fs.copyFileSync(path.join(root, "src", "editorial-insights-phase4.css"), path.jo
 fs.copyFileSync(path.join(root, "src", "reader-tools-phase5.js"), path.join(dist, "assets", "reader-tools-phase5.js"));
 fs.copyFileSync(path.join(root, "src", "reader-tools-phase5.css"), path.join(dist, "assets", "reader-tools-phase5.css"));
 fs.copyFileSync(path.join(root, "src", "glossary-phase1.js"), path.join(dist, "assets", "glossary-phase1.js"));
+fs.copyFileSync(path.join(root, "src", "team-appearance-phase-b.js"), path.join(dist, "assets", "team-appearance-phase-b.js"));
 fs.copyFileSync(path.join(root, "src", "glossary-phase1.css"), path.join(dist, "assets", "glossary-phase1.css"));
 fs.copyFileSync(path.join(root, "src", "releases-phase2.js"), path.join(dist, "assets", "releases-phase2.js"));
 fs.copyFileSync(path.join(root, "src", "releases-phase2.css"), path.join(dist, "assets", "releases-phase2.css"));
@@ -115,6 +116,7 @@ const requiredBuiltFiles = [
   "assets/reader-tools-phase5.js",
   "assets/reader-tools-phase5.css",
   "assets/glossary-phase1.js",
+  "assets/team-appearance-phase-b.js",
   "assets/glossary-phase1.css",
   "assets/releases-phase2.js",
   "assets/releases-phase2.css",
