@@ -15,6 +15,7 @@ assert.ok(!Object.hasOwn(pickTeamDesignSettings(raw),'reader_logo_url'),'Reader 
 assert.ok(!Object.hasOwn(pickTeamDesignSettings(raw),'reader_default_font'),'Reader preferences must remain untouched');
 assert.equal(compareTeamDesigns({team_template:'original'}, {team_template:'editorial'}).length,1);
 assert.equal(compareTeamDesigns({team_template:'original'}, {team_template:'original'}).length,0);
+assert.equal(compareTeamDesigns({}, {team_template:'original',team_palette:'original',show_stats:true,section_order:'presentacion,destacados,fijadas,estadisticas,traducciones,novedades,apoyo'}).length,0,'Unconfigured defaults should not appear as changes');
 assert.throws(()=>pickTeamDesignSettings({tagline:'z'.repeat(4001)}));
 let calls=0;
 const fake=(path,opts)=>{calls++;assert.equal(path,'/rest/v1/rpc/team_design_save_draft');assert.equal(opts.method,'POST');
