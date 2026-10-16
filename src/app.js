@@ -2289,6 +2289,20 @@ async function submitReaderErrata(sectionId){
  }catch(error){toast(friendlyError(error,'No se pudo enviar la errata. Si ya enviaste una para este capítulo, consulta al equipo.'),'bad')}
  finally{if(send?.isConnected)send.disabled=false}
 }
+let readerToolsPhase5=null,readerToolsPhase5Loading=false;
+function mountReaderToolsPhase5(){
+ if(!S.view.startsWith('reader:')||!S.readerSection)return;
+ if(readerToolsPhase5){readerToolsPhase5.mount();return}
+ if(readerToolsPhase5Loading)return;
+ readerToolsPhase5Loading=true;
+ loadScriptOnce('/assets/reader-tools-phase5.js',()=>!!window.createReaderToolsPhase5)
+  .then(()=>{
+   readerToolsPhase5Loading=false;
+   if(!S.view.startsWith('reader:')||!S.readerSection)return;
+   readerToolsPhase5=window.createReaderToolsPhase5({S,jreq,esc,toast,cacheReaderChapter,safeMediaUrl,go});
+   readerToolsPhase5.mount();
+  }).catch(error=>{readerToolsPhase5Loading=false;console.warn('[Lector fase 5]',error)});
+}
 function readerView(){
  const R=S.readerSection;
  if(!R)return `${nav()}<main class="wrap"><div class="empty"><div class="emptyArt" aria-hidden="true">📖</div><strong>Capítulo no disponible</strong><div style="margin-top:12px"><button class="btn" data-v="library">← Biblioteca</button></div></div></main>`;
@@ -2323,6 +2337,7 @@ function readerView(){
   <label for="readerImages">Ilustraciones</label><select id="readerImages"><option value="show" ${(S.readerPrefs.images||"show")==="show"?"selected":""}>Mostrar</option><option value="hide" ${S.readerPrefs.images==="hide"?"selected":""}>Ocultar</option></select>
  </section></details></div></details></div>\n ${(fontFamily==='original'||fontFamily.startsWith('epub:'))&&embedded.length?`<p class="muted readerFontNotice" role="status">Fuentes del EPUB: ${embedded.map(esc).join(', ')} · ${S.epubFontLoaded!==epubFingerprint?'Cargando fuentes originales…':S.epubFontCount?S.epubFontCount+' de '+(R.epub_fonts||[]).length+' variantes cargadas'+(!embeddedReady?' · la variante elegida no está disponible':''):'No se pudieron cargar las fuentes; se utiliza una alternativa de lectura.'}</p>`:''}
  <div class="readerReadingTools"><span class="readerChapterIndex">${i>=0&&ns.length?`CAPÍTULO ${i+1} DE ${ns.length}`:'TU LECTURA'}</span><div class="readerReadingActions"><span id="readerProgressLabel" role="status" aria-live="off">0% leído</span><button type="button" class="btn readerBookmarkButton" id="readerBookmark" title="Guardar la posición actual">♧ Guardar punto</button>${readingPosition&&(readingPosition.percent>5&&readingPosition.percent<98||readingPosition.sectionId&&readingPosition.sectionId!==R.id)?`<button type="button" class="btn readerResumeButton" id="readerResume">↳ Retomar lectura · ${Math.round(readingPosition.percent)}%</button>`:''}</div></div>
+ <div id="readerPhase5Tools" aria-label="Herramientas personales de lectura"></div>
  <p class="readerKeyboardHint">${continuous?'Lectura continua · los capítulos siguientes se cargarán conforme avances.':'Atajos: Mayús + ← anterior · Mayús + → siguiente.'} · Esc para salir del modo enfoque</p><button type="button" class="readerFocusExit" id="readerFocusExit" aria-label="Salir del modo de concentración">Salir del modo enfoque ✕</button>
  <article class="readerPaper reader-${esc(theme)} reader-${esc(width)} reader-line-${esc(lineHeight)} reader-font-${esc((fontFamily==='original'||fontFamily.startsWith('epub:'))&&validEpub&&embeddedReady?(fontFamily==='original'?'original':'epub'):fontFamily.startsWith('epub:')?'serif':fontFamily==='original'?'serif':fontFamily)} reader-space-${esc(paragraphSpace)} reader-indent-${esc(S.readerPrefs.indent||"none")} reader-align-${esc(S.readerPrefs.align||"left")} reader-contrast-${esc(S.readerPrefs.contrast||"standard")} reader-images-${esc(S.readerPrefs.images||"show")}" style="font-size:${Number(S.readerPrefs.fontSize||18)}px;--epub-reader-font:${esc(epubFontCss)}" aria-labelledby="chapterTitle"><div class="readerMeta">${esc(R.novel_title||'El Obi del Lector')}${R.volume_number!=null?` · Vol. ${esc(R.volume_number)}`:''}</div><h1 id="chapterTitle"${readerEpubTitleAttribute(R)}>${esc(R.title||'Capítulo')}</h1><div class="readerChapterDivider" aria-hidden="true"></div>${continuous?`<div id="readerContinuousChapters">${continuous.entries.map((entry,j)=>readerContinuousChapterMarkup(entry,j===0)).join('')}</div><div id="readerContinuousMore" role="status" aria-live="polite" ${continuous.ended?'hidden':''}>Desplázate para continuar al siguiente capítulo.</div>`:(R.content||[]).map(renderReaderBlock).join('')}</article>
  <nav class="readerBottom" aria-label="Continuar lectura"><button class="btn" id="markReaderDone" type="button">✓ Marcar como leído</button>${continuous?(nextVolume?`<button class="btn primary" id="finishAndNext" data-next-section="${nextVolume.id}" data-translation="${R.translation_id}" ${continuous.ended?'':'disabled'}>Finalizar volumen y leer el siguiente →</button>`:`<button class="btn primary" id="finishAndReturn" data-translation="${R.translation_id}" ${continuous.ended?'':'disabled'}>✓ Terminar volumen y volver a la obra</button>`):(next?`<button class="btn primary" id="finishAndNext" data-next-section="${next.id}" data-translation="${R.translation_id}">Finalizar y leer siguiente →</button>`:`<button class="btn primary" id="finishAndReturn" data-translation="${R.translation_id}">✓ Finalizar capítulo y volver a la obra</button>`)}</nav>
@@ -2462,6 +2477,10 @@ function render(){
   else if(S.view.startsWith('studio:project:'))html=studioProjectView();
   else if(S.view.startsWith('studio:team:'))html=studioTeamView();
   else if(S.view.startsWith('studio:media:'))html=studioMediaView();
+  // Preservar foco cuando una actualización de datos reconstruye la cabecera
+  // tras cerrar el menú con Escape, también en WebKit móvil.
+  const restoreClosedMobileMenuFocus=!!app.querySelector('.mobileNav:not([open]) > summary')&&
+   document.activeElement===app.querySelector('.mobileNav > summary')&&window.innerWidth<=1100;
   // El evento nativo toggle es asíncrono: conservar una apertura reciente aunque
   // todavía no se haya fijado mobileNavLockedScroll al llegar un render de datos.
   const preserveMobileNav=window.innerWidth<=1100&&!!app.querySelector('.mobileNav[open]')&&
@@ -2514,11 +2533,13 @@ function render(){
   const metaDescription=document.querySelector('meta[name="description"]');
   if(metaDescription)metaDescription.content=S.view.startsWith('group:')&&S.publicGroup?String(teamSettings(S.publicGroup).seo_description||S.publicGroup.description||'Equipo traductor de El Obi del Lector').slice(0,300):'Biblioteca digital de novelas ligeras para lectores y equipos de traducción: catálogo, progreso de lectura, Studio e importación de proyectos.';
   bind();
+  if(S.view.startsWith('reader:')&&S.readerSection)mountReaderToolsPhase5();
   if(S.view==='releases'&&!releasesPhase2)loadReleasesPhase2().then(()=>{if(S.view==='releases')render()}).catch(error=>console.warn('[Lanzamientos fase 2]',error));
   if(S.view.startsWith('reader:')&&S.readerSection)loadGlossaryPhase1().then(glossary=>glossary.decorateReader(S.readerSection)).catch(error=>console.warn('[Glosario lector]',error));
   observeShelves();
   setupHomeReadingMotion();
   if(preserveMobileNav)app.querySelector('.mobileNavClose')?.focus({preventScroll:true});
+  else if(restoreClosedMobileMenuFocus)app.querySelector('.mobileNav > summary')?.focus({preventScroll:true});
   applyStudioActionAccess();
   setNetworkBadge();
  }catch(e){
@@ -3629,7 +3650,26 @@ async function recordSectionCompleted(id){if(!id)return;markSectionCompletedLoca
 async function finishReaderAndNavigate(nextId,translationId){if(S.readerTransitionBusy)return;S.readerTransitionBusy=true;try{await recordSectionCompleted(S.readerContinuous?.activeId||S.readerSection?.id);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(true)),false,S.readerContinuous?.activeId||null);if(nextId)await openReader(nextId,translationId);else await openDetail(translationId)}finally{S.readerTransitionBusy=false}}
 async function markCurrentSectionRead(){await recordSectionCompleted(S.readerContinuous?.activeId||S.readerSection?.id);await saveReaderProgress(nonRegressingPercent(currentReaderPercent(true)),true,S.readerContinuous?.activeId||null)}
 function chapterCacheKey(id){return `nlobi_chapter_${id}`}
-function cacheReaderChapter(r){try{localStorage.setItem(chapterCacheKey(r.id),JSON.stringify({...r,cached_at:new Date().toISOString()}));const idx=JSON.parse(localStorage.getItem('nlobi_cached_chapters')||'[]').filter(x=>x.id!==r.id);idx.unshift({id:r.id,title:r.title||'Capítulo',novel_title:r.novel_title||'',cached_at:new Date().toISOString()});localStorage.setItem('nlobi_cached_chapters',JSON.stringify(idx.slice(0,30)))}catch(e){console.warn('No se pudo guardar capítulo offline',e)}}
+function cacheReaderChapter(r){
+ if(!r?.id||!Array.isArray(r.content))return false;
+ const idx=cachedChapterIndex().filter(x=>x?.id&&x.id!==r.id),now=new Date().toISOString();
+ const next=[{id:r.id,title:r.title||'Capítulo',novel_title:r.novel_title||'',cached_at:now},...idx];
+ const remove=()=>{const old=next.pop();if(old)localStorage.removeItem(chapterCacheKey(old.id))};
+ try{
+  while(next.length>30)remove();
+  let success=false;
+  for(let attempts=0;attempts<30;attempts++){
+   try{
+    localStorage.setItem(chapterCacheKey(r.id),JSON.stringify({...r,cached_at:now}));
+    localStorage.setItem('nlobi_cached_chapters',JSON.stringify(next));success=true;break;
+   }catch(error){
+    if(next.length<=1)throw error;
+    remove();
+   }
+  }
+  return success;
+ }catch(error){console.warn('No se pudo guardar capítulo offline',error);return false}
+}
 function readCachedChapter(id){try{return JSON.parse(localStorage.getItem(chapterCacheKey(id))||'null')}catch{return null}}
 function queueProgress(payload){try{const q=JSON.parse(localStorage.getItem('nlobi_progress_queue')||'[]');const filtered=q.filter(x=>!(x.user_id===payload.user_id&&x.translation_id===payload.translation_id));filtered.push(payload);localStorage.setItem('nlobi_progress_queue',JSON.stringify(filtered))}catch(e){console.warn(e)}}
 async function flushProgressQueue(){if(!navigator.onLine||!S.token)return;let q=[];try{q=JSON.parse(localStorage.getItem('nlobi_progress_queue')||'[]')}catch{}if(!q.length)return;const left=[];for(const p of q){try{await jreq('/rest/v1/reading_progress?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(p.progress)});await jreq('/rest/v1/library_entries?on_conflict=user_id,translation_id',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(p.library)})}catch(e){left.push(p)}}localStorage.setItem('nlobi_progress_queue',JSON.stringify(left));if(q.length&&!left.length)toast('Progreso offline sincronizado.','ok')}
