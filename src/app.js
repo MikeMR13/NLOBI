@@ -932,6 +932,7 @@ async function ensureStudioModules(){
  if(studioModulesPromise)return studioModulesPromise;
  studioModulesPromise=Promise.all([
   import('/assets/studio-phase5.js'),
+  import('/assets/studio-board-phase3.js'),
   import('/assets/studio-phase6.js'),
   import('/assets/studio-phase7.js'),
   loadGlossaryPhase1().catch(error=>{console.warn('[Glosario opcional]',error);return null})
