@@ -11,6 +11,11 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    # Playwright incluye WebKit/Chromium/Firefox y sus dependencias de SO.
+    # Evita bloqueos ocasionales de apt en ubuntu-latest sin recortar la matriz.
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --user 1001
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -66,6 +71,8 @@ jobs:
       - name: RPC phase 2 private implementations and grant regression
         run: node scripts/rpc-security-phase2-check.mjs
       - run: npm run build
+      - name: Auditoría — deduplicación de avisos, acceso glosarios y portada LCP
+        run: node scripts/audit-hardening-20261016-check.mjs
       - name: OX-MR Fase 6 editorial CSS modularization and visual polish
         run: node scripts/editorial-phase6-check.mjs
       - name: HTML-first LCP and Studio route-split regression
@@ -80,16 +87,17 @@ jobs:
         run: |
           npx --yes serve@14.2.4 dist -l 4173 > /tmp/nlobi-serve.log 2>&1 &
           echo $! > /tmp/nlobi-serve.pid
-          for i in {1..30}; do
+          for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
             sleep 1
           done
           cat /tmp/nlobi-serve.log
           exit 1
-      - name: Install accessibility test browser
+      - name: Initialize installed browser dependencies
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
-          npx playwright install --with-deps chromium firefox webkit
+          echo "CHROME_PATH=$(node -e 'console.log(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
+          node --input-type=module -e 'import {chromium,webkit,firefox} from "playwright"; for(const engine of [chromium,webkit,firefox]){const browser=await engine.launch({headless:true});await browser.close()} console.log("Chromium, WebKit y Firefox listos");'
       - name: Contextual glossary reader (Chromium + WebKit)
         run: node scripts/glossary-phase1-browser-check.mjs
       - name: Advanced launches phase 2 (Chromium + WebKit)
@@ -120,17 +128,21 @@ jobs:
         run: node scripts/lazy-studio-browser-check.mjs
       - name: EPUB title typography across reader font preferences
         run: node scripts/epub-reader-heading-typography-check.mjs
-      - name: Mobile Lighthouse performance report
+      - name: Mobile Lighthouse performance report (5 valid samples required)
         id: lighthouse
-        continue-on-error: true
         run: |
           mkdir -p performance-results
           node scripts/ci-media-proxy.mjs >/tmp/nlobi-media-proxy.log 2>&1 &
-          for i in {1..30}; do
+          for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:4175/ >/dev/null; then break; fi
             sleep 1
           done
-          node scripts/lighthouse-mobile-batch.mjs
+          if ! node scripts/lighthouse-mobile-batch.mjs; then
+            echo "::error::Lighthouse requiere cinco muestras válidas."
+            tail -n 80 /tmp/nlobi-media-proxy.log || true
+            tail -n 50 /tmp/nlobi-serve.log || true
+            exit 1
+          fi
           node scripts/lcp-diagnostics.mjs
       - name: axe accessibility audit
         id: axe

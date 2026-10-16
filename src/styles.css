@@ -2051,7 +2051,7 @@ body.dark .exploreNovelGrid .catalogStatusTag,body.dark .homeEditorial .homeFeat
 .collectionControls{display:flex;gap:8px;flex-wrap:wrap}
 .collectionEntryList{display:grid;gap:7px}
 .collectionEntryList>div{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.collectionEntryList>div>button:first-child{background:transparent;border:0;color:inherit;text-align:left;cursor:pointer;min-width:0;overflow-wrap:anywhere}
+.collectionEntryList>div>button:first-child{background:transparent;border:0;color:inherit;text-align:left;cursor:pointer;min-width:0;min-height:44px;padding:10px 12px;border-radius:10px;overflow-wrap:anywhere}
 .novelCollectionPicker{margin-top:14px;display:grid;gap:8px}
 .novelCollectionPicker .row{flex-wrap:wrap}
 .novelCollectionPicker select{flex:1;min-width:170px}
