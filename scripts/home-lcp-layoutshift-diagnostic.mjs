@@ -57,5 +57,7 @@ try{
  console.log('LCP shift diagnosis:',JSON.stringify({trace,runtime}));
  assert.equal(runtime.length,0,'Errores en primera carga pública de Home');
  assert.equal(trace.appStarted,true,'La portada no debe impedir el inicio completo');
+ const shifted=(trace.shifts||[]).reduce((sum,entry)=>sum+entry.value,0);
+ assert.ok(shifted<=0.02,'La hoja de estilo y la hidratación no deben desplazar la cabecera o la novela destacada (CLS='+shifted.toFixed(3)+')');
  await context.close();
 }finally{await browser.close()}
