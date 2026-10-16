@@ -1,0 +1,50 @@
+
+/* Fase 2 OX-MR: presentación avanzada de lanzamientos (carga diferida). */
+.releaseV2Modes,.releaseV2Toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin:12px 0 16px}
+.releaseV2Modes .btn,.releaseV2Toolbar .btn{min-height:42px}
+.releaseV2ModeGap{flex:1 1 16px}
+.releaseV2Check{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border);border-radius:10px;padding:9px 12px;background:var(--surface);cursor:pointer;font-size:.85rem}
+.releaseV2Check input{width:17px;height:17px;accent-color:var(--accent)}
+.releaseV2Check:has(input:disabled){opacity:.55;cursor:default}
+.releaseV2Toolbar{margin-top:16px}
+.releaseV2Actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.releaseV2Actions .btn{min-height:43px}
+.releaseV2Compact .releasesItem{padding:8px 12px;gap:12px}
+.releaseV2Compact .releasesCover{width:43px;min-width:43px;height:62px;border-radius:5px}
+.releaseV2Compact .releasesBody h2{margin:3px 0;font-size:.95rem}
+.releaseV2Compact .releasesBody p{margin:0 0 3px;font-size:.83rem}
+.releaseV2Compact .releasesBody small{font-size:.75rem}
+.releaseV2Muted{background:var(--surface);padding:14px 16px;margin-top:14px;border:1px solid var(--border);border-radius:13px}
+.releaseV2Muted h2{font-size:1rem;margin:0 0 5px}
+.releaseV2Muted .row{flex-wrap:wrap}
+.releaseV2More{margin:18px auto 10px;display:block}
+.releaseV2Calendar{border:1px solid var(--border);background:var(--surface);border-radius:17px;padding:17px}
+.releaseV2CalendarNav{display:flex;justify-content:space-between;gap:13px;align-items:center;margin-bottom:15px}
+.releaseV2CalendarNav>div:first-child{display:grid;gap:4px}
+.releaseV2CalendarNav strong{text-transform:capitalize;font:700 clamp(1.05rem,2.5vw,1.4rem) Georgia,serif}
+.releaseV2CalendarNav small{color:var(--muted)}
+.releaseV2MonthGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px}
+.releaseV2DayLabel{font-weight:700;text-align:center;padding:7px;color:var(--muted);font-size:.78rem}
+.releaseV2EmptyDay{min-height:66px}
+.releaseV2Day{border:1px solid var(--border);min-height:66px;border-radius:9px;display:flex;flex-direction:column;gap:7px;padding:8px;font-variant-numeric:tabular-nums}
+.releaseV2Day strong{font-size:.86rem}
+.releaseV2Day span{font-size:.69rem;color:var(--muted)}
+.releaseV2Day.hasReleases{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 10%,var(--surface))}
+.releaseV2MonthTitle{font-size:1.1rem;margin:26px 0 12px}
+.releaseV2Calendar>.muted{margin-top:18px;line-height:1.6}
+.studioV7Calendar{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin:16px 0}
+.studioV7CalendarHead{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+.studioV7CalendarHead .btn{min-width:44px;min-height:44px;display:inline-flex;align-items:center;justify-content:center}
+.studioV7CalendarHead strong{text-transform:capitalize;font:700 1.1rem Georgia,serif}
+.studioV7CalendarHead p{margin:5px 0;color:var(--muted);font-size:.83rem}
+.studioV7CalendarGrid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:5px;margin:10px 0}
+.studioV7CalendarGrid>span{min-height:57px;border:1px solid var(--border);border-radius:7px;padding:6px;font-size:.83rem}
+.studioV7CalendarGrid>.studioV7CalWeekday{min-height:auto;border:0;text-align:center;color:var(--muted);font-weight:700}
+.studioV7CalendarGrid>.studioV7CalBusy{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 11%,var(--surface))}
+.studioV7CalendarGrid .studioV7CalCount{display:block;font-size:.71rem;margin-top:5px;color:var(--muted)}
+.studioV7CalendarEvents{display:grid;gap:8px}
+.studioV7CalendarEvents article{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border:1px solid var(--border);border-radius:8px}
+.studioV7CalendarEvents time{display:block;color:var(--muted);font-size:.78rem;margin-top:4px}
+@media(max-width:700px){.releaseV2Modes .btn{flex:1 1 auto}.releaseV2ModeGap{display:none}.releaseV2Actions{width:100%}.releaseV2Actions .btn{flex:1 1 auto}.releaseV2Calendar{padding:10px}.releaseV2Day{padding:5px;min-height:49px}.releaseV2Day span{font-size:.56rem;line-height:1.2}.releaseV2CalendarNav{flex-wrap:wrap}.studioV7CalendarGrid>span{min-height:44px}.studioV7CalendarEvents article{align-items:start;flex-wrap:wrap}}
+@media(forced-colors:active){.releaseV2Day.hasReleases,.studioV7CalendarGrid>.studioV7CalBusy{outline:2px solid Highlight}}
+@media(prefers-reduced-motion:reduce){.releaseV2Page *, .studioV7Calendar *{transition:none!important;animation:none!important}}
