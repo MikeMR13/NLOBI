@@ -41,6 +41,7 @@ const jreq=async(path,opt)=>{
  if(path.includes('/editorial_review_requests?'))return data.reviews;
  if(path.includes('/volume_publication_schedule?'))return data.schedule;
  if(path.includes('/group_members?'))return data.members;
+ if(path.includes('/editorial_publication_events?'))return [];
  throw new Error('Unexpected query '+path);
 };
 const controls=new Map();let rendered=0;
@@ -52,7 +53,7 @@ for(const phrase of ['Bandeja de tareas','Revisiones editoriales','Calendario ed
 assert.ok(view.includes('Revisar &lt;capítulo&gt;'),'Task titles must be HTML-escaped');
 assert.ok(!view.includes('<capítulo>'),'Unsafe task title interpolation');
 assert.ok(rendered>0,'Async load should refresh the desk');
-assert.equal(requests.length,4,'Load only needed team-scoped collections');
+assert.equal(requests.length,5,'Load only team-scoped collections, including editorial events');
 for(const req of requests)assert.ok(req.path.includes('group_id=in.('+gid+')'),'Private data must be scoped to authorized groups');
 
 const button={disabled:false,isConnected:true};
