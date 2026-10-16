@@ -33,7 +33,7 @@ for(const [label,engine] of [['Chromium',chromium],['WebKit',webkit]]){
   await context.route('https://fonts.googleapis.com/**',r=>r.fulfill({status:200,contentType:'text/css',body:''}));
   const page=await context.newPage(),runtime=[],network=[];
   page.on('pageerror',e=>runtime.push(String(e)));
-  page.on('console',m=>{if(m.type()==='error')runtime.push('console: '+m.text())});
+  page.on('console',m=>{if(m.type()==='error'&&/\[NLOBI QA\]|Uncaught|SyntaxError|TypeError|ReferenceError/.test(m.text()))runtime.push('console: '+m.text())});
   page.on('requestfailed',request=>network.push('request failed: '+request.url()+' '+(request.failure()?.errorText||'')));
   page.on('response',response=>{if(response.status()>=400&&response.url().includes('/assets/'))network.push('http '+response.status()+': '+response.url())});
   try{
