@@ -14,7 +14,7 @@ assert.match(built,/data-app-src="\/assets\/app\.js\?v=[a-f0-9]{12}"/);
 assert.ok(sw.includes('/assets/app-bootstrap.js?v='));
 assert.match(source,/cover\.decode\(\)/);
 assert.match(source,/1500/);
-function simulate({route='#home',seeded=true,complete=false}={}){
+function simulate({route='#home',seeded=true,complete=false,qa=false}={}){
  const nodes=[],listeners=new Map(),coverHandlers=new Map(),frames=[],timers=[];
  const image=seeded?{
   complete,decode:()=>Promise.resolve(),addEventListener(name,cb){coverHandlers.set(name,cb)}
@@ -26,6 +26,7 @@ function simulate({route='#home',seeded=true,complete=false}={}){
   body:{appendChild(el){nodes.push(el)}}
  };
  const window={
+  __NLOBI_CONFIG__:{qaMode:qa},
   addEventListener(name,cb){listeners.set(name,cb)},
   removeEventListener(name){listeners.delete(name)}
  };
@@ -37,6 +38,8 @@ function simulate({route='#home',seeded=true,complete=false}={}){
  const tick=()=>{const batch=frames.splice(0);batch.forEach(cb=>cb())};
  return {nodes,listeners,coverHandlers,frames,timers,location,tick};
 }
+const fixture=simulate({qa:true});
+assert.equal(fixture.nodes.length,1,'QA no debe competir con actualizaciones asíncronas de fixtures');
 const direct=simulate({route:'#reader:section-1'});
 assert.equal(direct.nodes.length,1,'Rutas lector deben iniciar sin espera');
 assert.equal(direct.nodes[0].src,'/assets/app.js?v=abc123');
