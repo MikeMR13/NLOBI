@@ -55,6 +55,6 @@ assert.match(sql,/private\.team_action_allowed\(t\.group_id,'edit'\)/);
 assert.doesNotMatch(sql,/to anon,authenticated/,'Una única política no debe exponer borradores');
 const workflow=fs.readFileSync('.github/workflows/ci.yml','utf8');
 const css=fs.readFileSync('src/styles.css','utf8');
-assert.match(css,/\\.collectionEntryList>div>button:first-child\\{[^}]*min-height:44px/,'Los títulos interactivos de colecciones deben tener un área táctil de 44 px');
+assert.match(css,/\.collectionEntryList>div>button:first-child\{[^}]*min-height:44px/,'Los títulos interactivos de colecciones deben tener un área táctil de 44 px');
 assert.ok(workflow.includes('node scripts/audit-hardening-20261016-check.mjs'));
 console.log('Audit hardening 2026-10-16: OK (preload, permisos de glosario, consolidación de avisos).');
