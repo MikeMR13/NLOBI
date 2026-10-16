@@ -21,7 +21,7 @@ for(const [label,test] of [
  ['no public comment writes',!reader.includes('/rest/v1/comments')],
  ['server owner checks apply',reader.includes('user_id:uid,translation_id:r.translation_id,section_id:r.id')],
  ['existing cache reused',reader.includes('cacheReaderChapter(r)')],
- ['cache success shown honestly',reader.includes('if(cacheReaderChapter(r))toast(')],
+ ['cache success shown honestly',reader.includes('if(!cacheReaderChapter(r))')],
  ['cache bounded',app.includes('while(next.length>30)remove();')],
  ['private note text export',reader.includes('mis-notas-')&&reader.includes('text/plain;charset=utf-8')],
  ['official download links preserved',reader.includes("go('detail:'+r.translation_id)")],
