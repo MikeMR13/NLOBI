@@ -947,6 +947,7 @@ async function ensureStudioModules(){
  studioModulesPromise=Promise.all([
   import('/assets/studio-phase5.js'),
   import('/assets/studio-board-phase3.js'),
+  import('/assets/editorial-insights-phase4.js'),
   import('/assets/studio-phase6.js'),
   import('/assets/studio-phase7.js'),
   loadGlossaryPhase1().catch(error=>{console.warn('[Glosario opcional]',error);return null})
@@ -2269,6 +2270,25 @@ function bindReaderExperience(){
  }
  requestAnimationFrame(updateReaderProgress);
 }
+async function submitReaderErrata(sectionId){
+ if(!S.user||!S.readerSection||S.readerSection.id!==sectionId)return;
+ const body=document.getElementById('readerErrataBody')?.value.trim()||'';
+ const excerpt=document.getElementById('readerErrataExcerpt')?.value.trim()||'';
+ if(body.length<12||body.length>1400||excerpt.length>280){
+  toast('Describe la errata en 12–1400 caracteres y limita el fragmento a 280.','bad');return;
+ }
+ const send=document.querySelector('[data-reader-errata-send]');
+ if(send?.disabled)return;
+ if(send)send.disabled=true;
+ try{
+  await jreq('/rest/v1/translation_errata',{method:'POST',headers:{Prefer:'return=minimal'},body:JSON.stringify({section_id:sectionId,user_id:S.user.id,body,excerpt})});
+  toast('Errata enviada al equipo traductor.','ok');
+  document.getElementById('readerErrataBody').value='';
+  document.getElementById('readerErrataExcerpt').value='';
+  const details=document.querySelector('.readerErrataPhase4');if(details)details.open=false;
+ }catch(error){toast(friendlyError(error,'No se pudo enviar la errata. Si ya enviaste una para este capítulo, consulta al equipo.'),'bad')}
+ finally{if(send?.isConnected)send.disabled=false}
+}
 function readerView(){
  const R=S.readerSection;
  if(!R)return `${nav()}<main class="wrap"><div class="empty"><div class="emptyArt" aria-hidden="true">📖</div><strong>Capítulo no disponible</strong><div style="margin-top:12px"><button class="btn" data-v="library">← Biblioteca</button></div></div></main>`;
@@ -2306,6 +2326,13 @@ function readerView(){
  <p class="readerKeyboardHint">${continuous?'Lectura continua · los capítulos siguientes se cargarán conforme avances.':'Atajos: Mayús + ← anterior · Mayús + → siguiente.'} · Esc para salir del modo enfoque</p><button type="button" class="readerFocusExit" id="readerFocusExit" aria-label="Salir del modo de concentración">Salir del modo enfoque ✕</button>
  <article class="readerPaper reader-${esc(theme)} reader-${esc(width)} reader-line-${esc(lineHeight)} reader-font-${esc((fontFamily==='original'||fontFamily.startsWith('epub:'))&&validEpub&&embeddedReady?(fontFamily==='original'?'original':'epub'):fontFamily.startsWith('epub:')?'serif':fontFamily==='original'?'serif':fontFamily)} reader-space-${esc(paragraphSpace)} reader-indent-${esc(S.readerPrefs.indent||"none")} reader-align-${esc(S.readerPrefs.align||"left")} reader-contrast-${esc(S.readerPrefs.contrast||"standard")} reader-images-${esc(S.readerPrefs.images||"show")}" style="font-size:${Number(S.readerPrefs.fontSize||18)}px;--epub-reader-font:${esc(epubFontCss)}" aria-labelledby="chapterTitle"><div class="readerMeta">${esc(R.novel_title||'El Obi del Lector')}${R.volume_number!=null?` · Vol. ${esc(R.volume_number)}`:''}</div><h1 id="chapterTitle"${readerEpubTitleAttribute(R)}>${esc(R.title||'Capítulo')}</h1><div class="readerChapterDivider" aria-hidden="true"></div>${continuous?`<div id="readerContinuousChapters">${continuous.entries.map((entry,j)=>readerContinuousChapterMarkup(entry,j===0)).join('')}</div><div id="readerContinuousMore" role="status" aria-live="polite" ${continuous.ended?'hidden':''}>Desplázate para continuar al siguiente capítulo.</div>`:(R.content||[]).map(renderReaderBlock).join('')}</article>
  <nav class="readerBottom" aria-label="Continuar lectura"><button class="btn" id="markReaderDone" type="button">✓ Marcar como leído</button>${continuous?(nextVolume?`<button class="btn primary" id="finishAndNext" data-next-section="${nextVolume.id}" data-translation="${R.translation_id}" ${continuous.ended?'':'disabled'}>Finalizar volumen y leer el siguiente →</button>`:`<button class="btn primary" id="finishAndReturn" data-translation="${R.translation_id}" ${continuous.ended?'':'disabled'}>✓ Terminar volumen y volver a la obra</button>`):(next?`<button class="btn primary" id="finishAndNext" data-next-section="${next.id}" data-translation="${R.translation_id}">Finalizar y leer siguiente →</button>`:`<button class="btn primary" id="finishAndReturn" data-translation="${R.translation_id}">✓ Finalizar capítulo y volver a la obra</button>`)}</nav>
+ ${S.user?`<details class="readerErrataPhase4"><summary>¿Encontraste una errata? Reportarla al equipo</summary>
+  <p>Indica una errata de traducción, ortografía o formato. Este reporte se envía en privado al equipo; para conversar con otros lectores utiliza los comentarios.</p>
+  <label for="readerErrataExcerpt">Fragmento (opcional, máximo 280 caracteres)<input type="text" id="readerErrataExcerpt" maxlength="280" placeholder="Una frase breve para localizar el error"></label>
+  <label for="readerErrataBody">¿Qué debería corregirse?<textarea id="readerErrataBody" rows="3" minlength="12" maxlength="1400" placeholder="Describe el error y la corrección que propones."></textarea></label>
+  <button type="button" class="btn primary" data-reader-errata-send="${esc(R.id)}">Enviar errata</button>
+  <p class="muted">Solo se permite un reporte por lector y capítulo. Se revisará según la disponibilidad del equipo.</p>
+ </details>`:''}
  </div></main>`;
 }
 function accessibilityViewTitle(){
@@ -2502,7 +2529,9 @@ function render(){
 function bindAdminModeration(){const root=document.querySelector('[data-admin-moderation]');if(!root)return;const search=root.querySelector('[data-moderation-search]'),filter=root.querySelector('[data-moderation-filter]'),cards=[...root.querySelectorAll('.adminModerationItem')],count=root.querySelector('[data-moderation-count]'),empty=root.querySelector('[data-moderation-empty]');for(const value of [...new Set(cards.map(c=>c.querySelector('.badge')?.textContent?.trim()).filter(Boolean))].sort()){const opt=document.createElement('option');opt.value=value;opt.textContent=value;filter.append(opt)}const draw=()=>{let visible=0;const q=search.value.trim().toLocaleLowerCase(),state=filter.value;cards.forEach(c=>{const show=(!q||c.textContent.toLocaleLowerCase().includes(q))&&(!state||c.querySelector('.badge')?.textContent?.trim()===state);c.hidden=!show;if(show)visible++});count.textContent='Mostrando '+visible+' de '+cards.length+' registros cargados';empty.hidden=visible!==0};search.addEventListener('input',draw);filter.addEventListener('change',draw);root.querySelector('[data-moderation-clear]')?.addEventListener('click',()=>{search.value='';filter.value='';draw();search.focus()});draw()}
 function bindAdminEditorial(){const root=document.querySelector('[data-editorial]');if(!root)return;const input=root.querySelector('[data-editorial-search]'),select=root.querySelector('[data-editorial-status]'),cards=[...root.querySelectorAll('.adminEditorialCard')],counter=root.querySelector('[data-editorial-count]'),empty=root.querySelector('[data-editorial-empty]');for(const label of [...new Set(cards.map(c=>c.querySelector('.badge')?.textContent?.trim()||'').filter(Boolean))].sort()){const option=document.createElement('option');option.value=label;option.textContent=label;select.append(option)}const update=()=>{const q=input.value.trim().toLocaleLowerCase(),status=select.value;let shown=0;for(const c of cards){const ok=(!q||c.textContent.toLocaleLowerCase().includes(q))&&(!status||c.querySelector('.badge')?.textContent?.trim()===status);c.hidden=!ok;if(ok)shown++}counter.textContent='Mostrando '+shown+' de '+cards.length+' registros cargados';empty.hidden=shown!==0};input.addEventListener('input',update);select.addEventListener('change',update);root.querySelector('[data-editorial-clear]')?.addEventListener('click',()=>{input.value='';select.value='';update();input.focus()});update()}
 function bindAdminDirectory(){const root=document.querySelector('[data-admin-directory]');if(!root)return;const input=root.querySelector('[data-admin-directory-search]'),filter=root.querySelector('[data-admin-directory-filter]'),sort=root.querySelector('[data-admin-directory-sort]'),rows=[...root.querySelectorAll('[data-admin-directory-row]')],count=root.querySelector('[data-admin-directory-count]'),empty=root.querySelector('[data-admin-directory-empty]'),pageLabel=root.querySelector('[data-admin-directory-page]'),prev=root.querySelector('[data-admin-directory-prev]'),next=root.querySelector('[data-admin-directory-next]');let page=0;const draw=()=>{const q=(input?.value||'').trim().toLocaleLowerCase(),kind=filter?.value||'',direction=sort?.value||'asc';const filtered=rows.filter(el=>(!q||el.dataset.search.includes(q))&&(!kind||el.dataset.kind===kind)).sort((a,b)=>direction==='asc'?a.dataset.name.localeCompare(b.dataset.name,'es'):b.dataset.name.localeCompare(a.dataset.name,'es'));const pages=Math.max(1,Math.ceil(filtered.length/12));page=Math.min(page,pages-1);rows.forEach(el=>el.hidden=true);const tbody=root.querySelector('tbody');filtered.forEach(el=>tbody.appendChild(el));filtered.slice(page*12,(page+1)*12).forEach(el=>el.hidden=false);count.textContent='Mostrando '+(filtered.length?Math.min(12,filtered.length-page*12):0)+' de '+filtered.length+' resultados ('+rows.length+' registros cargados)';empty.hidden=filtered.length!==0;pageLabel.textContent='Página '+(page+1)+' de '+pages;prev.disabled=page===0;next.disabled=page>=pages-1};for(const el of [input,filter,sort])if(el)el.addEventListener(el===input?'input':'change',()=>{page=0;draw()});prev.onclick=()=>{page=Math.max(0,page-1);draw()};next.onclick=()=>{page++;draw()};draw()}
-function bind(){bindMobileNav();bindNotificationBell();bindFinalVolumeSettings('newVolume');bindFinalVolumeSettings('editVolume');bindNovelGenrePickers();studioWorkflow?.bind();studioQuality?.bind();studioLaunch?.bind();studioGlossary?.bind();releasesPhase2?.bind();document.querySelectorAll('img[data-team-fallback]').forEach(img=>img.addEventListener('error',()=>{const fallback=document.createElement('span');fallback.textContent='Equipo: '+img.dataset.teamFallback;img.replaceWith(fallback)},{once:true}));if(S.view==='auth:edit'){bindSiteAppearance();bindLibraryCustomization();
+function bind(){bindMobileNav();
+ const errataButton=document.querySelector('[data-reader-errata-send]');
+ if(errataButton)errataButton.onclick=()=>submitReaderErrata(errataButton.dataset.readerErrataSend);bindNotificationBell();bindFinalVolumeSettings('newVolume');bindFinalVolumeSettings('editVolume');bindNovelGenrePickers();studioWorkflow?.bind();studioQuality?.bind();studioLaunch?.bind();studioGlossary?.bind();releasesPhase2?.bind();document.querySelectorAll('img[data-team-fallback]').forEach(img=>img.addEventListener('error',()=>{const fallback=document.createElement('span');fallback.textContent='Equipo: '+img.dataset.teamFallback;img.replaceWith(fallback)},{once:true}));if(S.view==='auth:edit'){bindSiteAppearance();bindLibraryCustomization();
  const tabs=[...document.querySelectorAll('[data-preference-tab]')],panels=[...document.querySelectorAll('[data-preference-panel]')];
  const select=key=>{S.preferenceTab=key;for(const b of tabs){const selected=b.dataset.preferenceTab===key;b.classList.toggle('active',selected);b.setAttribute('aria-selected',String(selected))}for(const p of panels)p.hidden=p.dataset.preferencePanel!==key};
  for(const b of tabs)b.onclick=()=>select(b.dataset.preferenceTab);
