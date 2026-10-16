@@ -45,9 +45,10 @@ for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
     assert.equal(res.sandbox,'');
     const text=await page.locator('#teamDesignDifference').textContent();
     assert.equal(text.trim(),'','Unexpected warning before compare');
+    await page.locator('[data-team-setting="tagline"]').fill('Fase A.2: un cambio privado');
     await page.locator('#teamDesignCompareCurrent').click();
     await page.waitForSelector('#teamDesignDifference h4');
-    assert.equal(await page.locator('.teamDesignDiffList .teamDesignDiffRow').count(),0,'Comparing unchanged form should be empty');
+    assert.ok((await page.locator('#teamDesignDifference').textContent()).includes('tagline'),'Comparing draft should show edited field');
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
     assert.ok(overflow<=3,'Horizontal overflow at '+width+'px: '+overflow);
     await page.locator('#teamPreviewQuick').click();
