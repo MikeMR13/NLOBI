@@ -1327,8 +1327,8 @@ function teamSeasonDecor(p){
  const count=teamSeasonDensityKey(p)==='normal'?8:5;
  return '<div class="teamSeasonLayer" aria-hidden="true">'+Array.from({length:count},()=>'<span class="teamSeasonPiece"></span>').join('')+'</div>';
 }
-function teamSeasonGreeting(p){
- const season=teamSeasonEffective(p),message=typeof p?.team_season_message==='string'?p.team_season_message.trim():'';
+function teamSeasonGreeting(p,day=teamSeasonDayUtc()){
+ const season=teamSeasonEffective(p,day),message=typeof p?.team_season_message==='string'?p.team_season_message.trim():'';
  if(season==='none'||!message||message.length>160)return '';
  return '<aside class="teamSeasonGreeting" aria-label="Mensaje de temporada"><span class="teamSeasonGreetingEyebrow">'+esc(TEAM_SEASONS[season])+'</span><p>'+esc(message)+'</p></aside>';
 }
