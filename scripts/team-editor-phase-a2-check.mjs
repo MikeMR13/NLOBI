@@ -30,7 +30,8 @@ assert.ok(app.includes("function teamCustomFullPreview("),'Missing full preview'
 assert.ok(app.includes('function publicGroupView(){'),'Published renderer signature must stay stable');
 assert.ok(app.includes('teamPublicPreviewOverride=virtual;full=publicGroupView()'),'Preview must render actual published template');
 assert.ok(app.includes('id="teamDesignFrame"'),'Missing sandboxed iframe');
-assert.ok(app.includes('sandbox=""'),'Preview must prohibit script execution');
+assert.ok(app.includes('sandbox="allow-same-origin"'),'Preview must remain sandboxed without script permission');
+assert.ok(!app.includes('sandbox="allow-same-origin allow-scripts"'),'Scripts must never run in profile preview');
 assert.ok(app.includes('aria-pressed="false"'),'Preview toggle missing pressed state');
 assert.ok(build.includes('team-editor-phase-a2.js'),'Missing asset bundling');
 assert.ok(css.includes('.teamDesignWorkflow'),'Missing revision panel styles');
