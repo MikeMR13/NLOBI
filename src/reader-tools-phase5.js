@@ -82,8 +82,8 @@ window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toas
   if(!S.user?.id||!state.rows.length)return;
   const r=current(),lines=['EL OBI DEL LECTOR — MIS ANOTACIONES',r?.novel_title||'',r?.title||'','Exportación privada · '+new Date().toLocaleDateString('es-MX'),''];
   for(const a of state.rows){lines.push('['+formatDate(a.created_at)+'] '+(a.kind==='highlight'?'Fragmento':'Nota'));if(a.excerpt)lines.push('«'+a.excerpt+'»');if(a.note)lines.push(a.note);lines.push('')}
-  const file=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(file),link=document.createElement('a');
-  link.href=url;link.download='mis-notas-'+String(r?.id||'capitulo').replace(/[^a-z0-9-]/gi,'')+'.txt';document.body.append(link);link.click();link.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+  const file=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'}),url=globalThis.URL.createObjectURL(file),link=document.createElement('a');
+  link.href=url;link.download='mis-notas-'+String(r?.id||'capitulo').replace(/[^a-z0-9-]/gi,'')+'.txt';document.body.append(link);link.click();link.remove();setTimeout(()=>globalThis.URL.revokeObjectURL(url),1000);
  }
  function mount(){
   const key=scope();
