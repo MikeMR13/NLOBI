@@ -32,7 +32,7 @@ for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
     await page.locator('#teamPreviewFull').click();
     await page.waitForSelector('#teamDesignFrame');
     const frame=page.locator('#teamDesignFrame');
-    assert.equal(await frame.getAttribute('sandbox'),'','Full preview must be sandboxed');
+    assert.equal(await frame.getAttribute('sandbox'),'allow-same-origin','Preview must be sandboxed without allow-scripts');
     const full=await frame.getAttribute('srcdoc');
     assert.ok(full.includes('teamPublicPage'),'Public profile template not reused');
     assert.ok(full.includes('Equipo traductor'),'Team identity missing');
@@ -42,7 +42,7 @@ for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
     await page.waitForFunction(()=>document.querySelector('#teamDesignFrame')?.style.width==='390px',null,{timeout:10000});
     const res=await frame.evaluate(el=>({width:el.getAttribute('style'),sandbox:el.getAttribute('sandbox')}));
     assert.ok(res.width.includes('390px'),'Mobile viewport not applied');
-    assert.equal(res.sandbox,'');
+    assert.equal(res.sandbox,'allow-same-origin');
     const text=await page.locator('#teamDesignDifference').textContent();
     assert.equal(text.trim(),'','Unexpected warning before compare');
     await page.locator('[data-team-setting="tagline"]').fill('Fase A.2: un cambio privado');
