@@ -25,14 +25,23 @@ for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
      window.__NLOBI_QA__.setView('group:group-1');
     },original);
     await page.waitForSelector('.teamPublicPage.teamSeason-sakura .teamSeasonLayer');
+    // La app puede actualizar el DOM mientras termina de cargar CSS y datos de Home.
+    // Esperar un nodo conectado y la propiedad real evita leer estilos de un nodo descartado.
+    await page.waitForFunction(()=>{
+     const layer=document.querySelector('.teamPublicPage.teamSeason-sakura > .teamSeasonLayer');
+     return !!layer?.isConnected&&getComputedStyle(layer).pointerEvents==='none'&&layer.getBoundingClientRect().height>0;
+    },null,{timeout:12000});
     const count=await page.locator('.teamPublicPage .teamSeasonPiece').count();
     assert.equal(count,8, name+' should show bounded amount of petals');
     const decor=page.locator('.teamPublicPage .teamSeasonLayer');
     assert.equal(await decor.getAttribute('aria-hidden'),'true',name+' decor must be decorative for screen readers');
-    const values=await page.locator('.teamPublicPage .teamSeasonPiece').first().evaluate(el=>{
-     const layer=el.closest('.teamSeasonLayer');
+    const values=await page.evaluate(()=>{
+     const layer=document.querySelector('.teamPublicPage.teamSeason-sakura > .teamSeasonLayer');
+     const el=layer?.querySelector('.teamSeasonPiece');
+     if(!layer?.isConnected||!el?.isConnected)return null;
      return {animation:getComputedStyle(el).animationName,pointer:getComputedStyle(layer).pointerEvents,layerHeight:layer.getBoundingClientRect().height,hidden:getComputedStyle(el).display};
     });
+    assert.ok(values,name+' overlay detached before inspection');
     assert.equal(values.animation==='none',!animatedExpected,name+' animation mode incorrect width='+width+' reduce='+reducedMotion);
     assert.equal(values.pointer,'none',name+' overlay blocks taps');
     assert.ok(values.layerHeight<=291,name+' overlay too tall');
