@@ -9,7 +9,7 @@
   launched=true;
   if(timeout!==null)clearTimeout(timeout);
   window.removeEventListener('hashchange',launch);
-  window.removeEventListener('pointerdown',wakeOnInteraction,true);
+  window.removeEventListener('click',wakeOnInteraction,true);
   const module=document.createElement('script');
   module.type='module';
   module.src=source;
@@ -17,7 +17,13 @@
   document.body.appendChild(module);
  }
  function wakeOnInteraction(event){
-  if(event.target?.closest?.('a,button,select,input,[role="button"]'))launch();
+  const target=event.target?.closest?.('[data-v],a[href^="#"]');
+  if(!target)return;
+  // Los dos botones editoriales existen antes del JS completo: conservar su
+  // primera activación, incluso con táctil o teclado.
+  const route=target.dataset?.v;
+  if(route==='explore'||route==='auth')location.hash='#'+route;
+  launch();
  }
  function afterCoverPaint(){
   // Dos fotogramas permiten pintar la imagen decodificada antes de rehidratar.
@@ -27,7 +33,7 @@
  const cover=home?document.querySelector('img[data-early-featured-cover]'):null;
  if(!cover){launch();return;}
  window.addEventListener('hashchange',launch,{once:true});
- window.addEventListener('pointerdown',wakeOnInteraction,true);
+ window.addEventListener('click',wakeOnInteraction,true);
  // La conexión del lector no espera una imagen lenta o inaccesible.
  timeout=setTimeout(launch,1500);
  if(cover.complete){
