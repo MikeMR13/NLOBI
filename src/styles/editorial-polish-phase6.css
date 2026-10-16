@@ -1,0 +1,44 @@
+/* NLOBI · Fase 6 — acabados editoriales compartidos.
+   Solo superficies de interfaz; sin alterar portadas, texto EPUB o identidad de equipos. */
+:root{
+ --obi-quiet-rule:color-mix(in srgb,var(--line) 82%,var(--accent) 18%);
+ --obi-quiet-paper:linear-gradient(148deg,var(--panel) 5%,color-mix(in srgb,var(--panel) 92%,var(--accent) 8%) 100%);
+ --obi-quiet-shadow:0 10px 28px rgba(0,0,0,.045);
+}
+body.dark{
+ --obi-quiet-shadow:0 12px 30px rgba(0,0,0,.19);
+}
+/* Los estados vacíos se perciben como páginas de una misma biblioteca. */
+:where(.empty,.collectionEmpty,.teamPublicEmpty,.betaReportsEmpty){
+ border-color:var(--obi-quiet-rule);
+ background:var(--obi-quiet-paper);
+ box-shadow:var(--obi-quiet-shadow);
+}
+:where(.empty,.collectionEmpty,.teamPublicEmpty,.betaReportsEmpty) :where(h3,strong){
+ text-wrap:balance;
+ overflow-wrap:anywhere;
+}
+:where(.empty,.collectionEmpty,.teamPublicEmpty,.betaReportsEmpty) :where(p,div){
+ overflow-wrap:break-word;
+}
+/* Los libros interactivos y sus botones comparten un foco visible y accesible. */
+:where(.collectionCard,.discoverCollectionCard,.readerDirectoryCard,.teamPublicPage)
+ :where(button,a,summary):focus-visible,
+:where(.libraryShelfSwitch button,.collectionLeader,.navLink,.volumeCard button):focus-visible{
+ outline:3px solid var(--accent);
+ outline-offset:3px;
+}
+/* Refinamiento sin saltos de diseño: nada de movimientos sobre portadas. */
+@media(hover:hover) and (pointer:fine){
+ :where(.collectionCard,.readerDirectoryCard):hover{
+  border-color:var(--obi-quiet-rule);
+  box-shadow:var(--shadow2),0 0 0 1px color-mix(in srgb,var(--accent) 18%,transparent);
+ }
+}
+@media(max-width:480px){
+ :where(.empty,.betaReportsEmpty){padding-inline:clamp(14px,4vw,22px)}
+ :where(.collectionEmpty,.teamPublicEmpty){max-width:100%}
+}
+@media(prefers-reduced-motion:reduce){
+ :where(.collectionCard,.readerDirectoryCard){transition:none!important}
+}

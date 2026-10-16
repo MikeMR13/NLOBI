@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import {splitStudioViews} from "./split-studio-views.mjs";
 import {optimizeCss} from "./optimize-css-build.mjs";
+import {composeEditorialCss,EDITORIAL_PHASE6_MODULES} from "./compose-editorial-css-phase6.mjs";
 import {createHash} from "node:crypto";
 import { spawnSync } from "node:child_process";
 
@@ -11,10 +12,16 @@ fs.rmSync(dist, { recursive: true, force: true });
 fs.mkdirSync(path.join(dist, "assets"), { recursive: true });
 
 fs.copyFileSync(path.join(root, "src", "index.html"), path.join(dist, "index.html"));
-fs.copyFileSync(path.join(root, "src", "styles.css"), path.join(dist, "assets", "styles.css"));
-// La hoja global sigue siendo asíncrona; reducir bytes sin alterar su cascada.
+// Fase 6: modularización de mantenimiento con un solo CSS servido al navegador.
+// Reinsertar cada bloque en su posición exacta conserva la cascada y el LCP.
 const cssPath=path.join(dist,"assets","styles.css");
-fs.writeFileSync(cssPath,optimizeCss(fs.readFileSync(cssPath,"utf8")));
+const cssBase=composeEditorialCss(
+ fs.readFileSync(path.join(root,"src","styles.css"),"utf8"),
+ name=>fs.readFileSync(path.join(root,"src","styles",name+".css"),"utf8")
+);
+const cssPolish=fs.readFileSync(path.join(root,"src","styles","editorial-polish-phase6.css"),"utf8");
+fs.writeFileSync(cssPath,optimizeCss(cssBase+"\n"+cssPolish));
+console.log("OX-MR Phase 6: "+EDITORIAL_PHASE6_MODULES.length+" módulos CSS recompuestos sin solicitudes adicionales");
 fs.copyFileSync(path.join(root, "src", "app.js"), path.join(dist, "assets", "app.js"));
 // Solo el paquete construido difiere las vistas pesadas de Studio.
 const studioSplit=splitStudioViews(fs.readFileSync(path.join(dist,"assets","app.js"),"utf8"));
