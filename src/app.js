@@ -436,7 +436,10 @@ function bindMobileNav(){
    document.body.classList.add('mobileNavOpen');
    document.documentElement.classList.add('mobileNavOpen');
    panel.querySelector('.mobileNavClose')?.focus({preventScroll:true});
-  }else if(mobileNavLockedScroll!==null)mobileNavClose(false);
+  }else if(mobileNavLockedScroll!==null){
+   // A native <details> close can occur before our Escape listener; return focus to its summary.
+   mobileNavClose(true);
+  }
  };
  menu.addEventListener('toggle',sync);
  menu.querySelector('.mobileNavClose')?.addEventListener('click',()=>mobileNavClose(true));
