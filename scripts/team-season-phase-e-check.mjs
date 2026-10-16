@@ -27,9 +27,9 @@ assert.equal(teamSeasonEffective({team_season:'matsuri',team_season_mode:'manual
 assert.equal(teamSeasonEffective({...data,team_season_start:'2026-02-30'},'2026-10-18'),'none');
 assert.equal(teamSeasonDateOk('2028-02-29'),true);
 assert.equal(teamSeasonDateOk('2027-02-29'),false);
-assert.ok(teamSeasonGreeting(data).includes('Feliz lectura'));
-assert.equal(teamSeasonGreeting({...data,team_season_start:'2027-12-01'}),'');
-assert.ok(teamSeasonGreeting({...data,team_season_message:'<img src=x onerror=alert(1)>'}).includes('&lt;img'));
+assert.ok(teamSeasonGreeting(data,'2026-10-16').includes('Feliz lectura'));
+assert.equal(teamSeasonGreeting({...data,team_season_start:'2027-12-01'},'2026-10-16'),'');
+assert.ok(teamSeasonGreeting({...data,team_season_message:'<img src=x onerror=alert(1)>'},'2026-10-16').includes('&lt;img'));
 assert.doesNotThrow(()=>teamSeasonValidate(data));
 for(const bad of [{...data,team_season_start:'2026-02-30'},{...data,team_season_end:'2026-10-01'},{
  ...data,team_season_start:'2026-01-01',team_season_end:'2027-12-31'},{...data,team_season_mode:'scheduled',team_season:'none'},
