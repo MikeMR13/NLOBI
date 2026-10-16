@@ -31,6 +31,7 @@ for(const engine of [chromium,webkit]){
   await page.locator('[data-reader-p5-offline]').click();
   assert.equal(await page.evaluate(()=>window.__phase5.count()),1,'offline action uses existing chapter storage');
   await page.evaluate(()=>{window.__phase5.S.user={id:'user-1'};window.__phase5.tool.mount()});
+  await page.locator('.readerPhase5Tools > summary').click();
   await page.locator('#readerP5Note').fill('Mis comentarios de lectura');
   await page.locator('[data-reader-p5-save]').click();
   await page.waitForSelector('.readerP5Entry');
