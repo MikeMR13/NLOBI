@@ -27,6 +27,7 @@ for(const engine of [chromium,webkit]){
    tool.mount();
   });
   assert.equal(await page.locator('#readerP5Note').count(),0,'guest cannot access private notes');
+  await page.locator('.readerPhase5Tools > summary').click();
   await page.locator('[data-reader-p5-offline]').click();
   assert.equal(await page.evaluate(()=>window.__phase5.count()),1,'offline action uses existing chapter storage');
   await page.evaluate(()=>{window.__phase5.S.user={id:'user-1'};window.__phase5.tool.mount()});
