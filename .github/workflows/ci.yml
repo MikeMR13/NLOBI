@@ -66,6 +66,8 @@ jobs:
       - name: RPC phase 2 private implementations and grant regression
         run: node scripts/rpc-security-phase2-check.mjs
       - run: npm run build
+      - name: OX-MR Fase 6 editorial CSS modularization and visual polish
+        run: node scripts/editorial-phase6-check.mjs
       - name: HTML-first LCP and Studio route-split regression
         run: node scripts/home-first-cover-route-split-check.mjs
       - name: Build fingerprint and lazy asset regression
