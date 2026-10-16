@@ -407,12 +407,15 @@ function mobileNavClose(restoreFocus=false){
  if(toggle){toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Abrir menú de navegación')}
  if(restoreFocus){
   toggle?.focus({preventScroll:true});
-  // Native <details> toggle and responsive reflows can move focus after Escape.
-  queueMicrotask(()=>{
+  // Native <details> toggle and viewport reflows may steal focus after Escape.
+  // Restore it once after the current task, then again after the next layout frame.
+  const restoreMenuFocus=()=>{
    const current=document.querySelector('.mobileNav');
    const summary=current?.querySelector(':scope > summary');
    if(current&&!current.open&&summary?.isConnected&&document.activeElement!==summary)summary.focus({preventScroll:true});
-  });
+  };
+  queueMicrotask(restoreMenuFocus);
+  requestAnimationFrame(restoreMenuFocus);
  }
 }
 function bindMobileNav(){
