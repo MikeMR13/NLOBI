@@ -3,6 +3,9 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
  if(typeof document!=='undefined'&&document.head&&!document.getElementById?.('nlobi-studio-board-v3-css')){
   const sheet=document.createElement('link');sheet.id='nlobi-studio-board-v3-css';sheet.rel='stylesheet';sheet.href='/assets/studio-board-phase3.css';document.head.appendChild(sheet);
  }
+ if(typeof document!=='undefined'&&document.head&&!document.getElementById?.('nlobi-editorial-insights-v4-css')){
+  const sheet=document.createElement('link');sheet.id='nlobi-editorial-insights-v4-css';sheet.rel='stylesheet';sheet.href='/assets/editorial-insights-phase4.css';document.head.appendChild(sheet);
+ }
  const STATES=[['todo','Por hacer'],['in_progress','En curso'],['blocked','Bloqueada'],['done','Terminada'],['cancelled','Cancelada']];
  const PRIORITIES=[['normal','Normal'],['high','Alta'],['urgent','Urgente']];
  const label=(list,id)=>list.find(x=>x[0]===id)?.[1]||id||'—';
@@ -15,6 +18,8 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
  const work={data:null,loading:false,team:'all',status:'open',warning:'',scope:''};
  const chapterBoard=window.createStudioBoardPhase3?.({S,esc,jreq,teamCan,isManager,toast,friendlyError,openProject,
   getData:()=>work.data,getTeamFilter:()=>work.team,refresh:load})||null;
+ const editorialInsights=window.createEditorialInsightsPhase4?.({S,jreq,esc,toast,friendlyError,teamCan,openProject,render,
+  getWorkData:()=>work.data,getTeamFilter:()=>work.team})||null;
  async function load(){
   const incomingScope=(S.user?.id||'')+':'+groups().map(g=>g.id).sort().join(',');
   if(work.scope!==incomingScope){work.scope=incomingScope;work.data=null;work.loading=false;work.warning='';work.team='all';work.status='open'}
@@ -35,6 +40,7 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
    const get=i=>result[i].status==='fulfilled'?result[i].value||[]:[];
    work.data={tasks:get(0),reviews:get(1),schedule:get(2),members:get(3),events:get(4),taskReady:result[0].status==='fulfilled',errors:result.slice(1).flatMap((r,i)=>r.status==='rejected'?[['revisiones','calendario','miembros','actividad'][i]]:[])};
    if(!work.data.taskReady)work.warning='Las tareas necesitan aplicar la migración de Studio Fase 5 en Supabase. El resto de herramientas puede utilizarse por separado.';
+   if(editorialInsights)void editorialInsights.load(true);
   }catch(e){if(work.scope===scope)work.warning=friendlyError(e,'No se pudo cargar el escritorio editorial.')}
   finally{if(work.scope===scope){work.loading=false;if(S.view==='studio:work')render()}}
  }
@@ -67,6 +73,7 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
    <div class="studioV5Stats"><div><strong>${D.tasks.filter(t=>belongs(t)&&!['done','cancelled'].includes(t.status)).length}</strong><span>Tareas abiertas</span></div><div><strong>${D.reviews.filter(r=>belongs(r)&&r.status==='pending').length}</strong><span>Revisiones pendientes</span></div><div><strong>${schedule.filter(s=>s.status==='pending').length}</strong><span>Programadas</span></div><div><strong>${teams.length}</strong><span>Equipos</span></div></div>
    <div class="studioV5Filters"><label>Equipo<select id="workTeamFilter"><option value="all">Todos mis equipos</option>${teams.map(g=>`<option value="${esc(g.id)}" ${work.team===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select></label><label>Estado<select id="workStatusFilter">${[['open','Pendientes'],['mine','Asignadas a mí'],['closed','Cerradas'],['all','Todas']].map(([k,v])=>`<option value="${k}" ${work.status===k?'selected':''}>${v}</option>`).join('')}</select></label></div>
    ${chapterBoard?.view()||''}
+   ${editorialInsights?.view()||''}
    <div class="studioV5Grid"><div><section class="studioV5Panel"><h2>Bandeja de tareas</h2>${tasks.length?tasks.map(taskCard).join(''):'<p class="muted">No hay tareas con este filtro.</p>'}</section><section class="studioV5Panel"><h2>Revisiones editoriales</h2>${reviews.length?reviews.map(reviewCard).join(''):'<p class="muted">No hay revisiones con este filtro.</p>'}</section></div><div>
    <section class="studioV5Panel"><h2>Calendario editorial</h2><p class="muted">Horas locales del navegador. Gestiona publicaciones programadas dentro de cada volumen.</p>${events.length?`<ol class="studioV5Timeline">${events.slice(0,30).map(e=>`<li><time datetime="${esc(e.when)}">${esc(date(e.when))}</time><strong>${esc(e.type)} · ${esc(e.title)}</strong>${e.project?`<button class="btn" data-work-open="${esc(e.project)}">Abrir obra</button>`:''}</li>`).join('')}</ol>`:'<p class="muted">No hay eventos próximos registrados.</p>'}</section>
    <section class="studioV5Panel"><h2>Actividad reciente</h2><p class="muted">Seguimiento de tareas y revisiones. Las versiones de texto continúan en el historial del capítulo.</p>${history.length?`<ol class="studioV5Timeline">${history.map(h=>`<li><time datetime="${esc(h.when)}">${esc(date(h.when))}</time><strong>${esc(h.type)}</strong><span>${esc(h.title)}</span></li>`).join('')}</ol>`:'<p class="muted">Sin actividad registrada.</p>'}</section></div></div>
@@ -104,6 +111,7 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
  }
  function bind(){
   chapterBoard?.bind();
+  editorialInsights?.bind();
   const team=$('#workTeamFilter');if(team)team.onchange=()=>{work.team=team.value;render()};
   const st=$('#workStatusFilter');if(st)st.onchange=()=>{work.status=st.value;render()};
   const refresh=$('#workRefresh');if(refresh)refresh.onclick=load;

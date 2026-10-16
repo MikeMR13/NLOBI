@@ -43,6 +43,8 @@ jobs:
         run: node scripts/studio-phase5-check.mjs
       - name: OX-MR editorial board phase 3 regression
         run: node scripts/studio-board-phase3-check.mjs
+      - name: OX-MR editorial insights phase 4 regression
+        run: node scripts/editorial-insights-phase4-check.mjs
       - name: Studio phase 6 regression
         run: node scripts/studio-phase6-check.mjs
       - name: Studio phase 7 regression
@@ -88,6 +90,8 @@ jobs:
         run: node scripts/glossary-phase1-browser-check.mjs
       - name: Advanced launches phase 2 (Chromium + WebKit)
         run: node scripts/releases-phase2-browser-check.mjs
+      - name: OX-MR private errata reader phase 4 (Chromium + WebKit)
+        run: node scripts/editorial-insights-phase4-browser-check.mjs
       - name: Studio rows, volume synopsis and Home emphasis (Chromium + WebKit)
         run: node scripts/studio-volume-home-fix-check.mjs
       - name: OBI editorial workspaces phase 4 (Chromium + WebKit)
