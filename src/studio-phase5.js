@@ -10,6 +10,8 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
  const projectTitle=p=>p?.novels?.title||p?.title||'Obra';
  const date=v=>v?new Date(v).toLocaleString('es-MX',{dateStyle:'medium',timeStyle:'short'}):'—';
  const work={data:null,loading:false,team:'all',status:'open',warning:'',scope:''};
+ const chapterBoard=window.createStudioBoardPhase3?.({S,esc,jreq,teamCan,isManager,toast,friendlyError,openProject,
+  getData:()=>work.data,getTeamFilter:()=>work.team,refresh:load})||null;
  async function load(){
   const incomingScope=(S.user?.id||'')+':'+groups().map(g=>g.id).sort().join(',');
   if(work.scope!==incomingScope){work.scope=incomingScope;work.data=null;work.loading=false;work.warning='';work.team='all';work.status='open'}
@@ -17,17 +19,18 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
   const ids=groups().map(g=>g.id),scope=work.scope;
   work.loading=true;work.warning='';
   try{
-   if(!ids.length){work.data={tasks:[],reviews:[],schedule:[],members:[],taskReady:true,errors:[]};return}
+   if(!ids.length){work.data={tasks:[],reviews:[],schedule:[],members:[],events:[],taskReady:true,errors:[]};return}
    const q='group_id=in.('+ids.join(',')+')';
    const result=await Promise.allSettled([
     jreq('/rest/v1/editorial_tasks?'+q+'&select=id,group_id,translation_id,title,details,status,priority,assigned_to,created_by,due_at,created_at,updated_at&order=updated_at.desc&limit=300'),
     jreq('/rest/v1/editorial_review_requests?'+q+'&select=id,group_id,section_id,requested_by,assigned_to,status,request_note,review_note,created_at,reviewed_at&order=created_at.desc&limit=300'),
     jreq('/rest/v1/volume_publication_schedule?'+q+'&select=id,group_id,volume_id,status,scheduled_at,error_message&status=in.(pending,failed)&order=scheduled_at.asc&limit=200'),
-    jreq('/rest/v1/group_members?'+q+'&select=group_id,user_id,role,permissions,profiles(id,username,display_name)')
+    jreq('/rest/v1/group_members?'+q+'&select=group_id,user_id,role,permissions,profiles(id,username,display_name)'),
+    jreq('/rest/v1/editorial_publication_events?'+q+'&select=id,group_id,translation_id,section_id,volume_id,actor_user_id,event_type,summary,created_at&order=created_at.desc&limit=150')
    ]);
    if(work.scope!==scope)return; // A different user or team must never receive stale results.
    const get=i=>result[i].status==='fulfilled'?result[i].value||[]:[];
-   work.data={tasks:get(0),reviews:get(1),schedule:get(2),members:get(3),taskReady:result[0].status==='fulfilled',errors:result.slice(1).flatMap((r,i)=>r.status==='rejected'?[['revisiones','calendario','miembros'][i]]:[])};
+   work.data={tasks:get(0),reviews:get(1),schedule:get(2),members:get(3),events:get(4),taskReady:result[0].status==='fulfilled',errors:result.slice(1).flatMap((r,i)=>r.status==='rejected'?[['revisiones','calendario','miembros','actividad'][i]]:[])};
    if(!work.data.taskReady)work.warning='Las tareas necesitan aplicar la migración de Studio Fase 5 en Supabase. El resto de herramientas puede utilizarse por separado.';
   }catch(e){if(work.scope===scope)work.warning=friendlyError(e,'No se pudo cargar el escritorio editorial.')}
   finally{if(work.scope===scope){work.loading=false;if(S.view==='studio:work')render()}}
@@ -52,7 +55,7 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
   const events=[...D.tasks.filter(t=>belongs(t)&&t.due_at&&!['done','cancelled'].includes(t.status)).map(t=>({when:t.due_at,type:'Tarea',title:t.title,project:t.translation_id})),...schedule.map(s=>({when:s.scheduled_at,type:s.status==='failed'?'Publicación fallida':'Publicación',title:projectTitle(projectByVolume(s.volume_id)),project:projectByVolume(s.volume_id)?.id}))].sort((a,b)=>Date.parse(a.when)-Date.parse(b.when));
   const history=[...D.tasks.filter(belongs).map(t=>({when:t.updated_at,title:t.title,type:'Tarea · '+label(STATES,t.status)})),...D.reviews.filter(belongs).map(r=>({when:r.reviewed_at||r.created_at,title:projectTitle(projectBySection(r.section_id)),type:'Revisión · '+r.status}))].sort((a,b)=>Date.parse(b.when)-Date.parse(a.when)).slice(0,15);
   const taskCard=t=>{const p=projects.find(p=>p.id===t.translation_id),canChange=isManager(t.group_id)||t.created_by===S.user?.id||t.assigned_to===S.user?.id&&allowed(t.group_id);
-   return `<article class="studioV5Item"><div><div class="row"><span class="badge">${esc(label(PRIORITIES,t.priority))}</span><span class="badge">${esc(label(STATES,t.status))}</span></div><h3>${esc(t.title)}</h3>${t.details?`<p>${esc(t.details)}</p>`:''}<p class="muted">${esc(teamName(t.group_id))} · ${esc(name(t.assigned_to))}${t.due_at?' · Límite: '+esc(date(t.due_at)):''}</p></div><div class="studioV5Actions">${p?`<button class="btn" data-work-open="${esc(p.id)}">Abrir obra</button>`:''}${canChange?`<label class="srOnly" for="taskState-${esc(t.id)}">Estado de ${esc(t.title)}</label><select id="taskState-${esc(t.id)}" data-work-state="${esc(t.id)}">${STATES.map(([key,title])=>`<option value="${key}" ${t.status===key?'selected':''}>${title}</option>`).join('')}</select>`:''}</div></article>`};
+   return `<article class="studioV5Item"><div><div class="row"><span class="badge">${esc(label(PRIORITIES,t.priority))}</span><span class="badge">${esc(label(STATES,t.status))}</span></div><h3>${esc(t.title)}</h3>${t.details?`<p>${esc(t.details)}</p>`:''}<p class="muted">${esc(teamName(t.group_id))} · ${esc(name(t.assigned_to))}${t.due_at?' · Límite: '+esc(date(t.due_at)):''}</p></div><div class="studioV5Actions">${p?`<button class="btn" data-work-open="${esc(p.id)}">Abrir obra</button>`:''}${chapterBoard?.taskAssigneeControl(t)||''}${canChange?`<label class="srOnly" for="taskState-${esc(t.id)}">Estado de ${esc(t.title)}</label><select id="taskState-${esc(t.id)}" data-work-state="${esc(t.id)}">${STATES.map(([key,title])=>`<option value="${key}" ${t.status===key?'selected':''}>${title}</option>`).join('')}</select>`:''}</div></article>`};
   const reviewCard=r=>{const p=projectBySection(r.section_id),canReview=teamCan(r.group_id,'review')&&r.status==='pending'&&r.requested_by!==S.user?.id&&(!r.assigned_to||r.assigned_to===S.user?.id||isManager(r.group_id));
    return `<article class="studioV5Item"><div><span class="badge">${esc(({pending:'Pendiente',approved:'Aprobada',changes_requested:'Correcciones solicitadas',cancelled:'Cancelada'})[r.status]||r.status)}</span><h3>${esc(projectTitle(p))}</h3><p class="muted">${esc(teamName(r.group_id))} · ${r.assigned_to?'Revisor: '+esc(name(r.assigned_to)):'Sin revisor asignado'} · ${esc(date(r.created_at))}</p>${r.request_note?`<p>${esc(r.request_note)}</p>`:''}${r.review_note?`<p><strong>Observaciones:</strong> ${esc(r.review_note)}</p>`:''}</div><div class="studioV5Actions">${p?`<button class="btn" data-work-open="${esc(p.id)}">Abrir capítulo</button>`:''}${canReview?`<label class="srOnly" for="reviewNote-${esc(r.id)}">Nota de revisión</label><textarea id="reviewNote-${esc(r.id)}" rows="2" placeholder="Nota de revisión" data-work-note="${esc(r.id)}"></textarea><button class="btn primary" data-work-approve="${esc(r.id)}">Aprobar</button><button class="btn" data-work-changes="${esc(r.id)}">Solicitar cambios</button>`:''}</div></article>`};
   return `${nav()}<main class="wrap studioV5" id="mainContent">${status()}${context()}
@@ -60,6 +63,7 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
    ${work.warning?`<div class="notice" role="status">${esc(work.warning)}</div>`:''}${D.errors.length?`<div class="notice">No se pudo leer: ${esc(D.errors.join(', '))}. Revisa los permisos.</div>`:''}
    <div class="studioV5Stats"><div><strong>${D.tasks.filter(t=>belongs(t)&&!['done','cancelled'].includes(t.status)).length}</strong><span>Tareas abiertas</span></div><div><strong>${D.reviews.filter(r=>belongs(r)&&r.status==='pending').length}</strong><span>Revisiones pendientes</span></div><div><strong>${schedule.filter(s=>s.status==='pending').length}</strong><span>Programadas</span></div><div><strong>${teams.length}</strong><span>Equipos</span></div></div>
    <div class="studioV5Filters"><label>Equipo<select id="workTeamFilter"><option value="all">Todos mis equipos</option>${teams.map(g=>`<option value="${esc(g.id)}" ${work.team===g.id?'selected':''}>${esc(g.name)}</option>`).join('')}</select></label><label>Estado<select id="workStatusFilter">${[['open','Pendientes'],['mine','Asignadas a mí'],['closed','Cerradas'],['all','Todas']].map(([k,v])=>`<option value="${k}" ${work.status===k?'selected':''}>${v}</option>`).join('')}</select></label></div>
+   ${chapterBoard?.view()||''}
    <div class="studioV5Grid"><div><section class="studioV5Panel"><h2>Bandeja de tareas</h2>${tasks.length?tasks.map(taskCard).join(''):'<p class="muted">No hay tareas con este filtro.</p>'}</section><section class="studioV5Panel"><h2>Revisiones editoriales</h2>${reviews.length?reviews.map(reviewCard).join(''):'<p class="muted">No hay revisiones con este filtro.</p>'}</section></div><div>
    <section class="studioV5Panel"><h2>Calendario editorial</h2><p class="muted">Horas locales del navegador. Gestiona publicaciones programadas dentro de cada volumen.</p>${events.length?`<ol class="studioV5Timeline">${events.slice(0,30).map(e=>`<li><time datetime="${esc(e.when)}">${esc(date(e.when))}</time><strong>${esc(e.type)} · ${esc(e.title)}</strong>${e.project?`<button class="btn" data-work-open="${esc(e.project)}">Abrir obra</button>`:''}</li>`).join('')}</ol>`:'<p class="muted">No hay eventos próximos registrados.</p>'}</section>
    <section class="studioV5Panel"><h2>Actividad reciente</h2><p class="muted">Seguimiento de tareas y revisiones. Las versiones de texto continúan en el historial del capítulo.</p>${history.length?`<ol class="studioV5Timeline">${history.map(h=>`<li><time datetime="${esc(h.when)}">${esc(date(h.when))}</time><strong>${esc(h.type)}</strong><span>${esc(h.title)}</span></li>`).join('')}</ol>`:'<p class="muted">Sin actividad registrada.</p>'}</section></div></div>
@@ -96,6 +100,7 @@ window.createStudioPhase5=function({S,nav,status,context,esc,jreq,toast,friendly
   catch(e){toast(friendlyError(e),'bad')}
  }
  function bind(){
+  chapterBoard?.bind();
   const team=$('#workTeamFilter');if(team)team.onchange=()=>{work.team=team.value;render()};
   const st=$('#workStatusFilter');if(st)st.onchange=()=>{work.status=st.value;render()};
   const refresh=$('#workRefresh');if(refresh)refresh.onclick=load;
