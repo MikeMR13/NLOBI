@@ -100,6 +100,11 @@ for(const theme of themes){
        screenshots.push(name);
       }
       await page.keyboard.press('Escape');
+      // Focus restoration may settle after the native <details> toggle microtask.
+      await page.waitForFunction(()=>{
+       const menu=document.querySelector('.mobileNav'),toggle=menu?.querySelector(':scope > summary');
+       return !!toggle&&!menu.open&&toggle.getAttribute('aria-expanded')==='false'&&document.activeElement===toggle;
+      },null,{timeout:1200}).catch(()=>{});
       closedAgain=await page.evaluate(()=>({
        open:document.querySelector('.mobileNav').open,
        expanded:document.querySelector('.mobileNav>summary').getAttribute('aria-expanded'),

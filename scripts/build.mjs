@@ -24,6 +24,8 @@ console.log("Route-split Studio:",studioSplit.bytesSaved,"bytes excluded from in
 fs.copyFileSync(path.join(root, "src", "studio-phase7.js"), path.join(dist, "assets", "studio-phase7.js"));
 fs.copyFileSync(path.join(root, "src", "studio-phase6.js"), path.join(dist, "assets", "studio-phase6.js"));
 fs.copyFileSync(path.join(root, "src", "studio-phase5.js"), path.join(dist, "assets", "studio-phase5.js"));
+fs.copyFileSync(path.join(root, "src", "studio-board-phase3.js"), path.join(dist, "assets", "studio-board-phase3.js"));
+fs.copyFileSync(path.join(root, "src", "studio-board-phase3.css"), path.join(dist, "assets", "studio-board-phase3.css"));
 fs.copyFileSync(path.join(root, "src", "glossary-phase1.js"), path.join(dist, "assets", "glossary-phase1.js"));
 fs.copyFileSync(path.join(root, "src", "glossary-phase1.css"), path.join(dist, "assets", "glossary-phase1.css"));
 fs.copyFileSync(path.join(root, "src", "releases-phase2.js"), path.join(dist, "assets", "releases-phase2.js"));
@@ -93,6 +95,8 @@ const requiredBuiltFiles = [
   "assets/studio-phase7.js",
   "assets/studio-phase6.js",
   "assets/studio-phase5.js",
+  "assets/studio-board-phase3.js",
+  "assets/studio-board-phase3.css",
   "assets/glossary-phase1.js",
   "assets/glossary-phase1.css",
   "assets/releases-phase2.js",

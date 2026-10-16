@@ -1,0 +1,29 @@
+/* Fase 3 — tablero editorial, cargado solamente con Studio. */
+.studioV8BoardPanel{margin:18px 0 24px;padding:clamp(14px,2vw,24px);border:1px solid var(--line);border-radius:18px;background:var(--panel);box-shadow:var(--shadow2);min-width:0}
+.studioV8Heading{display:flex;gap:12px;flex-wrap:wrap;justify-content:space-between;align-items:center;margin-bottom:17px}
+.studioV8Heading h2{font:800 clamp(1.35rem,2.6vw,1.9rem)/1.22 Georgia,serif;margin:5px 0 7px}
+.studioV8Heading p{max-width:75ch;line-height:1.6;color:var(--muted);margin:0;font-size:.88rem}
+.studioV8Board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(228px,1fr);gap:12px;overflow-x:auto;overscroll-behavior-inline:contain;padding:2px 3px 14px;scrollbar-width:thin;scroll-snap-type:x proximity}
+.studioV8Board:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.studioV8Lane{min-width:0;padding:12px;border:1px solid var(--line);border-radius:13px;background:var(--panel2);scroll-snap-align:start}
+.studioV8Lane header{min-height:76px;display:grid;grid-template-columns:1fr auto;gap:4px}
+.studioV8Lane h3{font-size:.94rem;margin:0;line-height:1.4}
+.studioV8Lane header p{grid-column:1/-1;color:var(--muted);font-size:.76rem;margin:0}
+.studioV8Lane .muted{font-size:.82rem}
+.studioV8ChapterCard{display:flex;flex-direction:column;gap:7px;padding:12px;margin:10px 0;background:var(--panel);border:1px solid var(--line);border-radius:10px;overflow-wrap:anywhere}
+.studioV8ChapterCard strong{font-size:.91rem;line-height:1.38}
+.studioV8ChapterCard span,.studioV8ChapterCard small{font-size:.78rem;color:var(--muted);line-height:1.5}
+.studioV8ChapterCard .btn{min-height:44px;width:100%}
+.studioV8Log{margin-top:16px;border-top:1px solid var(--line);padding-top:17px}
+.studioV8Log h3{font-size:1.04rem;margin:0 0 4px}
+.studioV8Log p{font-size:.85rem;margin-bottom:12px}
+.studioV8Log ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:10px}
+.studioV8Log li{border:1px solid var(--line);border-radius:10px;padding:12px;display:grid;gap:6px;min-width:0}
+.studioV8Log li .badge{justify-self:start}
+.studioV8Log li strong{font-size:.85rem;overflow-wrap:anywhere}
+.studioV8Log li small{font-size:.75rem;color:var(--muted);overflow-wrap:anywhere}
+.studioV5Actions [data-board-assignee]{min-height:44px;max-width:100%;min-width:0}
+@media(min-width:1480px){.studioV8Board{grid-auto-columns:minmax(228px,1fr)}}
+@media(max-width:700px){.studioV8Board{grid-auto-columns:minmax(220px,80vw)}.studioV8Heading{align-items:flex-start}.studioV8BoardPanel{padding:12px}.studioV8Log ol{grid-template-columns:1fr}}
+@media(forced-colors:active){.studioV8Lane,.studioV8ChapterCard,.studioV8Log li{border:1px solid CanvasText}}
+@media(prefers-reduced-motion:reduce){.studioV8Board{scroll-behavior:auto;scroll-snap-type:none}}

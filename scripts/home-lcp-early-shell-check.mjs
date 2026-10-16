@@ -31,8 +31,11 @@ for(const [label,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    body:"window.__NLOBI_CONFIG__={supabaseUrl:'https://qa.supabase.local',supabasePublishableKey:'qa',qaMode:true};"}));
   await context.route('https://qa.supabase.local/**',r=>r.fulfill({status:200,contentType:'application/json',body:'[]'}));
   await context.route('https://fonts.googleapis.com/**',r=>r.fulfill({status:200,contentType:'text/css',body:''}));
-  const page=await context.newPage(),runtime=[];
+  const page=await context.newPage(),runtime=[],network=[];
   page.on('pageerror',e=>runtime.push(String(e)));
+  page.on('console',m=>{if(m.type()==='error'&&/\[NLOBI QA\]|Uncaught|SyntaxError|TypeError|ReferenceError/.test(m.text()))runtime.push('console: '+m.text())});
+  page.on('requestfailed',request=>network.push('request failed: '+request.url()+' '+(request.failure()?.errorText||'')));
+  page.on('response',response=>{if(response.status()>=400&&response.url().includes('/assets/'))network.push('http '+response.status()+': '+response.url())});
   try{
    await page.goto('http://127.0.0.1:4173/#home',{waitUntil:'commit'});
    await page.locator('.homeShowcaseCopy h1').waitFor({timeout:12000});
@@ -45,7 +48,10 @@ for(const [label,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    assert.equal(initially.visible,true,'El titular debe pintarse antes de app.js');
    assert.match(initially.text,/Abre un libro/);
    assert.equal(initially.fonts,null,'La portada no descarga tipografías del lector');
-   await page.waitForFunction(()=>!!window.__NLOBI_QA__,undefined,{timeout:18000});
+   await page.waitForFunction(()=>!!window.__NLOBI_QA__,undefined,{timeout:18000}).catch(async error=>{
+    const state=await page.evaluate(()=>({qa:!!window.__NLOBI_QA__,config:!!window.__NLOBI_CONFIG__,modules:{studio5:!!window.createStudioPhase5,board:!!window.createStudioBoardPhase3,studio6:!!window.createStudioPhase6,studio7:!!window.createStudioPhase7},scripts:[...document.querySelectorAll('script[src]')].map(x=>x.src)})).catch(()=>null);
+    throw new Error(error.message+' diagnostic='+JSON.stringify({state,runtime,network}));
+   });
    await page.evaluate(data=>{window.__NLOBI_QA__.setState({...data,catalogLoading:false,catalogLoaded:true});window.__NLOBI_QA__.setView('home')},home);
    const hydrated=await page.evaluate(()=>{
     const title=document.querySelector('.homeShowcaseCopy h1');

@@ -65,7 +65,7 @@ for(const route of ['studioProjectReadOnlyView','studioProjectView','studioNewPr
  assert.ok(at>=0,'Missing route '+route);
  assert.ok(app.slice(at,at+2500).includes('studioContextNav()'),'Navigation missing for '+route);
 }
-assert.match(app,/sections\(id,status\)/);
+assert.match(app,/sections\(id,(?:title,section_number,)?status(?:,updated_at)?\)/);
 assert.match(app,/select=id,title,status,updated_at,language_code/);
 assert.match(css,/Studio phase 3: editorial workspace/);
 assert.match(css,/@media\(max-width:900px\)/);
