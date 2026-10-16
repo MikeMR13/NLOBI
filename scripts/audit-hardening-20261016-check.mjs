@@ -4,7 +4,7 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 import {seedFeaturedHomeHtml} from './home-seed-html.mjs';
 
-const sql=fs.readFileSync('supabase/migrations/20261016165000_audit_volume_digest_and_glossary_rls.sql','utf8');
+const sql=fs.readFileSync('supabase/migrations/20261016162341_audit_volume_digest_and_glossary_rls_20261016.sql','utf8');
 const source=fs.readFileSync('src/index.html','utf8');
 const helper=fs.readFileSync('src/home-cover-hint.js','utf8');
 const origin='https://qa.supabase.local';

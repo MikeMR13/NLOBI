@@ -8,9 +8,9 @@ const built=fs.existsSync('dist/index.html')?fs.readFileSync('dist/index.html','
 const tag=html.match(/<script\s+src="\/assets\/home-cover-hint\.js[^"]*"\s*><\/script>/);
 assert.ok(tag,'LCP preload should execute synchronously from the head');
 assert.ok(html.indexOf(tag[0])>html.indexOf('<head>')&&html.indexOf(tag[0])<html.indexOf('</head>'));
-assert.ok(html.indexOf(tag[0])<html.indexOf('rel="modulepreload"'));
+assert.doesNotMatch(html, /rel="modulepreload" href="\/assets\/app\.js/);
 assert.ok(html.indexOf(tag[0])<html.indexOf('id="siteStyles"'));
-assert.ok(html.indexOf(tag[0])<html.indexOf('<script type="module" src="/assets/app.js'));
+assert.ok(html.indexOf(tag[0])<html.indexOf('<script defer src="/assets/app-bootstrap.js'));
 assert.match(html,/\.homeFeaturedBook/); // Critical geometry for the cover remains present
 assert.doesNotMatch(tag[0],/\bdefer\b|\basync\b/);
 assert.ok(helper.includes("url.origin!==location.origin"),'same-origin preload guard must remain');

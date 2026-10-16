@@ -71,6 +71,8 @@ jobs:
       - name: RPC phase 2 private implementations and grant regression
         run: node scripts/rpc-security-phase2-check.mjs
       - run: npm run build
+      - name: Home first paint bootstrap and direct-route regression
+        run: node scripts/home-bootstrap-first-paint-check.mjs
       - name: Auditoría — deduplicación de avisos, acceso glosarios y portada LCP
         run: node scripts/audit-hardening-20261016-check.mjs
       - name: OX-MR Fase 6 editorial CSS modularization and visual polish
@@ -98,6 +100,8 @@ jobs:
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
           echo "CHROME_PATH=$(node -e 'console.log(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
           node --input-type=module -e 'import {chromium,webkit,firefox} from "playwright"; for(const engine of [chromium,webkit,firefox]){const browser=await engine.launch({headless:true});await browser.close()} console.log("Chromium, WebKit y Firefox listos");'
+      - name: Identify CLS sources before mobile Lighthouse
+        run: node scripts/home-lcp-layoutshift-diagnostic.mjs
       - name: Contextual glossary reader (Chromium + WebKit)
         run: node scripts/glossary-phase1-browser-check.mjs
       - name: Advanced launches phase 2 (Chromium + WebKit)
