@@ -26,7 +26,8 @@ assert.ok(app.includes("team_design_draft_saved")===false,'Do not use misleading
 assert.ok(app.includes("team-design-draft-saved"),'No saved draft event');
 assert.ok(app.includes("saveTeamDesignDraft({request:jreq"),'Save flow bypasses revision RPC');
 assert.ok(app.includes("function teamCustomFullPreview("),'Missing full preview');
-assert.ok(app.includes("function publicGroupView(G=S.publicGroup)"),'Published profile renderer should be reused');
+assert.ok(app.includes('function publicGroupView(){'),'Published renderer signature must stay stable');
+assert.ok(app.includes('teamPublicPreviewOverride=virtual;full=publicGroupView()'),'Preview must render actual published template');
 assert.ok(app.includes('id="teamDesignFrame"'),'Missing sandboxed iframe');
 assert.ok(app.includes('sandbox=""'),'Preview must prohibit script execution');
 assert.ok(app.includes('aria-pressed="false"'),'Preview toggle missing pressed state');
