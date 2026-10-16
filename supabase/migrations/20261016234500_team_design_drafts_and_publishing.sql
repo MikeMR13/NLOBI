@@ -87,6 +87,8 @@ DECLARE
  v_settings jsonb;
  v_current jsonb;
  v_group public.translator_groups%ROWTYPE;
+ v_target public.team_design_revisions%ROWTYPE;
+ result_id uuid;
 BEGIN
  IF v_uid IS NULL OR NOT EXISTS(
   SELECT 1 FROM public.group_members gm
