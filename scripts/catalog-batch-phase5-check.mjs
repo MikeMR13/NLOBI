@@ -89,9 +89,11 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    }
    assert.equal(await explorer.count(),48,'Explorar debe mostrar 48 obras tras ampliar');
    await page.locator('#catalogSearch').fill('Historia QA 065');
+   await page.waitForFunction(()=>document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length===1,null,{timeout:5000});
    assert.equal(await explorer.count(),1,'Buscar debe encontrar obras fuera del primer lote');
    assert.equal(await page.locator('[data-catalog-more="explore"]').count(),0,'Sin botón al filtrar a un resultado');
    await page.locator('#catalogSearch').fill('');
+   await page.waitForFunction(()=>document.querySelectorAll('.exploreNovelGrid .catalogEditorialCard').length===24,null,{timeout:5000});
    assert.equal(await explorer.count(),24,'La búsqueda reinicia la ventana visible');
    await page.locator('[data-explore-view="list"]').click();
    assert.equal(await explorer.count(),24,'La vista de lista no pierde la ventana visible');
@@ -110,8 +112,10 @@ for(const [browserName,engine] of [['Chromium',chromium],['WebKit',webkit]]){
    await page.waitForFunction(()=>document.querySelectorAll('.libraryShelf .libraryShelfCard').length===48,null,{timeout:5000});
    assert.equal(await readerShelf.count(),48,'Biblioteca debe permitir mostrar más');
    await page.locator('#librarySearch').fill('Lectura QA 065');
+   await page.waitForFunction(()=>document.querySelectorAll('.libraryShelf .libraryShelfCard').length===1,null,{timeout:5000});
    assert.equal(await readerShelf.count(),1,'Búsqueda de biblioteca debe recorrer las 65 entradas');
    await page.locator('#librarySearch').fill('');
+   await page.waitForFunction(()=>document.querySelectorAll('.libraryShelf .libraryShelfCard').length===24,null,{timeout:5000});
    assert.equal(await readerShelf.count(),24,'Restablecer búsqueda reinicia la ventana');
    await page.locator('[data-library-filter="favorites"]').click();
    assert.equal(await readerShelf.count(),24,'Los filtros aplican a toda la biblioteca');
