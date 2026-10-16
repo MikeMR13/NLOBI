@@ -13,9 +13,23 @@ export function pickTeamDesignSettings(input={}){
  if(new TextEncoder().encode(JSON.stringify(result)).length>28000)throw Error('El diseño excede 28 KB');
  return result;
 }
+function comparableValue(key,value){
+ const base={team_template:'original',team_palette:'original',team_pattern:'none',
+  team_pattern_intensity:'10',team_font:'default',team_cover_style:'portada',
+  team_season:'none',team_season_motion:'static',team_season_density:'suave',
+  team_season_mode:'manual',theme:'automatico',header_style:'banner',
+  avatar_shape:'circular',status:'activo'};
+ if(key.startsWith('show_'))return value===undefined||value===null||value===''?true:
+   !(value===false||value==='false');
+ if(key==='section_order'){
+  const defaultOrder='presentacion,destacados,fijadas,estadisticas,traducciones,novedades,apoyo';
+  return String(value||defaultOrder).trim().toLowerCase().replace(/\s*,\s*/g,',');
+ }
+ return String(value===undefined||value===null||value===''?(base[key]||''):value);
+}
 export function compareTeamDesigns(published={},candidate={}){
  const a=pickTeamDesignSettings(published),b=pickTeamDesignSettings(candidate);
- return TEAM_DESIGN_KEYS.filter(key=>JSON.stringify(a[key]??null)!==JSON.stringify(b[key]??null))
+ return TEAM_DESIGN_KEYS.filter(key=>comparableValue(key,a[key])!==comparableValue(key,b[key]))
   .map(key=>({key,before:a[key],after:b[key]}));
 }
 export async function saveTeamDesignDraft({request,groupId,settings,note=''}) {
