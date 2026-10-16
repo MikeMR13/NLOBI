@@ -87,7 +87,7 @@ jobs:
         run: |
           npx --yes serve@14.2.4 dist -l 4173 > /tmp/nlobi-serve.log 2>&1 &
           echo $! > /tmp/nlobi-serve.pid
-          for i in {1..30}; do
+          for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:4173/ >/dev/null; then exit 0; fi
             sleep 1
           done
@@ -134,7 +134,7 @@ jobs:
         run: |
           mkdir -p performance-results
           node scripts/ci-media-proxy.mjs >/tmp/nlobi-media-proxy.log 2>&1 &
-          for i in {1..30}; do
+          for i in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:4175/ >/dev/null; then break; fi
             sleep 1
           done
