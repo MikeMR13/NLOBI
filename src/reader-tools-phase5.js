@@ -1,6 +1,7 @@
 /* OX-MR Fase 5: herramientas optativas del lector, cargadas solo en rutas de lectura.
    Anotaciones privadas en la tabla existente; nada se publica ni se añade al catálogo. */
 window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toast,cacheReaderChapter,go}){
+ if(!document.getElementById('reader-phase5-styles')){const link=document.createElement('link');link.id='reader-phase5-styles';link.rel='stylesheet';link.href='/assets/reader-tools-phase5.css';document.head.append(link)}
  const state={scope:'',rows:[],loaded:false,loading:false,error:'',open:false,draft:'',quote:''};
  const host=()=>document.getElementById('readerPhase5Tools');
  const current=()=>S.view.startsWith('reader:')?S.readerSection:null;
@@ -30,7 +31,7 @@ window.createReaderToolsPhase5=function createReaderToolsPhase5({S,jreq,esc,toas
   const d=h.querySelector('details');if(d)d.addEventListener('toggle',()=>{state.open=d.open});
   h.querySelector('[data-reader-p5-offline]')?.addEventListener('click',()=>{
    const r=current();if(!r)return;
-   try{cacheReaderChapter(r);toast('Se solicitó guardar el capítulo en este dispositivo. Revisa Biblioteca → Sin conexión.','ok')}
+   try{if(cacheReaderChapter(r))toast('Capítulo guardado. Disponible en Biblioteca → Sin conexión.','ok');else toast('No se pudo guardar: comprueba el almacenamiento disponible.','bad')}
    catch{toast('No se pudo guardar el capítulo. Comprueba el espacio disponible.','bad')}
   });
   h.querySelector('[data-reader-p5-downloads]')?.addEventListener('click',()=>{
