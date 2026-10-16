@@ -405,7 +405,15 @@ function mobileNavClose(restoreFocus=false){
  }
  const toggle=menu?.querySelector(':scope > summary');
  if(toggle){toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Abrir menú de navegación')}
- if(restoreFocus)toggle?.focus();
+ if(restoreFocus){
+  toggle?.focus({preventScroll:true});
+  // Native <details> toggle and responsive reflows can move focus after Escape.
+  queueMicrotask(()=>{
+   const current=document.querySelector('.mobileNav');
+   const summary=current?.querySelector(':scope > summary');
+   if(current&&!current.open&&summary?.isConnected&&document.activeElement!==summary)summary.focus({preventScroll:true});
+  });
+ }
 }
 function bindMobileNav(){
  const menu=document.querySelector('.mobileNav');
