@@ -1365,7 +1365,7 @@ function teamCustomFullPreview(target,G,settings){
  const width=mode==='mobile'?390:mode==='tablet'?768:1280;
  const html='<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/assets/styles.css"></head><body>'+main+'</body></html>';
  target.innerHTML='<div class="teamPreviewHead"><strong>Vista completa del perfil público</strong><small>Previsualización aislada · sin publicar</small></div>'+
- '<div class="teamDesignPreviewStage" data-device="'+mode+'"><iframe id="teamDesignFrame" loading="lazy" title="Vista real del perfil del equipo sin interacciones" sandbox="" referrerpolicy="no-referrer" srcdoc="'+esc(html)+'"></iframe></div>'+
+ '<div class="teamDesignPreviewStage" data-device="'+mode+'"><iframe id="teamDesignFrame" loading="lazy" title="Vista real del perfil del equipo sin interacciones" sandbox="allow-same-origin" referrerpolicy="no-referrer" srcdoc="'+esc(html)+'"></iframe></div>'+
  (data?'':'<p class="muted">Se están recuperando las publicaciones y miembros públicos. La vista se completará cuando estén disponibles.</p>');
  const frame=target.querySelector('#teamDesignFrame'),stage=target.querySelector('.teamDesignPreviewStage');
  if(frame&&stage){
