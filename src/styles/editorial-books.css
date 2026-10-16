@@ -1,0 +1,197 @@
+/* OBI EDITORIAL BOOKS — FASE 3
+   Inspiración v12: ficha impresa, estantería de volúmenes y papel del lector.
+   Aditiva; nunca cambia fuentes EPUB, bloques narrativos o progreso de lectura. */
+:root{
+ --obi-detail-paper:color-mix(in srgb,var(--panel) 94%,#e9d3a4 6%);
+ --obi-detail-rule:color-mix(in srgb,var(--line) 73%,var(--accent) 27%);
+ --obi-detail-seal:#15120c;
+}
+body.dark{
+ --obi-detail-paper:color-mix(in srgb,var(--panel) 95%,#8a7144 5%);
+ --obi-detail-rule:color-mix(in srgb,var(--line) 67%,var(--accent) 33%);
+}
+/* Ficha: hoja editorial con filo dorado, dejando intacta la portada original. */
+.detailEditorialHero{
+ position:relative;isolation:isolate;min-width:0;
+ background:linear-gradient(139deg,var(--obi-detail-paper),var(--panel) 62%);
+ border-color:var(--obi-detail-rule);
+}
+.detailEditorialHero::before{
+ content:"";position:absolute;inset:0 0 auto 0;height:3px;
+ pointer-events:none;z-index:1;
+ background:linear-gradient(90deg,var(--accent),var(--accent2) 40%,transparent 96%);
+}
+.detailEditorialHero .detailCover{
+ box-shadow:0 10px 23px rgba(17,13,7,.12),
+  inset 4px 0 6px rgba(12,9,5,.13);
+ border:1px solid var(--obi-detail-rule);
+}
+.detailEditorialHero .detailCover.hasImage img{
+ object-fit:contain;
+}
+.detailEditorialKicker>span:first-child::before{
+ content:"作品案内";display:inline-block;
+ margin-inline-end:9px;padding:3px 6px;
+ background:var(--accent);color:var(--obi-detail-seal);
+ font:700 .8em/1.2 var(--obi-japanese);
+ letter-spacing:.065em;white-space:nowrap;
+}
+.detailEditorialHeadline h1{
+ font-family:var(--obi-display);
+ letter-spacing:-.025em;
+}
+.detailEditorialHero .detailEditorialBadges .badge{
+ border-color:var(--obi-detail-rule);
+}
+.detailEditorialHero .detailSynopsis{
+ border-inline-start:3px solid var(--accent);
+ padding:13px clamp(12px,2vw,18px);
+ background:color-mix(in srgb,var(--panel) 85%,var(--accent) 15%);
+ border-radius:0 10px 10px 0;
+}
+.detailEditorialHero .detailSynopsis h2{
+ font-family:var(--obi-display);
+ margin-block-end:9px;
+}
+.detailEditorialHero .detailSynopsis p{
+ line-height:1.7;
+}
+/* Volúmenes: cabezales de colección y lomos discretos tipo edición física. */
+.volumeGallerySection .volumeGalleryHeading{
+ position:relative;min-width:0;
+ padding-inline-start:44px;
+ border-color:var(--obi-detail-rule);
+}
+.volumeGallerySection .volumeGalleryHeading::before{
+ content:"巻";display:grid;place-items:center;
+ position:absolute;top:0;inset-inline-start:0;
+ width:33px;height:42px;
+ pointer-events:none;
+ color:var(--obi-detail-seal);background:var(--accent);
+ border-radius:3px;
+ font:800 1.14rem/1 var(--obi-japanese);
+ box-shadow:3px 3px 0 var(--obi-detail-rule);
+}
+.volumeGallerySection .volumeGalleryHeading h2,
+.volumeEditorialOpened .volumeOpenedHero h2,
+.volumeEditorialOpened .volumeIndexHeading h3{
+ font-family:var(--obi-display);
+ letter-spacing:-.025em;
+ text-wrap:balance;
+}
+.volumeGallerySection .volumeEditorialCard{
+ position:relative;
+ background:linear-gradient(158deg,var(--obi-detail-paper),var(--panel));
+ border-color:var(--obi-detail-rule);
+}
+.volumeGallerySection .volumeGalleryArtwork{
+ position:relative;isolation:isolate;
+}
+.volumeGallerySection .volumeGalleryArtwork::after{
+ content:"";position:absolute;inset:0 auto 0 0;
+ width:clamp(4px,4%,9px);z-index:2;pointer-events:none;
+ background:linear-gradient(90deg,rgba(15,12,8,.34),rgba(255,255,255,.2) 64%,transparent);
+}
+.volumeGallerySection .volumeEditorialCard .volumeGalleryInfo{
+ border-block-start:2px solid color-mix(in srgb,var(--accent) 65%,transparent);
+}
+.volumeGallerySection .volumeGalleryVolumeLine strong{
+ font-family:var(--obi-caption);
+ letter-spacing:.045em;
+}
+/* Índice del volumen abierto: colofón en la banda, progreso nativo preservado. */
+.volumeEditorialOpened .volumeOpenedHero{
+ background-image:linear-gradient(143deg,var(--obi-detail-paper),var(--panel) 61%);
+ border-color:var(--obi-detail-rule);
+}
+.volumeEditorialOpened .volumeOpenedEyebrow::before{
+ content:"目次";display:inline-block;
+ padding:3px 6px;margin-inline-end:8px;
+ background:var(--accent);color:var(--obi-detail-seal);
+ border-radius:2px;white-space:nowrap;
+ font:800 .88em/1.25 var(--obi-japanese);
+ letter-spacing:.06em;
+}
+.volumeEditorialOpened .volumeIndexHeading{
+ border-color:var(--obi-detail-rule);
+}
+.volumeEditorialOpened .volumeChapterIndex{
+ border-color:var(--obi-detail-rule);
+}
+.volumeEditorialOpened .volumeChapterNumber{
+ font-family:var(--obi-display);
+}
+.volumeEditorialOpened .volumeChapterRow.isNext{
+ box-shadow:inset 3px 0 var(--accent);
+}
+/* Lector: solo el estilo editorial seleccionado por el usuario.
+   No tocar párrafos, fuentes originales, ruby, imágenes ni continuos. */
+.readerExperience.readerPresentation-editorial:not(.readerFocused) .readerPaper{
+ border-color:var(--reader-rule)!important;
+ box-shadow:0 13px 37px color-mix(in srgb,var(--reader-ink) 11%,transparent),
+  0 2px 8px color-mix(in srgb,var(--reader-ink) 5%,transparent)!important;
+}
+.readerExperience.readerPresentation-editorial:not(.readerFocused) .readerPaper::after{
+ content:"帯";
+ position:absolute;bottom:9px;right:16px;
+ pointer-events:none;
+ color:var(--reader-secondary);opacity:.28;
+ font:700 .94rem/1 var(--obi-japanese);
+}
+.readerExperience.readerPresentation-editorial .readerMeta{
+ border-block-end:1px solid var(--reader-rule);
+ padding-block-end:10px;
+ font-family:var(--obi-caption);
+ line-height:1.6;overflow-wrap:anywhere;
+}
+.readerExperience.readerPresentation-editorial .readerMeta::before{
+ content:"読書 · ";
+ color:var(--reader-action);
+ font-weight:800;
+}
+.readerExperience.readerPresentation-editorial .readerChapterDivider{
+ background:linear-gradient(90deg,transparent,var(--reader-rule) 14%,var(--reader-rule) 86%,transparent);
+}
+.readerExperience.readerPresentation-editorial.readerFocused .readerPaper::after{
+ display:none;
+}
+@media(max-width:640px){
+ .detailEditorialKicker>span:first-child::before{
+  padding:2px 4px;margin-inline-end:5px;font-size:.75em;
+ }
+ .volumeGallerySection .volumeGalleryHeading{
+  padding-inline-start:35px;
+ }
+ .volumeGallerySection .volumeGalleryHeading::before{
+  width:26px;height:34px;font-size:.9rem;
+ }
+ .readerExperience.readerPresentation-editorial:not(.readerFocused) .readerPaper::after{
+  right:8px;bottom:6px;
+ }
+}
+@media(max-width:360px){
+ .detailEditorialKicker>span:first-child::before{
+  display:none;
+ }
+}
+@media(forced-colors:active){
+ .detailEditorialHero,
+ .volumeGallerySection .volumeEditorialCard,
+ .volumeEditorialOpened .volumeOpenedHero{background:Canvas;border-color:CanvasText}
+ .detailEditorialHero::before,
+ .volumeGallerySection .volumeGalleryHeading::after{background:CanvasText}
+ .detailEditorialKicker>span:first-child::before,
+ .volumeGallerySection .volumeGalleryHeading::before,
+ .volumeEditorialOpened .volumeOpenedEyebrow::before{
+  color:CanvasText;background:Canvas;border:1px solid CanvasText;
+ }
+ .readerExperience.readerPresentation-editorial:not(.readerFocused) .readerPaper::after{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+ .volumeGallerySection .volumeEditorialCard{animation:none!important;transform:none!important}
+}
+html[data-site-motion="reduce"] .volumeGallerySection .volumeEditorialCard{
+ animation:none!important;transform:none!important;
+}
+
+
