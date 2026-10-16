@@ -66,6 +66,8 @@ jobs:
       - name: RPC phase 2 private implementations and grant regression
         run: node scripts/rpc-security-phase2-check.mjs
       - run: npm run build
+      - name: Auditoría — deduplicación de avisos, acceso glosarios y portada LCP
+        run: node scripts/audit-hardening-20261016-check.mjs
       - name: OX-MR Fase 6 editorial CSS modularization and visual polish
         run: node scripts/editorial-phase6-check.mjs
       - name: HTML-first LCP and Studio route-split regression
