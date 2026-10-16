@@ -36,6 +36,10 @@ for(const [name,browserType] of [['Chromium',chromium],['WebKit',webkit]]){
   await page.locator('#readerErrataBody').fill('corto');
   await page.locator('[data-reader-errata-send]').click();
   assert.equal(sent.length,0,name+' rechaza reportes menores al mínimo');
+  // El lector puede volver a renderizar al concluir cargas diferidas (más lento en WebKit).
+  // Reabrir y reconstruir el formulario evita falsos negativos por un nodo reemplazado.
+  await page.locator('.readerErrataPhase4').evaluate(el=>{el.open=true});
+  await page.locator('#readerErrataExcerpt').fill('Pasaje señalado');
   await page.locator('#readerErrataBody').fill('La palabra está escrita incorrectamente en este párrafo.');
   await page.locator('[data-reader-errata-send]').click();
   await page.waitForFunction(()=>document.querySelector('#readerErrataBody')?.value==='');
