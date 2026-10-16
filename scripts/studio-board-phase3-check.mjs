@@ -7,6 +7,9 @@ const app=fs.readFileSync('src/app.js','utf8');
 const css=fs.readFileSync('src/studio-board-phase3.css','utf8');
 const build=fs.readFileSync('scripts/build.mjs','utf8');
 const sw=fs.readFileSync('public/sw.js','utf8');
+const split=fs.readFileSync('scripts/split-studio-views.mjs','utf8');
+assert.ok(split.includes("modules.find(module=>typeof module?.createStudioViews==='function')"),'El chunk de Studio debe resolverse por export y no por índice');
+assert.ok(!split.includes('modules[4].createStudioViews'),'No usar índices rígidos de Promise.all');
 new Function(src);new Function(studio);new Function(app);
 
 const root={};new Function('window',src)(root);
