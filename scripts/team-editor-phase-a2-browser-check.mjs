@@ -38,6 +38,8 @@ for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
     assert.ok(full.includes('Equipo traductor'),'Team identity missing');
     assert.equal(await page.locator('#teamPreviewFull').getAttribute('aria-pressed'),'true');
     await page.locator('[data-team-preview-device="mobile"]').click();
+    // El render fiel se debounced para evitar regenerar el iframe en cada tecla.
+    await page.waitForFunction(()=>document.querySelector('#teamDesignFrame')?.style.width==='390px',null,{timeout:10000});
     const res=await frame.evaluate(el=>({width:el.getAttribute('style'),sandbox:el.getAttribute('sandbox')}));
     assert.ok(res.width.includes('390px'),'Mobile viewport not applied');
     assert.equal(res.sandbox,'');
