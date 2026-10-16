@@ -12,7 +12,7 @@ assert.match(html,/<meta name="nlobi-build-cover" content="\/media\/teams\/qa\/c
 assert.match(html,/<img src="\/media\/teams\/qa\/covers\/cover\.webp"[^>]+data-early-featured-cover>/);
 assert.match(html,/<a class="homeFeaturedBook homeFeaturedCoverLink" href="#detail:qa-cover-1"/);
 assert.ok(html.indexOf('data-early-featured-cover')>html.indexOf('<body>'));
-assert.ok(html.indexOf('data-early-featured-cover')<html.indexOf('src="/assets/app.js'));
+assert.ok(html.indexOf('data-early-featured-cover')<html.indexOf('src="/assets/app-bootstrap.js'));
 assert.ok(html.includes('Una novela con título y &amp; letras'));
 assert.equal(seedFeaturedHomeHtml(source,{...book,novels:{cover_url:'https://evil.test/img.webp'}},origin),source);
 assert.equal(seedFeaturedHomeHtml(source,{...book,id:'bad\\\"<script>'},origin),source);
