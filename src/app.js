@@ -1345,7 +1345,7 @@ function teamSeasonControls(G){
  '<label class="field"><span>Fecha de inicio (UTC)</span><input type="date" data-team-setting="team_season_start" id="teamSeasonStart" value="'+esc(a)+'"></label>'+
  '<label class="field"><span>Fecha de fin (UTC, inclusive)</span><input type="date" data-team-setting="team_season_end" id="teamSeasonEnd" value="'+esc(b)+'"></label></div>'+
  '<label class="field"><span>Saludo de temporada (opcional, máximo 160 caracteres)</span><textarea rows="2" maxlength="160" data-team-setting="team_season_message" id="teamSeasonMessage" placeholder="¡Felices lecturas esta temporada!">'+esc(String(p.team_season_message||'').slice(0,160))+'</textarea></label>'+
- '<p class="muted" role="note">Si eliges un intervalo, las fechas se calculan en UTC para que todos vean el mismo periodo. Se evalúan al abrir o actualizar el perfil: no se envían avisos ni se ejecuta cron. '+esc(info)+'</p>'+
+ '<p class="muted" role="note">Si eliges un intervalo, las fechas se calculan en UTC para que todos vean el mismo periodo. Se evalúan al abrir o actualizar el perfil: no se envían avisos ni se ejecuta cron. <output id="teamSeasonScheduleStatus">'+esc(info)+'</output></p>'+
  '<p class="muted">La vista previa aplica las fechas actuales. Para ver la decoración fuera de temporada, cambia temporalmente a activación manual sin guardar.</p></fieldset>';
 }
 function teamSeasonValidate(p){
@@ -1387,6 +1387,7 @@ function teamCustomPreview(){
  const target=document.getElementById('teamCustomPreview'),G=S.studioTeam;
  if(!target||!G)return;
  const p=teamReadCustom(),virtual={...G,profile_settings:p,name:document.getElementById('teamEditName')?.value||G.name};
+ const seasonInfo=document.getElementById('teamSeasonScheduleStatus');if(seasonInfo)seasonInfo.textContent=teamSeasonModeKey(p)==='scheduled'?(teamSeasonEffective(p)!=='none'?'La temporada está activa hoy (UTC).':'La temporada no está activa hoy (UTC).'):'La activación es manual y no depende de fechas.';
  const list=(S.catalog||[]).filter(w=>w.translator_groups?.id===G.id&&w.status!=='draft').slice(0,3);
  const books=list.length?list.map((w,i)=>'<div class="teamPreviewBook"><div class="teamPreviewCover" aria-hidden="true">'+(i+1)+'</div><strong>'+esc(titleOf(w))+'</strong></div>').join(''):
   '<div class="teamPreviewBook"><div class="teamPreviewCover" aria-hidden="true">本</div><strong>Tu próxima novela</strong></div>';
