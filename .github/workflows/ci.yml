@@ -11,6 +11,11 @@ permissions:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    # Playwright incluye WebKit/Chromium/Firefox y sus dependencias de SO.
+    # Evita bloqueos ocasionales de apt en ubuntu-latest sin recortar la matriz.
+    container:
+      image: mcr.microsoft.com/playwright:v1.63.0-noble
+      options: --user 1001
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
         with:
@@ -88,12 +93,11 @@ jobs:
           done
           cat /tmp/nlobi-serve.log
           exit 1
-      - name: Install accessibility test browser
+      - name: Initialize installed browser dependencies
         run: |
           npm install --no-save --no-package-lock playwright@1.63.0 @axe-core/playwright@4.13.0
-          # Las imágenes ubuntu-latest ya contienen bibliotecas compartidas habituales;
-          # evitar apt install-deps que ocasionalmente se bloquea en los mirrors.
-          npx playwright install chromium firefox webkit
+          echo "CHROME_PATH=$(node -e 'console.log(require("playwright").chromium.executablePath())')" >> "$GITHUB_ENV"
+          node --input-type=module -e 'import {chromium,webkit,firefox} from "playwright"; for(const engine of [chromium,webkit,firefox]){const browser=await engine.launch({headless:true});await browser.close()} console.log("Chromium, WebKit y Firefox listos");'
       - name: Contextual glossary reader (Chromium + WebKit)
         run: node scripts/glossary-phase1-browser-check.mjs
       - name: Advanced launches phase 2 (Chromium + WebKit)
