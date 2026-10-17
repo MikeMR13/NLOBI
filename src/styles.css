@@ -6777,3 +6777,36 @@ html[data-site-motion="reduce"] .teamPublicPage .teamSeasonLayer .teamSeasonPiec
 .teamPreviewCanvas .teamSeasonGreeting{max-width:100%;margin:8px 10px 14px;padding:10px}
 @media(max-width:560px){.teamSeasonScheduleGrid{grid-template-columns:1fr}.teamSeasonGreeting{margin:10px 4px 14px;padding:11px}}
 @media(prefers-reduced-motion:reduce){.teamSeasonGreeting{animation:none!important;transition:none!important}}
+
+
+/* Fase A.2 — Studio: versiones de diseño privadas y vista completa aislada */
+.teamDesignWorkflow{border:1px solid var(--line);background:var(--panel2);border-radius:13px;padding:16px;margin:14px 0 20px}
+.teamDesignWorkflow h3{margin:0 0 6px}
+.teamDesignWorkflow #teamDesignStatus{font-size:.83rem;color:var(--muted)}
+.teamDesignWorkflow details{margin-top:13px}
+.teamDesignWorkflow summary{cursor:pointer;font-weight:700;min-height:44px;display:flex;align-items:center}
+.teamDesignRevisionCard{border:1px solid var(--line);border-radius:9px;padding:12px;margin:10px 0;background:var(--panel)}
+.teamDesignRevisionHeading{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;flex-wrap:wrap}
+.teamDesignRevisionHeading time{font-size:.75rem;color:var(--muted)}
+.teamDesignRevisionCard p{font-size:.8rem;margin:8px 0}
+.teamDesignRevisionCard .row{margin-top:8px}
+.teamDesignDiffList{margin:6px 0 10px;max-height:245px;overflow:auto}
+.teamDesignDiffRow{border-bottom:1px solid var(--line);padding:7px 0;overflow-wrap:anywhere}
+.teamDesignDiffRow dt{font-size:.72rem;font-weight:700;text-transform:capitalize}
+.teamDesignDiffRow dd{margin:3px 0 0;font-size:.78rem;color:var(--muted)}
+.teamDesignPreviewColumn{min-width:0;position:relative}
+.teamDesignPreviewControls{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:9px}
+.teamDesignPreviewControls .btn{font-size:.76rem;min-height:44px}
+.teamDesignPreviewControls .btn[aria-pressed=true]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);font-weight:750}
+.teamDesignDevices{display:flex;gap:5px;flex-wrap:wrap}
+.teamDesignPreviewStage{position:relative;overflow:hidden;width:100%;max-width:100%;border:1px solid var(--line);border-radius:8px;background:var(--panel2)}
+.teamDesignPreviewStage iframe{position:absolute;top:0;left:0;border:0;transform-origin:0 0;max-width:none;background:var(--panel);display:block}
+.teamDesignPreviewColumn .teamLivePreview{min-width:0}
+@media(max-width:860px){
+ .teamDesignPreviewControls{position:relative;top:auto}
+ .teamDesignWorkflow{padding:12px}
+ .teamDesignPreviewControls .btn{flex:0 0 auto}
+}
+@media(prefers-reduced-motion:reduce){
+ .teamDesignPreviewStage iframe{transition:none!important}
+}
