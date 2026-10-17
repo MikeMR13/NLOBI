@@ -47,7 +47,7 @@ for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
     assert.equal(text.trim(),'','Unexpected warning before compare');
     await page.locator('[data-team-setting="tagline"]').fill('Fase A.2: un cambio privado');
     await page.locator('#teamDesignCompareCurrent').click();
-    await page.waitForSelector('#teamDesignDifference h4');
+    await page.waitForFunction(()=>document.querySelector('#teamDesignDifference')?.textContent?.includes('tagline'),null,{timeout:10000});
     assert.ok((await page.locator('#teamDesignDifference').textContent()).includes('tagline'),'Comparing draft should show edited field');
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
     assert.ok(overflow<=3,'Horizontal overflow at '+width+'px: '+overflow);

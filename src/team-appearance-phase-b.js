@@ -5,7 +5,7 @@
 export const APPEARANCE_KEYS=['team_template','team_palette','team_pattern','team_pattern_intensity','team_font','team_cover_style','team_season','team_season_motion','team_season_density','team_season_mode','team_season_start','team_season_end','team_season_message','accent_color','background_color','theme','header_style','avatar_shape'];
 const OPTIONS={
  team_template:['original','revista','clasica','editorial'],
- team_palette:['original','tinta','sakura','biblioteca','washi','neon','noche'],
+ team_palette:['original','tinta','sakura','biblioteca','washi','neon','noche','aizome','momiji','matsuri','zen','academia','yuki','cyberpunk','manuscrito'],
  team_pattern:['none','seigaiha','asanoha','sakura','washi'],
  team_font:['default','literaria','clasica','moderna','japonesa'],
  team_cover_style:['portada','bolsillo','obi'],
