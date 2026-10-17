@@ -6759,3 +6759,21 @@ html[data-site-motion="reduce"] .teamPublicPage .teamSeasonLayer .teamSeasonPiec
 .teamReadingTopChapters li span{display:inline-block;font-size:.75rem;margin-top:3px}
 @media(max-width:650px){.volumeBibliographyGrid,.volumeBibliographyPublic dl{grid-template-columns:1fr}.teamReadingBarRow{grid-template-columns:75px minmax(0,1fr) 30px;gap:5px}}
 @media(prefers-reduced-motion:reduce){.teamReadingBar{transition:none!important;animation:none!important}}
+
+
+/* Fase E — agenda opcional por equipo. Sin JS de animación ni solicitudes externas. */
+.teamSeasonScheduleGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.teamSeasonScheduleGrid .field{min-width:0}
+.teamSeasonScheduleGrid input{width:100%;min-height:44px}
+.teamSeasonGreeting{
+ position:relative;z-index:4;max-width:72ch;margin:10px auto 18px;
+ padding:12px 18px;border:1px solid var(--team-profile-accent,var(--accent));
+ border-radius:12px;background:var(--panel,rgba(255,255,255,.96));
+ box-shadow:0 4px 20px rgba(0,0,0,.09);
+ text-align:center;overflow-wrap:anywhere;
+}
+.teamSeasonGreetingEyebrow{display:block;font-size:.7rem;font-weight:800;letter-spacing:.085em;text-transform:uppercase;color:var(--team-profile-accent,var(--accent))}
+.teamSeasonGreeting p{font-size:clamp(.88rem,1.6vw,1rem);line-height:1.45;margin:.4rem 0 0}
+.teamPreviewCanvas .teamSeasonGreeting{max-width:100%;margin:8px 10px 14px;padding:10px}
+@media(max-width:560px){.teamSeasonScheduleGrid{grid-template-columns:1fr}.teamSeasonGreeting{margin:10px 4px 14px;padding:11px}}
+@media(prefers-reduced-motion:reduce){.teamSeasonGreeting{animation:none!important;transition:none!important}}

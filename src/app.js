@@ -1300,30 +1300,65 @@ function teamBOptions(options,current){return Object.entries(options).map(([key,
 const TEAM_SEASONS={none:'Sin temporada',sakura:'Primavera · pétalos de sakura',nieve:'Invierno · copos de nieve',momiji:'Otoño · hojas momiji',matsuri:'Festival japonés · faroles'};
 const TEAM_SEASON_MOTIONS={static:'Decoración estática (recomendado)',animated:'Movimiento suave en escritorio'};
 const TEAM_SEASON_DENSITIES={suave:'Sutil · pocos elementos',normal:'Normal · más elementos'};
+const TEAM_SEASON_MODES={manual:'Activación manual',scheduled:'Activar por intervalo de fechas'};
 function teamSeasonKey(p){return teamBKey(p,'team_season',TEAM_SEASONS,'none')}
 function teamSeasonMotionKey(p){return teamBKey(p,'team_season_motion',TEAM_SEASON_MOTIONS,'static')}
 function teamSeasonDensityKey(p){return teamBKey(p,'team_season_density',TEAM_SEASON_DENSITIES,'suave')}
+function teamSeasonModeKey(p){return teamBKey(p,'team_season_mode',TEAM_SEASON_MODES,'manual')}
+function teamSeasonDateOk(v){
+ if(typeof v!=='string'||!/^20\d{2}-\d{2}-\d{2}$/.test(v))return false;
+ const parsed=Date.parse(v+'T00:00:00.000Z');
+ return Number.isFinite(parsed)&&new Date(parsed).toISOString().slice(0,10)===v;
+}
+function teamSeasonDayUtc(){return new Date().toISOString().slice(0,10)}
+function teamSeasonEffective(p,day=teamSeasonDayUtc()){
+ const season=teamSeasonKey(p);
+ if(season==='none'||teamSeasonModeKey(p)==='manual')return season;
+ const a=p?.team_season_start,b=p?.team_season_end;
+ if(!teamSeasonDateOk(a)||!teamSeasonDateOk(b)||!teamSeasonDateOk(day)||a>b)return 'none';
+ return day>=a&&day<=b?season:'none';
+}
 function teamSeasonClasses(p){
- return 'teamSeason-'+teamSeasonKey(p)+' teamSeasonMotion-'+teamSeasonMotionKey(p)+' teamSeasonDensity-'+teamSeasonDensityKey(p);
+ return 'teamSeason-'+teamSeasonEffective(p)+' teamSeasonMotion-'+teamSeasonMotionKey(p)+' teamSeasonDensity-'+teamSeasonDensityKey(p);
 }
 function teamSeasonDecor(p){
- const season=teamSeasonKey(p);
+ const season=teamSeasonEffective(p);
  if(season==='none')return '';
  const count=teamSeasonDensityKey(p)==='normal'?8:5;
  return '<div class="teamSeasonLayer" aria-hidden="true">'+Array.from({length:count},()=>'<span class="teamSeasonPiece"></span>').join('')+'</div>';
 }
+function teamSeasonGreeting(p,day=teamSeasonDayUtc()){
+ const season=teamSeasonEffective(p,day),message=typeof p?.team_season_message==='string'?p.team_season_message.trim():'';
+ if(season==='none'||!message||message.length>160)return '';
+ return '<aside class="teamSeasonGreeting" aria-label="Mensaje de temporada"><span class="teamSeasonGreetingEyebrow">'+esc(TEAM_SEASONS[season])+'</span><p>'+esc(message)+'</p></aside>';
+}
 function teamSeasonControls(G){
- const p=teamSettings(G);
+ const p=teamSettings(G),mode=teamSeasonModeKey(p),a=teamSeasonDateOk(p.team_season_start)?p.team_season_start:'',b=teamSeasonDateOk(p.team_season_end)?p.team_season_end:'';
+ const info=mode==='scheduled'?(teamSeasonEffective(p)!=='none'?'La temporada está activa hoy (UTC).':'La temporada no está activa hoy (UTC).'):'La activación es manual y no depende de fechas.';
  return '<fieldset class="teamCustomSection teamSeasonOptions"><legend>Temporadas y atmósferas</legend>'+
- '<p class="muted">Decoración optativa solo en la página pública del equipo. Sin video, imágenes externas ni descargas adicionales. El movimiento permanece desactivado en móviles y con preferencias de movimiento reducido.</p>'+
+ '<p class="muted">Decoración exclusiva del perfil del equipo, con movimiento opcional en escritorio y desactivado en móviles. No altera notificaciones ni necesita tareas programadas.</p>'+
  '<label class="field"><span>Temporada</span><select data-team-setting="team_season" id="teamSeasonSelect">'+teamBOptions(TEAM_SEASONS,teamSeasonKey(p))+'</select></label>'+
  '<label class="field"><span>Movimiento</span><select data-team-setting="team_season_motion" id="teamSeasonMotionSelect">'+teamBOptions(TEAM_SEASON_MOTIONS,teamSeasonMotionKey(p))+'</select></label>'+
  '<label class="field"><span>Presencia visual</span><select data-team-setting="team_season_density" id="teamSeasonDensitySelect">'+teamBOptions(TEAM_SEASON_DENSITIES,teamSeasonDensityKey(p))+'</select></label>'+
- '<p class="muted" role="note">La vista previa muestra el diseño antes de guardar. Si eliges movimiento, solo se anima en escritorio y siempre se respeta el ajuste de accesibilidad.</p></fieldset>';
+ '<label class="field"><span>Activación</span><select data-team-setting="team_season_mode" id="teamSeasonMode">'+teamBOptions(TEAM_SEASON_MODES,mode)+'</select></label>'+
+ '<div class="teamSeasonScheduleGrid">'+
+ '<label class="field"><span>Fecha de inicio (UTC)</span><input type="date" data-team-setting="team_season_start" id="teamSeasonStart" value="'+esc(a)+'"></label>'+
+ '<label class="field"><span>Fecha de fin (UTC, inclusive)</span><input type="date" data-team-setting="team_season_end" id="teamSeasonEnd" value="'+esc(b)+'"></label></div>'+
+ '<label class="field"><span>Saludo de temporada (opcional, máximo 160 caracteres)</span><textarea rows="2" maxlength="160" data-team-setting="team_season_message" id="teamSeasonMessage" placeholder="¡Felices lecturas esta temporada!">'+esc(String(p.team_season_message||'').slice(0,160))+'</textarea></label>'+
+ '<p class="muted" role="note">Si eliges un intervalo, las fechas se calculan en UTC para que todos vean el mismo periodo. Se evalúan al abrir o actualizar el perfil: no se envían avisos ni se ejecuta cron. <output id="teamSeasonScheduleStatus">'+esc(info)+'</output></p>'+
+ '<p class="muted">La vista previa aplica las fechas actuales. Para ver la decoración fuera de temporada, cambia temporalmente a activación manual sin guardar.</p></fieldset>';
 }
 function teamSeasonValidate(p){
- for(const [key,options] of [['team_season',TEAM_SEASONS],['team_season_motion',TEAM_SEASON_MOTIONS],['team_season_density',TEAM_SEASON_DENSITIES]]){
+ for(const [key,options] of [['team_season',TEAM_SEASONS],['team_season_motion',TEAM_SEASON_MOTIONS],['team_season_density',TEAM_SEASON_DENSITIES],['team_season_mode',TEAM_SEASON_MODES]]){
   if(p[key]!==undefined&&!Object.prototype.hasOwnProperty.call(options,p[key]))throw Error('Configuración estacional inválida: '+key);
+ }
+ for(const k of ['team_season_start','team_season_end'])if(p[k]!==undefined&&p[k]!==''&&!teamSeasonDateOk(p[k]))throw Error('Fecha de temporada inválida: '+k);
+ if(p.team_season_message!==undefined&&(typeof p.team_season_message!=='string'||p.team_season_message.length>160||/[\u0000-\u0008\u000e-\u001f]/.test(p.team_season_message)))throw Error('Saludo de temporada inválido (máximo 160 caracteres).');
+ if(teamSeasonModeKey(p)==='scheduled'){
+  if(teamSeasonKey(p)==='none')throw Error('Selecciona una temporada para programarla.');
+  const a=p.team_season_start,b=p.team_season_end;
+  if(!teamSeasonDateOk(a)||!teamSeasonDateOk(b)||a>b)throw Error('Selecciona un intervalo de temporada válido.');
+  if((Date.parse(b+'T00:00:00Z')-Date.parse(a+'T00:00:00Z'))/86400000>366)throw Error('La temporada programada no puede durar más de 367 días.');
  }
 }
 
@@ -1352,13 +1387,14 @@ function teamCustomPreview(){
  const target=document.getElementById('teamCustomPreview'),G=S.studioTeam;
  if(!target||!G)return;
  const p=teamReadCustom(),virtual={...G,profile_settings:p,name:document.getElementById('teamEditName')?.value||G.name};
+ const seasonInfo=document.getElementById('teamSeasonScheduleStatus');if(seasonInfo)seasonInfo.textContent=teamSeasonModeKey(p)==='scheduled'?(teamSeasonEffective(p)!=='none'?'La temporada está activa hoy (UTC).':'La temporada no está activa hoy (UTC).'):'La activación es manual y no depende de fechas.';
  const list=(S.catalog||[]).filter(w=>w.translator_groups?.id===G.id&&w.status!=='draft').slice(0,3);
  const books=list.length?list.map((w,i)=>'<div class="teamPreviewBook"><div class="teamPreviewCover" aria-hidden="true">'+(i+1)+'</div><strong>'+esc(titleOf(w))+'</strong></div>').join(''):
   '<div class="teamPreviewBook"><div class="teamPreviewCover" aria-hidden="true">本</div><strong>Tu próxima novela</strong></div>';
  const tone=/^#[0-9a-f]{6}$/i.test(p.accent_color||'')?p.accent_color:'#ffd400';target.style.borderTopColor=tone;
  target.innerHTML='<div class="teamPreviewHead"><strong>Vista previa del perfil</strong><small>Sin publicar los cambios</small></div>'+
  '<div class="teamPublicPage teamPreviewCanvas teamTemplate-'+teamTemplateKey(p)+' teamPalette-'+teamPaletteKey(p)+' teamPattern-'+teamBKey(p,'team_pattern',TEAM_B_PATTERNS,'none')+' teamFont-'+teamBKey(p,'team_font',TEAM_B_FONTS,'default')+' teamCover-'+teamBKey(p,'team_cover_style',TEAM_B_COVERS,'portada')+' '+teamSeasonClasses(p)+' teamTheme-'+(['claro','oscuro'].includes(p.theme)?p.theme:'automatico')+'" style="'+esc(teamPublicStyle(p))+'">'+
- teamIdentityHero(virtual,false)+teamSeasonDecor(p)+
+ teamIdentityHero(virtual,false)+teamSeasonDecor(p)+teamSeasonGreeting(p)+
  '<div class="teamPreviewWelcome"><p>'+esc(p.welcome||p.short_description||'Una biblioteca de traducciones para compartir.')+'</p></div>'+
  '<div class="teamPublicOverview"><div class="teamPublicStat"><strong>'+list.length+'</strong><span>Obras disponibles</span></div><div class="teamPublicIntro"><span class="eyebrow">LECTURAS</span><p>Descubre nuestras publicaciones.</p></div></div>'+
  '<nav class="teamPublicNav" aria-label="Navegación de muestra"><span>Traducciones</span><span>Novedades</span></nav>'+
@@ -2033,7 +2069,7 @@ function publicGroupView(){
  if(!G)return `${nav()}<main class="wrap">${status()}<div class="empty"><div class="emptyArt">👥</div><strong>Equipo no cargado</strong><div style="margin-top:12px"><button class="btn" data-v="explore">← Explorar</button></div></div></main>`;
  const customization=teamSettings(G);const works=(Array.isArray(G.translations)?G.translations:[]).filter(w=>customization.show_progress!==false||w.status!=='active'),links=Array.isArray(G.support_links)?G.support_links.filter(l=>safeUrl(l.url)!=='#'):[],publications=(G.recent_publications||[]),query=(S.teamPublicQuery||'').trim().toLocaleLowerCase('es'),statusFilter=S.teamPublicStatus||'all',filteredWorks=works.filter(w=>(statusFilter==='all'||w.status===statusFilter)&&(!query||[titleOf(w),w.title,w.novels?.author_name,...(w.novels?.genres||[])].join(' ').toLocaleLowerCase('es').includes(query)));
  const worksLabel=works.length===1?'obra publicada':'obras publicadas';
- return `${nav()}<main class="wrap teamPublicPage ${customization.section_order?'teamCustomOrder':''} teamTheme-${['claro','oscuro'].includes(customization.theme)?customization.theme:'automatico'} teamTemplate-${teamTemplateKey(customization)} teamPalette-${teamPaletteKey(customization)} teamPattern-${teamBKey(customization,'team_pattern',TEAM_B_PATTERNS,'none')} teamFont-${teamBKey(customization,'team_font',TEAM_B_FONTS,'default')} teamCover-${teamBKey(customization,'team_cover_style',TEAM_B_COVERS,'portada')} ${teamSeasonClasses(customization)}" style="${esc(teamPublicStyle(customization))}">${status()}${teamIdentityHero(G)}${teamSeasonDecor(customization)}
+ return `${nav()}<main class="wrap teamPublicPage ${customization.section_order?'teamCustomOrder':''} teamTheme-${['claro','oscuro'].includes(customization.theme)?customization.theme:'automatico'} teamTemplate-${teamTemplateKey(customization)} teamPalette-${teamPaletteKey(customization)} teamPattern-${teamBKey(customization,'team_pattern',TEAM_B_PATTERNS,'none')} teamFont-${teamBKey(customization,'team_font',TEAM_B_FONTS,'default')} teamCover-${teamBKey(customization,'team_cover_style',TEAM_B_COVERS,'portada')} ${teamSeasonClasses(customization)}" style="${esc(teamPublicStyle(customization))}">${status()}${teamIdentityHero(G)}${teamSeasonDecor(customization)}${teamSeasonGreeting(customization)}
  <div class="teamPublicFollow">${S.user?`<button type="button" class="btn ${isFollowing('translator_group',G.id)?'primary':''}" data-follow-type="translator_group" data-follow-id="${esc(G.id)}" aria-pressed="${isFollowing('translator_group',G.id)}">${isFollowing('translator_group',G.id)?'✓ Siguiendo al equipo':'+ Seguir equipo y sus novedades'}</button>`:'<button type="button" class="btn" data-v="auth">Inicia sesión para seguir al equipo</button>'}</div>
  ${teamPublicExtras(G)}${teamPublicMembers(G)}${teamPublicMeta(G)}${teamPublicHighlights(G)}${customization.show_stats===false?'':`<section class="teamPublicOverview" aria-label="Resumen del equipo"><div class="teamPublicStat"><strong>${works.length}</strong><span>${worksLabel}</span></div>${customization.show_followers===false?'':`<div class="teamPublicStat"><strong>${Number(G.stats?.followers||0)}</strong><span>Seguidores</span></div>`}${customization.show_members===false?'':`<div class="teamPublicStat"><strong>${Number(G.stats?.members||0)}</strong><span>Miembros</span></div>`}<div class="teamPublicIntro"><span class="eyebrow">COMUNIDAD DE TRADUCCIÓN</span><p>Explora las novelas que comparte este equipo en El Obi del Lector.</p></div></section>`}
  <nav class="teamPublicNav" aria-label="Secciones del perfil del equipo">${customization.show_works===false?'':`<a href="#teamPublicWorks">Traducciones <span aria-label="${works.length} obras">${works.length}</span></a>`}${publications.length?'<a href="#teamPublicLatest">Últimos lanzamientos</a>':''}${links.length?'<a href="#teamPublicSupport">Apoyar al equipo ↗</a>':''}</nav>
