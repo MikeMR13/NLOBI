@@ -48,6 +48,7 @@ for(const [name,type] of [['Chromium',chromium],['WebKit',webkit]]){
     await page.locator('[data-team-setting="tagline"]').fill('Fase A.2: un cambio privado');
     await page.locator('#teamDesignCompareCurrent').click();
     await page.waitForSelector('#teamDesignDifference h4');
+    console.log('TEAM_THEME_DIFF_DIAG',name,width,JSON.stringify({draft:await page.locator('[data-team-setting="tagline"]').inputValue(),diff:await page.locator('#teamDesignDifference').textContent()}));
     assert.ok((await page.locator('#teamDesignDifference').textContent()).includes('tagline'),'Comparing draft should show edited field');
     const overflow=await page.evaluate(()=>document.documentElement.scrollWidth-document.documentElement.clientWidth);
     assert.ok(overflow<=3,'Horizontal overflow at '+width+'px: '+overflow);
