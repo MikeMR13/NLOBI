@@ -106,6 +106,8 @@ jobs:
         run: node scripts/team-editor-phase-a2-browser-check.mjs
       - name: Fase D — estadísticas anónimas del equipo (Chromium + WebKit)
         run: node scripts/team-reading-phase-d-browser-check.mjs
+      - name: Fase E — agenda estacional y saludo seguro (Chromium + WebKit)
+        run: node scripts/team-season-phase-e-browser-check.mjs
       - name: Fase C — decoración estacional, móviles y movimiento reducido (Chromium + WebKit)
         run: node scripts/team-season-phase-c-browser-check.mjs
       - name: OX-MR Fase B equipo — estilos y biblioteca de temas (Chromium + WebKit)
